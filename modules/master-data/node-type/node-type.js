@@ -1,0 +1,311 @@
+(function () {
+    // Mock Data
+    let nodeTypes = [];
+    for (let i = 1; i <= 45; i++) {
+        nodeTypes.push({
+            id: i,
+            name: `Loại vị trí ${i}`,
+            image: i % 2 === 0 ? 'https://via.placeholder.com/40x40?text=V' : ''
+        });
+    }
+
+    let selectedIds = [];
+    let currentPage = 1;
+    const itemsPerPage = 20;
+    let filteredData = [];
+    let pendingDeleteNodeTypeIds = [];
+    let isInitialized = false;
+
+    // Initialize
+    function initNodeTypeModule() {
+        if (isInitialized) return;
+        const tbody = document.getElementById('node-type-table-body');
+        if (!tbody) return;
+
+        isInitialized = true;
+        renderTable();
+
+        // Search listener
+        const searchInput = document.getElementById('node-type-search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                currentPage = 1;
+                renderTable(e.target.value);
+            });
+        }
+    }
+
+    const observer = new MutationObserver((mutations) => {
+        if (document.getElementById('node-type-table-body')) {
+            initNodeTypeModule();
+        }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initNodeTypeModule);
+    } else {
+        initNodeTypeModule();
+    }
+
+    // Render Table
+    function renderTable(keyword = '') {
+        const tbody = document.getElementById('node-type-table-body');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        selectedIds = [];
+        updateBulkDeleteBtn();
+        const selectAll = document.getElementById('node-type-select-all');
+        if (selectAll) selectAll.checked = false;
+
+        const term = keyword.toLowerCase().trim();
+        filteredData = nodeTypes.filter(item => item.name.toLowerCase().includes(term));
+
+        // Calculate Pagination
+        const totalItems = filteredData.length;
+        let totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startItem = (currentPage - 1) * itemsPerPage;
+        const endItem = Math.min(startItem + itemsPerPage, totalItems);
+        const pageData = filteredData.slice(startItem, endItem);
+
+        // Render Pagination Info
+        const infoEl = document.getElementById('node-type-pagination-info');
+        if (infoEl) {
+            if (totalItems === 0) {
+                infoEl.innerText = 'Không có dữ liệu';
+            } else {
+                infoEl.innerText = `Hiển thị ${startItem + 1} - ${endItem} của ${totalItems} bản ghi`;
+            }
+        }
+
+        renderPaginationControls(totalPages);
+
+        if (totalItems === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Không tìm thấy loại vị trí nào</td></tr>';
+            return;
+        }
+
+        pageData.forEach((item, index) => {
+            const stt = startItem + index + 1;
+            const tr = document.createElement('tr');
+            
+            const imageHtml = item.image 
+                ? `<img src="${item.image}" alt="${item.name}" class="node-type-thumbnail" onerror="this.onerror=null; this.src='https://via.placeholder.com/40x40?text=Err';"/>`
+                : `<div class="node-type-thumbnail" style="display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size: 12px; text-align:center; line-height: 1.2;">No img</div>`;
+
+            tr.innerHTML = `
+                <td style="text-align:center">
+                    <input type="checkbox" class="node-type-row-checkbox" value="${item.id}" onclick="toggleNodeTypeRow(${item.id})">
+                </td>
+                <td style="text-align:center">${stt}</td>
+                <td style="font-weight:500;">${item.name}</td>
+                <td>${imageHtml}</td>
+                <td style="text-align:center">
+                    <div class="action-buttons" style="justify-content:center">
+                        <div class="action-icon" onclick="openNodeTypeEditModal(${item.id})" title="Chỉnh sửa"><i class="fas fa-edit"></i></div>
+                        <div class="action-icon delete" onclick="deleteNodeTypeItem(${item.id})" title="Xóa"><i class="fas fa-trash"></i></div>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderPaginationControls(totalPages) {
+        const prevBtn = document.getElementById('node-type-prev-btn');
+        const nextBtn = document.getElementById('node-type-next-btn');
+        const pageNumbers = document.getElementById('node-type-page-numbers');
+
+        if (prevBtn) prevBtn.disabled = currentPage === 1;
+        if (nextBtn) nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+
+        if (pageNumbers) {
+            let html = '';
+            // Display up to 5 page numbers
+            let startP = Math.max(1, currentPage - 2);
+            let endP = Math.min(totalPages, startP + 4);
+            if (endP - startP < 4) {
+                startP = Math.max(1, endP - 4);
+            }
+            
+            for (let i = startP; i <= endP; i++) {
+                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToNodeTypePage(${i})">${i}</button>`;
+            }
+            pageNumbers.innerHTML = html;
+        }
+    }
+
+    // Window global functions for pagination
+    window.prevNodeTypePage = function () {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable(document.getElementById('node-type-search-input')?.value || '');
+        }
+    };
+
+    window.nextNodeTypePage = function () {
+        const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable(document.getElementById('node-type-search-input')?.value || '');
+        }
+    };
+
+    window.goToNodeTypePage = function (page) {
+        currentPage = page;
+        renderTable(document.getElementById('node-type-search-input')?.value || '');
+    };
+
+    // Modals
+    window.openNodeTypeAddModal = function () {
+        document.getElementById('node-type-modal-title').innerText = 'Thêm mới Loại vị trí';
+        document.getElementById('node-type-id').value = '';
+        document.getElementById('node-type-name').value = '';
+        document.getElementById('node-type-image').value = '';
+        document.getElementById('node-type-modal').classList.add('show');
+    };
+
+    window.openNodeTypeEditModal = function (id) {
+        const item = nodeTypes.find(d => d.id === id);
+        if (!item) return;
+
+        document.getElementById('node-type-modal-title').innerText = 'Cập nhật Loại vị trí';
+        document.getElementById('node-type-id').value = item.id;
+        document.getElementById('node-type-name').value = item.name;
+        document.getElementById('node-type-image').value = item.image || '';
+        document.getElementById('node-type-modal').classList.add('show');
+    };
+
+    window.closeNodeTypeModal = function () {
+        document.getElementById('node-type-modal').classList.remove('show');
+    };
+
+    window.saveNodeType = function () {
+        const id = document.getElementById('node-type-id').value;
+        const name = document.getElementById('node-type-name').value.trim();
+        const image = document.getElementById('node-type-image').value.trim();
+
+        if (!name) {
+            if (typeof showToast === 'function') showToast('Vui lòng nhập Tên loại vị trí', 'error');
+            else alert('Vui lòng nhập Tên loại vị trí');
+            return;
+        }
+
+        if (id) {
+            // Update
+            const index = nodeTypes.findIndex(d => d.id == id);
+            if (index !== -1) {
+                nodeTypes[index] = { ...nodeTypes[index], name, image };
+                if (typeof showToast === 'function') showToast('Cập nhật thành công');
+            }
+        } else {
+            // Create
+            const newId = nodeTypes.length > 0 ? Math.max(...nodeTypes.map(d => d.id)) + 1 : 1;
+            nodeTypes.unshift({ id: newId, name, image }); // Thêm lên đầu danh sách
+            if (typeof showToast === 'function') showToast('Thêm mới thành công');
+            currentPage = 1;
+        }
+
+        closeNodeTypeModal();
+        renderTable(document.getElementById('node-type-search-input')?.value || '');
+    };
+
+    // Checkboxes
+    window.toggleSelectAllNodeTypes = function () {
+        const isChecked = document.getElementById('node-type-select-all').checked;
+        const checkboxes = document.querySelectorAll('.node-type-row-checkbox');
+        selectedIds = [];
+
+        checkboxes.forEach(cb => {
+            cb.checked = isChecked;
+            if (isChecked) selectedIds.push(parseInt(cb.value));
+        });
+        updateBulkDeleteBtn();
+    };
+
+    window.toggleNodeTypeRow = function (id) {
+        const checkbox = document.querySelector(`.node-type-row-checkbox[value="${id}"]`);
+        if (checkbox && checkbox.checked) {
+            selectedIds.push(id);
+        } else {
+            selectedIds = selectedIds.filter(idx => idx !== id);
+        }
+        
+        // Update select all checkbox state
+        const selectAll = document.getElementById('node-type-select-all');
+        const checkboxes = document.querySelectorAll('.node-type-row-checkbox');
+        if (selectAll && checkboxes.length > 0) {
+            selectAll.checked = selectedIds.length === checkboxes.length;
+        }
+
+        updateBulkDeleteBtn();
+    };
+
+    function updateBulkDeleteBtn() {
+        const btn = document.getElementById('node-type-bulk-delete-btn');
+        const countSpan = document.getElementById('node-type-selected-count');
+        if (countSpan) countSpan.innerText = selectedIds.length;
+        if (btn) btn.disabled = selectedIds.length === 0;
+    }
+
+    // Delete Modals
+    window.deleteNodeTypeItem = function (id) {
+        pendingDeleteNodeTypeIds = [id];
+        const item = nodeTypes.find(d => d.id === id);
+        const msgEl = document.getElementById('node-type-confirm-delete-message');
+        if (msgEl) {
+            msgEl.innerHTML = `Bạn có chắc chắn muốn xóa loại vị trí <strong>${item?.name}</strong> không?<br />Hành động này không thể hoàn tác.`;
+        }
+        const modal = document.getElementById('node-type-delete-confirm-modal');
+        if (modal) modal.classList.add('show');
+    };
+
+    window.closeNodeTypeDeleteConfirm = function () {
+        const modal = document.getElementById('node-type-delete-confirm-modal');
+        if (modal) modal.classList.remove('show');
+        pendingDeleteNodeTypeIds = [];
+    };
+
+    window.confirmDeleteNodeType = function () {
+        if (pendingDeleteNodeTypeIds.length > 0) {
+            nodeTypes = nodeTypes.filter(d => !pendingDeleteNodeTypeIds.includes(d.id));
+            
+            // Re-render check if active page gets empty
+            const term = document.getElementById('node-type-search-input')?.value.toLowerCase().trim() || '';
+            const testFiltered = nodeTypes.filter(item => item.name.toLowerCase().includes(term));
+            const newTotalPages = Math.ceil(testFiltered.length / itemsPerPage) || 1;
+            if (currentPage > newTotalPages) {
+                currentPage = newTotalPages;
+            }
+
+            renderTable(document.getElementById('node-type-search-input')?.value || '');
+            if (typeof showToast === 'function') {
+                showToast(`Đã xóa thành công ${pendingDeleteNodeTypeIds.length} loại vị trí`);
+            }
+            closeNodeTypeDeleteConfirm();
+            
+            // Clear selection if they were deleted
+            selectedIds = selectedIds.filter(id => !pendingDeleteNodeTypeIds.includes(id));
+            updateBulkDeleteBtn();
+        }
+    };
+
+    window.deleteSelectedNodeTypes = function () {
+        if (selectedIds.length === 0) return;
+
+        pendingDeleteNodeTypeIds = selectedIds;
+        const msgEl = document.getElementById('node-type-confirm-delete-message');
+        if (msgEl) {
+            msgEl.innerHTML = `Bạn có chắc chắn muốn xóa <strong>${selectedIds.length}</strong> loại vị trí đã chọn không?<br />Hành động này không thể hoàn tác.`;
+        }
+        const modal = document.getElementById('node-type-delete-confirm-modal');
+        if (modal) modal.classList.add('show');
+    };
+
+})();

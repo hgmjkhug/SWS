@@ -1,0 +1,259 @@
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="warehouse-config.css" />
+  </head>
+<div class="warehouse-config-container">
+  <div class="config-header">
+    <h3>Thiết lập cấu hình Kho</h3>
+    <div class="header-actions">
+      <div class="floor-custom-dropdown" id="floorCustomDropdown">
+        <div class="floor-custom-toggle" onclick="toggleFloorDropdown()">
+          <span id="currentFloorDisplay">Tầng 1</span>
+          <i class="fas fa-chevron-down" style="font-size: 12px"></i>
+        </div>
+        <div class="floor-custom-menu" id="floorCustomMenu">
+          <!-- Floor options will be rendered here -->
+        </div>
+      </div>
+      <button class="btn-action btn-sync-all" onclick="syncAllFloors()">
+        Đồng bộ tất cả
+      </button>
+      <button class="btn-action btn-reset-floor" onclick="resetCurrentFloor()">
+        Khôi phục mặc định
+      </button>
+    </div>
+  </div>
+
+  <div class="config-content">
+    <!-- Left Panel - Controls -->
+    <div class="config-left-panel">
+      <!-- Segment buttons: Khai báo, Khu vực, Vị trí -->
+      <div class="config-segment-control" id="configTabControl">
+        <button class="segment-btn active" onclick="setConfigTab('init', this)">
+          Khai báo
+        </button>
+        <button class="segment-btn" onclick="setConfigTab('area', this)">
+          Khu vực
+        </button>
+        <button
+          class="segment-btn"
+          onclick="setConfigTab('location', this)"
+        >
+          Vị trí
+        </button>
+      </div>
+
+      <!-- Tab Content: Khai báo (default visible) -->
+      <div id="tabContentInit" class="tab-content active">
+        <div class="init-info-form">
+          <div class="init-info-row">
+            <label class="init-label">Tên kho</label>
+            <input type="text" class="init-value-box" id="initWarehouseName" value="" placeholder="Nhập tên kho..." disabled style="cursor: not-allowed;" />
+          </div>
+          <div class="init-info-row">
+            <label class="init-label">Loại kho</label>
+            <div class="init-dropdown" id="initWarehouseTypeDropdown">
+              <div class="init-dropdown-toggle" onclick="toggleInitTypeDropdown()">
+                <span id="initWarehouseTypeDisplay">Kho Tower</span>
+                <i class="fas fa-chevron-down" style="font-size: 12px; color: #8c8c8c"></i>
+              </div>
+              <div class="init-dropdown-menu" id="initWarehouseTypeMenu">
+                <div class="init-dropdown-item" onclick="selectInitType('Kho Tower')">Kho Tower</div>
+                <div class="init-dropdown-item" onclick="selectInitType('Kho Stacker crane')">Kho Stacker crane</div>
+                <div class="init-dropdown-item" onclick="selectInitType('Kho Flat')">Kho Flat</div>
+              </div>
+            </div>
+          </div>
+          <div class="init-info-row">
+            <label class="init-label">Số tầng</label>
+            <input type="number" class="init-value-box" id="initWarehouseFloors" value="1" min="1" disabled style="cursor: not-allowed;" />
+          </div>
+          <div class="init-info-row">
+            <label class="init-label">Chiều dài kho (ô)</label>
+            <input type="number" class="init-value-box" id="initWarehouseLength" value="5" min="1" max="256" disabled style="cursor: not-allowed;" />
+          </div>
+          <div class="init-info-row">
+            <label class="init-label">Chiều rộng kho (ô)</label>
+            <input type="number" class="init-value-box" id="initWarehouseWidth" value="5" min="1" max="256" disabled style="cursor: not-allowed;" />
+          </div>
+          <div class="init-info-row init-equipment-section">
+            <label class="init-label">Thiết bị nhập<span class="required-star">*</span></label>
+            <div class="init-equipment-container">
+              <!-- Search & Combobox -->
+              <div class="init-equipment-search-wrapper">
+                <div class="init-equipment-search">
+                  <i class="fas fa-search search-icon"></i>
+                  <input type="text" id="initEquipmentSearch" placeholder="Tìm theo mã thiết bị..." onfocus="showEquipmentList('')" oninput="filterEquipmentList('')">
+                  <i class="fas fa-chevron-down toggle-icon" onclick="toggleEquipmentList('')"></i>
+                </div>
+                <!-- Search Result Dropdown / Combobox -->
+                <div class="init-equipment-list" id="initEquipmentList">
+                  <!-- Accordion or Flat list items will be rendered here by JS -->
+                </div>
+              </div>
+
+              <!-- Selected Tags -->
+              <div class="init-selected-equipment" id="initSelectedEquipment">
+                <!-- Selected equipment tags will render here -->
+              </div>
+            </div>
+          </div>
+
+          <div class="init-info-row init-equipment-section">
+            <label class="init-label">Thiết bị xuất<span class="required-star">*</span></label>
+            <div class="init-equipment-container">
+              <!-- Search & Combobox -->
+              <div class="init-equipment-search-wrapper">
+                <div class="init-equipment-search">
+                  <i class="fas fa-search search-icon"></i>
+                  <input type="text" id="initEquipmentSearch2" placeholder="Tìm theo mã thiết bị..." onfocus="showEquipmentList('2')" oninput="filterEquipmentList('2')">
+                  <i class="fas fa-chevron-down toggle-icon" onclick="toggleEquipmentList('2')"></i>
+                </div>
+                <!-- Search Result Dropdown / Combobox -->
+                <div class="init-equipment-list" id="initEquipmentList2">
+                  <!-- Accordion or Flat list items will be rendered here by JS -->
+                </div>
+              </div>
+
+              <!-- Selected Tags -->
+              <div class="init-selected-equipment" id="initSelectedEquipment2">
+                <!-- Selected equipment tags will render here -->
+              </div>
+            </div>
+          </div>
+          <div class="init-action-buttons">
+            <button class="init-btn-back" onclick="window.history.back()">Quay về</button>
+            <button class="init-btn-save" onclick="saveInitTab()">Lưu</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content: Vị trí (grid layout) -->
+      <div id="tabContentLocation" class="tab-content" style="height: 100%;">
+        <div class="location-scroll-section" style="flex: 1; overflow-y: auto; padding-right: 4px;">
+          <div class="location-card-list" id="locationCardList">
+            <!-- Location cards will be rendered by JS -->
+          </div>
+        </div>
+
+        <div class="location-add-wrapper" style="padding: 12px 0 8px 0; border-top: 1px solid #f1f5f9; background: #fff; display: flex; justify-content: center;">
+          <button class="btn-add-location" onclick="addLocationCard()" style="width: 40px; height: 40px; background: #076eb8; color: white; border: none; border-radius: 50%; cursor: pointer;">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+
+        <div class="mode-selector">
+          <div class="mode-selector-header">
+            <label>Chế độ chọn:</label>
+            <div class="mode-info-tooltip">
+              <i class="fas fa-info-circle"></i>
+              <span class="tooltip-text">Chế độ chọn ô có hàng chỉ có ở bản demo</span>
+            </div>
+          </div>
+          <div class="mode-buttons">
+            <button
+              class="mode-btn active"
+              onclick="setMode('position')"
+              id="btn-mode-position"
+            >
+              <span class="mode-icon dot"></span> Vị trí
+            </button>
+            <button
+              class="mode-btn"
+              onclick="setMode('goods')"
+              id="btn-mode-goods"
+            >
+              <span class="mode-icon box">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 33 32"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g>
+                    <path
+                      d="M18.0341 0.019531L5.2656 1.9016C4.82462 1.9666 4.68267 2.53252 5.04078 2.79794L11.038 7.24299C11.1527 7.32799 11.2982 7.35992 11.438 7.33073L26.329 4.21954C26.8145 4.11811 26.872 3.44788 26.4108 3.26525L18.2911 0.0493199C18.2096 0.0170095 18.1209 0.0067359 18.0341 0.019531Z"
+                      fill="#38A0F0"
+                    />
+                    <path
+                      d="M10.7663 7.57295L4.80274 3.0371C4.47301 2.78632 3.99883 3.02228 4.00005 3.43654L4.03305 14.6538C4.03337 14.7633 4.06963 14.8696 4.13625 14.9565L10.0668 22.6919C10.3576 23.0711 10.9636 22.8655 10.9636 22.3876V7.97092C10.9636 7.81472 10.8906 7.6675 10.7663 7.57295Z"
+                      fill="#1D8ADF"
+                    />
+                    <path
+                      d="M27.3862 4.46063L11.7904 7.84534C11.5605 7.89524 11.3965 8.09868 11.3965 8.33396V23.2908C11.3965 23.6365 11.7389 23.8779 12.0645 23.7617L27.6603 18.1965C27.8593 18.1254 27.9922 17.9369 27.9922 17.7256V4.94926C27.9922 4.6304 27.6978 4.393 27.3862 4.46063Z"
+                      fill="#0F6EB8"
+                      stroke="#0F6EB8"
+                      stroke-width="0.1"
+                    />
+                  </g>
+                </svg>
+              </span>
+              Ô có hàng
+            </button>
+          </div>
+        </div>
+
+        <div class="init-action-buttons" style="border-top: 1px solid #f1f5f9; background: #fff;">
+          <button class="init-btn-back" onclick="window.history.back()">Quay về</button>
+          <button class="init-btn-save" onclick="saveLocationTab()">Lưu</button>
+        </div>
+      </div>
+
+      <!-- Tab Content: Khu vực (hidden by default) -->
+      <div id="tabContentArea" class="tab-content" style="height: 100%;">
+        <div class="area-scroll-section" style="flex: 1; overflow-y: auto; padding-right: 4px;">
+          <div class="area-card-list" id="areaCardList">
+            <!-- Area cards will be rendered by JS -->
+          </div>
+
+        </div>
+        
+        <div class="area-add-fixed-wrapper">
+          <div class="area-add-wrapper" style="padding: 12px 0 16px 0; border-top: 1px solid #f1f5f9; background: #fff; display: flex; justify-content: center;">
+            <button class="btn-add-area" onclick="addArea()" style="width: 40px; height: 40px; background: #076eb8; color: white; border: none; border-radius: 50%; cursor: pointer;">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="init-action-buttons">
+          <button class="init-btn-back" onclick="window.history.back()">Quay về</button>
+          <button class="init-btn-save" onclick="saveAreaTab()">Lưu</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Panel - Grid Area -->
+    <div class="grid-area">
+      <div id="gridWrapper" class="grid-wrapper"></div>
+
+      <div class="zoom-controls">
+        <button class="zoom-btn" onclick="zoomIn()">
+          <i class="fas fa-plus"></i>
+        </button>
+        <button class="zoom-btn" onclick="zoomOut()">
+          <i class="fas fa-minus"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Confirm Modal -->
+<div id="customConfirmModal" class="custom-confirm-modal" style="display: none;">
+  <div class="custom-confirm-content">
+    <div class="custom-confirm-header">
+      <i class="fas fa-exclamation-triangle" style="color: #ef4444; margin-right: 8px;"></i>
+      <span id="customConfirmTitle">Xác nhận</span>
+    </div>
+    <div class="custom-confirm-body" id="customConfirmMessage">Bạn có chắc chắn?</div>
+    <div class="custom-confirm-footer">
+      <button class="btn-confirm" onclick="executeCustomConfirm()" id="btnCustomConfirmOk">Đồng ý</button>
+      <button class="btn-cancel" onclick="closeCustomConfirm()">Hủy</button>
+    </div>
+  </div>
+</div>
+
+<script src="warehouse-config.js"></script>

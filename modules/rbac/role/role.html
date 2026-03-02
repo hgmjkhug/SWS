@@ -1,0 +1,164 @@
+<div class="role-container">
+  <div class="module-header">
+    <div class="role-search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        id="role-search"
+        placeholder="Tìm kiếm vai trò..."
+        oninput="filterRoles()"
+      />
+    </div>
+    <div class="module-actions">
+      <button class="btn btn-primary" onclick="openRoleModal()">
+        <i class="fas fa-plus"></i> Thêm mới
+      </button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 50px; text-align: center">STT</th>
+          <th>Tên vai trò</th>
+          <th style="width: 120px; text-align: center">Số quyền</th>
+          <th>Mô tả</th>
+          <th style="width: 120px; text-align: center">Hành động</th>
+        </tr>
+      </thead>
+      <tbody id="role-table-body">
+        <!-- Data rendered by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination-bar">
+    <span id="role-page-info">Hiển thị 1-4 trên tổng 4</span>
+    <div class="pagination-controls">
+      <button class="btn-page" onclick="prevPage()" id="btn-prev" disabled>
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <div id="role-pages" class="pages-numbers">
+        <button class="btn-page active">1</button>
+      </div>
+      <button class="btn-page" onclick="nextPage()" id="btn-next" disabled>
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Role Modal -->
+<div class="modal-overlay" id="role-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title" id="role-modal-title">Thêm mới vai trò</h3>
+      <button class="modal-close-square" onclick="closeRoleModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="role-id" />
+      <div class="form-group">
+        <label>Tên vai trò <span class="text-danger">*</span></label>
+        <input type="text" id="role-name" placeholder="Nhập tên vai trò" />
+        <small class="error-message" id="role-name-error"></small>
+      </div>
+
+      <div class="form-group">
+        <label>Mô tả</label>
+        <textarea
+          id="role-desc"
+          rows="3"
+          placeholder="Mô tả chi tiết vai trò"
+        ></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeRoleModal()">Hủy</button>
+      <button class="btn-primary" onclick="saveRole()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Permission Detail Modal -->
+<div class="modal-overlay" id="permission-detail-modal">
+  <div class="modal-box" style="width: 900px; max-width: 95vw">
+    <div class="modal-header">
+      <h3
+        class="modal-title"
+        id="perm-header-title"
+        style="font-weight: 700; color: #1e293b"
+      >
+        Quyền của vai trò:
+        <span id="perm-header-role" style="color: #1e293b"></span>
+      </h3>
+      <button class="modal-close-square" onclick="closePermissionDetailModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body" style="padding: 0">
+      <!-- Permission Info Box -->
+      <div class="perm-info-box">
+        <div class="perm-info-title">
+          <strong id="perm-info-name"></strong> -
+          <span id="perm-info-desc"></span>
+        </div>
+        <div class="perm-info-count" id="perm-info-count-text"></div>
+      </div>
+
+      <div class="permission-table-wrapper">
+        <table class="permission-table">
+          <thead>
+            <tr>
+              <th style="width: 35%">Nguồn tài nguyên</th>
+              <th style="width: 10%; text-align: center">Tất cả</th>
+              <th style="width: 13.75%; text-align: center">Thêm</th>
+              <th style="width: 13.75%; text-align: center">Đọc</th>
+              <th style="width: 13.75%; text-align: center">Sửa</th>
+              <th style="width: 13.75%; text-align: center">Xóa</th>
+            </tr>
+          </thead>
+          <tbody id="permission-table-body">
+            <!-- Accordion Content rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          class="btn btn-secondary"
+          onclick="closePermissionDetailModal()"
+        >
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Popover (Standardized) -->
+<div id="delete-confirm-modal" class="modal-confirm">
+  <div class="confirm-content">
+    <div class="confirm-icon-box">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h3 class="confirm-title">Xác nhận xóa</h3>
+    <p class="confirm-message">
+      Bạn có chắc chắn muốn xóa vai trò này không?<br />Hành động này không thể
+      hoàn tác.
+    </p>
+    <div class="confirm-actions">
+      <button onclick="closeDeleteConfirm()" class="btn btn-secondary">
+        Hủy
+      </button>
+      <button onclick="confirmDeleteRole()" class="btn btn-danger">Xóa</button>
+    </div>
+  </div>
+</div>
+
+<!-- Load CSS and JS -->
+<link href="role.css" rel="stylesheet" />
+<script src="role.js"></script>

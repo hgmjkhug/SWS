@@ -1,0 +1,636 @@
+<div id="main-view">
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <input
+        type="text"
+        class="search-input"
+        id="search-input"
+        placeholder="Tìm theo mã lệnh, mã hoặc tên vật tư"
+        onkeyup="filterOutboundData()"
+      />
+
+      <!-- Status Filter -->
+      <div class="status-custom-dropdown" id="status-dropdown">
+        <label class="filter-label">Trạng thái</label>
+        <div
+          class="dropdown-selected"
+          onclick="toggleOutboundStatusDropdown('status-dropdown')"
+        >
+          <span id="status-selected-label">Tất cả</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <input
+          type="hidden"
+          id="filter-status"
+          value="ALL"
+          onchange="filterOutboundData()"
+        />
+        <div class="dropdown-options">
+          <div
+            class="dropdown-option active"
+            data-value="ALL"
+            onclick="selectOutboundStatus('ALL', 'Tất cả')"
+          >
+            Tất cả
+          </div>
+          <div
+            class="dropdown-option"
+            data-value="PENDING"
+            onclick="selectOutboundStatus('PENDING', 'Đang chờ')"
+          >
+            Đang chờ
+          </div>
+          <div
+            class="dropdown-option"
+            data-value="PROCESSING"
+            onclick="selectOutboundStatus('PROCESSING', 'Đang xử lý')"
+          >
+            Đang xử lý
+          </div>
+          <div
+            class="dropdown-option"
+            data-value="COMPLETED"
+            onclick="selectOutboundStatus('COMPLETED', 'Hoàn thành')"
+          >
+            Hoàn thành
+          </div>
+          <div
+            class="dropdown-option"
+            data-value="CANCELLED"
+            onclick="selectOutboundStatus('CANCELLED', 'Lỗi')"
+          >
+            Lỗi
+          </div>
+        </div>
+      </div>
+
+      <!-- Outbound Type Filter -->
+      <div class="status-custom-dropdown" id="type-dropdown">
+        <label class="filter-label">Loại xuất kho</label>
+        <div class="dropdown-selected" onclick="toggleOutboundTypeDropdown()">
+          <span id="type-selected-label">Tất cả</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <input
+          type="hidden"
+          id="filter-type"
+          value="ALL"
+          onchange="filterOutboundData()"
+        />
+        <div class="dropdown-options">
+          <div
+            class="dropdown-option active"
+            data-value="ALL"
+            onclick="selectOutboundType('ALL', 'Tất cả')"
+          >
+            Tất cả
+          </div>
+          <div
+            class="dropdown-option"
+            data-value="PALLET"
+            onclick="selectOutboundType('PALLET', 'Xuất theo pallet')"
+          >
+            Xuất theo pallet
+          </div>
+          <div
+            class="dropdown-option"
+            data-value="MATERIAL"
+            onclick="selectOutboundType('MATERIAL', 'Xuất theo vật tư')"
+          >
+            Xuất theo vật tư
+          </div>
+        </div>
+      </div>
+
+      <!-- Creator Filter (Editable Combobox) -->
+      <div class="creator-filter-group">
+        <label class="filter-label">Người tạo</label>
+        <div class="custom-combobox-wrapper" id="creator-combobox-wrapper">
+          <div class="combobox-input-group">
+            <input
+              type="text"
+              id="creator-combobox-input"
+              class="combobox-input"
+              placeholder="Tất cả"
+              autocomplete="off"
+              onclick="toggleOutboundCreatorCombobox()"
+              onkeyup="handleOutboundCreatorComboboxSearch(this)"
+            />
+            <i
+              class="fas fa-chevron-down combobox-arrow"
+              onclick="toggleOutboundCreatorCombobox()"
+            ></i>
+          </div>
+          <div class="combobox-dropdown" id="creator-combobox-dropdown">
+            <ul class="combobox-list" id="creator-combobox-list">
+              <!-- Populated by JS -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date Picker (Copied from Pallet) -->
+      <div class="unified-date-filter" style="position: relative">
+        <div
+          class="date-picker-trigger"
+          id="dateRangeTrigger"
+          onclick="window.toggleDateRangePicker(event)"
+        >
+          <i class="fas fa-calendar-alt"></i>
+          <span id="dateRangeDisplay">dd/mm/yyyy - dd/mm/yyyy</span>
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+
+        <!-- Bespoke Analytics Date Picker -->
+        <div class="analytics-date-picker" id="analyticsPicker">
+          <div class="picker-sidebar">
+            <div class="sidebar-item" data-range="today">Hôm nay</div>
+            <div class="sidebar-item" data-range="last3">3 ngày gần đây</div>
+            <div class="sidebar-item" data-range="last7">7 ngày gần đây</div>
+            <div class="sidebar-item" data-range="last30">30 ngày gần đây</div>
+            <div class="sidebar-item" data-range="last3mo">3 tháng gần đây</div>
+            <div class="sidebar-item" data-range="last6mo">6 tháng gần đây</div>
+            <div class="sidebar-item" data-range="last1yr">1 năm qua</div>
+          </div>
+
+          <div class="picker-main">
+            <div class="picker-header">
+              <div class="selected-range-box" id="tempRangeDisplay">-</div>
+              <div class="header-actions">
+                <button
+                  type="button"
+                  class="text-btn clear-btn"
+                  id="clearPicker"
+                >
+                  Xóa bộ lọc
+                </button>
+                <button
+                  type="button"
+                  class="text-btn cancel-btn"
+                  id="cancelPicker"
+                >
+                  Hủy
+                </button>
+                <button type="button" class="apply-btn" id="applyPicker">
+                  Áp dụng
+                </button>
+              </div>
+            </div>
+
+            <div class="picker-body">
+              <div class="calendar-panel left-panel">
+                <div class="panel-title">Từ ngày</div>
+                <div class="panel-nav">
+                  <div
+                    class="custom-dropdown month-dropdown"
+                    id="leftMonthDropdown"
+                  >
+                    <div class="dropdown-selected" id="leftMonthSelected">
+                      Tháng
+                    </div>
+                    <div class="dropdown-list" id="leftMonthList"></div>
+                  </div>
+                  <div
+                    class="custom-dropdown year-dropdown"
+                    id="leftYearDropdown"
+                  >
+                    <div class="dropdown-selected" id="leftYearSelected">
+                      Năm
+                    </div>
+                    <div class="dropdown-list" id="leftYearList"></div>
+                  </div>
+                </div>
+                <div class="calendar-grid" id="leftCalendar">
+                  <div class="day-names">
+                    <span>T2</span><span>T3</span><span>T4</span><span>T5</span
+                    ><span>T6</span><span>T7</span><span>CN</span>
+                  </div>
+                  <div class="days-container"></div>
+                </div>
+              </div>
+
+              <div class="calendar-panel right-panel">
+                <div class="panel-title">Đến ngày</div>
+                <div class="panel-nav">
+                  <div
+                    class="custom-dropdown month-dropdown"
+                    id="rightMonthDropdown"
+                  >
+                    <div class="dropdown-selected" id="rightMonthSelected">
+                      Tháng
+                    </div>
+                    <div class="dropdown-list" id="rightMonthList"></div>
+                  </div>
+                  <div
+                    class="custom-dropdown year-dropdown"
+                    id="rightYearDropdown"
+                  >
+                    <div class="dropdown-selected" id="rightYearSelected">
+                      Năm
+                    </div>
+                    <div class="dropdown-list" id="rightYearList"></div>
+                  </div>
+                </div>
+                <div class="calendar-grid" id="rightCalendar">
+                  <div class="day-names">
+                    <span>T2</span><span>T3</span><span>T4</span><span>T5</span
+                    ><span>T6</span><span>T7</span><span>CN</span>
+                  </div>
+                  <div class="days-container"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn-add" onclick="openOutboundModal()">
+        <i class="fas fa-plus"></i> Thêm mới
+      </button>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Mã lệnh xuất</th>
+          <th style="min-width: 200px; max-width: 250px">Vật tư</th>
+          <th style="min-width: 100px; max-width: 150px; text-align: center">
+            Loại xuất kho
+          </th>
+          <!-- <th style="min-width: 200px; max-width: 250px; text-align: left">
+            Quy trình
+          </th> -->
+          <th style="min-width: 200px; max-width: 250px">Thời gian tạo lệnh</th>
+          <th style="min-width: 100px; max-width: 150px; text-align: center">
+            Trạng thái
+          </th>
+          <th style="width: 140px">Người tạo</th>
+          <th style="width: 100px; text-align: center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <!-- Data will be rendered here -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-bar">
+    <span id="pagination-info">Hiển thị 0 trên tổng 0</span>
+    <div class="pagination-controls">
+      <button
+        class="page-btn"
+        id="prev-page"
+        onclick="outboundPrevPage()"
+        disabled
+      >
+        &lt;
+      </button>
+      <div id="page-numbers" class="page-numbers"></div>
+      <button class="page-btn" id="next-page" onclick="outboundNextPage()">
+        &gt;
+      </button>
+      <span class="page-goto">
+        Đến
+        <input
+          type="number"
+          id="goto-page"
+          min="1"
+          onchange="outboundGotoPage(this.value)"
+        />
+        trang
+      </span>
+    </div>
+  </div>
+
+  <!-- Modal Add New -->
+  <div class="modal-overlay" id="add-modal">
+    <div class="modal-box">
+      <div class="close-modal" onclick="closeOutboundModal('add-modal')">
+        <i class="fas fa-times"></i>
+      </div>
+      <div class="modal-header">
+        <div class="modal-title">Thêm mới lệnh xuất kho</div>
+      </div>
+      <div class="modal-body">
+        <!-- Outbound Type Selection -->
+        <div class="outbound-type-selection">
+          <label class="selection-card">
+            <input
+              type="radio"
+              name="outbound-type"
+              value="MATERIAL"
+              checked
+              onchange="toggleOutboundForm(this.value)"
+            />
+            <div class="card-content">
+              <div class="card-icon"><i class="fas fa-cubes"></i></div>
+              <div class="card-text">
+                <span class="title">Xuất theo vật tư</span>
+                <span class="desc">Xuất lẻ vật tư</span>
+              </div>
+              <div class="check-icon"><i class="fas fa-check-circle"></i></div>
+            </div>
+          </label>
+          <label class="selection-card">
+            <input
+              type="radio"
+              name="outbound-type"
+              value="PALLET"
+              onchange="toggleOutboundForm(this.value)"
+            />
+            <div class="card-content">
+              <div class="card-icon"><i class="fa-solid fa-pallet"></i></div>
+              <div class="card-text">
+                <span class="title">Xuất theo pallet</span>
+                <span class="desc">Xuất nguyên pallet hàng</span>
+              </div>
+              <div class="check-icon"><i class="fas fa-check-circle"></i></div>
+            </div>
+          </label>
+        </div>
+
+        <div class="form-grid">
+          <!-- MATERIAL FORM (NEW) -->
+          <div id="outbound-material-form" class="full-width">
+            <div class="search-box-material">
+              <input
+                type="text"
+                id="material-search-input"
+                class="form-control"
+                placeholder="Tìm kiếm theo mã vật tư hoặc tên vật tư..."
+                onkeyup="window.filterMaterialSelection()"
+              />
+              <i class="fas fa-search search-icon"></i>
+            </div>
+
+            <div class="material-table-wrapper">
+              <table class="material-selection-table">
+                <thead>
+                  <tr>
+                    <th style="width: 40px"></th>
+                    <th style="width: 50px; text-align: center">STT</th>
+                    <th>Mã vật tư</th>
+                    <th>Tên vật tư</th>
+                    <th style="min-width: 150px">
+                      <div class="header-content">
+                        <span>Nhóm vật tư</span>
+                        <i
+                          class="fas fa-filter filter-trigger"
+                          onclick="toggleColumnFilter(event, 'category')"
+                        ></i>
+                        <!-- Dropdown -->
+                        <div
+                          class="column-filter-dropdown"
+                          id="dropdown-category"
+                        >
+                          <div class="filter-list" id="list-category">
+                            <!-- Populated by JS -->
+                          </div>
+                          <div class="filter-actions">
+                            <button
+                              class="btn-secondary btn-sm"
+                              onclick="closeColumnFilter('category')"
+                            >
+                              Hủy
+                            </button>
+                            <button
+                              class="btn-primary btn-sm"
+                              onclick="applyColumnFilter('category')"
+                            >
+                              Xác nhận
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </th>
+                    <th
+                      style="
+                        min-width: 50px;
+                        max-width: 100px;
+                        white-space: nowrap;
+                      "
+                    >
+                      <div
+                        class="header-content"
+                        style="justify-content: center; gap: 8px"
+                      >
+                        <span>PT xuất</span>
+                        <i
+                          class="fas fa-filter filter-trigger"
+                          onclick="toggleColumnFilter(event, 'method')"
+                        ></i>
+                        <!-- Dropdown -->
+                        <div
+                          class="column-filter-dropdown"
+                          id="dropdown-method"
+                          style="text-align: center"
+                        >
+                          <div class="filter-list" id="list-method">
+                            <!-- Populated by JS -->
+                          </div>
+                          <div class="filter-actions">
+                            <button
+                              class="btn-secondary btn-sm"
+                              onclick="closeColumnFilter('method')"
+                            >
+                              Hủy
+                            </button>
+                            <button
+                              class="btn-primary btn-sm"
+                              onclick="applyColumnFilter('method')"
+                            >
+                              Xác nhận
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </th>
+                    <!-- New Column -->
+                    <th style="text-align: center">SL hiện có</th>
+                    <th
+                      style="
+                        width: 100px;
+                        text-align: center;
+                        white-space: nowrap;
+                      "
+                    >
+                      SL xuất
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="material-selection-body">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- PALLET FORM (OLD) -->
+          <!-- PALLET SELECTION TABLE -->
+          <div
+            id="outbound-pallet-form"
+            class="full-width form-grid"
+            style="display: none; height: 100%; overflow: hidden"
+          >
+            <div class="search-box-material" style="margin-bottom: 10px">
+              <input
+                type="text"
+                id="pallet-search-input"
+                class="form-control"
+                placeholder="Tìm kiếm theo mã pallet..."
+                onkeyup="window.filterPalletSelection()"
+              />
+              <i class="fas fa-search search-icon"></i>
+            </div>
+            <div class="material-table-wrapper">
+              <table
+                class="material-selection-table"
+                id="pallet-selection-table"
+              >
+                <thead>
+                  <tr>
+                    <th
+                      rowspan="2"
+                      style="
+                        width: 50px;
+                        text-align: center;
+                        border-bottom: 1px solid #e2e8f0;
+                        vertical-align: middle;
+                      "
+                    >
+                      <!-- Radio column -->
+                    </th>
+                    <th
+                      rowspan="2"
+                      style="
+                        width: 50px;
+                        text-align: center;
+                        border-bottom: 1px solid #e2e8f0;
+                        vertical-align: middle;
+                      "
+                    >
+                      STT
+                    </th>
+                    <th
+                      rowspan="2"
+                      style="
+                        width: 120px;
+                        text-align: left;
+                        border-bottom: 1px solid #e2e8f0;
+                        vertical-align: middle;
+                      "
+                    >
+                      Mã Pallet
+                    </th>
+                    <th
+                      rowspan="2"
+                      style="
+                        min-width: 200px;
+                        max-width: 250px;
+                        text-align: left;
+                        border-bottom: 1px solid #e2e8f0;
+                        vertical-align: middle;
+                      "
+                      class="truncate-header"
+                    >
+                      Mã lệnh nhập
+                    </th>
+                    <th
+                      colspan="3"
+                      style="
+                        text-align: center;
+                        border-bottom: 1px solid #e2e8f0;
+                      "
+                    >
+                      Thông tin vật tư
+                    </th>
+                    <th
+                      rowspan="2"
+                      style="
+                        width: 200px;
+                        text-align: center;
+                        white-space: nowrap;
+                        border-bottom: 1px solid #e2e8f0;
+                        vertical-align: middle;
+                      "
+                    >
+                      Thời gian tạo lệnh
+                    </th>
+                    <th
+                      rowspan="2"
+                      style="
+                        width: 100px;
+                        text-align: center;
+                        white-space: nowrap;
+                        border-bottom: 1px solid #e2e8f0;
+                        vertical-align: middle;
+                      "
+                    >
+                      Vị trí lưu
+                    </th>
+                  </tr>
+                  <tr>
+                    <th
+                      style="
+                        font-weight: 600;
+                        font-size: 13px;
+                        border-bottom: 1px solid #e2e8f0;
+                        width: 100px;
+                      "
+                    >
+                      Mã vật tư
+                    </th>
+                    <th
+                      style="
+                        font-weight: 600;
+                        font-size: 13px;
+                        border-bottom: 1px solid #e2e8f0;
+                      "
+                    >
+                      Tên vật tư
+                    </th>
+                    <th
+                      style="
+                        font-weight: 600;
+                        font-size: 13px;
+                        text-align: center;
+                        border-bottom: 1px solid #e2e8f0;
+                        width: 80px;
+                        white-space: nowrap;
+                      "
+                    >
+                      Số lượng
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="pallet-selection-body">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeOutboundModal('add-modal')">
+          Hủy
+        </button>
+        <button
+          class="btn-primary"
+          id="btn-save-outbound"
+          onclick="addOutboundOrder()"
+        >
+          Lưu
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="outbound.css" />
+<script src="outbound.js"></script>

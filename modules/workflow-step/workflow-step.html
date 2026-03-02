@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý Bước quy trình</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="workflow-step.css" />
+</head>
+
+<body>
+  <div id="workflow-step-view">
+    <!-- 1. Toolbar Card -->
+    <div class="module-card">
+      <!-- Bulk Actions Bar (Hidden by default) -->
+      <div id="bulkActions" class="bulk-actions hidden">
+        <span id="selectedCount">Đã chọn 0 mục</span>
+        <button class="btn btn-warning" onclick="handleBulkDelete()">
+          <i class="fas fa-trash-alt"></i> Xóa hàng loạt
+        </button>
+      </div>
+
+      <!-- Main Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="filter-group">
+            <!-- <label class="filter-label">Tìm kiếm</label> -->
+            <div class="search-box-panel">
+              <i class="fas fa-search"></i>
+              <input type="text" id="stepSearch" placeholder="Tìm kiếm theo mã, tên bước..." />
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Nhóm thiết bị</label>
+            <div class="custom-dropdown" id="deviceTypeDropdown">
+              <div class="dropdown-selected">
+                <span id="deviceTypeSelected" data-value="all">Tất cả nhóm thiết bị</span>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="dropdown-options" id="deviceTypeOptions">
+                <!-- Populated via JS -->
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Trạng thái</label>
+            <div class="custom-dropdown" id="statusDropdown">
+              <div class="dropdown-selected">
+                <span id="statusSelected" data-value="all">Tất cả trạng thái</span>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="dropdown-options" id="statusOptions">
+                <!-- Populated via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar-right">
+          <button class="btn btn-primary" onclick="openStepModal('create')">
+            <i class="fas fa-plus"></i> Thêm mới
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Table Card -->
+    <div class="module-card" style="padding: 0;">
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="col-selection">
+                <input type="checkbox" id="selectAll" />
+              </th>
+              <th class="col-stt">STT</th>
+              <th class="col-code">Mã bước</th>
+              <th class="col-name">Tên bước</th>
+              <th class="col-flows">Nhóm thiết bị</th>
+              <th class="col-status">Trạng thái</th>
+              <th class="col-actions">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="stepTableBody">
+            <!-- Data rows populated by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3. Pagination Card -->
+    <div class="module-card">
+      <div class="pagination-container">
+        <div class="pagination-info" id="paginationInfo">
+          Hiển thị 1 - 20 trong tổng 35
+        </div>
+        <div class="pagination-controls">
+          <button class="page-btn" id="prevPage" disabled>
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <div class="page-numbers" id="pageNumbers">
+
+            <!-- Page buttons populated by JS -->
+          </div>
+          <button class="page-btn" id="nextPage">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+
+          <div class="page-goto">
+            <span>Đến</span>
+            <input type="number" id="gotoPage" value="1" />
+            <span>Trang</span>
+          </div>
+        </div>
+      </div> <!-- end module-card -->
+    </div> <!-- end workflow-step-view -->
+
+    <!-- Step Modal -->
+    <div id="stepModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalTitle">Thêm bước quy trình mới</h3>
+          <button class="close-btn" onclick="closeStepModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="stepId" />
+
+          <div class="form-group" style="margin-bottom: 20px">
+            <label class="required" style="
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 500;
+                font-size: 14px;
+                color: #475569;
+              ">Mã bước</label>
+            <input type="text" id="stepCode" placeholder="Ví dụ: STEP-PIC" style="
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #cbd5e1;
+                border-radius: 6px;
+                font-size: 14px;
+              " />
+          </div>
+
+          <div class="form-group" style="margin-bottom: 20px">
+            <label class="required" style="
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 500;
+                font-size: 14px;
+                color: #475569;
+              ">Tên bước</label>
+            <input type="text" id="stepName" placeholder="Nhập tên bước quy trình" style="
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #cbd5e1;
+                border-radius: 6px;
+                font-size: 14px;
+              " />
+          </div>
+
+          <div class="form-group" style="margin-bottom: 20px">
+            <label style="
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 500;
+                font-size: 14px;
+                color: #475569;
+              ">Nhóm thiết bị</label>
+            <div class="custom-dropdown" id="deviceTypeDropdownModal">
+              <div class="dropdown-selected" id="deviceTypeSelectedModal" onclick="toggleDeviceTypeDropdown()">
+                <span class="selected-placeholder">Chọn nhóm thiết bị...</span>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="dropdown-options" id="deviceTypeOptionsModal">
+                <!-- Device Types populated by JS -->
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group toggle-group" style="
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              margin-top: 24px;
+            ">
+            <label style="
+                margin-bottom: 0;
+                font-weight: 500;
+                font-size: 14px;
+                color: #475569;
+              ">Trạng thái hoạt động</label>
+            <label class="switch">
+              <input type="checkbox" id="stepActive" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeStepModal()">
+            Hủy bỏ
+          </button>
+          <button class="btn btn-primary" onclick="saveStep()">
+            Lưu thông tin
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deactivation Confirmation Modal -->
+    <div id="confirmModal" class="popover-overlay">
+      <div class="confirm-content">
+        <div class="confirm-icon warning">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h4 class="confirm-title">Xác nhận ngưng sử dụng</h4>
+        <p class="confirm-message">
+          Bạn có chắc chắn muốn ngưng sử dụng bước
+          <strong id="confirmStepName"></strong>? Hành động này có thể ảnh hưởng
+          đến các luồng đang vận hành.
+        </p>
+        <div class="confirm-actions">
+          <button class="btn btn-secondary" onclick="closeConfirmModal()">
+            Hủy bỏ
+          </button>
+          <button class="btn btn-warning" onclick="confirmDisable()">
+            Xác nhận
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="workflow-step.js"></script>
+</body>
+
+</html>

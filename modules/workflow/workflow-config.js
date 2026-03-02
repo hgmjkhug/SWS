@@ -1,0 +1,1167 @@
+// Workflow Builder Logic
+
+// Dirty State Tracking & Global References
+window.isWorkflowDirty = false;
+let globalSaveStepsLocal = null;
+
+// --- GLOBAL BACK/SAVE FUNCTIONS ---
+// Defined globally so they exist immediately even if init is slow
+
+window.saveWorkflowFinal = function() {
+    if (!globalSaveStepsLocal) {
+        console.error("Save function not initialized");
+        return;
+    }
+    // 1. Force save current state to local storage
+    globalSaveStepsLocal();
+    
+    // 2. Reset dirty flag
+    window.isWorkflowDirty = false;
+    
+    // 3. Show Success Toast
+    if (window.showToast) {
+        window.showToast('Thiết lập quy trình thành công!', 'success');
+    } else {
+        alert('Thiết lập quy trình thành công!');
+    }
+}
+
+window.tryCloseWorkflowConfig = function() {
+    if (window.isWorkflowDirty) {
+        // Show custom modal
+        const modal = document.getElementById('confirmExitModal');
+        if (modal) modal.style.display = 'block';
+    } else {
+        // Safe to exit
+        window.forceExitWorkflowConfig();
+    }
+}
+
+window.confirmExit = function() {
+    window.closeExitConfirmModal();
+    window.forceExitWorkflowConfig();
+}
+
+window.closeExitConfirmModal = function() {
+    const modal = document.getElementById('confirmExitModal');
+    if (modal) modal.style.display = 'none';
+}
+
+window.forceExitWorkflowConfig = function() {
+    if (window.clearWorkflowConfigState && window.loadPage) {
+        window.clearWorkflowConfigState(); 
+        window.loadPage('Danh sách Quy trình');
+    } else {
+        console.error("Navigation functions not found");
+        // Fallback
+        if(window.loadPage) window.loadPage('Danh sách Quy trình');
+    }
+}
+
+function initWorkflowConfig(workflowId, workflowName) {
+    // Reset global ref
+    globalSaveStepsLocal = null;
+
+    const flowchartList = document.getElementById('flowchart-list');
+    const svgCanvas = document.getElementById('svg-canvas');
+    const canvasContainer = document.getElementById('canvasContainer');
+
+    const configuredStepsSpan = document.getElementById('configuredSteps');
+    const totalAvailableStepsSpan = document.getElementById('totalAvailableSteps');
+    const nameDisplay = document.getElementById('workflowNameDisplay');
+    const stepList = document.getElementById('stepList');
+
+    if (nameDisplay && workflowName) {
+        nameDisplay.querySelector('span').innerText = workflowName;
+    }
+
+    if (!flowchartList || !svgCanvas || !canvasContainer) {
+        console.error("Workflow Builder elements not found!");
+        return;
+    }
+
+    // --- STEP DATA (from workflow-step module) ---
+    const deviceTypes = [
+        { id: 1, code: 'AGV-LOAD', name: 'AGV Vận chuyển hàng' },
+        { id: 2, code: 'CRANE-STACK', name: 'Cần trục Stacker Crane' },
+        { id: 3, code: 'CONVEYOR-BELT', name: 'Băng tải dây' },
+        { id: 4, code: 'LIFTER-VERT', name: 'Thang máy nâng hàng' },
+        { id: 5, code: 'SCANNER-GATE', name: 'Cổng Scan RFID' }
+    ];
+
+    const stepTemplates = [];
+    const STORAGE_KEY_AVAILABLE = `workflow_available_steps_${workflowId}`;
+    let availableSteps = [];
+
+    function saveAvailableSteps() {
+        localStorage.setItem(STORAGE_KEY_AVAILABLE, JSON.stringify(availableSteps));
+    }
+
+    function loadAvailableSteps() {
+        const data = localStorage.getItem(STORAGE_KEY_AVAILABLE);
+        if (data) {
+            try {
+                availableSteps = JSON.parse(data);
+            } catch (e) {
+                console.error("Error loading available steps", e);
+                availableSteps = [];
+            }
+        } else {
+            // Default steps if none exist for this workflow? 
+            // Better to start empty as requested.
+            availableSteps = [];
+        }
+    }
+    loadAvailableSteps(); // Initial load
+
+    // --- Sidebar Step Creation Combobox ---
+    function initSidebarDeviceCombobox() {
+        const dropdown = document.getElementById('sidebar-device-dropdown');
+        if (!dropdown) return;
+
+        const input = document.getElementById('sidebar-device-input');
+        const optionsContainer = document.getElementById('sidebar-device-options');
+        const icon = dropdown.querySelector('.combo-icon');
+        const hiddenValue = document.getElementById('sidebar-device-value');
+
+        // Populate Options
+        let html = '';
+        deviceTypes.forEach(dt => {
+            html += `<div class="dropdown-option" data-value="${dt.id}">${dt.code} - ${dt.name}</div>`;
+        });
+        optionsContainer.innerHTML = html;
+
+        function openDropdown() {
+            dropdown.classList.add('active');
+            optionsContainer.classList.add('show');
+        }
+
+        function closeDropdown() {
+            dropdown.classList.remove('active');
+            optionsContainer.classList.remove('show');
+        }
+
+        input.addEventListener('focus', openDropdown);
+        input.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openDropdown();
+        });
+
+        if(icon) icon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (optionsContainer.classList.contains('show')) closeDropdown();
+            else openDropdown();
+        });
+
+        input.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const items = optionsContainer.querySelectorAll('.dropdown-option');
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(term) ? 'block' : 'none';
+            });
+            if (!optionsContainer.classList.contains('show')) openDropdown();
+        });
+
+        optionsContainer.addEventListener('click', (e) => {
+            const item = e.target.closest('.dropdown-option');
+            if (!item) return;
+            e.stopPropagation();
+            const value = item.dataset.value;
+            const text = item.textContent;
+            input.value = text;
+            if (hiddenValue) hiddenValue.value = value;
+            closeDropdown();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (dropdown && !dropdown.contains(e.target)) closeDropdown();
+        });
+    }
+    initSidebarDeviceCombobox();
+
+    window.addNewAvailableStep = function() {
+        const inputName = document.getElementById('sidebar-new-step-name');
+        const inputDevice = document.getElementById('sidebar-device-input');
+        const hiddenDevice = document.getElementById('sidebar-device-value');
+
+        const name = inputName.value.trim();
+        const deviceId = hiddenDevice.value;
+
+        if (!name) {
+            if (window.showToast) window.showToast('Vui lòng nhập tên bước', 'error');
+            else alert('Vui lòng nhập tên bước');
+            return;
+        }
+
+        if (!deviceId) {
+            if (window.showToast) window.showToast('Vui lòng chọn nhóm thiết bị', 'error');
+            else alert('Vui lòng chọn nhóm thiết bị');
+            return;
+        }
+
+        const device = deviceTypes.find(dt => dt.id.toString() === deviceId);
+        const newId = availableSteps.length > 0 ? Math.max(...availableSteps.map(s => s.id)) + 1 : 1;
+        const code = `STEP-${100 + newId}`;
+
+        availableSteps.push({
+            id: newId,
+            code: code,
+            name: name,
+            deviceTypes: [device]
+        });
+
+        // Reset inputs
+        inputName.value = '';
+        inputDevice.value = '';
+        hiddenDevice.value = '';
+
+        saveAvailableSteps();
+        renderStepList();
+        if (window.showToast) window.showToast('Đã thêm bước vào danh sách chọn', 'success');
+    };
+
+    window.removeAvailableStep = function(id) {
+        availableSteps = availableSteps.filter(s => s.id !== id);
+        saveAvailableSteps();
+        renderStepList();
+    };
+
+    // --- Editable Device Combobox Logic ---
+    function initDeviceCombobox() {
+        const dropdown = document.getElementById('device-type-dropdown');
+        if (!dropdown) return;
+
+        const input = document.getElementById('device-input');
+        const optionsContainer = document.getElementById('device-options-list');
+        const icon = dropdown.querySelector('.combo-icon');
+        const hiddenFilter = document.getElementById('deviceTypeFilter');
+
+        // Populate Options
+        let html = '';
+        // "All" Option
+        html += `<div class="dropdown-option selected" data-value="all">Tất cả nhóm thiết bị</div>`;
+        
+        deviceTypes.forEach(dt => {
+            html += `<div class="dropdown-option" data-value="${dt.id}">${dt.code} - ${dt.name}</div>`;
+        });
+        optionsContainer.innerHTML = html;
+
+        // Functions
+        function openDropdown() {
+            dropdown.classList.add('active');
+            optionsContainer.classList.add('show');
+        }
+
+        function closeDropdown() {
+            dropdown.classList.remove('active');
+            optionsContainer.classList.remove('show');
+        }
+
+        function toggleDropdown(e) {
+            e.stopPropagation();
+            if (optionsContainer.classList.contains('show')) {
+                closeDropdown();
+            } else {
+                openDropdown();
+                input.focus();
+            }
+        }
+
+        // Event Listeners
+        input.addEventListener('focus', openDropdown);
+        input.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openDropdown();
+        });
+
+        if(icon) icon.addEventListener('click', toggleDropdown);
+
+        // Filter Options on Input
+        input.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const items = optionsContainer.querySelectorAll('.dropdown-option');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(term)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            if (!optionsContainer.classList.contains('show')) {
+                openDropdown();
+            }
+            
+            // If empty, maybe reset filter to 'all'? 
+            // Better to let user clear it and select 'all' explicitly or handle separately.
+            // For now, only explicit selection triggers filter update.
+        });
+
+        // Handle Selection
+        optionsContainer.addEventListener('click', (e) => {
+            const item = e.target.closest('.dropdown-option');
+            if (!item) return;
+
+            e.stopPropagation();
+            const value = item.dataset.value;
+            const text = item.textContent;
+
+            // Update UI
+            input.value = text;
+            const allOpts = optionsContainer.querySelectorAll('.dropdown-option');
+            allOpts.forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+
+            // Update State
+            if (hiddenFilter) hiddenFilter.value = value;
+            
+            closeDropdown();
+
+            // Reset Filter Visibility
+            setTimeout(() => {
+                allOpts.forEach(i => i.style.display = 'block');
+            }, 200);
+
+            // Trigger Main Filter
+            renderStepList();
+        });
+
+        // Close on Outside Click
+        document.addEventListener('click', (e) => {
+            if (dropdown && !dropdown.contains(e.target)) {
+                closeDropdown();
+            }
+        });
+    }
+
+    // Initialize Combobox
+    initDeviceCombobox();
+
+    // --- Render Step List ---
+    let stepListSortable = null;
+
+    function initStepListSortable() {
+        // Destroy old instance if exists
+        if (stepListSortable) {
+            stepListSortable.destroy();
+            stepListSortable = null;
+        }
+
+        // Create new Sortable instance for stepList
+        if (stepList && stepList.querySelectorAll('.step-item').length > 0) {
+            stepListSortable = new Sortable(stepList, {
+                group: {
+                    name: 'workflow-group',
+                    pull: 'clone',
+                    put: false
+                },
+                animation: 150,
+                sort: false,
+                draggable: '.step-item',
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                onStart: function () {
+                    if (flowchartList) flowchartList.classList.add('drop-active');
+                },
+                onEnd: function () {
+                    if (flowchartList) flowchartList.classList.remove('drop-active');
+                }
+            });
+        }
+    }
+
+    // Init End Step Sortable ONCE (separate from step list)
+    function initEndStepSortable() {
+        const sidebarFooter = document.querySelector('.sidebar-footer-step');
+        if (sidebarFooter && sidebarFooter.querySelector('.step-item')) {
+            new Sortable(sidebarFooter, {
+                group: {
+                    name: 'workflow-group',
+                    pull: 'clone',
+                    put: false
+                },
+                sort: false,
+                draggable: '.step-item',
+                onStart: function () {
+                    if (flowchartList) flowchartList.classList.add('drop-active');
+                },
+                onEnd: function () {
+                    if (flowchartList) flowchartList.classList.remove('drop-active');
+                }
+            });
+        }
+    }
+    initEndStepSortable(); // Run once on init
+
+    // Function to add step to canvas via click
+    function addStepToCanvas(stepCode, stepName) {
+        // Find the full step object to get default devices
+        const stepObj = availableSteps.find(s => s.code === stepCode);
+        const defaultDevice = (stepObj && stepObj.deviceTypes && stepObj.deviceTypes.length > 0)
+            ? stepObj.deviceTypes[0].id
+            : '';
+
+        const newNode = createNodeHTML(stepName, '', defaultDevice);
+        newNode.dataset.stepCode = stepCode;
+        flowchartList.appendChild(newNode);
+
+        updateLogic();
+        saveStepsLocal();
+        drawLines();
+
+        // Scroll to new node
+        requestAnimationFrame(() => {
+             const canvasCont = document.getElementById('canvasContainer');
+             if (canvasCont) {
+                 canvasCont.scrollTo({
+                     top: canvasCont.scrollHeight,
+                     behavior: 'smooth'
+                 });
+             }
+             newNode.style.animation = 'highlight 1s';
+        });
+    }
+
+    function renderStepList() {
+        if (!stepList) return;
+
+        // Update total available steps count
+        if (totalAvailableStepsSpan) totalAvailableStepsSpan.textContent = availableSteps.length;
+
+        if (availableSteps.length === 0) {
+            stepList.innerHTML = '<div class="step-list-empty"><i class="fas fa-inbox"></i><br>Chưa có bước nào. Hãy tạo bước mới ở trên.</div>';
+            return;
+        }
+
+        stepList.innerHTML = availableSteps.map(step => `
+            <div class="step-item" data-step-id="${step.id}" data-step-code="${step.code}" data-step-name="${step.name}">
+                <button class="delete-step-btn" onclick="event.stopPropagation(); removeAvailableStep(${step.id})" title="Xóa bước này">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="step-item-code">${step.code}</div>
+                <div class="step-item-name">${step.name}</div>
+                <div class="step-item-devices">
+                    ${step.deviceTypes.map(d => `<span class="step-device-badge">${d.code}</span>`).join('')}
+                </div>
+            </div>
+        `).join('');
+
+        // Add click handlers to each step-item
+        stepList.querySelectorAll('.step-item').forEach(item => {
+            item.addEventListener('click', function () {
+                const code = this.dataset.stepCode;
+                const name = this.dataset.stepName;
+                addStepToCanvas(code, name);
+            });
+        });
+
+        // Re-init Sortable after rendering new elements
+        initStepListSortable();
+    }
+
+    // Initial render
+    renderStepList();
+
+    // --- 1. LOCAL STORAGE & DATA MANAGEMENT ---
+    const STORAGE_KEY = `workflow_steps_${workflowId}`;
+    let currentZoom = 1;
+
+    function loadSteps() {
+        const data = localStorage.getItem(STORAGE_KEY);
+        if (data) {
+            const parsed = JSON.parse(data);
+            let steps = [];
+            let hasEndNode = false;
+
+            // Handle both legacy array format and new object format
+            if (Array.isArray(parsed)) {
+                steps = parsed;
+            } else {
+                steps = parsed.steps || [];
+                hasEndNode = !!parsed.hasEndNode;
+            }
+
+            flowchartList.innerHTML = ''; // Clear current
+            
+            // Re-append static nodes and SVG
+            const startNode = document.createElement('div');
+            startNode.id = 'node-start';
+            startNode.className = 'node-special node-start';
+            startNode.innerHTML = '<i class="fa-solid fa-play"></i> Bắt đầu';
+            flowchartList.appendChild(startNode);
+            flowchartList.appendChild(svgCanvas);
+
+            // Restore regular steps
+            steps.forEach(step => {
+                const node = createNodeHTML(step.name, step.actionType, step.device, step.params, step.properties);
+                flowchartList.appendChild(node);
+            });
+
+            // Restore End node if it were saved
+            if (hasEndNode) {
+                const endNode = document.createElement('div');
+                endNode.id = 'node-end';
+                endNode.className = 'node-special node-end';
+                endNode.innerHTML = `
+                    <button class="del-node-btn" onclick="removeEndNode()" title="Xóa kết thúc"><i class="fas fa-times"></i></button>
+                    <i class="fa-solid fa-stop"></i> Kết thúc
+                `;
+                flowchartList.appendChild(endNode);
+            }
+
+            updateLogic();
+        } else {
+            // New workflow, ensure empty but keep SVG
+            updateLogic();
+        }
+        window.isWorkflowDirty = false;
+    }
+
+
+    function saveStepsLocal() {
+        const nodes = flowchartList.querySelectorAll('.node'); // Only select .node classes, ignore .node-special
+        const steps = [];
+        nodes.forEach(node => {
+            const name = node.dataset.name || '';
+            const actionTypeEl = node.querySelector('.input-action-type');
+            const actionType = actionTypeEl ? actionTypeEl.value : '';
+            const deviceEl = node.querySelector('.select-device');
+            const device = deviceEl ? deviceEl.value : '';
+
+            // Collect Properties (Hidden Dataset)
+            let properties = {};
+            try {
+                properties = JSON.parse(node.dataset.properties || '{}');
+            } catch (e) {
+                console.error("Error parsing node properties", e);
+            }
+
+            steps.push({ name, actionType, device, properties });
+        });
+
+        // Check for End Node presence
+        const hasEndNode = !!document.getElementById('node-end');
+
+        const storageData = {
+            steps: steps,
+            hasEndNode: hasEndNode
+        };
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(storageData));
+        updateTotalCountCanvas();
+        window.isWorkflowDirty = true; // Mark as dirty on change
+    }
+
+    // Link global reference (CRITICAL)
+    globalSaveStepsLocal = saveStepsLocal;
+
+    function updateTotalCountCanvas() {
+        // Update the count in sidebar (workflow steps configured)
+        const count = flowchartList.querySelectorAll('.node').length;
+        if (configuredStepsSpan) configuredStepsSpan.textContent = count;
+    }
+
+
+    // --- 2. INIT SORTABLE ---
+
+    // Init Main Flowchart Sortable (accepts from sidebar)
+    new Sortable(flowchartList, {
+        group: {
+            name: 'workflow-group',
+            pull: false,
+            put: true
+        },
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        filter: 'svg, .node-special', // Ignore SVG and static nodes
+        draggable: '.node, .step-item', // Accept both nodes and sidebar step-items
+        onAdd: function (evt) {
+            console.log("Item added to flowchart canvas", evt.item);
+            // Convert step-item to node
+            const itemEl = evt.item;
+
+            // Handle "End" node drop
+            if (itemEl.dataset.isEndNode === "true") {
+                // If end node already exists on canvas, just remove the dropped clone
+                const existingEnd = document.getElementById('node-end');
+                if (existingEnd) {
+                    itemEl.remove();
+                } else {
+                    // Create the actual sticky end node
+                    const endNode = document.createElement('div');
+                    endNode.id = 'node-end';
+                    endNode.className = 'node-special node-end';
+                    endNode.innerHTML = `
+                        <button class="del-node-btn" onclick="removeEndNode()" title="Xóa kết thúc"><i class="fas fa-times"></i></button>
+                        <i class="fa-solid fa-stop"></i> Kết thúc
+                    `;
+                    itemEl.parentNode.replaceChild(endNode, itemEl);
+                }
+                updateLogic();
+                saveStepsLocal();
+                drawLines();
+                return;
+            }
+
+            // Check if it's a step-item from sidebar
+            if (itemEl.classList.contains('step-item')) {
+                const stepName = itemEl.dataset.stepName || 'Bước mới';
+                const stepCode = itemEl.dataset.stepCode || '';
+                const stepIdStr = itemEl.dataset.stepId;
+                const stepId = parseInt(stepIdStr);
+
+                console.log("Dropped step-item:", { stepName, stepCode, stepIdStr, stepId });
+
+                // Find step data for defaults
+                const stepObj = availableSteps.find(s => s.id === stepId || s.id.toString() === stepIdStr);
+                if (stepObj) {
+                    console.log("Found step data:", stepObj);
+                } else {
+                    console.warn("Could not find step data for ID:", stepId);
+                }
+
+                const defaultDevice = (stepObj && stepObj.deviceTypes && stepObj.deviceTypes.length > 0)
+                    ? stepObj.deviceTypes[0].id
+                    : '';
+
+                // Create proper node
+                const newNode = createNodeHTML(stepName, '', defaultDevice);
+                newNode.dataset.stepCode = stepCode;
+
+                // Insert node before itemEl, then remove itemEl
+                itemEl.parentNode.insertBefore(newNode, itemEl);
+                itemEl.remove();
+
+                // Auto Scroll & Highlight (Same as addStepToCanvas)
+                requestAnimationFrame(() => {
+                    const canvasCont = document.getElementById('canvasContainer');
+                    if (canvasCont) {
+                        canvasCont.scrollTo({
+                            top: canvasCont.scrollHeight,
+                            behavior: 'smooth'
+                        });
+                    }
+                    newNode.style.animation = "highlight 1s";
+                });
+            }
+
+            flowchartList.classList.remove('drop-active');
+
+            // Immediately update logic and draw connecting arrows
+            updateLogic();
+            saveStepsLocal();
+            drawLines();
+        },
+        onEnd: function () {
+            flowchartList.classList.remove('drop-active');
+            updateLogic();
+            saveStepsLocal();
+            drawLines();
+        },
+        onChange: function () {
+            requestAnimationFrame(drawLines);
+        }
+    });
+
+    // --- 3. HELPER FUNCTIONS ---
+
+    // Updated createNode with value support
+    window.createNodeHTML = function (name, actionType = '', deviceId = '', params = [], properties = {}) {
+        const div = document.createElement('div');
+        div.className = 'node';
+        div.dataset.name = name;
+        // Store properties in dataset for persistence
+        div.dataset.properties = JSON.stringify(properties || {});
+        
+        // Add click listener for selection
+        div.onclick = function(e) {
+            // Prevent triggering if clicking delete button or inputs directly
+            if (e.target.closest('.del-node-btn') || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON') {
+                return;
+            }
+            selectNode(this);
+            e.stopPropagation(); // Prevent bubbling to document
+        };
+
+        // Populate Device Options
+        // defined in outer scope: const deviceTypes = [...]
+        const deviceOptionsHtml = deviceTypes.map(dt => {
+            return `<option value="${dt.id}">${dt.code} - ${dt.name}</option>`;
+        }).join('');
+
+
+        div.innerHTML = `
+            <button class="del-node-btn" onclick="deleteNode(this)">×</button>
+            <div class="node-header">
+                <span class="stt-badge">Bước <span class="num">0</span></span>
+                <strong style="color: #076EB8; font-size: 13px;">${name}</strong>
+            </div>
+            <div class="node-body">
+                <label class="label">Nhóm thiết bị áp dụng</label>
+                <select class="select-device" onchange="saveStepsTrigger()" disabled style="background-color: #f1f5f9; cursor: not-allowed;">
+                    <option value="">Chọn nhóm thiết bị</option>
+                    ${deviceOptionsHtml}
+                </select>
+            </div>
+        `;
+
+        // Explicitly set the value to handle type safety
+        if (deviceId) {
+            const select = div.querySelector('.select-device');
+            if (select) select.value = deviceId;
+        }
+
+        return div;
+    }
+
+    // Global wrappers for internal storage access
+    window.saveStepsTrigger = function () {
+        saveStepsLocal();
+    }
+
+    window.saveStepDirectly = function () {
+        // console.log("DEBUG: saveStepDirectly called");
+        const flowchartList = document.getElementById('flowchart-list');
+        if (!flowchartList) {
+            // console.error("DEBUG: flowchart-list not found!");
+            return;
+        }
+
+        const count = flowchartList.querySelectorAll('.node').length + 1;
+        const name = `Bước ${count}`;
+
+        const newNode = createNodeHTML(name);
+        flowchartList.appendChild(newNode);
+
+        // Immediate Logic Update & Save
+        if (window.updateLogic) window.updateLogic();
+        if (window.saveStepsTrigger) window.saveStepsTrigger();
+
+        // Auto Scroll & Highlight
+        requestAnimationFrame(() => {
+            // Scroll CANVAS CONTAINER instead of main-view
+            const canvasCont = document.getElementById('canvasContainer');
+            if (canvasCont) {
+                canvasCont.scrollTo({
+                    top: canvasCont.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+
+            // Re-draw after scroll starts, and a bit later
+            if (window.drawLines) {
+                drawLines();
+                setTimeout(drawLines, 50);
+                setTimeout(drawLines, 150);
+            }
+
+            // Highlight
+            newNode.style.animation = "highlight 1s";
+        });
+    }
+    let nodeToDelete = null;
+    window.deleteNode = function (btn) {
+        nodeToDelete = btn.parentElement;
+        const modal = document.getElementById('deleteStepModal');
+        const content = modal ? modal.querySelector('.confirm-content') : null;
+
+        if (modal && content) {
+            modal.style.display = 'block';
+
+            // Re-bind confirm button
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            if (confirmBtn) {
+                confirmBtn.onclick = function () {
+                    if (nodeToDelete) {
+                        nodeToDelete.remove();
+                        requestAnimationFrame(() => {
+                            setTimeout(() => {
+                                updateLogic();
+                                saveStepsLocal();
+                            }, 50);
+                        });
+                        nodeToDelete = null;
+                        closeDeleteModal();
+                    }
+                };
+            }
+
+            // Position next to the 'x' button
+            const rect = btn.getBoundingClientRect();
+            // Offset to the left of the button
+            content.style.left = (rect.left - 315) + 'px'; // content width (300) + gap (15)
+            // Center arrow vertically with button
+            content.style.top = (rect.top - 15) + 'px';
+        }
+    }
+
+    window.closeDeleteModal = function () {
+        const modal = document.getElementById('deleteStepModal');
+        if (modal) modal.style.display = 'none';
+        nodeToDelete = null;
+    }
+
+    window.removeEndNode = function () {
+        const endNode = document.getElementById('node-end');
+        if (endNode) {
+            endNode.remove();
+            saveStepsLocal();
+            updateLogic();
+        }
+    }
+
+
+    // Logic Updates
+    window.updateLogic = function () {
+        // Ensure Start node and SVG are persistent and at the top
+        const startNode = document.getElementById('node-start');
+        if (startNode && flowchartList.firstChild !== startNode) {
+            flowchartList.prepend(startNode);
+        }
+        if (!flowchartList.contains(svgCanvas)) {
+            // After startNode if it exists
+            if (startNode) startNode.after(svgCanvas);
+            else flowchartList.prepend(svgCanvas);
+        }
+
+        const nodes = flowchartList.querySelectorAll('.node');
+        nodes.forEach((node, idx) => {
+            const numSpan = node.querySelector('.num');
+            if (numSpan) numSpan.innerText = idx + 1;
+
+            // Re-attach change listeners if needed (simplification)
+            node.querySelectorAll('input, select').forEach(i => {
+                if (!i.onchange) i.onchange = saveStepsLocal;
+            });
+        });
+        updateTotalCountCanvas();
+        drawLines();
+    }
+
+    // --- 6. ADVANCED UI ACTIONS ---
+    let isHorizontal = false;
+
+    window.toggleFlowDirection = function () {
+        isHorizontal = !isHorizontal;
+        if (flowchartList) {
+            if (isHorizontal) {
+                flowchartList.classList.add('flow-horizontal');
+                if (window.showToast) window.showToast('Đã chuyển sang chế độ xem NGANG');
+            } else {
+                flowchartList.classList.remove('flow-horizontal');
+                if (window.showToast) window.showToast('Đã chuyển sang chế độ xem DỌC');
+            }
+            // Reset Zoom to avoid confusion when switching
+            currentZoom = 1;
+            applyZoom();
+
+            // Wait for transition to finish/start before drawing
+            setTimeout(drawLines, 300);
+        }
+    }
+
+    window.zoomWorkflow = function (delta) {
+        currentZoom = Math.min(Math.max(currentZoom + delta, 0.3), 2); // Limit 30% to 200%
+        applyZoom();
+    }
+
+    window.resetZoom = function () {
+        currentZoom = 1;
+        applyZoom();
+    }
+
+    function applyZoom() {
+        if (flowchartList) {
+            // Update origin based on mode
+            flowchartList.style.transformOrigin = isHorizontal ? 'center center' : 'top center';
+            flowchartList.style.transform = `scale(${currentZoom})`;
+            // Lines are redrawn on next scroll or manually
+            drawLines();
+        }
+    }
+
+    // Drawing Lines (SVG) - Optimized using internal coordinates
+    window.drawLines = function () {
+        if (!svgCanvas || !flowchartList) return;
+
+        const defs = svgCanvas.querySelector('defs');
+        svgCanvas.innerHTML = '';
+        if (defs) svgCanvas.appendChild(defs);
+
+        const nodes = Array.from(flowchartList.querySelectorAll('.node-special, .node'));
+
+        if (nodes.length < 2) return;
+
+        // Determine mode dynamically from class or state
+        const isHoriz = flowchartList.classList.contains('flow-horizontal');
+
+        for (let i = 0; i < nodes.length - 1; i++) {
+            const startNode = nodes[i];
+            const endNode = nodes[i + 1];
+
+            // Use offset properties relative to the container (flowchartList)
+            // Note: offsetLeft/Top are relative to offsetParent. 
+            // If flowchartList is position:relative, this works perfectly.
+
+            let x1, y1, x2, y2;
+
+            if (isHoriz) {
+                // Horizontal: Right Middle -> Left Middle
+                x1 = startNode.offsetLeft + startNode.offsetWidth;
+                y1 = startNode.offsetTop + (startNode.offsetHeight / 2);
+                x2 = endNode.offsetLeft;
+                y2 = endNode.offsetTop + (endNode.offsetHeight / 2);
+            } else {
+                // Vertical: Bottom Center -> Top Center
+                // Force X to be exactly center of container to prevent slight offsets/slants
+                const centerX = flowchartList.clientWidth / 2;
+                x1 = centerX;
+                y1 = startNode.offsetTop + startNode.offsetHeight;
+                x2 = centerX;
+                y2 = endNode.offsetTop;
+            }
+
+            // Safety check for display:none
+            if (startNode.offsetWidth === 0) continue;
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+            // Create path d attribute
+            let dString = `M ${x1} ${y1} `;
+
+            // Optional: Curve logic could go here, but straight line is fine usually
+            // For purely straight lines:
+            dString += `L ${x2} ${y2}`;
+
+            path.setAttribute("d", dString);
+            path.setAttribute("stroke", "#3498db");
+            path.setAttribute("stroke-width", "2");
+            path.setAttribute("fill", "none");
+            path.setAttribute("marker-end", "url(#arrow)");
+            svgCanvas.appendChild(path);
+        }
+
+        // Update SVG Size to cover scrollable area
+        if (nodes.length > 0) {
+            const lastNode = nodes[nodes.length - 1];
+            if (isHoriz) {
+                const totalWidth = lastNode.offsetLeft + lastNode.offsetWidth + 200;
+                // Height needs to cover the tallest node or just container height
+                const totalHeight = flowchartList.scrollHeight;
+                svgCanvas.style.width = totalWidth + 'px';
+                svgCanvas.style.height = totalHeight + 'px';
+            } else {
+                const totalHeight = lastNode.offsetTop + lastNode.offsetHeight + 100;
+                svgCanvas.style.height = totalHeight + 'px';
+                svgCanvas.style.width = '100%';
+            }
+        }
+    }
+
+    // START
+    // START
+    loadSteps();
+
+    // --- PROPERTIES PANEL LOGIC ---
+    let selectedNodeRef = null;
+
+    window.selectNode = function(node) {
+        // Deselect previous
+        if (selectedNodeRef) {
+            selectedNodeRef.classList.remove('selected');
+        }
+
+        selectedNodeRef = node;
+        node.classList.add('selected');
+
+        // Show Panel
+        const panel = document.getElementById('propertiesPanel');
+        if (panel) panel.classList.add('open');
+
+        // Load Data
+        let props = {};
+        try {
+            props = JSON.parse(node.dataset.properties || '{}');
+        } catch(e) { props = {}; }
+
+        // Populate Fields
+        document.getElementById('prop-speed').value = props.speed || 'NORMAL';
+        // Update display text for speed
+        const speedMap = { 'NORMAL': 'Bình thường', 'FAST': 'Nhanh', 'SLOW': 'Chậm' };
+        document.getElementById('prop-speed-display').value = speedMap[props.speed || 'NORMAL'];
+
+        document.getElementById('prop-door-time').value = props.doorTime || '';
+        document.getElementById('prop-battery-threshold').value = props.batteryThreshold || '';
+        document.getElementById('prop-retry-scan').value = props.retryScan || '';
+        document.getElementById('prop-fork-speed').value = props.forkSpeed || '';
+        document.getElementById('prop-allowed-error').value = props.allowedError || '';
+        document.getElementById('prop-max-payload').value = props.maxPayload || '';
+        
+        const audioLabel = document.getElementById('audio-filename');
+        if (audioLabel) {
+            audioLabel.textContent = props.audioFileName || 'Chọn file âm thanh...';
+        }
+    }
+
+    window.deselectNode = function() {
+        if (selectedNodeRef) {
+            selectedNodeRef.classList.remove('selected');
+            selectedNodeRef = null;
+        }
+        const panel = document.getElementById('propertiesPanel');
+        if (panel) panel.classList.remove('open');
+        
+        // Hide dropdown
+        const speedDrodown = document.getElementById('speedDropdown');
+        const list = document.getElementById('speedOptionsList');
+        if(speedDrodown) speedDrodown.classList.remove('active');
+        if(list) list.style.display = 'none';
+    }
+
+    // Attach listeners to Property Inputs
+    // Auto-save listeners removed
+
+
+    // File Input Special Handling
+    const fileInput = document.getElementById('prop-audio-file');
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                document.getElementById('audio-filename').textContent = file.name;
+                // updateSelectedNodeProperties removed
+            }
+        });
+    }
+
+    // Function updateSelectedNodeProperties removed to support manual save
+
+
+    // Click outside to deselect and close dropdowns
+    document.addEventListener('click', function(e) {
+        // Close Speed Dropdown if clicked outside
+        const speedDropdown = document.getElementById('speedDropdown');
+        const list = document.getElementById('speedOptionsList');
+        const isOption = e.target.closest('.dropdown-option'); 
+        const isList = e.target.closest('#speedOptionsList');
+        // Check if click is inside Dropdown (wrapper) OR inside the List (in body)
+        const isInsideDropdown = (speedDropdown && speedDropdown.contains(e.target));
+        const isInsideList = (list && list.contains(e.target));
+
+        if (!isInsideDropdown && !isInsideList && !isOption) {
+            if (speedDropdown) speedDropdown.classList.remove('active');
+            if (list) list.style.display = 'none';
+        }
+
+        // If click is NOT inside properties panel AND NOT on a node AND NOT on a speed option
+        const isPanel = e.target.closest('.properties-panel');
+        const isNode = e.target.closest('.node');
+        // REUSE isOption from above
+        
+        if (!isPanel && !isNode && !isOption && selectedNodeRef) {
+            deselectNode();
+        }
+    });
+
+    // Speed Dropdown Logic
+    window.toggleSpeedDropdown = function() {
+        const dropdown = document.getElementById('speedDropdown');
+        const list = document.getElementById('speedOptionsList');
+        const wrapper = dropdown.querySelector('.combo-wrapper');
+
+        if (!dropdown || !list || !wrapper) return;
+
+        // Move list to body if not already there to escape overflow clipping
+        if (list.parentElement !== document.body) {
+            document.body.appendChild(list);
+        }
+
+        // Toggle state
+        const isActive = dropdown.classList.contains('active');
+        
+        if (isActive) {
+            // Close
+            dropdown.classList.remove('active');
+            list.style.display = 'none';
+        } else {
+            // Open
+            dropdown.classList.add('active');
+            
+            // Calculate Position
+            const rect = wrapper.getBoundingClientRect();
+            list.style.top = (rect.bottom + 4) + 'px';
+            list.style.left = rect.left + 'px';
+            list.style.width = rect.width + 'px';
+            list.style.display = 'block';
+            list.style.zIndex = '9999'; // Ensure top z-index
+        }
+    }
+
+    // Close fixed dropdown on scroll
+    document.addEventListener('scroll', function() {
+        const dropdown = document.getElementById('speedDropdown');
+        const list = document.getElementById('speedOptionsList');
+        if (dropdown && dropdown.classList.contains('active')) {
+             dropdown.classList.remove('active');
+             if(list) list.style.display = 'none';
+        }
+    }, true); // Capture phase
+
+    window.selectSpeed = function(value, text) {
+        document.getElementById('prop-speed').value = value;
+        document.getElementById('prop-speed-display').value = text;
+        
+        // Close dropdown
+        const dropdown = document.getElementById('speedDropdown');
+        const list = document.getElementById('speedOptionsList');
+        if(dropdown) dropdown.classList.remove('active');
+        if(list) list.style.display = 'none';
+
+        // Auto save on selection (silent)
+        if (typeof saveProperties === 'function') {
+            saveProperties(true);
+        }
+    }
+
+    window.saveProperties = function(silent = false) {
+        if (!selectedNodeRef) return;
+
+        let props = {};
+        try {
+            props = JSON.parse(selectedNodeRef.dataset.properties || '{}');
+        } catch(e) { props = {} }
+
+        // Gather values
+        props.speed = document.getElementById('prop-speed').value;
+        props.doorTime = document.getElementById('prop-door-time').value;
+        props.batteryThreshold = document.getElementById('prop-battery-threshold').value;
+        props.retryScan = document.getElementById('prop-retry-scan').value;
+        props.forkSpeed = document.getElementById('prop-fork-speed').value;
+        props.allowedError = document.getElementById('prop-allowed-error').value;
+        props.maxPayload = document.getElementById('prop-max-payload').value;
+        props.audioFileName = document.getElementById('audio-filename').textContent; // Get from label text
+
+        // Save back to node
+        selectedNodeRef.dataset.properties = JSON.stringify(props);
+        
+        // Trigger global save
+        saveStepsLocal();
+
+        // Show Toast if NOT silent
+        if (!silent) {
+            if (typeof showToast === 'function') {
+                showToast('Thiết lập thuộc tính cho bước thành công', 'success');
+            } else {
+                alert('Thiết lập thuộc tính cho bước thành công');
+            }
+        }
+    }
+
+    window.closePropertiesPanel = function() {
+        deselectNode();
+    }
+
+}

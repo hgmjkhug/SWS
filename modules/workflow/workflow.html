@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý Quy trình</title>
+    <link rel="stylesheet" href="workflow.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div id="workflow-view" class="module-view">
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="filter-group">
+            <!-- <label class="filter-label">Tìm kiếm</label> -->
+            <div class="search-box-panel">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Tìm kiếm theo mã, tên quy trình..."
+              />
+            </div>
+          </div>
+
+          <!-- Order Type Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Loại lệnh</label>
+            <div class="custom-dropdown" id="typeDropdown">
+              <div class="dropdown-selected" id="typeSelected">
+                Tất cả loại lệnh
+              </div>
+              <div class="dropdown-list" id="typeList">
+                <div class="dropdown-item selected" data-value="ALL">
+                  Tất cả loại lệnh
+                </div>
+                <div class="dropdown-item" data-value="IMPORT">Nhập kho</div>
+                <div class="dropdown-item" data-value="EXPORT">Xuất kho</div>
+              </div>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="filter-group">
+            <label class="filter-label">Trạng thái</label>
+            <div class="custom-dropdown" id="statusDropdown">
+              <div class="dropdown-selected" id="statusSelected">
+                Tất cả trạng thái
+              </div>
+              <div class="dropdown-list" id="statusList">
+                <!-- Js will populate -->
+              </div>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar-right">
+          <button class="btn-primary" onclick="openModal('create')">
+            <i class="fas fa-plus"></i> Thêm mới
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th
+                class="sticky-col first-col"
+                style="width: 40px; min-width: 40px; text-align: center"
+              >
+                <input type="checkbox" id="selectAll" />
+              </th>
+              <th style="width: 50px; min-width: 50px; text-align: center">
+                STT
+              </th>
+              <th style="width: 150px; min-width: 150px">Mã quy trình</th>
+              <th style="width: 250px; min-width: 300px">Tên quy trình</th>
+              <th style="width: 140px; min-width: 140px; text-align: center">
+                Loại lệnh áp dụng
+              </th>
+              <!-- New Column -->
+
+              <th style="width: 100px; min-width: 100px; text-align: center">
+                Số bước
+              </th>
+              <th style="min-width: 300px; width: 300px">Mô tả</th>
+              <th style="width: 140px; min-width: 140px; text-align: center">
+                Trạng thái
+              </th>
+              <th style="width: 120px; min-width: 120px; text-align: center">
+                Thao tác
+              </th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- JS will populate -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div
+        class="pagination-container"
+        style="justify-content: space-between; display: none"
+      >
+        <div class="pagination-info">
+          Hiển thị <span id="currentCount">0</span> trong tổng
+          <span id="totalCount">0</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <div
+            class="pagination-controls"
+            id="paginationControls"
+            style="display: flex; gap: 4px"
+          ></div>
+          <div
+            class="pagination-goto"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              color: #64748b;
+              font-size: 13px;
+            "
+          >
+            <span>Đến</span>
+            <input
+              type="number"
+              id="pageInput"
+              min="1"
+              style="
+                width: 50px;
+                padding: 6px 8px;
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
+                text-align: center;
+              "
+            />
+            <span>Trang</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create/Edit Modal -->
+      <div class="modal-overlay" id="workflowModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 id="modalTitle">Thêm mới quy trình</h3>
+            <button class="close-btn" onclick="closeModal()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="workflowForm">
+              <input type="hidden" id="workflowId" />
+              <div class="form-group">
+                <label class="required">Mã quy trình</label>
+                <input
+                  type="text"
+                  id="wfCode"
+                  required
+                  placeholder="VD: WF-001"
+                />
+              </div>
+              <div class="form-group">
+                <label class="required">Tên quy trình</label>
+                <input
+                  type="text"
+                  id="wfName"
+                  required
+                  placeholder="Nhập tên quy trình"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="required">Loại lệnh áp dụng</label>
+                <div class="custom-dropdown" id="modalTypeDropdown">
+                  <div
+                    class="dropdown-selected"
+                    id="modalTypeSelected"
+                    style="
+                      padding: 10px;
+                      border: 1px solid #cbd5e1;
+                      border-radius: 6px;
+                    "
+                  >
+                    Chọn loại lệnh
+                  </div>
+                  <div class="dropdown-list" id="modalTypeList">
+                    <div class="dropdown-item" data-value="IMPORT">
+                      Nhập kho
+                    </div>
+                    <div class="dropdown-item" data-value="EXPORT">
+                      Xuất kho
+                    </div>
+                  </div>
+                  <i class="fas fa-chevron-down" style="right: 12px"></i>
+                  <input type="hidden" id="wfType" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Mô tả</label>
+                <textarea
+                  id="wfDescription"
+                  rows="3"
+                  placeholder="Mô tả chi tiết..."
+                ></textarea>
+              </div>
+              <div class="form-group toggle-group">
+                <label>Trạng thái hoạt động</label>
+                <label class="switch">
+                  <input type="checkbox" id="wfActive" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal()">Hủy</button>
+            <button class="btn-primary" onclick="saveWorkflow()">Lưu</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Confirm Disable Popover -->
+    <div class="modal-confirm" id="confirmModal">
+      <div class="confirm-content">
+        <div class="confirm-icon warning">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="confirm-title">Xác nhận ngưng sử dụng</h3>
+        <p class="confirm-message">
+          Bạn có chắc chắn muốn ngưng sử dụng quy trình
+          <strong id="confirmWorkflowName"></strong>? <br />
+          Hành động này sẽ tạm dừng mọi hoạt động liên quan.
+        </p>
+        <div class="confirm-actions">
+          <button class="btn btn-secondary" onclick="closeConfirmModal()">
+            Hủy bỏ
+          </button>
+          <button class="btn btn-warning" onclick="confirmDisable()">
+            Ngưng sử dụng
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="workflow.js"></script>
+  </body>
+</html>

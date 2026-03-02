@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý Loại vị trí</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="node-type.css" />
+  </head>
+
+  <body>
+    <div class="node-type-container">
+      <!-- Actions Toolbar -->
+      <div class="node-type-actions">
+        <div class="node-type-filters">
+          <div class="filter-group">
+            <input
+              type="text"
+              class="node-type-search-input"
+              id="node-type-search-input"
+              placeholder="Tìm theo tên loại vị trí"
+            />
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button
+            class="btn btn-danger"
+            id="node-type-bulk-delete-btn"
+            onclick="deleteSelectedNodeTypes()"
+            disabled
+          >
+            <i class="fas fa-trash"></i> Xóa (<span id="node-type-selected-count">0</span>)
+          </button>
+          <button class="btn btn-primary" onclick="openNodeTypeAddModal()">
+            <i class="fas fa-plus"></i> Thêm mới
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table class="node-type-table">
+          <thead>
+            <tr>
+              <th style="width: 50px; text-align: center;">
+                <input
+                  type="checkbox"
+                  id="node-type-select-all"
+                  onclick="toggleSelectAllNodeTypes()"
+                />
+              </th>
+              <th style="width: 60px; text-align: center;">STT</th>
+              <th>Tên loại vị trí</th>
+              <th>Hình ảnh</th>
+              <th style="width: 120px; text-align: center;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="node-type-table-body">
+            <!-- Rows rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-bar">
+        <div class="pagination-info" id="node-type-pagination-info">
+          Hiển thị 0-0 của 0 bản ghi
+        </div>
+        <div class="pagination-controls">
+          <button class="page-btn" id="node-type-prev-btn" onclick="prevNodeTypePage()">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <div class="page-numbers" id="node-type-page-numbers">
+            <!-- Page numbers rendered by JS -->
+          </div>
+          <button class="page-btn" id="node-type-next-btn" onclick="nextNodeTypePage()">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal-overlay" id="node-type-modal">
+      <div class="modal-box">
+        <button class="close-btn" onclick="closeNodeTypeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-header">
+          <h3 class="modal-title" id="node-type-modal-title">Thêm mới Loại vị trí</h3>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="node-type-id" />
+          <div class="form-group">
+            <label>Tên loại vị trí <span class="required">*</span></label>
+            <input
+              type="text"
+              id="node-type-name"
+              placeholder="Nhập tên loại vị trí"
+            />
+          </div>
+          <div class="form-group">
+            <label>Hình ảnh (URL / Đường dẫn)</label>
+            <input
+              type="text"
+              id="node-type-image"
+              placeholder="Nhập đường dẫn hình ảnh"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeNodeTypeModal()">Hủy</button>
+          <button class="btn btn-primary" onclick="saveNodeType()">
+            Lưu lại
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Popover (Standardized) -->
+    <div id="node-type-delete-confirm-modal" class="modal-confirm">
+      <div class="confirm-content">
+        <div class="confirm-icon-box">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="confirm-title">Xác nhận xóa</h3>
+        <p class="confirm-message" id="node-type-confirm-delete-message">
+          Bạn có chắc chắn muốn xóa loại vị trí này không?<br />Hành động này
+          không thể hoàn tác.
+        </p>
+        <div class="confirm-actions">
+          <button onclick="closeNodeTypeDeleteConfirm()" class="btn btn-secondary">
+            Hủy
+          </button>
+          <button onclick="confirmDeleteNodeType()" class="btn btn-danger">
+            Xóa
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="node-type.js"></script>
+  </body>
+</html>

@@ -1,0 +1,957 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      :root {
+        --primary-color: #2563eb;
+        --danger-color: #ef4444;
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --text-color: #1f2937;
+        --border-radius: 12px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 540px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      #blocks-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        transition: all 0.3s ease;
+      }
+
+      .block-card {
+        background-color: var(--card-bg);
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        opacity: 1;
+        transform: scale(1);
+        max-height: 500px;
+        margin-bottom: 0;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .block-card.deleting {
+        opacity: 0;
+        transform: scale(0.9);
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin-top: -20px;
+      }
+
+      .block-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        gap: 12px;
+      }
+
+      .title-area {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-grow: 0;
+      }
+
+      .block-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--text-color);
+        cursor: pointer;
+      }
+
+      .btn-icon {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        color: #9ca3af;
+        transition: all 0.2s;
+      }
+      .btn-icon:hover:not(:disabled) {
+        color: var(--primary-color);
+      }
+      .btn-icon.delete:hover:not(:disabled) {
+        color: var(--danger-color);
+      }
+      .btn-icon:disabled {
+        cursor: not-allowed;
+        opacity: 0.4;
+        color: #d1d5db;
+      }
+
+      .title-input {
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 8px 12px;
+        border: 2px solid var(--primary-color);
+        border-radius: 6px;
+        width: 180px;
+        display: none;
+      }
+      .editing .block-title,
+      .editing .btn-edit {
+        display: none;
+      }
+      .editing .title-input {
+        display: block;
+      }
+
+      .input-group {
+        margin-bottom: 18px;
+      }
+      .input-group:last-child {
+        margin-bottom: 0;
+      }
+      .input-label {
+        display: block;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-color);
+      }
+      .input-field {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        color: var(--text-color);
+      }
+      .input-field::placeholder {
+        color: #9ca3af;
+      }
+      .input-field:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background-color: #f0f4ff;
+      }
+
+      .btn-add {
+        background-color: transparent;
+        color: var(--primary-color);
+        border: 2px dashed var(--primary-color);
+        padding: 16px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.2s;
+        width: 100%;
+      }
+      .btn-add:hover {
+        background-color: #f0f4ff;
+      }
+      .btn-add:active {
+        transform: scale(0.98);
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .modal-overlay.show {
+        display: flex !important;
+        opacity: 1;
+      }
+
+      .modal-box {
+        background-color: white;
+        padding: 32px;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 600px;
+        text-align: left;
+        box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+        transform: scale(0.9);
+        transition: transform 0.2s;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+      .modal-overlay.show .modal-box {
+        transform: scale(1);
+      }
+      .modal-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 0 0 28px 0;
+      }
+      .modal-desc {
+        color: #6b7280;
+        margin-bottom: 24px;
+        font-size: 0.95rem;
+      }
+      .modal-actions {
+        display: flex;
+        gap: 12px;
+      }
+      .btn-modal {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+      }
+      .btn-cancel {
+        background-color: #e5e7eb;
+        color: #374151;
+      }
+      .btn-confirm {
+        background-color: var(--danger-color);
+        color: white;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .block-card.new-item {
+        animation: slideIn 0.3s ease-out forwards;
+      }
+
+      @keyframes breathing {
+        0%,
+        100% {
+          box-shadow:
+            0 0 0 0 rgba(239, 68, 68, 0.7),
+            inset 0 0 0 2px var(--danger-color);
+        }
+        50% {
+          box-shadow:
+            0 0 0 8px rgba(239, 68, 68, 0),
+            inset 0 0 0 2px var(--danger-color);
+        }
+      }
+
+      .buffer-cell-pulse {
+        animation: breathing 1.5s infinite;
+      }
+
+      .layout-block-container {
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 20px;
+        background-color: #fafafa;
+      }
+
+      .layout-block-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #e5e7eb;
+        color: #1f2937;
+      }
+
+      .modal-footer .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        flex: 1;
+      }
+      .modal-footer .btn-secondary {
+        background-color: #f1f5f9;
+        color: #0f172a;
+        border: 1px solid #e6eef6;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        flex: 1;
+      }
+      .modal-footer {
+        display: flex;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .info-text {
+        text-align: center;
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin: 16px 0 0 0;
+      }
+
+      @keyframes slideInRight {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideOutRight {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+      }
+
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 2000;
+        pointer-events: none;
+      }
+      .toast {
+        background-color: #22c55e;
+        color: white;
+        padding: 16px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        min-width: 300px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+        animation: slideInRight 0.3s ease-out forwards;
+        pointer-events: auto;
+      }
+      .toast.hide {
+        animation: slideOutRight 0.3s ease-in forwards;
+      }
+      .toast.success {
+        background-color: #22c55e;
+      }
+      .toast.error {
+        background-color: #ef4444;
+      }
+      .toast.info {
+        background-color: #3b82f6;
+      }
+      .toast-icon {
+        font-size: 18px;
+      }
+
+      .pallet-hover-card {
+        position: fixed;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        min-width: 280px;
+        font-size: 13px;
+        max-width: 350px;
+        pointer-events: none;
+      }
+
+      .pallet-card-row {
+        display: flex;
+        margin-bottom: 12px;
+        gap: 8px;
+      }
+
+      .pallet-card-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .pallet-card-label {
+        font-weight: 600;
+        color: #374151;
+        min-width: 120px;
+      }
+
+      .pallet-card-value {
+        color: #6b7280;
+        flex: 1;
+        word-break: break-word;
+      }
+
+      .pallet-card-header {
+        font-weight: 700;
+        font-size: 14px;
+        color: #1f2937;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e5e7eb;
+      }
+
+      .empty-state-message {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+        font-size: 16px;
+        color: #6b7280;
+        text-align: center;
+        padding: 40px;
+        background: #f9fafb;
+        border-radius: 8px;
+        border: 2px dashed #d1d5db;
+      }
+
+      /* Refined Step Indicator */
+      .step-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        padding: 0;
+        margin: 0 0 24px 0;
+        width: 100%;
+        position: relative;
+      }
+
+      .step-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        position: relative;
+        z-index: 2;
+        background: white;
+        padding: 0 10px;
+      }
+
+      .step-number {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 12px;
+        color: #64748b;
+        transition: all 0.3s ease;
+      }
+
+      .step-item.active .step-number {
+        border-color: #3b82f6;
+        background-color: #3b82f6;
+        color: white;
+      }
+
+      .step-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #64748b;
+        position: static;
+        transform: none;
+        margin: 0;
+      }
+
+      .step-item.active .step-label {
+        color: #1e293b;
+      }
+
+      .step-connector {
+        flex: 1;
+        height: 2px;
+        background: #e2e8f0;
+        margin: 0 -10px; /* Overlap slightly */
+        z-index: 1;
+        max-width: 100px;
+      }
+
+      /* Reduce Modal Font Sizes */
+      .modal-title {
+        font-size: 1.25rem;
+        margin-bottom: 20px;
+      }
+
+      .modal-box {
+        padding: 24px;
+      }
+
+      .input-label {
+        font-size: 0.9rem;
+      }
+
+      .input-field {
+        padding: 8px 12px;
+        font-size: 0.95rem;
+      }
+      /* Conveyor & Pallet Animation */
+      @keyframes moveBelt {
+        from {
+          background-position: 0 0;
+        }
+        to {
+          background-position: -45px 0;
+        }
+      }
+
+      .conveyor-belt-animated {
+        width: 100%;
+        height: 60px;
+        background: repeating-linear-gradient(
+          90deg,
+          #333,
+          #333 40px,
+          #444 40px,
+          #444 45px
+        );
+        animation: moveBelt 1s linear infinite;
+        border-radius: 4px;
+        position: relative;
+        overflow: hidden;
+        border-top: 4px solid #555;
+        border-bottom: 4px solid #555;
+      }
+
+      .pallet-item-anim {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 35px;
+        background-color: #d2a679;
+        border: 2px solid #8d6e63;
+        border-radius: 4px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 8px;
+        font-weight: bold;
+        color: #5d4037;
+        z-index: 5;
+      }
+
+      /* Dynamic Lifter Animation */
+      .lift-shaft-dynamic {
+        width: 70px;
+        background: linear-gradient(
+          180deg,
+          #1e293b 0%,
+          #334155 50%,
+          #1e293b 100%
+        );
+        margin: 0 15px;
+        position: relative;
+        border-radius: 6px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-self: flex-end; /* Align to bottom with blocks */
+        box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+      }
+
+      /* Vertical rails on sides */
+      .lift-shaft-dynamic::before,
+      .lift-shaft-dynamic::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(
+          180deg,
+          #64748b 0%,
+          #94a3b8 50%,
+          #64748b 100%
+        );
+        border-radius: 2px;
+      }
+      .lift-shaft-dynamic::before {
+        left: 8px;
+      }
+      .lift-shaft-dynamic::after {
+        right: 8px;
+      }
+
+      .lift-cabin {
+        width: 50px;
+        height: 70px;
+        background: linear-gradient(
+          135deg,
+          #fbbf24 0%,
+          #f59e0b 50%,
+          #d97706 100%
+        );
+        border: 3px solid #92400e;
+        border-radius: 6px;
+        position: absolute;
+        bottom: 10px;
+        box-shadow:
+          0 0 20px rgba(251, 191, 36, 0.6),
+          0 4px 8px rgba(0, 0, 0, 0.3),
+          inset 0 2px 4px rgba(255, 255, 255, 0.3);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #78350f;
+        font-weight: 800;
+        font-size: 11px;
+        animation: liftMoveSmooth 4s ease-in-out infinite;
+        z-index: 10;
+      }
+
+      .lift-cabin span {
+        font-size: 8px;
+        opacity: 0.7;
+      }
+
+      /* Cabin window */
+      .lift-cabin::before {
+        content: "";
+        width: 30px;
+        height: 20px;
+        background: linear-gradient(180deg, #7dd3fc 0%, #38bdf8 100%);
+        border: 2px solid #0284c7;
+        border-radius: 3px;
+        position: absolute;
+        top: 8px;
+        box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.5);
+      }
+
+      @keyframes liftMoveSmooth {
+        0%,
+        100% {
+          bottom: 10px;
+          transform: scale(1);
+        }
+        10% {
+          bottom: 10px;
+          transform: scale(1.02);
+        }
+        45% {
+          bottom: calc(100% - 85px);
+          transform: scale(1);
+        }
+        55% {
+          bottom: calc(100% - 85px);
+          transform: scale(1.02);
+        }
+        90% {
+          bottom: 10px;
+          transform: scale(1);
+        }
+      }
+
+      .status-tag {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        color: white;
+        margin-left: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main-view"></div>
+
+    <div id="custom-tooltip" class="tooltip-card">
+      <div class="tt-header" id="tt-id">---</div>
+      <div class="tt-row">
+        <span>Tọa độ:</span> <span class="tt-val" id="tt-coord">...</span>
+      </div>
+      <div class="tt-row">
+        <span>Trạng thái:</span> <span id="tt-status" class="badge">---</span>
+      </div>
+      <div class="tt-row">
+        <span>SKU:</span> <span class="tt-val" id="tt-sku">---</span>
+      </div>
+      <div
+        style="
+          margin-top: 8px;
+          font-style: italic;
+          color: #94a3b8;
+          font-size: 10px;
+        "
+      >
+        *Click để xem chi tiết
+      </div>
+    </div>
+
+    <!-- Flat layout edit modal -->
+    <div
+      id="modal-flat-edit"
+      class="modal-overlay"
+      onclick="closeFlatEditModal()"
+    >
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">Thiết lập Layout kho</div>
+        <div class="step-indicator">
+          <div class="step-item active">
+            <div class="step-number">1</div>
+            <div class="step-label">Thiết lập Block</div>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-label">Chọn ô Buffer</div>
+          </div>
+        </div>
+        <div class="container">
+          <div id="blocks-wrapper"></div>
+          <button id="flat-add-block" class="btn-add" onclick="addBlock()">
+            <span>+</span> Thêm Block
+          </button>
+          <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeFlatEditModal()">
+              Hủy
+            </button>
+            <button class="btn-primary" onclick="startFlatBufferSelection()">
+              Tạo & Chọn ô Buffer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete confirmation modal -->
+    <div id="delete-modal" class="modal-overlay">
+      <div class="modal-box">
+        <h3 class="modal-title">Xóa Block?</h3>
+        <p class="modal-desc">Hành động này không thể hoàn tác.</p>
+        <div class="modal-actions">
+          <button class="btn-modal btn-cancel" onclick="closeModal()">
+            Hủy
+          </button>
+          <button class="btn-modal btn-confirm" onclick="confirmDelete()">
+            Xóa
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buffer selection modal -->
+    <div
+      id="modal-flat-buffer"
+      class="modal-overlay"
+      onclick="closeFlatBufferModal()"
+    >
+      <div
+        class="modal-box"
+        style="max-width: 700px; max-height: 90vh"
+        onclick="event.stopPropagation()"
+      >
+        <div class="modal-header">
+          <div class="modal-title">Chọn ô Buffer cho Layout Flat</div>
+        </div>
+        <div class="step-indicator">
+          <div class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-label">Thiết lập Block</div>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step-item active">
+            <div class="step-number">2</div>
+            <div class="step-label">Chọn ô Buffer</div>
+          </div>
+        </div>
+        <div class="modal-body" style="display: flex; flex-direction: column">
+          <div style="margin-bottom: 10px; color: #64748b">
+            Nhấp vào layout dưới đây và chọn tối thiểu 1 ô để chọn làm ô Buffer.
+          </div>
+          <div id="flat-buffer-preview" class="preview-box"></div>
+          <div
+            id="flat-buffer-selected"
+            style="margin-top: 10px; color: #334155"
+          >
+            Ô đã chọn: <span id="flat-buffer-coord">(chưa chọn)</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="backToEditModal()">
+            Quay lại
+          </button>
+          <button
+            id="flat-buffer-save"
+            class="btn-primary"
+            onclick="saveFlatLayout()"
+          >
+            Lưu layout
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stacker Crane edit modal -->
+    <div
+      id="modal-crane-edit"
+      class="modal-overlay"
+      onclick="closeCraneEditModal()"
+    >
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">Thiết lập Layout kho</div>
+        <div class="step-indicator">
+          <div class="step-item active">
+            <div class="step-number">1</div>
+            <div class="step-label">Thiết lập Block</div>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-label">Chọn ô Buffer</div>
+          </div>
+        </div>
+        <div class="container">
+          <div id="crane-inputs-wrapper" style="margin-bottom: 20px">
+            <div class="input-group">
+              <label class="input-label">Số dòng (Rows)</label>
+              <input
+                type="number"
+                id="crane-rows"
+                class="input-field"
+                min="1"
+                value="2"
+                onchange="previewCraneModal()"
+              />
+            </div>
+            <div class="input-group">
+              <label class="input-label">Số cột (Columns)</label>
+              <input
+                type="number"
+                id="crane-cols"
+                class="input-field"
+                min="1"
+                value="10"
+                onchange="previewCraneModal()"
+              />
+            </div>
+            <div class="input-group">
+              <label class="input-label"
+                >Tổng số Block (Chia đều 2 bên conveyer)</label
+              >
+              <input
+                type="number"
+                id="crane-blocks"
+                class="input-field"
+                min="2"
+                step="2"
+                value="2"
+                onchange="previewCraneModal()"
+              />
+            </div>
+          </div>
+          <div
+            id="crane-preview-modal"
+            class="preview-box"
+            style="
+              display: flex;
+              justify-content: center;
+              padding: 20px;
+              background: #f0fdf4;
+              border: 1px dashed #4ade80;
+            "
+          >
+            <!-- Preview will be rendered here -->
+          </div>
+          <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeCraneEditModal()">
+              Hủy
+            </button>
+            <button class="btn-primary" onclick="startCraneBufferSelection()">
+              Tạo & Chọn ô Buffer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stacker Crane buffer modal -->
+    <div
+      id="modal-crane-buffer"
+      class="modal-overlay"
+      onclick="closeCraneBufferModal()"
+    >
+      <div
+        class="modal-box"
+        style="max-width: 700px; max-height: 90vh"
+        onclick="event.stopPropagation()"
+      >
+        <div class="modal-header">
+          <div class="modal-title">Chọn ô Buffer cho Stacker Crane</div>
+        </div>
+        <div class="step-indicator">
+          <div class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-label">Thiết lập Block</div>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step-item active">
+            <div class="step-number">2</div>
+            <div class="step-label">Chọn ô Buffer</div>
+          </div>
+        </div>
+        <div class="modal-body" style="display: flex; flex-direction: column">
+          <div style="margin-bottom: 10px; color: #64748b">
+            Nhấp vào layout dưới đây để chọn ô Buffer.
+          </div>
+          <div id="crane-buffer-preview" class="preview-box"></div>
+          <div
+            id="crane-buffer-selected"
+            style="margin-top: 10px; color: #334155"
+          >
+            Ô đã chọn: <span id="crane-buffer-coord">(chưa chọn)</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="backToCraneEditModal()">
+            Quay lại
+          </button>
+          <button
+            id="crane-buffer-save"
+            class="btn-primary"
+            onclick="saveCraneLayout()"
+          >
+            Lưu layout
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

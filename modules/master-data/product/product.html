@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý vật tư - Smart WMS</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <link rel="stylesheet" href="product.css" />
+
+    <div id="main-view">
+      <div class="product-container">
+        <div class="product-actions">
+          <div class="product-filters">
+            <div class="filter-group">
+              <input
+                type="text"
+                id="product-search"
+                class="product-search-input"
+                placeholder="Tìm theo mã hoặc tên vật tư..."
+                oninput="filterProducts()"
+              />
+            </div>
+            <div class="filter-group">
+              <label class="filter-title">Nhóm vật tư</label>
+              <div
+                class="custom-dropdown"
+                id="group-filter-dropdown"
+                style="min-width: 180px"
+              >
+                <div
+                  class="custom-dropdown-toggle"
+                  onclick="toggleFilterDropdown('group')"
+                >
+                  <span id="group-filter-display">Tất cả nhóm</span>
+                  <i
+                    class="fas fa-chevron-down"
+                    style="font-size: 12px; color: #64748b"
+                  ></i>
+                </div>
+                <div class="custom-dropdown-menu" id="group-filter-menu">
+                  <!-- Populated by JS -->
+                </div>
+                <!-- Hidden input maintains ID for existing JS logic -->
+                <input type="hidden" id="group-filter" value="" />
+              </div>
+            </div>
+            <div class="filter-group">
+              <label class="filter-title">Quy cách</label>
+              <div
+                class="custom-dropdown"
+                id="method-filter-dropdown"
+                style="min-width: 160px"
+              >
+                <div
+                  class="custom-dropdown-toggle"
+                  onclick="toggleFilterDropdown('method')"
+                >
+                  <span id="method-filter-display">Tất cả</span>
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="custom-dropdown-menu" id="method-filter-menu">
+                  <div
+                    class="custom-dropdown-item active"
+                    onclick="selectFilterOption('method', '', 'Tất cả')"
+                  >
+                    Tất cả
+                  </div>
+                  <div
+                    class="custom-dropdown-item"
+                    onclick="selectFilterOption('method', 'FIFO', 'FIFO')"
+                  >
+                    FIFO
+                  </div>
+                  <div
+                    class="custom-dropdown-item"
+                    onclick="selectFilterOption('method', 'LIFO', 'LIFO')"
+                  >
+                    LIFO
+                  </div>
+                  <div
+                    class="custom-dropdown-item"
+                    onclick="selectFilterOption('method', 'FEFO', 'FEFO')"
+                  >
+                    FEFO
+                  </div>
+                </div>
+                <input type="hidden" id="method-filter" value="" />
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-title">Trạng thái</label>
+              <div
+                class="custom-dropdown"
+                id="status-filter-dropdown"
+                style="min-width: 160px"
+              >
+                <div
+                  class="custom-dropdown-toggle"
+                  onclick="toggleFilterDropdown('status')"
+                >
+                  <span id="status-filter-display">Tất cả trạng thái</span>
+                  <i
+                    class="fas fa-chevron-down"
+                    style="font-size: 12px; color: #64748b"
+                  ></i>
+                </div>
+                <div class="custom-dropdown-menu" id="status-filter-menu">
+                  <div
+                    class="custom-dropdown-item selected"
+                    onclick="
+                      selectFilterOption('status', '', 'Tất cả trạng thái')
+                    "
+                  >
+                    Tất cả trạng thái
+                  </div>
+                  <div
+                    class="custom-dropdown-item"
+                    onclick="selectFilterOption('status', '1', 'Hoạt động')"
+                  >
+                    Hoạt động
+                  </div>
+                  <div
+                    class="custom-dropdown-item"
+                    onclick="
+                      selectFilterOption('status', '0', 'Ngừng hoạt động')
+                    "
+                  >
+                    Ngừng hoạt động
+                  </div>
+                </div>
+                <input type="hidden" id="status-filter" value="" />
+              </div>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <button
+              class="btn btn-danger"
+              id="bulk-delete-btn"
+              onclick="bulkDelete()"
+              disabled
+            >
+              <i class="fas fa-trash"></i> Xóa (<span id="selected-count"
+                >0</span
+              >)
+            </button>
+            <button class="btn btn-success" onclick="openImportModal()">
+              <i class="fas fa-file-excel"></i> Import
+            </button>
+            <button class="btn btn-primary" onclick="openProductModal()">
+              <i class="fas fa-plus"></i> Thêm mới
+            </button>
+          </div>
+        </div><!-- end product-actions -->
+
+        <div id="warehouse-info-banner" style="padding: 10px 15px; background-color: #e0f2fe; color: #0369a1; border-radius: 6px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-info-circle"></i>
+          <span>Bạn đang xem các thông tin của danh mục chung thuộc kho <strong><span id="banner-warehouse-name"></span></strong></span>
+        </div>
+
+        <div class="table-wrapper">
+          <div class="table-scroll-head">
+            <table class="product-table product-table-head">
+              <thead>
+                <tr>
+                  <th style="width: 40px">
+                    <input
+                      type="checkbox"
+                      id="check-all"
+                      onchange="toggleAll(this)"
+                    />
+                  </th>
+                  <th style="width: 50px">STT</th>
+                  <th>Tên vật tư</th>
+                  <th>Nhóm vật tư</th>
+                  <th>Đơn vị tính</th>
+                  <th style="text-align: center">Khối lượng</th>
+                  <th>Quy cách</th>
+                  <th>Mô tả</th>
+                  <th>Trạng thái</th>
+                  <th style="width: 140px">Thao tác</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+          <div class="table-scroll-body" id="table-scroll-body">
+            <table class="product-table product-table-body">
+              <tbody id="product-table-body">
+                <!-- Data rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="pagination-bar">
+          <span id="pagination-info">Hiển thị 0 trên tổng 0</span>
+          <div class="pagination-controls">
+            <button
+              class="page-btn"
+              id="prev-page"
+              onclick="prevPage()"
+              disabled
+            >
+              &lt;
+            </button>
+            <div id="page-numbers" class="page-numbers"></div>
+            <button class="page-btn" id="next-page" onclick="nextPage()">
+              &gt;
+            </button>
+            <span class="page-goto"
+              >Đến
+              <input
+                type="number"
+                id="goto-page"
+                min="1"
+                onchange="gotoPage(this.value)"
+              />
+              trang</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Thêm/Sửa vật tư -->
+    <div id="product-modal" class="modal-overlay">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modal-title">Thêm mới vật tư</h3>
+          <button class="close-btn" onclick="closeProductModal()">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="product-form">
+            <input type="hidden" id="prod-id" />
+            <div class="form-row">
+              <div class="form-group">
+                <label>Tên vật tư <span class="required">*</span></label>
+                <input
+                  type="text"
+                  id="prod-name"
+                  required
+                  placeholder="Nhập tên vật tư"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group half">
+                <label>Nhóm vật tư</label>
+                <div class="custom-dropdown" id="group-dropdown">
+                  <div
+                    class="custom-dropdown-toggle"
+                    onclick="toggleGroupDropdown()"
+                  >
+                    <span id="selected-group-span">-- Chọn nhóm --</span>
+                    <i
+                      class="fas fa-chevron-down"
+                      style="font-size: 12px; color: #64748b"
+                    ></i>
+                  </div>
+                  <div class="custom-dropdown-menu" id="group-dropdown-menu">
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectGroup('bulong', 'Bulong & Ốc vít')"
+                    >
+                      Bulong & Ốc vít
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectGroup('dien', 'Thiết bị điện')"
+                    >
+                      Thiết bị điện
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectGroup('ong', 'Ống & Phụ kiện')"
+                    >
+                      Ống & Phụ kiện
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectGroup('khac', 'Khác')"
+                    >
+                      Khác
+                    </div>
+                  </div>
+                  <input type="hidden" id="prod-group" value="" />
+                </div>
+              </div>
+              <div class="form-group half">
+                <label>Đơn vị tính</label>
+                <div class="custom-dropdown" id="unit-dropdown">
+                  <div
+                    class="custom-dropdown-toggle"
+                    onclick="toggleUnitDropdown()"
+                  >
+                    <span id="selected-unit-span">-- Chọn ĐVT --</span>
+                    <i
+                      class="fas fa-chevron-down"
+                      style="font-size: 12px; color: #64748b"
+                    ></i>
+                  </div>
+                  <div class="custom-dropdown-menu" id="unit-dropdown-menu">
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Cái')"
+                    >
+                      Cái
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Hộp')"
+                    >
+                      Hộp
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Thùng')"
+                    >
+                      Thùng
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Cuộn')"
+                    >
+                      Cuộn
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Kg')"
+                    >
+                      Kg
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Mét')"
+                    >
+                      Mét
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Lít')"
+                    >
+                      Lít
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Bộ')"
+                    >
+                      Bộ
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Viên')"
+                    >
+                      Viên
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Phuy')"
+                    >
+                      Phuy
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Chai')"
+                    >
+                      Chai
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Lon')"
+                    >
+                      Lon
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Bao')"
+                    >
+                      Bao
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Tấm')"
+                    >
+                      Tấm
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Đôi')"
+                    >
+                      Đôi
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectUnit('Gói')"
+                    >
+                      Gói
+                    </div>
+                  </div>
+                  <input type="hidden" id="prod-unit" value="" />
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group half">
+                <label>Quy cách <span class="required">*</span></label>
+                <div class="custom-dropdown" id="export-method-dropdown">
+                  <div
+                    class="custom-dropdown-toggle"
+                    onclick="toggleExportMethodDropdown()"
+                  >
+                    <span id="selected-export-method-span"
+                      >-- Chọn phương thức --</span
+                    >
+                    <i
+                      class="fas fa-chevron-down"
+                      style="font-size: 12px; color: #64748b"
+                    ></i>
+                  </div>
+                  <div
+                    class="custom-dropdown-menu"
+                    id="export-method-dropdown-menu"
+                  >
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectExportMethod('FIFO', 'FIFO')"
+                      title="First In First Out - Nhập trước xuất trước"
+                    >
+                      FIFO
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectExportMethod('FEFO', 'FEFO')"
+                      title="First Expired First Out - Hết hạn trước xuất trước"
+                    >
+                      FEFO
+                    </div>
+                    <div
+                      class="custom-dropdown-item"
+                      onclick="selectExportMethod('LIFO', 'LIFO')"
+                      title="Last In First Out - Nhập sau xuất trước"
+                    >
+                      LIFO
+                    </div>
+                  </div>
+                  <input type="hidden" id="prod-export-method" value="" />
+                </div>
+              </div>
+              <div class="form-group half">
+                <label>Khối lượng (kg)</label>
+                <input
+                  type="number"
+                  id="prod-weight"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Mô tả</label>
+              <textarea
+                id="prod-description"
+                rows="2"
+                placeholder="Mô tả chi tiết vật tư..."
+              ></textarea>
+            </div>
+            <div class="form-group" style="margin-top: 16px">
+              <div class="toggle-label">
+                <span style="font-weight: 500; font-size: 14px; color: #374151"
+                  >Sử dụng</span
+                >
+                <label class="switch">
+                  <input type="checkbox" id="prod-status" checked />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeProductModal()">
+            Hủy
+          </button>
+          <button class="btn btn-primary" onclick="saveProduct()">Lưu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Import Excel -->
+    <div id="import-modal" class="modal-overlay">
+      <div class="modal-box import-modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title">Import vật tư từ Excel</h3>
+          <button class="close-btn" onclick="closeImportModal()">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="import-step">
+            <div class="step-label">Bước 1: Tải file mẫu</div>
+            <p class="step-desc">
+              Tải file Excel mẫu, điền thông tin theo định dạng, sau đó import
+              lại.
+            </p>
+            <button class="btn btn-secondary" onclick="downloadSampleFile()">
+              <i class="fas fa-download"></i> Tải file mẫu
+            </button>
+          </div>
+          <div class="import-step">
+            <div class="step-label">Bước 2: Chọn file để import</div>
+            <div
+              class="file-upload-zone"
+              id="upload-zone"
+              onclick="document.getElementById('import-file').click()"
+            >
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span>Nhấp để chọn file hoặc kéo thả vào đây</span>
+              <input
+                type="file"
+                id="import-file"
+                hidden
+                accept=".xlsx,.xls"
+                onchange="handleFileSelect(this)"
+              />
+            </div>
+            <div id="selected-file-name" class="selected-file"></div>
+          </div>
+          <div id="import-preview" class="import-preview" style="display: none">
+            <div class="step-label">Xem trước dữ liệu</div>
+            <div
+              id="import-error"
+              class="import-error"
+              style="display: none"
+            ></div>
+            <div class="preview-table-wrapper">
+              <table class="preview-table" id="preview-table">
+                <thead id="preview-thead"></thead>
+                <tbody id="preview-tbody"></tbody>
+              </table>
+            </div>
+            <div id="import-summary" class="import-summary"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeImportModal()">
+            Hủy
+          </button>
+          <button
+            class="btn btn-primary"
+            id="confirm-import-btn"
+            onclick="confirmImport()"
+            disabled
+          >
+            <i class="fas fa-check"></i> Xác nhận Import
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Popover (Standardized) -->
+    <div id="delete-confirm-modal" class="modal-confirm">
+      <div class="confirm-content">
+        <div class="confirm-icon-box">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="confirm-title">Xác nhận xóa</h3>
+        <p class="confirm-message" id="confirm-delete-message">
+          Bạn có chắc chắn muốn xóa vật tư này không?<br />Hành động này không
+          thể hoàn tác.
+        </p>
+        <div class="confirm-actions">
+          <button onclick="closeDeleteModal()" class="btn btn-secondary">
+            Hủy
+          </button>
+          <button onclick="confirmDelete()" class="btn btn-danger">Xóa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Disable Popover -->
+    <div class="modal-confirm" id="confirmModal">
+      <div class="confirm-content">
+        <div class="confirm-icon warning">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="confirm-title">Xác nhận ngưng sử dụng</h3>
+        <p class="confirm-message">
+          Bạn có chắc chắn muốn ngưng sử dụng vật tư
+          <strong id="confirmProductName"></strong>? <br />
+          Hành động này sẽ làm vật tư không thể sử dụng trong các phiếu
+          nhập/xuất.
+        </p>
+        <div class="confirm-actions">
+          <button class="btn btn-secondary" onclick="closeConfirmModal()">
+            Hủy bỏ
+          </button>
+          <button class="btn btn-warning" onclick="confirmDisable()">
+            Xác nhận
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="product.js"></script>
+    <script>
+      // Sync horizontal scroll: tbody scrolls, thead follows
+      document.addEventListener('DOMContentLoaded', function () {
+        const scrollBody = document.getElementById('table-scroll-body');
+        const scrollHead = document.querySelector('.table-scroll-head');
+        if (scrollBody && scrollHead) {
+          scrollBody.addEventListener('scroll', function () {
+            scrollHead.scrollLeft = scrollBody.scrollLeft;
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

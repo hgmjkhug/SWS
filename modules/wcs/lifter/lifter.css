@@ -1,0 +1,140 @@
+:root {
+    --tower-bg: #0f172a;
+    --lifter-color: #f59e0b;
+    --floor-height: 48px;
+    --panel-bg: #1e293b;
+    --bg-dark: #020617;
+    --conveyor-in: #0ea5e9;
+    --conveyor-out: #f43f5e;
+}
+
+body {
+    font-family: "Inter", "Segoe UI", sans-serif;
+    background: var(--bg-dark);
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+    height: 95vh;
+    color: white;
+    margin: 0;
+}
+
+/* TOWER & SHAFT */
+.warehouse-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.tower-container {
+    position: relative;
+    width: 420px;
+    height: 520px;
+    background: var(--tower-bg);
+    border: 2px solid #334155;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column-reverse;
+    overflow: hidden;
+}
+
+.floor {
+    height: var(--floor-height);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 15px;
+    align-items: center;
+}
+
+.bin-slot {
+    width: 90px; height: 32px;
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed #475569;
+    border-radius: 4px;
+}
+
+.bin-slot.occupied {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid var(--lifter-color);
+}
+
+.lift-shaft {
+    position: absolute;
+    left: 50%; transform: translateX(-50%);
+    width: 120px; height: 100%;
+    background: rgba(0,0,0,0.4);
+    border-left: 1px solid #334155; border-right: 1px solid #334155;
+}
+
+#lifter {
+    position: absolute;
+    left: 50%; transform: translateX(-50%);
+    width: 110px; height: 40px;
+    background: var(--lifter-color);
+    bottom: 0;
+    transition: bottom 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+    border-radius: 4px;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+}
+
+/* CONVEYOR */
+.conveyor-system {
+    height: 90px; background: var(--panel-bg);
+    border-radius: 8px; border: 1px solid #334155;
+    display: flex; flex-direction: column;
+}
+
+.lane {
+    flex: 1; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; font-size: 11px; font-weight: 800;
+}
+
+.lane-in { border-bottom: 1px solid #0f172a; color: var(--conveyor-in); }
+.lane-out { color: var(--conveyor-out); }
+
+/* CONTROL PANEL */
+.control-panel {
+    flex: 1; display: flex; flex-direction: column;
+    background: var(--panel-bg); border-radius: 12px; border: 1px solid #334155;
+}
+
+.header-top {
+    padding: 15px; background: #0f172a; border-bottom: 1px solid #334155;
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.date-badge {
+    background: var(--lifter-color); color: #000;
+    padding: 4px 12px; border-radius: 4px; font-weight: bold; font-family: monospace;
+}
+
+.stat-card {
+    background: var(--bg-dark); margin: 15px; padding: 15px;
+    border-radius: 8px; border-left: 4px solid var(--lifter-color);
+}
+
+.stat-label { font-size: 10px; color: #64748b; margin-bottom: 5px; }
+.stat-value { font-weight: bold; color: var(--lifter-color); font-size: 15px; }
+
+/* LOGS */
+.tabs { display: flex; background: #0f172a; padding: 10px 10px 0; gap: 4px; }
+.tab-btn {
+    flex: 1; padding: 12px; border: none; background: #1e293b;
+    color: #64748b; cursor: pointer; border-radius: 8px 8px 0 0; font-weight: bold;
+}
+.tab-btn.active { background: #334155; color: white; }
+
+.log-viewport { flex: 1; padding: 15px; overflow-y: auto; background: var(--bg-dark); }
+#op-log { color: #10b981; font-family: 'Consolas', monospace; font-size: 12px; }
+.api-entry {
+    background: rgba(255,255,255,0.02); padding: 10px; border-radius: 6px;
+    margin-bottom: 8px; border-left: 3px solid #61afef; font-size: 11px;
+}
+.pallet {
+    width: 80px; height: 28px; background: #d97706; border: 1px solid #92400e;
+    color: white; font-size: 10px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    position: absolute; border-radius: 2px;
+}

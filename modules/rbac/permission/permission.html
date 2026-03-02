@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phân Quyền</title>
+    <!-- Use FontAwesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="permission.css" />
+  </head>
+  <body>
+    <div class="permission-container">
+      <div class="permission-header">
+        <div class="header-left"></div>
+        <div class="header-right">
+          <button class="btn-outline" id="btn-select-all">Chọn tất cả</button>
+          <button class="btn-outline" id="btn-deselect-all">
+            Bỏ chọn tất cả
+          </button>
+          <button class="btn-save"><i class="fas fa-save"></i> Lưu</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="permission-table">
+          <thead>
+            <tr>
+              <th class="col-stt">STT</th>
+              <th class="col-name">Tên menu</th>
+              <th class="col-action">Tất cả</th>
+              <th class="col-action">Xem</th>
+              <th class="col-action">Thêm</th>
+              <th class="col-action">Sửa</th>
+              <th class="col-action">Xóa</th>
+            </tr>
+          </thead>
+          <tbody id="permission-table-body">
+            <!-- Javascript will populate this -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="permission.js"></script>
+  </body>
+</html>

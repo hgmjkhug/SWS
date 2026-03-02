@@ -1,0 +1,119 @@
+<link rel="stylesheet" href="modules/rbac/module/module.css" />
+
+<div class="module-container">
+  <!-- Toolbar -->
+  <div class="module-toolbar">
+    <div class="toolbar-left">
+      <div class="search-box-panel">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="module-search" placeholder="Tìm kiếm theo mã, tên phân hệ..." />
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn btn-primary" onclick="openModuleModal()">
+        <i class="fas fa-plus"></i> Thêm mới
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper">
+    <table class="module-table">
+      <thead>
+        <tr>
+          <th class="col-stt">STT</th>
+          <th class="col-code">Mã phân hệ</th>
+          <th class="col-name">Tên phân hệ</th>
+          <th class="col-icon">Icon</th>
+          <th class="col-path">Đường dẫn</th>
+          <th class="col-resource">Tài nguyên</th>
+          <th class="col-order">Thứ tự</th>
+          <th class="col-action">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody id="module-table-body">
+        <!-- Data will be rendered here -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination (Optional for future, included for layout consistency) -->
+  <!-- <div class="pagination-bar">...</div> -->
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="module-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title" id="module-modal-title">Thêm phân hệ mới</h3>
+      <button class="close-btn" onclick="closeModuleModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="required">Mã phân hệ</label>
+        <input type="text" id="module-code" placeholder="VD: WAREHOUSE" />
+      </div>
+      <div class="form-group">
+        <label class="required">Tên phân hệ</label>
+        <input type="text" id="module-name" placeholder="VD: Quản lý Kho" />
+      </div>
+      <div class="form-group">
+        <label>Icon</label>
+        <input type="text" id="module-icon" placeholder="VD: fas fa-warehouse - thực tế dùng React-icons" />
+      </div>
+      <div class="form-group">
+        <label>Đường dẫn</label>
+        <input type="text" id="module-path" placeholder="VD: modules/warehouse/ - thực tế dùng React Router" />
+      </div>
+      <div class="form-group" id="resource-field-group">
+        <label>Mã tài nguyên (Chức năng con)</label>
+        <div class="custom-select-wrapper searchable-resource-wrapper" id="module-resource-wrapper">
+          <div class="resource-search-container">
+            <input type="text" id="module-resource-search" placeholder="Chọn tài nguyên..." autocomplete="off" />
+            <input type="hidden" id="module-resource" />
+            <i class="fas fa-chevron-down dropdown-arrow"></i>
+          </div>
+          <div class="custom-options resource-options-dropdown" id="module-resource-options">
+            <div class="options-list" id="module-resource-options-list">
+              <!-- Options will be populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Thứ tự hiển thị</label>
+        <input type="number" id="module-order" value="1" min="1" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModuleModal()">
+        Hủy
+      </button>
+      <button class="btn btn-primary" onclick="saveModule()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Popover (Styled like Account module) -->
+<!-- Delete Confirmation Popover (Standardized) -->
+<div id="delete-confirm-modal" class="modal-confirm">
+  <div class="confirm-content">
+    <div class="confirm-icon-box">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h3 class="confirm-title">Xác nhận xóa</h3>
+    <p class="confirm-message" id="confirm-delete-message">
+      Bạn có chắc chắn muốn xóa phân hệ này không?<br />Hành động này không thể hoàn tác.
+    </p>
+    <div class="confirm-actions">
+      <button onclick="closeDeleteConfirm()" class="btn btn-secondary">
+        Hủy
+      </button>
+      <button onclick="confirmDelete()" class="btn btn-danger">
+        Xóa
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="modules/rbac/module/module.js"></script>
