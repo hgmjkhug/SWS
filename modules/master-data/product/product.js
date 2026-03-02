@@ -20,12 +20,7 @@
         { code: 'KC09', name: 'Vật tư Bảo hộ' },
         { code: 'KC10', name: 'Phụ tùng máy công cụ' }
     ];
-    // Export Method Config
-    var exportMethodConfig = {
-        'FIFO': 'First In First Out - Nhập trước xuất trước',
-        'FEFO': 'First Expired First Out - Hết hạn trước xuất trước',
-        'LIFO': 'Last In First Out - Nhập sau xuất trước'
-    };
+
 
     // Mock Data - Mechanical Products
     // Products mapping to categories: KC01 (Kim khí), KC02 (Cắt gọt), KC03 (Cầm tay), KC04 (Hàn), etc.
@@ -105,6 +100,12 @@
         const tbody = document.getElementById('product-table-body');
         if (!tbody) return;
 
+        // Hiển thị tên kho đang chọn
+        const bannerNameEl = document.getElementById('banner-warehouse-name');
+        if (bannerNameEl) {
+            bannerNameEl.innerText = getCurrentWarehouse();
+        }
+
         filteredData = products.filter(p => !p.is_deleted);
         renderCategoryFilter();
         renderProducts();
@@ -141,7 +142,6 @@
         let menu;
         if (type === 'group') menu = document.getElementById('group-filter-menu');
         else if (type === 'status') menu = document.getElementById('status-filter-menu');
-        else if (type === 'method') menu = document.getElementById('method-filter-menu');
 
         if (!menu) return;
 
@@ -159,10 +159,6 @@
             document.getElementById('status-filter').value = value;
             document.getElementById('status-filter-display').innerText = label;
             currentStatusFilter = value;
-        } else if (type === 'method') {
-            document.getElementById('method-filter').value = value;
-            document.getElementById('method-filter-display').innerText = label;
-            currentMethodFilter = value;
         }
 
         const menu = document.getElementById(`${type}-filter-menu`);
@@ -224,26 +220,24 @@
         if (pageData.length === 0) {
             tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 20px; color: #64748b;">Không tìm thấy dữ liệu</td></tr>';
         } else {
-            // Helper removed (using categoryData directly)
             pageData.forEach((item, idx) => {
                 const groupName = categoryData.find(c => c.code === item.group)?.name || item.group || 'N/A';
-                const exportMethodFullName = exportMethodConfig[item.exportMethod] || item.exportMethod || '-';
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                 <td><input type="checkbox" class="prod-check" value="${item.id}" onchange="updateBulkDeleteBtn()"></td>
                 <td>${start + idx + 1}</td>
+                <td style="font-weight: 500">${item.code}</td>
                 <td style="font-weight: 500">${item.name}</td>
                 <td>${groupName}</td>
                 <td>${item.unit || ''}</td>
-                <td style="text-align: center;">${item.weight ? item.weight.toFixed(2) : '-'}</td>
-                <td title="${exportMethodFullName}" style="cursor: help;">${item.exportMethod || '-'}</td>
-                <td style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.description}">${item.description || '-'}</td>
+                <td>${item.weight ? item.weight.toFixed(2) : '-'}</td>
+                <td title="${item.description || ''}">${item.description || '-'}</td>
                 <td><label class="switch"><input type="checkbox" ${item.status === 1 ? 'checked' : ''} onchange="handleToggleRequest(this, '${item.id}')"><span class="slider round"></span></label></td>
                 <td>
                     <div style="display: flex; gap: 4px; justify-content: center;">
                         <div class="action-icon" title="Xem/Sửa" onclick="openProductModal('${item.id}')"><i class="fas fa-edit"></i></div>
-                        <div class="action-icon print" title="In mã QR" onclick="printQR('${item.id}')"><i class="fas fa-print"></i></div>
+                        <div class="action-icon print" title="In mã QR/Mã SP" onclick="printQR('${item.id}')"><i class="fas fa-print"></i></div>
                         <div class="action-icon delete" title="Xóa" onclick="openDeleteModal('${item.id}')"><i class="fas fa-trash"></i></div>
                     </div>
                 </td>
@@ -324,7 +318,6 @@
     // State for filters
     let currentGroupFilter = '';
     let currentStatusFilter = '';
-    let currentMethodFilter = '';
 
     // Filter
     window.filterProducts = function () {
@@ -333,7 +326,6 @@
         // Use variables
         const groupFilter = currentGroupFilter;
         const statusFilter = currentStatusFilter;
-        const methodFilter = currentMethodFilter; // Use the new state variable
 
         filteredData = products.filter(prod => {
             if (prod.is_deleted) return false;
@@ -344,9 +336,8 @@
             // Status filter logic
             const matchesStatus = statusFilter === '' || prod.status.toString() === statusFilter;
             const matchesGroup = groupFilter === '' || prod.group === groupFilter;
-            const matchesMethod = methodFilter === '' || prod.exportMethod === methodFilter; // New filter condition
 
-            return matchesQuery && matchesStatus && matchesGroup && matchesMethod;
+            return matchesQuery && matchesStatus && matchesGroup;
         });
         currentPage = 1;
         renderProducts();
@@ -361,9 +352,13 @@
         const checked = document.querySelectorAll('.prod-check:checked');
         const btn = document.getElementById('bulk-delete-btn');
         const countSpan = document.getElementById('selected-count');
-
+        
         if (btn) btn.disabled = checked.length === 0;
         if (countSpan) countSpan.textContent = checked.length;
+    };
+    
+    window.printQR = function (id) {
+        // Function to handle printing if needed
     };
 
     // Product Modal
@@ -377,8 +372,9 @@
         if (id) {
             const prod = products.find(p => p.id === id);
             if (prod) {
-                title.innerText = 'Cập nhật vật tư';
+                title.innerText = 'Cập nhật sản phẩm';
                 document.getElementById('prod-id').value = prod.id;
+                document.getElementById('prod-code').value = prod.code;
                 document.getElementById('prod-name').value = prod.name;
                 document.getElementById('prod-description').value = prod.description || '';
                 // Set Group Dropdown
@@ -392,16 +388,13 @@
                 document.getElementById('prod-unit').value = uVal;
                 document.getElementById('selected-unit-span').innerText = uVal || '-- Chọn ĐVT --';
 
-                // Set Export Method Dropdown
-                const emVal = prod.exportMethod || '';
-                document.getElementById('prod-export-method').value = emVal;
-                document.getElementById('selected-export-method-span').innerText = emVal || '-- Chọn phương thức --';
-
                 document.getElementById('prod-weight').value = prod.weight || '';
                 document.getElementById('prod-status').checked = prod.status === 1;
             }
         } else {
-            title.innerText = 'Thêm mới vật tư';
+            title.innerText = 'Thêm mới sản phẩm';
+            document.getElementById('prod-code').value = '';
+            
             // Reset custom dropdowns
             document.getElementById('selected-unit-span').innerText = '-- Chọn ĐVT --';
             document.getElementById('prod-unit').value = '';
@@ -409,8 +402,6 @@
             document.getElementById('selected-group-span').innerText = '-- Chọn nhóm --';
             document.getElementById('prod-group').value = '';
 
-            document.getElementById('selected-export-method-span').innerText = '-- Chọn phương thức --';
-            document.getElementById('prod-export-method').value = '';
             document.getElementById('prod-status').checked = true;
         }
         modal.classList.add('show');
@@ -440,17 +431,7 @@
         document.getElementById('group-dropdown-menu').classList.remove('show');
     };
 
-    // Export Method Dropdown Logic
-    window.toggleExportMethodDropdown = function () {
-        const menu = document.getElementById('export-method-dropdown-menu');
-        menu.classList.toggle('show');
-    };
 
-    window.selectExportMethod = function (val, label) {
-        document.getElementById('prod-export-method').value = val;
-        document.getElementById('selected-export-method-span').innerText = label;
-        document.getElementById('export-method-dropdown-menu').classList.remove('show');
-    };
 
     // Close dropdown when clicking outside
     window.addEventListener('click', function (e) {
@@ -463,11 +444,6 @@
         const gDropdown = document.getElementById('group-dropdown');
         if (gDropdown && !gDropdown.contains(e.target)) {
             document.getElementById('group-dropdown-menu').classList.remove('show');
-        }
-        // Export Method
-        const emDropdown = document.getElementById('export-method-dropdown');
-        if (emDropdown && !emDropdown.contains(e.target)) {
-            document.getElementById('export-method-dropdown-menu').classList.remove('show');
         }
     });
 
@@ -482,19 +458,18 @@
         const description = document.getElementById('prod-description').value.trim();
         const group = document.getElementById('prod-group').value;
         const unit = document.getElementById('prod-unit').value;
-        const exportMethod = document.getElementById('prod-export-method').value;
         const weight = parseFloat(document.getElementById('prod-weight').value) || 0;
         const status = document.getElementById('prod-status').checked ? 1 : 0;
 
-        if (!name) {
-            alert('Vui lòng nhập tên vật tư');
+        let code = codeEl ? codeEl.value.trim() : ``;
+
+        if (!code) {
+            alert('Vui lòng nhập mã sản phẩm');
             return;
         }
 
-        let code = codeEl ? codeEl.value.trim() : `VT${Math.floor(Math.random() * 10000)}`;
-
-        if (!exportMethod) {
-            alert('Vui lòng chọn phương thức xuất');
+        if (!name) {
+            alert('Vui lòng nhập tên sản phẩm');
             return;
         }
 
@@ -505,25 +480,25 @@
             if (idx !== -1) {
                 products[idx] = {
                     ...products[idx],
-                    code, name, description, group, unit, exportMethod, weight, status,
+                    code, name, description, group, unit, weight, status,
                     updated_at: now
                 };
-                showToast('Cập nhật vật tư thành công');
+                showToast('Cập nhật sản phẩm thành công');
             }
         } else {
             const newId = crypto.randomUUID ? crypto.randomUUID() : `uuid-${Date.now()}`;
-            products.push({
+            products.unshift({
                 id: newId,
-                code, name, description, group, unit, exportMethod, weight, status,
+                code, name, description, group, unit, weight, status,
                 is_deleted: false,
                 created_at: now,
                 updated_at: now
             });
-            showToast('Thêm mới vật tư thành công');
+            showToast('Thêm mới sản phẩm thành công');
         }
 
         closeProductModal();
-        renderProducts(); // Use renderProducts instead of filterProducts to maintain current filters if possible, but filterProducts is also fine
+        filterProducts(); 
     };
 
     window.toggleProductStatus = function (id, isChecked) {

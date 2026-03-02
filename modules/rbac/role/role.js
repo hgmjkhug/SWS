@@ -414,7 +414,7 @@
 
             // Use the global loadPage function (from script.js) to switch views
             if (window.loadPage) {
-                window.loadPage('Phân quyền vai trò');
+                window.loadPage('Phân quyền');
             } else {
                 console.error('loadPage function not found!');
                 alert('Lỗi: Không tìm thấy chức năng điều hướng.');

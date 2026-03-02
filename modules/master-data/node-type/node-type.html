@@ -43,43 +43,58 @@
 
       <!-- Table -->
       <div class="table-wrapper">
-        <table class="node-type-table">
-          <thead>
+        <div class="table-scroll-head">
+          <table class="node-type-table">
+            <thead>
             <tr>
-              <th style="width: 50px; text-align: center;">
+              <th>
                 <input
                   type="checkbox"
                   id="node-type-select-all"
                   onclick="toggleSelectAllNodeTypes()"
                 />
               </th>
-              <th style="width: 60px; text-align: center;">STT</th>
+              <th>STT</th>
               <th>Tên loại vị trí</th>
               <th>Hình ảnh</th>
-              <th style="width: 120px; text-align: center;">Thao tác</th>
+              <th>Thao tác</th>
             </tr>
-          </thead>
-          <tbody id="node-type-table-body">
-            <!-- Rows rendered by JS -->
-          </tbody>
-        </table>
+            </thead>
+          </table>
+        </div>
+        <div class="table-scroll-body" id="table-scroll-body">
+          <table class="node-type-table">
+            <tbody id="node-type-table-body">
+              <!-- Rows rendered by JS -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Pagination -->
       <div class="pagination-bar">
         <div class="pagination-info" id="node-type-pagination-info">
-          Hiển thị 0-0 của 0 bản ghi
+          Hiển thị 0-0 trong tổng 0
         </div>
-        <div class="pagination-controls">
-          <button class="page-btn" id="node-type-prev-btn" onclick="prevNodeTypePage()">
-            <i class="fas fa-chevron-left"></i>
-          </button>
-          <div class="page-numbers" id="node-type-page-numbers">
-            <!-- Page numbers rendered by JS -->
+        
+        <div class="pagination-right" style="display: flex; align-items: center; gap: 12px;">
+          <div class="pagination-controls">
+            <button class="page-btn" id="node-type-prev-btn" onclick="prevNodeTypePage()">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="page-numbers" id="node-type-page-numbers">
+              <!-- Page numbers rendered by JS -->
+            </div>
+            <button class="page-btn" id="node-type-next-btn" onclick="nextNodeTypePage()">
+              <i class="fas fa-chevron-right"></i>
+            </button>
           </div>
-          <button class="page-btn" id="node-type-next-btn" onclick="nextNodeTypePage()">
-            <i class="fas fa-chevron-right"></i>
-          </button>
+          
+          <div class="page-goto">
+            <span>Đến</span>
+            <input type="number" id="node-type-page-input" min="1" onkeypress="if(event.keyCode==13) goToNodeTypePage(this.value)"/>
+            <span>trang</span>
+          </div>
         </div>
       </div>
     </div>
@@ -104,12 +119,21 @@
             />
           </div>
           <div class="form-group">
-            <label>Hình ảnh (URL / Đường dẫn)</label>
-            <input
-              type="text"
-              id="node-type-image"
-              placeholder="Nhập đường dẫn hình ảnh"
-            />
+            <label>Hình ảnh</label>
+            <div class="image-upload-wrapper">
+              <input
+                type="file"
+                id="node-type-image"
+                accept="image/*"
+                class="hidden-file-input"
+                onchange="previewNodeTypeImage(this)"
+              />
+              <label for="node-type-image" class="image-upload-box" id="node-type-image-preview-box">
+                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                <span>Tải ảnh lên</span>
+                <img id="node-type-image-preview" src="" alt="Preview" style="display: none;" />
+              </label>
+            </div>
           </div>
         </div>
         <div class="modal-footer">

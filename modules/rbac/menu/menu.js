@@ -8,65 +8,56 @@
     // We use this for the "Parent" selection and for grouping.
     // Updated to match module.js order and paths
     const modules = [
-        { id: 1, code: 'SYSTEM', name: 'Hệ thống', icon: 'fas fa-cogs', path: 'modules/rbac', order: 10 },
-        { id: 2, code: 'REPORT', name: 'Báo cáo thống kê', icon: 'fas fa-chart-bar', path: 'modules/report/report', order: 9 },
-        { id: 3, code: 'MASTER_DATA', name: 'Master data', icon: 'fas fa-database', path: 'modules/master-data', order: 8 },
-        { id: 4, code: 'WORKFLOW', name: 'Quản lý luồng và quy trình', icon: 'fas fa-project-diagram', path: 'modules/workflow', order: 7 },
-        { id: 5, code: 'INVENTORY', name: 'Theo dõi tồn kho', icon: 'fas fa-boxes', path: 'modules/inventory/', order: 6 },
-        { id: 6, code: 'OUTBOUND', name: 'Xuất kho', icon: 'fas fa-file-export', path: 'modules/outbound', order: 5 },
-        { id: 7, code: 'INBOUND', name: 'Nhập kho', icon: 'fas fa-file-import', path: 'modules/inbound', order: 4 },
-        { id: 8, code: 'WCS', name: 'Quản lý điều phối WCS', icon: 'fas fa-microchip', path: 'modules/wcs', order: 3 },
-        { id: 9, code: 'DASHBOARD', name: 'Theo dõi & Giám sát', icon: 'fas fa-chart-line', path: 'modules/dashboard', order: 1 },
-        { id: 10, code: 'WAREHOUSE', name: 'Quản lý kho', icon: 'fas fa-map', path: 'modules/warehouse', order: 2 }
+        { id: 1, code: 'DASHBOARD', name: 'Theo dõi & Giám sát', icon: 'fas fa-chart-line', path: 'modules/dashboard', order: 1 },
+        { id: 2, code: 'WAREHOUSE', name: 'Quản lý Kho', icon: 'fas fa-map', path: 'modules/warehouse', order: 2 },
+        { id: 3, code: 'WCS', name: 'Quản lý điều phối WCS', icon: 'fas fa-microchip', path: 'modules/wcs', order: 3 },
+        { id: 4, code: 'INBOUND', name: 'Nhập kho', icon: 'fas fa-file-import', path: 'modules/inbound', order: 4 },
+        { id: 5, code: 'OUTBOUND', name: 'Xuất kho', icon: 'fas fa-file-export', path: 'modules/outbound', order: 5 },
+        { id: 6, code: 'WORKFLOW', name: 'Quản lý bước và quy trình', icon: 'fas fa-project-diagram', path: 'modules/workflow', order: 6 },
+        { id: 7, code: 'MASTER_DATA', name: 'Danh mục chung', icon: 'fas fa-database', path: 'modules/master-data', order: 7 },
+        { id: 8, code: 'SYSTEM', name: 'Hệ thống', icon: 'fas fa-cogs', path: 'modules/rbac', order: 8 }
     ];
 
     // Mock Data for Functions (Children)
-    // Map functions to module IDs
     let functions = [
-        // DASHBOARD (id: 9)
-        { id: 901, moduleId: 9, code: 'DASHBOARD_OVERVIEW', name: 'Dashboard tổng quan', icon: 'fas fa-chart-pie', path: 'modules/dashboard/overview', resource: 'DASHBOARDTONGQUAN', order: 1 },
-        { id: 902, moduleId: 9, code: 'DASHBOARD_DETAIL', name: 'Dashboard chi tiết', icon: 'fas fa-chart-area', path: 'modules/dashboard/detail', resource: 'DASHBOARDCHITIET', order: 2 },
+        // DASHBOARD (id: 1)
+        { id: 101, moduleId: 1, code: 'DASHBOARD_OVERVIEW', name: 'Dashboard tổng quan', icon: 'fas fa-chart-pie', path: 'modules/dashboard/general-dashboard/general', resource: 'DASHBOARDTONGQUAN', order: 1 },
+        { id: 102, moduleId: 1, code: 'DASHBOARD_DETAIL', name: 'Dashboard chi tiết', icon: 'fas fa-chart-area', path: 'modules/dashboard/detail-dashboard/detail', resource: 'DASHBOARDCHITIET', order: 2 },
 
-        // WAREHOUSE (id: 10)
-        { id: 1001, moduleId: 10, code: 'WAREHOUSE_LIST', name: 'Danh sách kho', icon: 'fas fa-warehouse', path: 'modules/warehouse/list', resource: 'DANHSACHKHO', order: 1 },
-        { id: 1002, moduleId: 10, code: 'DEVICE_GROUP', name: 'Nhóm thiết bị', icon: 'fas fa-layer-group', path: 'modules/warehouse/device-group', resource: 'NHOMTHIETBI', order: 2 },
-        { id: 1003, moduleId: 10, code: 'DEVICE', name: 'Thiết bị', icon: 'fas fa-mobile-alt', path: 'modules/warehouse/device', resource: 'THIETBI', order: 3 },
+        // WAREHOUSE (id: 2)
+        { id: 201, moduleId: 2, code: 'WAREHOUSE_LIST', name: 'Quản lý Kho', icon: 'fas fa-warehouse', path: 'modules/warehouse/warehouse', resource: 'QUANLYKHO', order: 1 },
+        { id: 202, moduleId: 2, code: 'CONTAINER_MGMT', name: 'Quản lý vật chứa', icon: 'fas fa-pallet', path: 'modules/pallet/pallet', resource: 'QUANLYVATCHUA', order: 2 },
+        { id: 203, moduleId: 2, code: 'DEVICE_MGMT', name: 'Quản lý thiết bị', icon: 'fas fa-mobile-alt', path: 'modules/master-data/device/device', resource: 'QUANLYTHIETBI', order: 3 },
+        { id: 204, moduleId: 2, code: 'MAINTENANCE', name: 'Lịch bảo trì thiết bị', icon: 'fas fa-calendar-alt', path: 'modules/wcs/maintenance', resource: 'LICHBAOTRI', order: 4 },
 
-        // WCS (id: 8)
-        { id: 801, moduleId: 8, code: 'WCS_KANBAN', name: 'Kanban WCS', icon: 'fas fa-columns', path: 'modules/wcs/kanban', resource: 'KANBANWCS', order: 1 },
-        { id: 802, moduleId: 8, code: 'WCS_ORDER', name: 'Quản lý Lệnh', icon: 'fas fa-clipboard-list', path: 'modules/wcs/order', resource: 'QUANLYLENH', order: 2 },
-        { id: 803, moduleId: 8, code: 'WCS_DEVICE', name: 'Quản lý Thiết bị', icon: 'fas fa-robot', path: 'modules/wcs/device', resource: 'QUANLYTHIETBI', order: 3 },
-        { id: 804, moduleId: 8, code: 'WCS_MONITOR', name: 'Giám sát thiết bị', icon: 'fas fa-desktop', path: 'modules/wcs/monitor', resource: 'GIAMSATTHIETBI', order: 4 },
-        { id: 805, moduleId: 8, code: 'WCS_TRACE', name: 'Truy vết nhập xuất', icon: 'fas fa-search-location', path: 'modules/wcs/trace', resource: 'TRUYVETNHAPXUAT', order: 5 },
+        // WCS (id: 3)
+        { id: 301, moduleId: 3, code: 'WCS_KANBAN', name: 'Kanban WCS', icon: 'fas fa-columns', path: 'modules/kanbanWCS/kanban', resource: 'KANBANWCS', order: 1 },
+        { id: 302, moduleId: 3, code: 'WCS_ORDER', name: 'Quản lý Lệnh', icon: 'fas fa-clipboard-list', path: 'modules/wcs/job/job', resource: 'QUANLYLENH', order: 2 },
+        { id: 303, moduleId: 3, code: 'WCS_MONITOR', name: 'Giám sát Thiết bị', icon: 'fas fa-desktop', path: 'modules/wcs/device', resource: 'GIAMSATTHIETBI', order: 3 },
 
-        // INBOUND (id: 7)
-        { id: 701, moduleId: 7, code: 'INBOUND_ORDER', name: 'Phiếu nhập kho', icon: 'fas fa-file-import', path: 'modules/inbound/inbound', resource: 'LENHNHAPKHO', order: 1 },
+        // INBOUND (id: 4)
+        { id: 401, moduleId: 4, code: 'INBOUND_ORDER', name: 'Lệnh nhập kho', icon: 'fas fa-file-import', path: 'modules/inbound/inbound', resource: 'LENHNHAPKHO', order: 1 },
 
-        // OUTBOUND (id: 6)
-        { id: 601, moduleId: 6, code: 'OUTBOUND_ORDER', name: 'Phiếu xuất kho', icon: 'fas fa-file-export', path: 'modules/outbound/outbound', resource: 'LENHXUATKHO', order: 1 },
+        // OUTBOUND (id: 5)
+        { id: 501, moduleId: 5, code: 'OUTBOUND_ORDER', name: 'Lệnh xuất kho', icon: 'fas fa-file-export', path: 'modules/outbound/outbound', resource: 'LENHXUATKHO', order: 1 },
 
-        // INVENTORY (id: 5)
-        { id: 501, moduleId: 5, code: 'INVENTORY_TRACKING', name: 'Theo dõi tồn kho', icon: 'fas fa-boxes', path: 'modules/inventory/inventory', resource: 'THEODOITONKHO', order: 1 },
+        // WORKFLOW (id: 6)
+        { id: 601, moduleId: 6, code: 'WORKFLOW_PROCESS', name: 'Quản lý quy trình', icon: 'fas fa-random', path: 'modules/workflow/workflow', resource: 'QUANLYQUYTRINH', order: 1 },
 
-        // WORKFLOW (id: 4)
-        { id: 401, moduleId: 4, code: 'WORKFLOW_STEP', name: 'Quản lý bước', icon: 'fas fa-step-forward', path: 'modules/workflow/step', resource: 'QUANLYBUOC', order: 1 },
-        { id: 402, moduleId: 4, code: 'WORKFLOW_PROCESS', name: 'Quản lý quy trình', icon: 'fas fa-random', path: 'modules/workflow/process', resource: 'QUANLYQUYTRINH', order: 2 },
+        // MASTER_DATA (id: 7)
+        { id: 701, moduleId: 7, code: 'DEVICE_TYPE', name: 'Nhóm thiết bị', icon: 'fas fa-layer-group', path: 'modules/master-data/device-type/device-type', resource: 'NHOMTHIETBI', order: 1 },
+        { id: 702, moduleId: 7, code: 'DEVICE_LIST', name: 'Thiết bị', icon: 'fas fa-mobile-alt', path: 'modules/master-data/device-list/device-list', resource: 'THIETBI', order: 2 },
+        { id: 703, moduleId: 7, code: 'PRODUCT_GROUP', name: 'Nhóm sản phẩm', icon: 'fas fa-cubes', path: 'modules/master-data/category/category', resource: 'NHOMSANPHAM', order: 3 },
+        { id: 704, moduleId: 7, code: 'PRODUCT_LIST', name: 'Sản phẩm', icon: 'fas fa-box', path: 'modules/master-data/product/product', resource: 'SANPHAM', order: 4 },
+        { id: 705, moduleId: 7, code: 'PALLET_LIST', name: 'Vật chứa', icon: 'fas fa-pallet', path: 'modules/master-data/pallet-list/container', resource: 'VATCHUA', order: 5 },
+        { id: 706, moduleId: 7, code: 'UNIT_OF_MEASURE', name: 'Đơn vị tính', icon: 'fas fa-ruler', path: 'modules/master-data/unit-of-measure/unit', resource: 'DONVITINH', order: 6 },
+        { id: 707, moduleId: 7, code: 'LOCATION_TYPE', name: 'Loại vị trí', icon: 'fas fa-map-marker-alt', path: 'modules/master-data/node-type/node-type', resource: 'LOAIVITRI', order: 7 },
 
-        // MASTER_DATA (id: 3)
-        { id: 301, moduleId: 3, code: 'MATERIAL_GROUP', name: 'Nhóm vật tư', icon: 'fas fa-cubes', path: 'modules/master-data/material-group', resource: 'NHOMVATTU', order: 1 },
-        { id: 302, moduleId: 3, code: 'MATERIAL', name: 'Danh mục vật tư', icon: 'fas fa-box', path: 'modules/master-data/material', resource: 'DANHMUCVATTU', order: 2 },
-        { id: 303, moduleId: 3, code: 'UNIT', name: 'Đơn vị tính', icon: 'fas fa-ruler', path: 'modules/master-data/unit', resource: 'DONVITINH', order: 3 },
-        { id: 304, moduleId: 3, code: 'PALLET', name: 'Danh mục Pallet', icon: 'fas fa-pallet', path: 'modules/master-data/pallet', resource: 'DANHMUCPALLET', order: 4 },
-
-        // REPORT (id: 2)
-        { id: 201, moduleId: 2, code: 'REPORT_IO', name: 'Báo cáo Nhập/xuất', icon: 'fas fa-file-alt', path: 'modules/report/io-report', resource: 'BAOCAONHAPXUAT', order: 1 },
-
-        // SYSTEM (id: 1)
-        { id: 101, moduleId: 1, code: 'ACCOUNT', name: 'Tài khoản', icon: 'fas fa-user', path: 'modules/rbac/account/account', resource: 'TAIKHOAN', order: 1 },
-        { id: 102, moduleId: 1, code: 'ROLE', name: 'Vai trò', icon: 'fas fa-user-tag', path: 'modules/rbac/role/role', resource: 'VAITRO', order: 2 },
-        { id: 103, moduleId: 1, code: 'MODULE', name: 'Phân hệ', icon: 'fas fa-th-large', path: 'modules/rbac/module/module', resource: 'CHUCNANG', order: 3 },
-        { id: 104, moduleId: 1, code: 'MENU', name: 'Chức năng', icon: 'fas fa-list', path: 'modules/rbac/menu/menu', resource: 'CHUCNANG', order: 4 },
-        { id: 105, moduleId: 1, code: 'RESOURCE', name: 'Tài nguyên', icon: 'fas fa-folder-open', path: 'modules/rbac/resource/resource', resource: 'TAINGUYEN', order: 5 },
+        // SYSTEM (id: 8)
+        { id: 801, moduleId: 8, code: 'ACCOUNT', name: 'Tài khoản', icon: 'fas fa-user', path: 'modules/rbac/account/account', resource: 'TAIKHOAN', order: 1 },
+        { id: 802, moduleId: 8, code: 'ROLE', name: 'Vai trò', icon: 'fas fa-user-tag', path: 'modules/rbac/role/role', resource: 'VAITRO', order: 2 },
+        { id: 803, moduleId: 8, code: 'MENU', name: 'Chức năng', icon: 'fas fa-list', path: 'modules/rbac/menu/menu', resource: 'CHUCNANG', order: 3 },
+        { id: 804, moduleId: 8, code: 'RESOURCE', name: 'Tài nguyên', icon: 'fas fa-folder-open', path: 'modules/rbac/resource/resource', resource: 'TAINGUYEN', order: 4 },
     ];
 
     let isEditing = false;
@@ -184,32 +175,30 @@
     }
 
     // --- Searchable Resource Dropdown Logic ---
-    let allResources = [
-        { id: 1, code: 'DASHBOARDTONGQUAN', description: 'Dashboard Tổng quan' },
-        { id: 2, code: 'DASHBOARDCHITIET', description: 'Dashboard Chi tiết' },
-        { id: 3, code: 'DANHSACHKHO', description: 'Danh sách Kho' },
-        { id: 4, code: 'NHOMTHIETBI', description: 'Nhóm thiết bị' },
-        { id: 5, code: 'THIETBI', description: 'Thiết bị' },
-        { id: 6, code: 'KANBANWCS', description: 'Kanban WCS' },
-        { id: 7, code: 'QUANLYLENH', description: 'Quản lý Lệnh' },
-        { id: 8, code: 'QUANLYTHIETBI', description: 'Quản lý Thiết bị' },
-        { id: 9, code: 'LICHBAOTRITHIETBI', description: 'Lịch bảo trì thiết bị' },
-        { id: 10, code: 'GIAMSATTHIETBI', description: 'Giám sát Thiết bị' },
-        { id: 11, code: 'TRUYVETNHAPXUAT', description: 'Truy vết nhập xuất' },
-        { id: 12, code: 'LENHNHAPKHO', description: 'Lệnh nhập kho' },
-        { id: 13, code: 'LENHXUATKHO', description: 'Lệnh xuất kho' },
-        { id: 14, code: 'THEODOITONKHO', description: 'Theo dõi tồn kho' },
-        { id: 15, code: 'QUANLYBUOC', description: 'Quản lý bước' },
-        { id: 16, code: 'QUANLYQUYTRINH', description: 'Quản lý Quy trình' },
-        { id: 17, code: 'NHOMVATTU', description: 'Nhóm Vật tư' },
-        { id: 18, code: 'DANHMUCVATTU', description: 'Danh mục Vật tư' },
-        { id: 19, code: 'DONVITINH', description: 'Đơn vị tính' },
-        { id: 20, code: 'DANHMUCPALLET', description: 'Danh mục Pallet' },
-        { id: 21, code: 'BAOCAONHAPXUAT', description: 'Báo cáo Nhập/Xuất' },
-        { id: 22, code: 'TAIKHOAN', description: 'Tài khoản' },
-        { id: 23, code: 'VAITRO', description: 'Vai trò' },
-        { id: 24, code: 'CHUCNANG', description: 'Chức năng' },
-        { id: 25, code: 'TAINGUYEN', description: 'Tài nguyên' }
+    const allResources = [
+        { id: 1, code: 'DASHBOARD_TONGQUAN', description: 'Dashboard Tổng quan' },
+        { id: 2, code: 'DASHBOARD_CHITIET', description: 'Dashboard Chi tiết' },
+        { id: 3, code: 'QUANLY_KHO', description: 'Quản lý Kho' },
+        { id: 4, code: 'QUANLY_VATCHUA', description: 'Quản lý vật chứa' },
+        { id: 5, code: 'QUANLY_THIETBI', description: 'Quản lý thiết bị' },
+        { id: 6, code: 'LICH_BAOTRI_THIETBI', description: 'Lịch bảo trì thiết bị' },
+        { id: 7, code: 'KANBAN_WCS', description: 'Kanban WCS' },
+        { id: 8, code: 'QUANLY_LENH', description: 'Quản lý Lệnh' },
+        { id: 9, code: 'GIAMSAT_THIETBI', description: 'Giám sát Thiết bị' },
+        { id: 10, code: 'LENH_NHAPKHO', description: 'Lệnh nhập kho' },
+        { id: 11, code: 'LENH_XUATKHO', description: 'Lệnh xuất kho' },
+        { id: 12, code: 'QUANLY_QUYTRINH', description: 'Quản lý quy trình' },
+        { id: 13, code: 'NHOM_THIETBI', description: 'Nhóm thiết bị' },
+        { id: 14, code: 'THIETBI', description: 'Thiết bị' },
+        { id: 15, code: 'NHOM_SANPHAM', description: 'Nhóm sản phẩm' },
+        { id: 16, code: 'SANPHAM', description: 'Sản phẩm' },
+        { id: 17, code: 'VATCHUA', description: 'Vật chứa' },
+        { id: 18, code: 'DON_VI_TINH', description: 'Đơn vị tính' },
+        { id: 19, code: 'LOAI_VI_TRI', description: 'Loại vị trí' },
+        { id: 20, code: 'TAI_KHOAN', description: 'Tài khoản' },
+        { id: 21, code: 'VAI_TRO', description: 'Vai trò' },
+        { id: 22, code: 'CHUC_NANG', description: 'Chức năng' },
+        { id: 23, code: 'TAI_NGUYEN', description: 'Tài nguyên' }
     ];
 
     function populateResourceSelect(searchTerm = '', isInline = false, inlineTarget = null) {

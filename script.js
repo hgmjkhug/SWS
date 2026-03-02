@@ -57,21 +57,20 @@ function loadPage(title) {
 
     // mapping menu text -> module HTML path
     const moduleMap = {
-        'Danh sách Kho': 'modules/warehouse/warehouse.html',
+        'Quản lý Kho': 'modules/warehouse/warehouse.html',
         'Cấu hình Kho': 'modules/warehouse/warehouse-config.html',
+        'Quản lý vật chứa': 'modules/pallet/pallet.html',
         'Layout Kho': 'modules/layout/index.html',
         'Lệnh nhập kho': 'modules/inbound/inbound.html',
         'Lệnh xuất kho': 'modules/outbound/outbound.html',
         'Xác nhận nhập kho': 'modules/inbound/inbound.html',
-        'Quản lý Thiết bị': 'modules/master-data/device/device.html',
+        'Quản lý thiết bị': 'modules/master-data/device/device.html',
         'Giám sát Thiết bị': 'modules/wcs/device.html',
         'Kanban WCS': 'modules/kanbanWCS/kanban.html',
-        'Danh mục Vật tư': 'modules/master-data/product/product.html',
-        'Account': 'modules/rbac/account/account.html',
+        'Sản phẩm': 'modules/master-data/product/product.html',
         'Tài khoản': 'modules/rbac/account/account.html',
         'Vai trò': 'modules/rbac/role/role.html',
-        'Phân quyền vai trò': 'modules/rbac/permission/permission.html',
-        'Nhóm Vật tư': 'modules/master-data/category/category.html',
+        'Nhóm sản phẩm': 'modules/master-data/category/category.html',
         'Đơn vị tính': 'modules/master-data/unit-of-measure/unit.html',
         'Nhóm thiết bị': 'modules/master-data/device-type/device-type.html',
         // 'Quản lý thiết bị': 'modules/master-data/device/device.html',
@@ -81,10 +80,13 @@ function loadPage(title) {
         'Chức năng': 'modules/rbac/menu/menu.html',
         'Lịch bảo trì thiết bị': 'modules/wcs/maintenance.html',
         'Quản lý Lệnh': 'modules/wcs/job/job.html',
-        'Quản lý vật chứa': 'modules/pallet/pallet.html',
-        'Danh sách vật chứa': 'modules/master-data/pallet-list/container.html',
+        'Vật chứa': 'modules/master-data/pallet-list/container.html',
         'Tài nguyên': 'modules/rbac/resource/resource.html',
         'Loại vị trí': 'modules/master-data/node-type/node-type.html',
+        'Thiết bị': 'modules/master-data/device-list/device-list.html',
+        'Phân quyền': 'modules/rbac/permission/permission.html',
+        'Dashboard tổng quan': 'modules/dashboard/general-dashboard/general.html',
+        'Dashboard chi tiết': 'modules/dashboard/detail-dashboard/detail.html',
         // add more mappings here as modules are created
     };
 
@@ -117,7 +119,7 @@ function loadPage(title) {
         if (text === title) return true;
 
         // Special mapping for Permission Detail view to keep Role active
-        if (title === 'Phân quyền vai trò' && text === 'Vai trò') return true;
+        // if (title === 'Phân quyền vai trò' && text === 'Vai trò') return true;
 
         // Special mapping for Layout Kho to keep Danh sách Kho active
         if (title === 'Layout Kho' && text === 'Danh sách Kho') return true;
@@ -128,6 +130,10 @@ function loadPage(title) {
         const onclick = el.getAttribute('onclick') || '';
         if (onclick.includes(`loadPage('${title}')`)) return true; // Exact match including quotes
         if (onclick.includes(`loadPage("${title}")`)) return true; // Double quotes
+
+        // Special mapping for Permission view to keep Role active
+        if (title === 'Phân quyền' && text === 'Vai trò') return true;
+
         return false;
     });
 
@@ -146,8 +152,10 @@ function loadPage(title) {
                 if (linkText) parentText = linkText.innerText.trim();
             }
         }
-        // If the title logic mapped to "Vai trò" but current page is "Phân quyền vai trò", keep childText as "Phân quyền vai trò"
-        // (default behavior of variable initialization)
+        // If the title is "Phân quyền", force parent to "HỆ THỐNG / VAI TRÒ"
+        if (title === 'Phân quyền') {
+            parentText = 'Hệ thống / VAI TRÒ';
+        }
     } else {
         // fallback: try to match a top-level menu link text
         const topMatch = Array.from(document.querySelectorAll('.menu-link .link-text')).find(span => span.innerText.trim() === title);
@@ -679,7 +687,7 @@ document.addEventListener('DOMContentLoaded', initFactorySelector);
 
 /* Notification Logic */
 let notifications = [
-    { id: 1, title: 'Cảnh báo tồn kho', desc: 'Vật tư VT001 sắp hết hàng (còn 5)', time: '10 phút trước', read: false },
+    { id: 1, title: 'Cảnh báo tồn kho', desc: 'sản phẩm VT001 sắp hết hàng (còn 5)', time: '10 phút trước', read: false },
     { id: 2, title: 'Nhập kho thành công', desc: 'Phiếu nhập PN005 đã được xác nhận', time: '1 giờ trước', read: false },
     { id: 3, title: 'Bảo trì hệ thống', desc: 'Hệ thống sẽ bảo trì vào 22:00 hôm nay', time: '2 giờ trước', read: true },
     { id: 4, title: 'Yêu cầu phê duyệt', desc: 'Có 2 lệnh xuất kho chờ duyệt', time: '5 giờ trước', read: true }

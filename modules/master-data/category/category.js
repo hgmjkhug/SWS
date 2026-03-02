@@ -8,15 +8,15 @@
 
     // Mock Data - Kho Cơ Khí (Expanded to 30 items) with updated Warehouse codes
     var categories = [
-        { id: 1, code: 'KC01', name: 'Kim khí & Vật tư phụ', description: 'Bulong, ốc vít, long đen, đinh, tán rivets...' },
+        { id: 1, code: 'KC01', name: 'Kim khí & sản phẩm phụ', description: 'Bulong, ốc vít, long đen, đinh, tán rivets...' },
         { id: 2, code: 'KC02', name: 'Dụng cụ Cắt gọt', description: 'Mũi khoan, dao phay, đá mài, lưỡi cưa, taro...' },
         { id: 3, code: 'KC03', name: 'Dụng cụ Cầm tay', description: 'Kìm, búa, cờ lê, mỏ lết, tuốc nơ vít, kìm bấm...' },
-        { id: 4, code: 'KC04', name: 'Vật tư Hàn', description: 'Que hàn, dây hàn, thuốc hàn, bép hàn...' },
+        { id: 4, code: 'KC04', name: 'sản phẩm Hàn', description: 'Que hàn, dây hàn, thuốc hàn, bép hàn...' },
         { id: 5, code: 'KC05', name: 'Thiết bị Đo lường', description: 'Thước kẹp, panme, đồng hồ so, thước cuộn, thước lá...' },
         { id: 6, code: 'KC06', name: 'Vòng bi & Bạc đạn', description: 'Vòng bi cầu, vòng bi côn, gối đỡ, bạc đạn...' },
         { id: 7, code: 'KC07', name: 'Dầu mỡ & Hóa chất', description: 'Dầu bôi trơn, mỡ bò, dầu chống gỉ, dung dịch tẩy rửa...' },
         { id: 8, code: 'KC08', name: 'Thiết bị điện cầm tay', description: 'Máy khoan, máy mài, máy cắt, máy chà nhám...' },
-        { id: 9, code: 'KC09', name: 'Vật tư Bảo hộ', description: 'Găng tay, kính, giày, mũ, nút tai chống ồn...' },
+        { id: 9, code: 'KC09', name: 'sản phẩm Bảo hộ', description: 'Găng tay, kính, giày, mũ, nút tai chống ồn...' },
         { id: 10, code: 'KC10', name: 'Phụ tùng máy công cụ', description: 'Chấu kẹp, mũi tâm, collet, dao tiện...' },
         { id: 11, code: 'KC11', name: 'Thép hình & Thép tấm', description: 'Thép V, U, I, thép tấm, thép tròn trơn...' },
         { id: 12, code: 'KC12', name: 'Nhôm định hình', description: 'Nhôm 3030, 4040, ke góc, nắp bịt...' },
@@ -28,7 +28,7 @@
         { id: 18, code: 'KC18', name: 'Lò xo công nghiệp', description: 'Lò xo nén, lò xo kéo, lò xo xoắn...' },
         { id: 19, code: 'KC19', name: 'Bánh xe đẩy & Con lăn', description: 'Bánh xe PU, cao su, con lăn băng tải...' },
         { id: 20, code: 'KC20', name: 'Khuôn mẫu & Linh kiện', description: 'Chốt dẫn hướng, lò xo khuôn, ty lói...' },
-        { id: 21, code: 'KC21', name: 'Vật tư mài mòn', description: 'Giấy nhám, đá mài, đá cắt, nỉ đánh bóng...' },
+        { id: 21, code: 'KC21', name: 'sản phẩm mài mòn', description: 'Giấy nhám, đá mài, đá cắt, nỉ đánh bóng...' },
         { id: 22, code: 'KC22', name: 'Keo & Băng keo', description: 'Keo 502, keo khóa ren, băng keo chịu nhiệt...' },
         { id: 23, code: 'KC23', name: 'Sơn & Dung môi', description: 'Sơn chống gỉ, sơn dầu, xăng thơm, dung môi...' },
         { id: 24, code: 'KC24', name: 'Dụng cụ khí nén', description: 'Súng xịt hơi, dây hơi, đầu nối nhanh...' },
@@ -36,7 +36,7 @@
         { id: 26, code: 'KC26', name: 'Thiết bị nâng hạ', description: 'Pa lăng, xích cẩu, ma ní, cáp vải...' },
         { id: 27, code: 'KC27', name: 'Đèn chiếu sáng', description: 'Đèn led nhà xưởng, bóng đèn huỳnh quang...' },
         { id: 28, code: 'KC28', name: 'Quạt & Thông gió', description: 'Quạt công nghiệp, quạt hút, ống gió...' },
-        { id: 29, code: 'KC29', name: 'Vật tư đóng gói', description: 'Màng PE, dây đai, xốp hơi...' },
+        { id: 29, code: 'KC29', name: 'sản phẩm đóng gói', description: 'Màng PE, dây đai, xốp hơi...' },
         { id: 30, code: 'KC30', name: 'Văn phòng phẩm xưởng', description: 'Bút viết, sổ ghi chép, kẹp hồ sơ...' }
     ];
 
@@ -214,13 +214,13 @@
         if (id) {
             const item = categories.find(c => c.id === id);
             if (item) {
-                title.innerText = 'Cập nhật nhóm vật tư';
+                title.innerText = 'Cập nhật nhóm sản phẩm';
                 document.getElementById('cat-id').value = item.id;
                 document.getElementById('cat-name').value = item.name;
                 document.getElementById('cat-desc').value = item.description;
             }
         } else {
-            title.innerText = 'Thêm mới nhóm vật tư';
+            title.innerText = 'Thêm mới nhóm sản phẩm';
         }
         modal.classList.add('show');
     }
@@ -233,7 +233,7 @@
         const desc = document.getElementById('cat-desc').value;
 
         if (!name) {
-            alert('Vui lòng nhập tên nhóm vật tư');
+            alert('Vui lòng nhập tên nhóm sản phẩm');
             return;
         }
 
@@ -266,7 +266,7 @@
         const cat = categories.find(c => c.id === id);
         const msgEl = document.getElementById('confirm-delete-message');
         if (msgEl) {
-            msgEl.innerHTML = `Bạn có chắc chắn muốn xóa nhóm vật tư <strong>${cat?.name}</strong> không?<br />Hành động này không thể hoàn tác.`;
+            msgEl.innerHTML = `Bạn có chắc chắn muốn xóa nhóm sản phẩm <strong>${cat?.name}</strong> không?<br />Hành động này không thể hoàn tác.`;
         }
         const modal = document.getElementById('delete-confirm-modal');
         if (modal) modal.classList.add('show');
@@ -283,7 +283,7 @@
             categories = categories.filter(c => !pendingDeleteCategoryIds.includes(c.id));
             document.getElementById('check-all').checked = false;
             filterCategories();
-            showToast(`Đã xóa ${pendingDeleteCategoryIds.length} nhóm vật tư!`);
+            showToast(`Đã xóa ${pendingDeleteCategoryIds.length} nhóm sản phẩm!`);
             closeDeleteConfirm();
         }
     }
@@ -310,7 +310,7 @@
         pendingDeleteCategoryIds = selected;
         const msgEl = document.getElementById('confirm-delete-message');
         if (msgEl) {
-            msgEl.innerHTML = `Bạn có chắc chắn muốn xóa <strong>${selected.length}</strong> nhóm vật tư đã chọn không?<br />Hành động này không thể hoàn tác.`;
+            msgEl.innerHTML = `Bạn có chắc chắn muốn xóa <strong>${selected.length}</strong> nhóm sản phẩm đã chọn không?<br />Hành động này không thể hoàn tác.`;
         }
         const modal = document.getElementById('delete-confirm-modal');
         if (modal) modal.classList.add('show');

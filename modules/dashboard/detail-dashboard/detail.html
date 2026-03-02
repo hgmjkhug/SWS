@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Chi Tiết</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="detail.css" />
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="clock-block">
+    <div class="clock-time" id="rt-time">00:00:00</div>
+    <div class="clock-date" id="rt-date">--</div>
+  </div>
+  <button class="btn-sync" id="btn-sync" onclick="doSync()" title="Đồng bộ">
+    <i class="fas fa-arrows-rotate"></i>
+  </button>
+</div>
+
+<div class="dash">
+
+  <!-- ROW 0: KPI STRIP -->
+  <div class="row-kpi">
+    <div class="kpi-card info">
+      <div class="kpi-label">Tổng Pallet Tồn</div>
+      <div class="kpi-val accent">23,040</div>
+      <div class="kpi-sub">Công suất: 24,000</div>
+    </div>
+    <div class="kpi-card warn">
+      <div class="kpi-label">Tỉ lệ lấp đầy</div>
+      <div class="kpi-val amber">96%</div>
+      <div class="kpi-sub"><span class="warn-tag">⚠ Gần giới hạn</span></div>
+    </div>
+    <div class="kpi-card good">
+      <div class="kpi-label">Lệnh Thành Công</div>
+      <div class="kpi-val green">1,842</div>
+      <div class="kpi-sub"><span class="good-tag">Success rate: 98.2%</span></div>
+    </div>
+    <div class="kpi-card crit">
+      <div class="kpi-label">Lệnh Lỗi</div>
+      <div class="kpi-val red">33</div>
+      <div class="kpi-sub"><span class="crit-tag">Cần retry/cancel</span></div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">Cycle Time TB</div>
+      <div class="kpi-val purple">4.2<span style="font-size:16px;font-weight:500">ph</span></div>
+      <div class="kpi-sub">Stacker Crane avg</div>
+    </div>
+    <div class="kpi-card cyan">
+      <div class="kpi-label">Throughput / Giờ</div>
+      <div class="kpi-val accent">840</div>
+      <div class="kpi-sub">Thiết kế: 900</div>
+    </div>
+  </div>
+
+  <!-- ROW 1: KANBAN + ERROR ANALYSIS -->
+  <div class="row-main">
+
+    <!-- Mission Kanban -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-table-columns"></i>Quản lý lệnh theo ưu tiên</div>
+        <span class="card-tag">MISSION KANBAN</span>
+      </div>
+      <div class="kanban-body">
+        <!-- KHẨN CẤP -->
+        <div class="kanban-col">
+          <div class="col-head">
+            <span class="col-label red"><span class="col-icon">🔴</span>Khẩn cấp</span>
+            <span class="col-count red" id="k-urgent-count">0</span>
+          </div>
+          <div class="kanban-items" id="k-urgent"></div>
+        </div>
+        <!-- ĐANG XỬ LÝ -->
+        <div class="kanban-col">
+          <div class="col-head">
+            <span class="col-label amber"><span class="col-icon">⚡</span>Đang xử lý</span>
+            <span class="col-count amber" id="k-prog-count">0</span>
+          </div>
+          <div class="kanban-items" id="k-prog"></div>
+        </div>
+        <!-- HOÀN THÀNH -->
+        <div class="kanban-col">
+          <div class="col-head">
+            <span class="col-label green"><span class="col-icon">✅</span>Hoàn thành</span>
+            <span class="col-count green" id="k-done-count">0</span>
+          </div>
+          <div class="kanban-items" id="k-done"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Analysis -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-chart-simple"></i>Phân tích lỗi</div>
+        <span class="card-tag">TOP ERRORS — 30 NGÀY</span>
+      </div>
+      <div class="err-list" id="err-list"></div>
+      <div class="err-tip" id="err-tip"></div>
+    </div>
+
+  </div>
+
+  <!-- ROW 2: CYCLE TIME + PREDICTIVE -->
+  <div class="row-ops">
+
+    <!-- Cycle Time -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-stopwatch"></i>Cycle Time</div>
+        <span class="card-tag">THỜI GIAN CHU KỲ</span>
+      </div>
+      <div class="ct-body" id="ct-body"></div>
+    </div>
+
+    <!-- Predictive Maintenance -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-screwdriver-wrench"></i>Dự báo bảo trì</div>
+        <span class="card-tag">PREDICTIVE MAINT.</span>
+      </div>
+      <div class="pred-list" id="pred-list"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="detail.js"></script>
+</body>
+</html>

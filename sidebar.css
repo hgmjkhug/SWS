@@ -84,8 +84,9 @@ body {
 
 .submenu { max-height: 0; overflow: hidden; background-color: rgba(7, 110, 184, 0.05); transition: max-height var(--transition-speed) ease, opacity var(--transition-speed) ease; opacity: 0; }
 .menu-item.open .submenu { max-height: 500px; opacity: 1; }
-.submenu a { display: flex; align-items: center; padding: 10px 20px 10px 58px; color: rgba(7, 110, 184, 0.7); text-decoration: none; font-size: 13px; transition: all 0.2s ease; min-height: 40px; }
-.submenu a:hover { color: #076EB8; background-color: rgba(7, 110, 184, 0.08); padding-left: 62px; }
+.submenu a { display: flex; align-items: center; padding: 10px 20px 10px 50px; color: rgba(7, 110, 184, 0.7); text-decoration: none; font-size: 13px; transition: all 0.2s ease; min-height: 40px; }
+.submenu a i { width: 25px; text-align: center; margin-right: 12px; color: inherit; font-size: 14px; flex-shrink: 0; }
+.submenu a:hover { color: #076EB8; background-color: rgba(7, 110, 184, 0.08); }
 .submenu a.sub-active { color: #076EB8; font-weight: 600; background-color: rgba(7, 110, 184, 0.1); }
 
 /* MAIN CONTENT */

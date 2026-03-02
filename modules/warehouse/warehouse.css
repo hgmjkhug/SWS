@@ -1,3 +1,10 @@
+/* Scrollbar styling for table body */
+.table-scroll-body::-webkit-scrollbar { width: 6px; }
+.table-scroll-body::-webkit-scrollbar-track { background: #f1f5f9; }
+.table-scroll-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+.table-scroll-body::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Các định dạng Status text inline */
 /* Main Container */
 .warehouse-container {
     padding: 24px;
@@ -91,23 +98,22 @@
 
 /* Content Wrapper */
 .content-wrapper {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    padding: 20px;
-    max-height: calc(100vh - 120px);
+    height: 100%;
 }
 
 /* Toolbar */
 .toolbar {
     display: flex;
     justify-content: flex-start;
-    margin-bottom: 16px;
-    gap: 8px;
     align-items: flex-end;
+    gap: 8px;
+    margin-bottom: 16px;
+    background: white;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .toolbar .btn-primary {
@@ -190,38 +196,78 @@
     background: #e2e8f0;
 }
 
-/* Table */
+/* --- Bảng dữ liệu chính --- */
 .table-container {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+  flex: 1; /* Để bảng chiếm phần không gian còn lại */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Cắt phần con tràn ra ngoài container */
 }
 
+/* Phần chứa bảng dữ liệu (phần tử cuộn) */
 .table-wrapper {
-    overflow-y: auto;
-    max-height: 70vh;
-    /* Allow shrinking, limit growth */
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
+  background-color: white; /* B nền trắng */
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  max-height: 70vh; /* Allow shrinking, limit growth */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Ngăn scroll cả cục, chỉ scroll tbody */
+  margin-bottom: 16px;
 }
 
+.table-scroll-head {
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.table-scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+}
+
+/* Base style cho table */
 .warehouse-table {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
+.warehouse-table tbody {
+  width: 100%;
+}
+
+/* Explicit width for alignment */
+.warehouse-table th:nth-child(1), .warehouse-table td:nth-child(1) { width: 4%; text-align: center; } /* Checkbox */
+.warehouse-table th:nth-child(2), .warehouse-table td:nth-child(2) { width: 5%; text-align: center; } /* STT */
+.warehouse-table th:nth-child(3), .warehouse-table td:nth-child(3) { width: 26%; } /* Tên kho */
+.warehouse-table th:nth-child(4), .warehouse-table td:nth-child(4) { width: 15%; text-align: center; } /* Loại kho */
+.warehouse-table th:nth-child(5), .warehouse-table td:nth-child(5) { width: 10%; text-align: center; } /* Số tầng */
+.warehouse-table th:nth-child(6), .warehouse-table td:nth-child(6) { width: 15%; text-align: center; } /* Tổng vị trí */
+.warehouse-table th:nth-child(7), .warehouse-table td:nth-child(7) { width: 15%; text-align: center; } /* Trạng thái */
+.warehouse-table th:nth-child(8), .warehouse-table td:nth-child(8) { width: 10%; text-align: center; } /* Thao tác */
+
+/* Style cho các cell TH và TD */
+.warehouse-table th,
+.warehouse-table td {
+  padding: 14px 16px; /* Giảm padding một chút để gọn gàng hơn */
+  text-align: left; /* Mặc định căn trái */
+  border-bottom: 1px solid #f1f5f9; /* Viền sáng dưới mỗi ô */
+}
+
+/* Style riêng cho thead (Tiêu đề cột) */
 .warehouse-table th {
-    background: #f8fafc;
-    color: #475569;
-    font-weight: 600;
-    font-size: 12px;
-    color: #475569;
-    padding: 12px 16px;
-    text-align: left;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    border-bottom: 1px solid #e2e8f0;
+  background-color: #076eb8; /* Background xanh đậm đặc trưng */
+  color: white;              /* Chữ trắng */
+  font-weight: 600;          /* Đậm vừa */
+  font-size: 13px;           /* Kích cỡ hợp lý cho tiêu đề */
+  text-transform: none;      /* Ko viết hoa toàn bộ nếu muốn giống ảnh mẫu */
+  position: sticky;          /* Dính ở trên khi cuộn */
+  top: 0;
+  z-index: 10;
 }
 
 .warehouse-table td {
@@ -309,12 +355,14 @@ input:checked+.slider:before {
     color: #ef4444;
 }
 
-/* Pagination */
+/* Pagination Custom */
 .pagination-wrapper {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 16px;
+    background: transparent;
+    padding: 12px 16px;
+    border-top: 1px solid #f1f5f9;
 }
 
 .page-info {

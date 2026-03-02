@@ -134,25 +134,31 @@
     <!-- Table -->
     <div class="table-container">
       <div class="table-wrapper">
-        <table class="warehouse-table">
-          <thead>
-            <tr>
-              <th style="width: 40px">
-                <input type="checkbox" id="checkAll" />
-              </th>
-              <th style="width: 50px; text-align: center">STT</th>
-              <th style="width: 25%">Tên kho</th>
-              <th style="width: 15%; text-align: center">Loại kho</th>
-              <th style="width: 100px; text-align: center">Số tầng</th>
-              <th style="width: 120px; text-align: center">Tổng vị trí</th>
-              <th style="width: 120px; text-align: center">Trạng thái</th>
-              <th style="width: 100px; text-align: center">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody id="warehouseBody">
-            <!-- Data will be rendered here -->
-          </tbody>
-        </table>
+        <div class="table-scroll-head">
+          <table class="warehouse-table">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" id="checkAll" />
+                </th>
+                <th>STT</th>
+                <th>Tên kho</th>
+                <th>Loại kho</th>
+                <th>Số tầng</th>
+                <th>Tổng vị trí</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+        <div class="table-scroll-body" id="table-scroll-body">
+          <table class="warehouse-table">
+            <tbody id="warehouseBody">
+              <!-- Data will be rendered here -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Pagination -->

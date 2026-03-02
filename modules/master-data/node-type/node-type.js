@@ -80,7 +80,7 @@
             if (totalItems === 0) {
                 infoEl.innerText = 'Không có dữ liệu';
             } else {
-                infoEl.innerText = `Hiển thị ${startItem + 1} - ${endItem} của ${totalItems} bản ghi`;
+                infoEl.innerText = `Hiển thị ${startItem + 1} - ${endItem} trong ${totalItems}`;
             }
         }
 
@@ -158,8 +158,19 @@
     };
 
     window.goToNodeTypePage = function (page) {
+        if (typeof page === 'string') {
+            page = parseInt(page);
+        }
+        
+        const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
+        if (isNaN(page) || page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+        
         currentPage = page;
         renderTable(document.getElementById('node-type-search-input')?.value || '');
+        
+        const pageInput = document.getElementById('node-type-page-input');
+        if (pageInput) pageInput.value = '';
     };
 
     // Modals
@@ -168,6 +179,14 @@
         document.getElementById('node-type-id').value = '';
         document.getElementById('node-type-name').value = '';
         document.getElementById('node-type-image').value = '';
+        
+        // Reset image preview
+        const preview = document.getElementById('node-type-image-preview');
+        if (preview) {
+            preview.src = '';
+            preview.style.display = 'none';
+        }
+        
         document.getElementById('node-type-modal').classList.add('show');
     };
 
@@ -178,7 +197,20 @@
         document.getElementById('node-type-modal-title').innerText = 'Cập nhật Loại vị trí';
         document.getElementById('node-type-id').value = item.id;
         document.getElementById('node-type-name').value = item.name;
-        document.getElementById('node-type-image').value = item.image || '';
+        document.getElementById('node-type-image').value = ''; // Reset file input
+        
+        // Show current image in preview box
+        const preview = document.getElementById('node-type-image-preview');
+        if (preview) {
+            if (item.image) {
+                preview.src = item.image;
+                preview.style.display = 'block';
+            } else {
+                preview.src = '';
+                preview.style.display = 'none';
+            }
+        }
+        
         document.getElementById('node-type-modal').classList.add('show');
     };
 
@@ -189,7 +221,13 @@
     window.saveNodeType = function () {
         const id = document.getElementById('node-type-id').value;
         const name = document.getElementById('node-type-name').value.trim();
-        const image = document.getElementById('node-type-image').value.trim();
+        const imageInput = document.getElementById('node-type-image');
+        
+        // Handle file image preview for mock
+        let image = '';
+        if (imageInput.files && imageInput.files[0]) {
+            image = URL.createObjectURL(imageInput.files[0]);
+        }
 
         if (!name) {
             if (typeof showToast === 'function') showToast('Vui lòng nhập Tên loại vị trí', 'error');
@@ -201,7 +239,9 @@
             // Update
             const index = nodeTypes.findIndex(d => d.id == id);
             if (index !== -1) {
-                nodeTypes[index] = { ...nodeTypes[index], name, image };
+                // Only update image if a new one is uploaded, otherwise keep old
+                const newImg = image ? image : nodeTypes[index].image;
+                nodeTypes[index] = { ...nodeTypes[index], name, image: newImg };
                 if (typeof showToast === 'function') showToast('Cập nhật thành công');
             }
         } else {
@@ -214,6 +254,23 @@
 
         closeNodeTypeModal();
         renderTable(document.getElementById('node-type-search-input')?.value || '');
+    };
+    
+    // Image Preview logic
+    window.previewNodeTypeImage = function(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const preview = document.getElementById('node-type-image-preview');
+                if (preview) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+            }
+            
+            reader.readAsDataURL(input.files[0]);
+        }
     };
 
     // Checkboxes

@@ -1,4 +1,4 @@
-    <link rel="stylesheet" href="device.css" />
+<link rel="stylesheet" href="device-list.css" />
 
   <body>
     <div class="device-container">
@@ -30,90 +30,6 @@
               <input type="hidden" id="group-filter-value" value="" />
             </div>
           </div>
-
-          <div class="filter-group">
-            <span class="filter-title">Trạng thái</span>
-            <div class="custom-dropdown" id="status-dropdown">
-              <div
-                class="dropdown-selected"
-                onclick="toggleDeviceDropdown('status-dropdown')"
-              >
-                <span id="status-selected-label">Tất cả trạng thái</span>
-                <i class="fas fa-chevron-down"></i>
-              </div>
-              <div class="dropdown-options">
-                <div
-                  class="dropdown-option active"
-                  data-value=""
-                  onclick="
-                    selectDeviceOption('status', '', 'Tất cả trạng thái')
-                  "
-                >
-                  Tất cả trạng thái
-                </div>
-                <div
-                  class="dropdown-option"
-                  data-value="idle"
-                  onclick="selectDeviceOption('status', 'idle', 'Idle')"
-                >
-                  Idle
-                </div>
-                <div
-                  class="dropdown-option"
-                  data-value="in_progress"
-                  onclick="
-                    selectDeviceOption('status', 'in_progress', 'In Progress')
-                  "
-                >
-                  In Progress
-                </div>
-                <div
-                  class="dropdown-option"
-                  data-value="waiting"
-                  onclick="selectDeviceOption('status', 'waiting', 'Waiting')"
-                >
-                  Waiting
-                </div>
-                <div
-                  class="dropdown-option"
-                  data-value="completed"
-                  onclick="
-                    selectDeviceOption('status', 'completed', 'Completed')
-                  "
-                >
-                  Completed
-                </div>
-              </div>
-              <input type="hidden" id="status-filter-value" value="" />
-            </div>
-          </div>
-
-          <div class="filter-group">
-            <span class="filter-title">Lệnh thực thi</span>
-            <div class="custom-dropdown" id="command-dropdown">
-              <div
-                class="dropdown-selected"
-                onclick="toggleDeviceDropdown('command-dropdown')"
-              >
-                <input
-                  type="text"
-                  id="command-search-input"
-                  placeholder="Tất cả lệnh"
-                  oninput="filterCommandOptions(this)"
-                  onfocus="openDeviceDropdown('command-dropdown')"
-                  onclick="event.stopPropagation()"
-                  autocomplete="off"
-                />
-                <i class="fas fa-chevron-down"></i>
-              </div>
-              <div class="dropdown-options">
-                <div id="command-options-list">
-                  <!-- Populated by JS -->
-                </div>
-              </div>
-              <input type="hidden" id="command-filter-value" value="" />
-            </div>
-          </div>
         </div>
 
         <div class="action-buttons">
@@ -134,8 +50,19 @@
 
       <!-- Table -->
       <div class="table-scroll-container">
-        <div class="table-scroll-body">
+        <div class="table-scroll-head">
           <table class="device-table">
+            <colgroup>
+              <col class="col-chk" />
+              <col class="col-stt" />
+              <col class="col-group" />
+              <col class="col-code" />
+              <col class="col-name" />
+              <col class="col-ip" />
+              <col class="col-port" />
+              <col class="col-protocol" />
+              <col class="col-action" />
+            </colgroup>
             <thead>
               <tr>
                 <th>
@@ -148,14 +75,28 @@
                 <th>STT</th>
                 <th>Nhóm thiết bị</th>
                 <th>Mã thiết bị</th>
+                <th>Tên thiết bị</th>
                 <th>IP</th>
                 <th>Port</th>
-                <th>Lệnh thực thi</th>
-                <th>Công đoạn</th>
-                <th>Trạng thái</th>
+                <th>Giao thức</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
+          </table>
+        </div>
+        <div class="table-scroll-body" id="table-scroll-body">
+          <table class="device-table">
+            <colgroup>
+              <col class="col-chk" />
+              <col class="col-stt" />
+              <col class="col-group" />
+              <col class="col-code" />
+              <col class="col-name" />
+              <col class="col-ip" />
+              <col class="col-port" />
+              <col class="col-protocol" />
+              <col class="col-action" />
+            </colgroup>
             <tbody id="device-table-body">
               <!-- Rows rendered by JS -->
             </tbody>
@@ -219,7 +160,7 @@
                   class="dropdown-selected"
                   onclick="toggleDeviceDropdown('modal-group-dropdown')"
                 >
-                  <span id="modal-group-selected-label">-- Chọn Nhóm --</span>
+                  <span id="modal-group-selected-label">Chọn nhóm thiết bị</span>
                   <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="dropdown-options" id="modal-group-options">
@@ -237,6 +178,24 @@
             <div class="form-group">
               <label>Port</label>
               <input type="number" id="device-port" placeholder="8080" />
+            </div>
+          </div>
+          <div class="form-row single-col">
+            <div class="form-group">
+              <label>Giao thức <span class="required">*</span></label>
+              <div class="custom-dropdown" id="modal-protocol-dropdown">
+                <div
+                  class="dropdown-selected"
+                  onclick="toggleDeviceDropdown('modal-protocol-dropdown')"
+                >
+                  <span id="modal-protocol-selected-label">Chọn giao thức</span>
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-options" id="modal-protocol-options">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+              <input type="hidden" id="device-protocol" value="" />
             </div>
           </div>
         </div>
@@ -273,7 +232,6 @@
       </div>
     </div>
 
-    <script src="device.js"></script>
-
+    <script src="device-list.js"></script>
   </body>
 </html>

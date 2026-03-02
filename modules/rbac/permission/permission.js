@@ -6,84 +6,71 @@ var permissionData = [
         id: 1,
         name: 'Theo dõi & Giám sát',
         children: [
-            { id: 11, name: 'Dashboard Tổng quan' },
-            { id: 12, name: 'Dashboard Chi tiết' }
+            { id: 101, name: 'Dashboard tổng quan' },
+            { id: 102, name: 'Dashboard chi tiết' }
         ]
     },
     {
         id: 2,
         name: 'Quản lý Kho',
         children: [
-            { id: 21, name: 'Danh sách Kho' },
-            { id: 22, name: 'Nhóm thiết bị' },
-            { id: 23, name: 'Thiết bị' }
+            { id: 201, name: 'Quản lý Kho' },
+            { id: 202, name: 'Quản lý vật chứa' },
+            { id: 203, name: 'Quản lý thiết bị' },
+            { id: 204, name: 'Lịch bảo trì thiết bị' }
         ]
     },
     {
         id: 3,
         name: 'Quản lý điều phối WCS',
         children: [
-            { id: 31, name: 'Kanban WCS' },
-            { id: 32, name: 'Quản lý Lệnh' },
-            { id: 33, name: 'Quản lý Thiết bị' },
-            { id: 34, name: 'Lịch bảo trì thiết bị' },
-            { id: 35, name: 'Giám sát Thiết bị' },
-            { id: 36, name: 'Truy vết nhập xuất' }
+            { id: 301, name: 'Kanban WCS' },
+            { id: 302, name: 'Quản lý Lệnh' },
+            { id: 303, name: 'Giám sát Thiết bị' }
         ]
     },
     {
         id: 4,
         name: 'Nhập kho',
         children: [
-            { id: 41, name: 'Lệnh nhập kho' }
+            { id: 401, name: 'Lệnh nhập kho' }
         ]
     },
     {
         id: 5,
         name: 'Xuất kho',
         children: [
-            { id: 51, name: 'Lệnh xuất kho' }
+            { id: 501, name: 'Lệnh xuất kho' }
         ]
     },
     {
         id: 6,
-        name: 'Theo dõi tồn kho',
+        name: 'Quản lý bước và quy trình',
         children: [
-            { id: 61, name: 'Theo dõi tồn kho' }
+            { id: 601, name: 'Quản lý quy trình' }
         ]
     },
     {
         id: 7,
-        name: 'Quản lý luồng và quy trình',
+        name: 'Danh mục chung',
         children: [
-            { id: 71, name: 'Quản lý bước' },
-            { id: 72, name: 'Quản lý Quy trình' }
+            { id: 701, name: 'Nhóm thiết bị' },
+            { id: 702, name: 'Thiết bị' },
+            { id: 703, name: 'Nhóm sản phẩm' },
+            { id: 704, name: 'Sản phẩm' },
+            { id: 705, name: 'Vật chứa' },
+            { id: 706, name: 'Đơn vị tính' },
+            { id: 707, name: 'Loại vị trí' }
         ]
     },
     {
         id: 8,
-        name: 'Master data',
-        children: [
-            { id: 81, name: 'Nhóm Vật tư' },
-            { id: 82, name: 'Danh mục Vật tư' },
-            { id: 83, name: 'Đơn vị tính' },
-            { id: 84, name: 'Danh mục Pallet' }
-        ]
-    },
-    {
-        id: 9,
-        name: 'Báo cáo thống kê',
-        children: [
-            { id: 91, name: 'Báo cáo Nhập/Xuất' }
-        ]
-    },
-    {
-        id: 10,
         name: 'Hệ thống',
         children: [
-            { id: 101, name: 'Tài khoản' },
-            { id: 102, name: 'Vai trò' },
-            { id: 103, name: 'Chức năng' }
+            { id: 801, name: 'Tài khoản' },
+            { id: 802, name: 'Vai trò' },
+            { id: 803, name: 'Chức năng' },
+            { id: 804, name: 'Tài nguyên' }
         ]
     }
 ];
@@ -302,6 +289,18 @@ function init() {
     renderPermissionTable();
     setupGlobalButtons();
     loadSavedPermissions();
+    
+    // Display current role name in header-left with info-banner style
+    const roleName = localStorage.getItem('current_role_name');
+    const headerLeft = document.querySelector('.header-left');
+    if (roleName && headerLeft) {
+        headerLeft.innerHTML = `
+            <div class="info-banner">
+                <i class="fas fa-info-circle"></i>
+                <span>Vai trò: <strong>${roleName}</strong></span>
+            </div>
+        `;
+    }
 }
 
 if (document.readyState === 'loading') {

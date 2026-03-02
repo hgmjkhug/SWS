@@ -72,8 +72,9 @@
         const options = document.getElementById('warehouse-options');
         const icon = dropdown.querySelector('.combo-icon');
 
-        // Load Warehouses from LocalStorage
-        const stored = localStorage.getItem('wms_warehouses');
+        // Load Warehouses from LocalStorage (Mocked in warehouse module)
+        // Usually it's stored under 'wms_warehouses_v5' in the demo
+        const stored = localStorage.getItem('wms_warehouses_v5');
         if (stored) {
             try {
                 const warehouses = JSON.parse(stored);
@@ -82,18 +83,49 @@
                 options.innerHTML = '';
                 if(allOption) options.appendChild(allOption);
 
-                // Add Warehouses
+                // Add Warehouses using the 'name' field
                 warehouses.forEach(w => {
-                    if (!w.active) return; // Skip inactive
+                    if (w.status === 'Ngưng sử dụng') return; // Skip inactive
                     const div = document.createElement('div');
                     div.className = 'dropdown-option';
-                    div.dataset.value = w.code; // Use code or ID as value
-                    div.textContent = `${w.code} - ${w.name}`;
+                    div.dataset.value = w.name; // Filter by name to keep it simple
+                    div.textContent = w.name;
                     options.appendChild(div);
                 });
+                
+                // Map mock tasks to random real warehouses for demo purposes
+                // Only if mockTasks haven't been mapped yet
+                if (mockTasks.length > 0 && mockTasks[0].warehouse.startsWith('Kho ')) {
+                    const activeWarehouses = warehouses.filter(w => w.status !== 'Ngưng sử dụng').map(w => w.name);
+                    if (activeWarehouses.length > 0) {
+                        mockTasks.forEach((t, index) => {
+                            t.warehouse = activeWarehouses[index % activeWarehouses.length];
+                        });
+                    }
+                }
             } catch(e) {
                 console.error('Error parsing warehouses', e);
             }
+        } else {
+             // Fallback if no local storage found
+             const fallbackWarehouses = ['CÔNG TY THÉP', 'TẬP ĐOÀN THACO', 'NHÀ MÁY LẮP RÁP'];
+             const allOption = options.querySelector('[data-value="all"]');
+             options.innerHTML = '';
+             if(allOption) options.appendChild(allOption);
+             
+             fallbackWarehouses.forEach(w => {
+                  const div = document.createElement('div');
+                  div.className = 'dropdown-option';
+                  div.dataset.value = w;
+                  div.textContent = w;
+                  options.appendChild(div);
+             });
+             
+             if (mockTasks[0].warehouse.startsWith('Kho ')) {
+                  mockTasks.forEach((t, index) => {
+                      t.warehouse = fallbackWarehouses[index % fallbackWarehouses.length];
+                  });
+             }
         }
 
         // Open dropdown
@@ -207,16 +239,8 @@
 
     // Render Kanban Board
     function renderBoard() {
-        // 1. Filter Data
+        // 1. Filter Data (using names now to match the dropdown)
         const filteredTasks = mockTasks.filter(task => {
-            // Simple logic: if 'all', show all. Else, match EXACTLY the code?
-            // Warehouse data uses "Code" (e.g. CSC, INDUSTRIES)
-            // Mock data uses "Kho A", "Kho B"
-            // The mismatch is problematic if filter is selected.
-            // But user approved "Kho A" removal.
-            // If user selects "INDUSTRIES", it won't match "Kho A".
-            // That's acceptable as we are moving to real data. This is a layout demo.
-            
             const matchesWarehouse = currentWarehouseFilter === 'all' || task.warehouse === currentWarehouseFilter;
             const matchesSearch = task.id.toLowerCase().includes(currentSearchTerm) || 
                                   task.device.toLowerCase().includes(currentSearchTerm);

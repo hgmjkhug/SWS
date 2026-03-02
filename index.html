@@ -80,11 +80,11 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Dashboard Tổng quan')"
-              >Dashboard Tổng quan</a
+            <a href="#" onclick="loadPage('Dashboard tổng quan')"
+              ><i class="fas fa-chart-pie"></i>Dashboard tổng quan</a
             >
-            <a href="#" onclick="loadPage('Dashboard Chi tiết')"
-              >Dashboard Chi tiết</a
+            <a href="#" onclick="loadPage('Dashboard chi tiết')"
+              ><i class="fas fa-chart-area"></i>Dashboard chi tiết</a
             >
           </div>
         </div>
@@ -99,9 +99,12 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Danh sách Kho')">Danh sách Kho</a>
-            <a href="#" onclick="loadPage('Quản lý vật chứa')">Quản lý vật chứa</a>
-            <a href="#" onclick="loadPage('Quản lý thiết bị')">Quản lý thiết bị</a>
+            <a href="#" onclick="loadPage('Quản lý Kho')"><i class="fas fa-warehouse"></i>Quản lý Kho</a>
+            <a href="#" onclick="loadPage('Quản lý vật chứa')"><i class="fas fa-pallet"></i>Quản lý vật chứa</a>
+            <a href="#" onclick="loadPage('Quản lý thiết bị')"><i class="fas fa-mobile-alt"></i>Quản lý thiết bị</a>
+             <a href="#" onclick="loadPage('Lịch bảo trì thiết bị')"
+              ><i class="fas fa-calendar-alt"></i>Lịch bảo trì thiết bị</a
+            >
           </div>
         </div>
 
@@ -115,20 +118,17 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Kanban WCS')">Kanban WCS</a>
-            <a href="#" onclick="loadPage('Quản lý Lệnh')">Quản lý Lệnh</a>
-            <a href="#" onclick="loadPage('Quản lý Thiết bị')"
+            <a href="#" onclick="loadPage('Kanban WCS')"><i class="fas fa-columns"></i>Kanban WCS</a>
+            <a href="#" onclick="loadPage('Quản lý Lệnh')"><i class="fas fa-clipboard-list"></i>Quản lý Lệnh</a>
+            <!-- <a href="#" onclick="loadPage('Quản lý Thiết bị')"
               >Quản lý Thiết bị</a
-            >
-            <a href="#" onclick="loadPage('Lịch bảo trì thiết bị')"
-              >Lịch bảo trì thiết bị</a
-            >
+            > -->
             <a href="#" onclick="loadPage('Giám sát Thiết bị')"
-              >Giám sát Thiết bị</a
+              ><i class="fas fa-desktop"></i>Giám sát Thiết bị</a
             >
-            <a href="#" onclick="loadPage('Truy vết nhập xuất')"
+            <!-- <a href="#" onclick="loadPage('Truy vết nhập xuất')"
               >Truy vết nhập xuất</a
-            >
+            > -->
           </div>
         </div>
 
@@ -142,7 +142,7 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Lệnh nhập kho')">Lệnh nhập kho</a>
+            <a href="#" onclick="loadPage('Lệnh nhập kho')"><i class="fas fa-file-import"></i>Lệnh nhập kho</a>
           </div>
         </div>
 
@@ -156,29 +156,7 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Lệnh xuất kho')">Lệnh xuất kho</a>
-          </div>
-        </div>
-
-        <!-- Theo dõi tồn kho -->
-        <div class="menu-item">
-          <div class="menu-link" onclick="toggleSubmenu(this)">
-            <div class="link-content">
-              <i class="fas fa-boxes"></i>
-              <span class="link-text">Theo dõi tồn kho</span>
-            </div>
-            <i class="fas fa-chevron-right arrow-icon"></i>
-          </div>
-          <div class="submenu">
-            <a href="#" onclick="loadPage('Theo dõi tồn kho')"
-              >Theo dõi tồn kho</a
-            >
-            <!-- <a href="#" onclick="loadPage('Kiểm kê định kỳ')"
-              >Kiểm kê định kỳ</a
-            > -->
-            <!-- <a href="#" onclick="loadPage('Quản lý chất lượng (QC)')"
-              >Quản lý chất lượng</a
-            > -->
+            <a href="#" onclick="loadPage('Lệnh xuất kho')"><i class="fas fa-file-export"></i>Lệnh xuất kho</a>
           </div>
         </div>
 
@@ -194,7 +172,7 @@
           <div class="submenu">
             <!-- <a href="#" onclick="loadPage('Quản lý bước')">Quản lý bước</a> -->
             <a href="#" onclick="loadPage('Danh sách Quy trình')"
-              >Quản lý quy trình</a
+              ><i class="fas fa-random"></i>Quản lý quy trình</a
             >
           </div>
         </div>
@@ -209,20 +187,17 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Nhóm Vật tư')">Nhóm Vật tư</a>
-            <a href="#" onclick="loadPage('Danh mục Vật tư')"
-              >Danh mục Vật tư</a
-            >
-            <a href="#" onclick="loadPage('Đơn vị tính')">Đơn vị tính</a>
-            <a href="#" onclick="loadPage('Danh sách vật chứa')"
-              >Danh sách vật chứa</a
-            >
-            <a href="#" onclick="loadPage('Nhóm thiết bị')">Nhóm thiết bị</a>
-            <a href="#" onclick="loadPage('Loại vị trí')">Loại vị trí</a>
+            <a href="#" onclick="loadPage('Nhóm thiết bị')"><i class="fas fa-layer-group"></i>Nhóm thiết bị</a>
+            <a href="#" onclick="loadPage('Thiết bị')"><i class="fas fa-mobile-alt"></i>Thiết bị</a>
+            <a href="#" onclick="loadPage('Nhóm sản phẩm')"><i class="fas fa-cubes"></i>Nhóm sản phẩm</a>
+            <a href="#" onclick="loadPage('Sản phẩm')"><i class="fas fa-box"></i>Sản phẩm</a>
+            <a href="#" onclick="loadPage('Vật chứa')"><i class="fas fa-pallet"></i>Vật chứa</a>
+            <a href="#" onclick="loadPage('Đơn vị tính')"><i class="fas fa-ruler"></i>Đơn vị tính</a>
+            <a href="#" onclick="loadPage('Loại vị trí')"><i class="fas fa-map-marker-alt"></i>Loại vị trí</a>
           </div>
         </div>
 
-        <!-- Báo cáo thống kê -->
+        <!-- Báo cáo thống kê
         <div class="menu-item">
           <div class="menu-link" onclick="toggleSubmenu(this)">
             <div class="link-content">
@@ -236,7 +211,7 @@
               >Báo cáo Nhập/Xuất</a
             >
           </div>
-        </div>
+        </div> -->
 
         <!-- Hệ thống -->
         <div class="menu-item">
@@ -248,10 +223,10 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Tài khoản')">Tài khoản</a>
-            <a href="#" onclick="loadPage('Vai trò')">Vai trò</a>
-            <a href="#" onclick="loadPage('Chức năng')">Chức năng</a>
-            <a href="#" onclick="loadPage('Tài nguyên')">Tài nguyên</a>
+            <a href="#" onclick="loadPage('Tài khoản')"><i class="fas fa-user"></i>Tài khoản</a>
+            <a href="#" onclick="loadPage('Vai trò')"><i class="fas fa-user-tag"></i>Vai trò</a>
+            <a href="#" onclick="loadPage('Chức năng')"><i class="fas fa-list"></i>Chức năng</a>
+            <a href="#" onclick="loadPage('Tài nguyên')"><i class="fas fa-folder-open"></i>Tài nguyên</a>
           </div>
         </div>
       </div>
@@ -261,6 +236,13 @@
     <main class="main-content">
       <header class="top-bar">
         <div class="page-title" id="page-title">Danh sách Kho</div>
+        
+        <!-- Info Banner inserted in Top Bar -->
+        <div style="padding: 6px 15px; margin-left: 24px; margin-right: auto; background-color: none; color: #0369a1; border-radius: 6px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-info-circle"></i>
+          <span>Các dữ liệu ở bản demo được hiển thị với vai trò người dùng là <strong>"Admin"</strong></span>
+        </div>
+
         <div style="display: flex; align-items: center">
           <!-- Factory Selector -->
           <div class="factory-selector-container">

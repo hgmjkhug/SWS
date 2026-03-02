@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quản lý vật tư - Smart WMS</title>
+    <title>Quản lý sản phẩm - Smart WMS</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -22,12 +22,12 @@
                 type="text"
                 id="product-search"
                 class="product-search-input"
-                placeholder="Tìm theo mã hoặc tên vật tư..."
+                placeholder="Tìm theo mã hoặc tên sản phẩm..."
                 oninput="filterProducts()"
               />
             </div>
             <div class="filter-group">
-              <label class="filter-title">Nhóm vật tư</label>
+              <label class="filter-title">Nhóm sản phẩm</label>
               <div
                 class="custom-dropdown"
                 id="group-filter-dropdown"
@@ -50,49 +50,7 @@
                 <input type="hidden" id="group-filter" value="" />
               </div>
             </div>
-            <div class="filter-group">
-              <label class="filter-title">Quy cách</label>
-              <div
-                class="custom-dropdown"
-                id="method-filter-dropdown"
-                style="min-width: 160px"
-              >
-                <div
-                  class="custom-dropdown-toggle"
-                  onclick="toggleFilterDropdown('method')"
-                >
-                  <span id="method-filter-display">Tất cả</span>
-                  <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="custom-dropdown-menu" id="method-filter-menu">
-                  <div
-                    class="custom-dropdown-item active"
-                    onclick="selectFilterOption('method', '', 'Tất cả')"
-                  >
-                    Tất cả
-                  </div>
-                  <div
-                    class="custom-dropdown-item"
-                    onclick="selectFilterOption('method', 'FIFO', 'FIFO')"
-                  >
-                    FIFO
-                  </div>
-                  <div
-                    class="custom-dropdown-item"
-                    onclick="selectFilterOption('method', 'LIFO', 'LIFO')"
-                  >
-                    LIFO
-                  </div>
-                  <div
-                    class="custom-dropdown-item"
-                    onclick="selectFilterOption('method', 'FEFO', 'FEFO')"
-                  >
-                    FEFO
-                  </div>
-                </div>
-                <input type="hidden" id="method-filter" value="" />
-              </div>
-            </div>
+
 
             <div class="filter-group">
               <label class="filter-title">Trạng thái</label>
@@ -169,22 +127,22 @@
             <table class="product-table product-table-head">
               <thead>
                 <tr>
-                  <th style="width: 40px">
+                  <th>
                     <input
                       type="checkbox"
                       id="check-all"
                       onchange="toggleAll(this)"
                     />
                   </th>
-                  <th style="width: 50px">STT</th>
-                  <th>Tên vật tư</th>
-                  <th>Nhóm vật tư</th>
+                  <th>STT</th>
+                  <th>Mã sản phẩm</th>
+                  <th>Tên sản phẩm</th>
+                  <th>Nhóm sản phẩm</th>
                   <th>Đơn vị tính</th>
-                  <th style="text-align: center">Khối lượng</th>
-                  <th>Quy cách</th>
+                  <th>Khối lượng</th>
                   <th>Mô tả</th>
                   <th>Trạng thái</th>
-                  <th style="width: 140px">Thao tác</th>
+                  <th>Thao tác</th>
                 </tr>
               </thead>
             </table>
@@ -228,11 +186,11 @@
       </div>
     </div>
 
-    <!-- Modal Thêm/Sửa vật tư -->
+    <!-- Modal Thêm/Sửa sản phẩm -->
     <div id="product-modal" class="modal-overlay">
       <div class="modal-box">
         <div class="modal-header">
-          <h3 class="modal-title" id="modal-title">Thêm mới vật tư</h3>
+          <h3 class="modal-title" id="modal-title">Thêm mới sản phẩm</h3>
           <button class="close-btn" onclick="closeProductModal()">
             &times;
           </button>
@@ -241,19 +199,28 @@
           <form id="product-form">
             <input type="hidden" id="prod-id" />
             <div class="form-row">
-              <div class="form-group">
-                <label>Tên vật tư <span class="required">*</span></label>
+              <div class="form-group half">
+                <label>Mã sản phẩm <span class="required">*</span></label>
+                <input
+                  type="text"
+                  id="prod-code"
+                  required
+                  placeholder="Nhập mã sản phẩm"
+                />
+              </div>
+              <div class="form-group half">
+                <label>Tên sản phẩm <span class="required">*</span></label>
                 <input
                   type="text"
                   id="prod-name"
                   required
-                  placeholder="Nhập tên vật tư"
+                  placeholder="Nhập tên sản phẩm"
                 />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group half">
-                <label>Nhóm vật tư</label>
+                <label>Nhóm sản phẩm</label>
                 <div class="custom-dropdown" id="group-dropdown">
                   <div
                     class="custom-dropdown-toggle"
@@ -411,50 +378,6 @@
             </div>
             <div class="form-row">
               <div class="form-group half">
-                <label>Quy cách <span class="required">*</span></label>
-                <div class="custom-dropdown" id="export-method-dropdown">
-                  <div
-                    class="custom-dropdown-toggle"
-                    onclick="toggleExportMethodDropdown()"
-                  >
-                    <span id="selected-export-method-span"
-                      >-- Chọn phương thức --</span
-                    >
-                    <i
-                      class="fas fa-chevron-down"
-                      style="font-size: 12px; color: #64748b"
-                    ></i>
-                  </div>
-                  <div
-                    class="custom-dropdown-menu"
-                    id="export-method-dropdown-menu"
-                  >
-                    <div
-                      class="custom-dropdown-item"
-                      onclick="selectExportMethod('FIFO', 'FIFO')"
-                      title="First In First Out - Nhập trước xuất trước"
-                    >
-                      FIFO
-                    </div>
-                    <div
-                      class="custom-dropdown-item"
-                      onclick="selectExportMethod('FEFO', 'FEFO')"
-                      title="First Expired First Out - Hết hạn trước xuất trước"
-                    >
-                      FEFO
-                    </div>
-                    <div
-                      class="custom-dropdown-item"
-                      onclick="selectExportMethod('LIFO', 'LIFO')"
-                      title="Last In First Out - Nhập sau xuất trước"
-                    >
-                      LIFO
-                    </div>
-                  </div>
-                  <input type="hidden" id="prod-export-method" value="" />
-                </div>
-              </div>
-              <div class="form-group half">
                 <label>Khối lượng (kg)</label>
                 <input
                   type="number"
@@ -470,7 +393,7 @@
               <textarea
                 id="prod-description"
                 rows="2"
-                placeholder="Mô tả chi tiết vật tư..."
+                placeholder="Mô tả chi tiết sản phẩm..."
               ></textarea>
             </div>
             <div class="form-group" style="margin-top: 16px">
@@ -499,7 +422,7 @@
     <div id="import-modal" class="modal-overlay">
       <div class="modal-box import-modal-box">
         <div class="modal-header">
-          <h3 class="modal-title">Import vật tư từ Excel</h3>
+          <h3 class="modal-title">Import sản phẩm từ Excel</h3>
           <button class="close-btn" onclick="closeImportModal()">
             &times;
           </button>
@@ -574,7 +497,7 @@
         </div>
         <h3 class="confirm-title">Xác nhận xóa</h3>
         <p class="confirm-message" id="confirm-delete-message">
-          Bạn có chắc chắn muốn xóa vật tư này không?<br />Hành động này không
+          Bạn có chắc chắn muốn xóa sản phẩm này không?<br />Hành động này không
           thể hoàn tác.
         </p>
         <div class="confirm-actions">
@@ -594,9 +517,9 @@
         </div>
         <h3 class="confirm-title">Xác nhận ngưng sử dụng</h3>
         <p class="confirm-message">
-          Bạn có chắc chắn muốn ngưng sử dụng vật tư
+          Bạn có chắc chắn muốn ngưng sử dụng sản phẩm
           <strong id="confirmProductName"></strong>? <br />
-          Hành động này sẽ làm vật tư không thể sử dụng trong các phiếu
+          Hành động này sẽ làm sản phẩm không thể sử dụng trong các phiếu
           nhập/xuất.
         </p>
         <div class="confirm-actions">

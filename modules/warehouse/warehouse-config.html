@@ -1,4 +1,4 @@
-  <head>
+<head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="warehouse-config.css" />
   </head>
@@ -45,6 +45,8 @@
 
       <!-- Tab Content: Khai báo (default visible) -->
       <div id="tabContentInit" class="tab-content active">
+
+        <!-- Scrollable form area -->
         <div class="init-info-form">
           <div class="init-info-row">
             <label class="init-label">Tên kho</label>
@@ -76,57 +78,44 @@
             <label class="init-label">Chiều rộng kho (ô)</label>
             <input type="number" class="init-value-box" id="initWarehouseWidth" value="5" min="1" max="256" disabled style="cursor: not-allowed;" />
           </div>
-          <div class="init-info-row init-equipment-section">
-            <label class="init-label">Thiết bị nhập<span class="required-star">*</span></label>
+
+          <!-- EQUIPMENT SECTION: Inline type assignment -->
+          <div class="init-info-row init-equipment-section" style="align-items: flex-start;">
+            <label class="init-label" style="padding-top: 10px;">Thiết bị<span class="required-star">*</span></label>
             <div class="init-equipment-container">
-              <!-- Search & Combobox -->
-              <div class="init-equipment-search-wrapper">
-                <div class="init-equipment-search">
-                  <i class="fas fa-search search-icon"></i>
-                  <input type="text" id="initEquipmentSearch" placeholder="Tìm theo mã thiết bị..." onfocus="showEquipmentList('')" oninput="filterEquipmentList('')">
-                  <i class="fas fa-chevron-down toggle-icon" onclick="toggleEquipmentList('')"></i>
-                </div>
-                <!-- Search Result Dropdown / Combobox -->
-                <div class="init-equipment-list" id="initEquipmentList">
-                  <!-- Accordion or Flat list items will be rendered here by JS -->
-                </div>
+
+              <!-- Search bar -->
+              <div class="eq-search-bar">
+                <i class="fas fa-search" style="color:#94a3b8; font-size:13px;"></i>
+                <input type="text" id="eqSearchInput" placeholder="Tìm theo mã thiết bị..." oninput="filterEqList()">
               </div>
 
-              <!-- Selected Tags -->
-              <div class="init-selected-equipment" id="initSelectedEquipment">
-                <!-- Selected equipment tags will render here -->
+              <!-- Filter tabs -->
+              <div class="eq-filter-tabs" id="eqFilterTabs">
+                <button class="eq-filter-btn active" onclick="setEqFilter('all', this)">Tất cả</button>
+                <button class="eq-filter-btn" onclick="setEqFilter('nhap', this)">Nhập</button>
+                <button class="eq-filter-btn" onclick="setEqFilter('xuat', this)">Xuất</button>
+                <button class="eq-filter-btn" onclick="setEqFilter('danang', this)">Đa năng</button>
+                <button class="eq-filter-btn" onclick="setEqFilter('unset', this)">Chưa gán</button>
               </div>
+
+              <!-- Device list (always visible, scrollable internally) -->
+              <div class="eq-device-list" id="eqDeviceList"></div>
+
+              <!-- Summary accordion by type -->
+              <div class="eq-summary-accordion" id="eqSummaryAccordion"></div>
+
             </div>
           </div>
+        </div><!-- end .init-info-form (scrollable) -->
 
-          <div class="init-info-row init-equipment-section">
-            <label class="init-label">Thiết bị xuất<span class="required-star">*</span></label>
-            <div class="init-equipment-container">
-              <!-- Search & Combobox -->
-              <div class="init-equipment-search-wrapper">
-                <div class="init-equipment-search">
-                  <i class="fas fa-search search-icon"></i>
-                  <input type="text" id="initEquipmentSearch2" placeholder="Tìm theo mã thiết bị..." onfocus="showEquipmentList('2')" oninput="filterEquipmentList('2')">
-                  <i class="fas fa-chevron-down toggle-icon" onclick="toggleEquipmentList('2')"></i>
-                </div>
-                <!-- Search Result Dropdown / Combobox -->
-                <div class="init-equipment-list" id="initEquipmentList2">
-                  <!-- Accordion or Flat list items will be rendered here by JS -->
-                </div>
-              </div>
-
-              <!-- Selected Tags -->
-              <div class="init-selected-equipment" id="initSelectedEquipment2">
-                <!-- Selected equipment tags will render here -->
-              </div>
-            </div>
-          </div>
-          <div class="init-action-buttons">
-            <button class="init-btn-back" onclick="window.history.back()">Quay về</button>
-            <button class="init-btn-save" onclick="saveInitTab()">Lưu</button>
-          </div>
+        <!-- Action buttons pinned at bottom outside scroll area -->
+        <div class="init-action-buttons">
+          <button class="init-btn-back" onclick="window.history.back()">Quay về</button>
+          <button class="init-btn-save" onclick="saveInitTab()">Lưu</button>
         </div>
-      </div>
+
+      </div><!-- end #tabContentInit -->
 
       <!-- Tab Content: Vị trí (grid layout) -->
       <div id="tabContentLocation" class="tab-content" style="height: 100%;">

@@ -79,17 +79,20 @@
     document.addEventListener('click', function(e) {
         // Dropdown 1
         var dropdown1 = document.getElementById('initEquipmentList');
-        var container1 = document.querySelector('.init-equipment-search');
-        if (dropdown1 && container1 && dropdown1.classList.contains('show')) {
-            if (!container1.contains(e.target)) {
+        var input1 = document.getElementById('initEquipmentSearch');
+        if (dropdown1 && input1 && dropdown1.classList.contains('show')) {
+            var wrapper1 = input1.closest('.init-equipment-search-wrapper');
+            if (wrapper1 && !wrapper1.contains(e.target)) {
                 dropdown1.classList.remove('show');
             }
         }
+        
         // Dropdown 2
         var dropdown2 = document.getElementById('initEquipmentList2');
-        var container2 = document.querySelectorAll('.init-equipment-search')[1];
-        if (dropdown2 && container2 && dropdown2.classList.contains('show')) {
-            if (!container2.contains(e.target)) {
+        var input2 = document.getElementById('initEquipmentSearch2');
+        if (dropdown2 && input2 && dropdown2.classList.contains('show')) {
+            var wrapper2 = input2.closest('.init-equipment-search-wrapper');
+            if (wrapper2 && !wrapper2.contains(e.target)) {
                 dropdown2.classList.remove('show');
             }
         }
@@ -1146,15 +1149,142 @@
 
     // ===== KHAI BÁO TAB LOGIC =====
     var equipmentData = [
-        { group: 'Lifter', items: ['LIFT-001', 'LIFT-002', 'LIFT-003'] },
-        { group: 'Transfer', items: ['TRANS-001', 'TRANS-002', 'TRANS-003'] },
+        { group: 'Lifter',        items: ['LIFT-001', 'LIFT-002', 'LIFT-003'] },
+        { group: 'Transfer',      items: ['TRANS-001', 'TRANS-002', 'TRANS-003'] },
         { group: 'Stacker Crane', items: ['STACKER-001', 'STACKER-002', 'STACKER-003'] },
-        { group: 'AMR', items: ['AMR-001', 'AMR-002', 'AMR-003'] }
+        { group: 'AMR',           items: ['AMR-001', 'AMR-002', 'AMR-003'] }
     ];
+
+    // equipmentAssignment: { 'LIFT-001': 'nhap' | 'xuat' | 'danang' }
+    var equipmentAssignment = {};
+    var eqFilterMode = 'all';
+    var EQ_LABELS = { nhap: 'Nhập', xuat: 'Xuất', danang: 'Đa năng' };
+    var EQ_FULL_LABELS = { nhap: 'Thiết bị nhập', xuat: 'Thiết bị xuất', danang: 'Thiết bị đa năng' };
+
+    // ---- LocalStorage ----
+    function saveEqAssignmentToStorage() {
+        if (!currentWarehouseId) return;
+        try { localStorage.setItem('wms_eq_assign_v1_' + currentWarehouseId, JSON.stringify(equipmentAssignment)); } catch(e) {}
+    }
+    function loadEqAssignmentFromStorage() {
+        if (!currentWarehouseId) return;
+        try {
+            var raw = localStorage.getItem('wms_eq_assign_v1_' + currentWarehouseId);
+            if (raw) { equipmentAssignment = JSON.parse(raw); }
+            else if (currentWarehouse && currentWarehouse.equipmentAssignment) { equipmentAssignment = currentWarehouse.equipmentAssignment; }
+            else { equipmentAssignment = {}; }
+        } catch(e) { equipmentAssignment = {}; }
+    }
+
+    // ---- Filter ----
+    function setEqFilter(mode, btn) {
+        eqFilterMode = mode;
+        document.querySelectorAll('.eq-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+        if (btn) btn.classList.add('active');
+        renderEqDeviceList();
+    }
+    function filterEqList() { renderEqDeviceList(); }
+
+    // ---- Assign type ----
+    function assignEqType(item, type) {
+        if (equipmentAssignment[item] === type) { delete equipmentAssignment[item]; }
+        else { equipmentAssignment[item] = type; }
+        saveEqAssignmentToStorage();
+        renderEqDeviceList();
+        renderEqSummaryAccordion();
+    }
+
+    // ---- Render device list ----
+    function renderEqDeviceList() {
+        var container = document.getElementById('eqDeviceList');
+        if (!container) return;
+        var searchEl = document.getElementById('eqSearchInput');
+        var searchTerm = searchEl ? searchEl.value.toLowerCase().trim() : '';
+        var html = '';
+
+        equipmentData.forEach(function(group) {
+            var filteredItems = group.items.filter(function(item) {
+                if (searchTerm && item.toLowerCase().indexOf(searchTerm) === -1) return false;
+                var assigned = equipmentAssignment[item] || null;
+                if (eqFilterMode === 'all') return true;
+                if (eqFilterMode === 'unset') return !assigned;
+                return assigned === eqFilterMode;
+            });
+            if (filteredItems.length === 0) return;
+
+            html += '<div class="eq-group-header">' + group.group + ' <span class="eq-group-count">' + filteredItems.length + '</span></div>';
+            filteredItems.forEach(function(item) {
+                var assigned = equipmentAssignment[item] || null;
+                html += '<div class="eq-device-row">';
+                html += '<span class="eq-device-code">' + item + '</span>';
+                html += '<div class="eq-type-pills">';
+                ['nhap', 'xuat', 'danang'].forEach(function(type) {
+                    var isActive = assigned === type;
+                    html += '<button class="eq-type-pill eq-pill-' + type + (isActive ? ' active' : '') + '" onclick="assignEqType(\'' + item + '\', \'' + type + '\')">' + EQ_LABELS[type] + '</button>';
+                });
+                html += '</div></div>';
+            });
+        });
+
+        if (!html) html = '<div class="eq-empty">Không tìm thấy thiết bị phù hợp</div>';
+        container.innerHTML = html;
+    }
+
+    // ---- Render summary accordion ----
+    function renderEqSummaryAccordion() {
+        var container = document.getElementById('eqSummaryAccordion');
+        if (!container) return;
+        var types = ['nhap', 'xuat', 'danang'];
+        var hasAny = types.some(function(t) {
+            return Object.keys(equipmentAssignment).some(function(k) { return equipmentAssignment[k] === t; });
+        });
+        if (!hasAny) { container.innerHTML = ''; return; }
+
+        var html = '<div class="eq-summary-title">Danh sách đã cấu hình</div>';
+        types.forEach(function(type) {
+            var items = Object.keys(equipmentAssignment).filter(function(k) { return equipmentAssignment[k] === type; });
+            if (items.length === 0) return;
+            html += '<div class="eq-sum-group">';
+            html += '<div class="eq-sum-header" onclick="toggleEqSumGroup(\'' + type + '\')">';
+            html += '<div class="eq-sum-header-left">';
+            html += '<i class="fas fa-chevron-down eq-sum-chevron" id="eq-sum-chev-' + type + '"></i>';
+            html += '<span class="eq-sum-label eq-sum-label-' + type + '">' + EQ_FULL_LABELS[type] + '</span>';
+            html += '<span class="eq-sum-count">' + items.length + '</span>';
+            html += '</div></div>';
+            html += '<div class="eq-sum-items" id="eq-sum-items-' + type + '">';
+            items.forEach(function(item) {
+                html += '<div class="eq-sum-item"><span class="eq-sum-bullet"></span>';
+                html += '<span class="eq-sum-item-name">' + item + '</span>';
+                html += '<button class="eq-sum-remove" onclick="assignEqType(\'' + item + '\', \'' + type + '\')" title="Bỏ gán"><i class="fas fa-times"></i></button>';
+                html += '</div>';
+            });
+            html += '</div></div>';
+        });
+        container.innerHTML = html;
+    }
+
+    function toggleEqSumGroup(type) {
+        var items = document.getElementById('eq-sum-items-' + type);
+        var chev = document.getElementById('eq-sum-chev-' + type);
+        if (items) items.classList.toggle('collapsed');
+        if (chev) chev.classList.toggle('rotated');
+    }
+
+    // ---- backward-compat shims ----
+    var selectedEquipments = [];
+    var selectedEquipments2 = [];
+    function renderSelectedEquipment(suffix) {}
+    function showEquipmentList(s) {}
+    function toggleEquipmentList(s) {}
+    function filterEquipmentList(s) {}
+    function selectEquipment(item, s) {}
+    function removeEquipment(idx, s) {}
+    function renderEquipmentAccordion(s) {}
+    function toggleAccordionGroup(idx, s) {}
 
     var productData = [
         { 
-            group: 'Kim khí & Vật tư phụ', 
+            group: 'Kim khí & Sản phẩm phụ', 
             items: [
                 { code: 'KK-001', name: 'Bulong Inox 304 M8x20', quyTac: 'FIFO' },
                 { code: 'KK-002', name: 'Đai ốc M8', quyTac: 'FIFO' },
@@ -1180,7 +1310,7 @@
             ] 
         },
         { 
-            group: 'Vật tư Hàn', 
+            group: 'Sản phẩm Hàn', 
             items: [
                 { code: 'VH-001', name: 'Que hàn Kim Tín 3.2mm', quyTac: 'FIFO' },
                 { code: 'VH-002', name: 'Kính hàn điện tử', quyTac: 'FEFO' },
@@ -1221,21 +1351,10 @@
         var typeToggle = document.querySelector('#initWarehouseTypeDropdown .init-dropdown-toggle');
         if (typeToggle) typeToggle.classList.add('disabled');
         
-        // Restore equipment 1
-        if (currentWarehouse.equipments) {
-            selectedEquipments = currentWarehouse.equipments.slice();
-        } else {
-            selectedEquipments = [];
-        }
-        renderSelectedEquipment('');
-
-        // Restore equipment 2
-        if (currentWarehouse.equipments2) {
-            selectedEquipments2 = currentWarehouse.equipments2.slice();
-        } else {
-            selectedEquipments2 = [];
-        }
-        renderSelectedEquipment('2');
+        // Restore equipment assignments (new system)
+        loadEqAssignmentFromStorage();
+        renderEqDeviceList();
+        renderEqSummaryAccordion();
     }
 
     function toggleInitTypeDropdown() {
@@ -1518,8 +1637,8 @@
         if (lengthEl) currentWarehouse.warehouseLength = parseInt(lengthEl.value) || 27;
         if (widthEl) currentWarehouse.warehouseWidth = parseInt(widthEl.value) || 18;
         currentWarehouse.warehouseType = warehouseType;
-        currentWarehouse.equipments = selectedEquipments.slice();
-        currentWarehouse.equipments2 = selectedEquipments2.slice();
+        currentWarehouse.equipmentAssignment = equipmentAssignment;
+        saveEqAssignmentToStorage();
 
         currentWarehouse.configData = floorConfigs; // Save grid config
 
@@ -1611,20 +1730,20 @@
             
             html += '</div></div></div>';
             
-            // Vật tư (In-bar selection display)
+            // Sản phẩm (In-bar selection display)
             var selectedProduct = (area.selectedProducts && area.selectedProducts.length > 0) ? area.selectedProducts[0] : null;
             var displayValue = selectedProduct ? '[' + selectedProduct.code + '] ' + selectedProduct.name : '';
             var hasSelectionClass = selectedProduct ? ' has-selection' : '';
 
             html += '<div class="init-info-row init-equipment-section" style="padding: 0; margin: 0;">';
-            html += '<label class="area-field-label" style="padding-top: 10px;">Vật tư <span style="color: red;">*</span></label>';
+            html += '<label class="area-field-label" style="padding-top: 10px;">Sản phẩm <span style="color: red;">*</span></label>';
             html += '<div class="init-equipment-container">';
             html += '  <div class="init-equipment-search-wrapper' + hasSelectionClass + '">';
             html += '    <div class="init-equipment-search">';
             html += '      <i class="fas fa-search search-icon"></i>';
-            html += '      <input type="text" id="areaProductSearch-' + area.id + '" value="' + displayValue + '" placeholder="Tìm theo mã hoặc tên vật tư..." onfocus="showAreaProductList(' + area.id + ')" oninput="filterAreaProductList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selectedProduct ? 'readonly' : '') + '>';
+            html += '      <input type="text" id="areaProductSearch-' + area.id + '" value="' + displayValue + '" placeholder="Tìm theo mã hoặc tên sản phẩm..." onfocus="showAreaProductList(' + area.id + ')" oninput="filterAreaProductList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selectedProduct ? 'readonly' : '') + '>';
             if (selectedProduct && !isReadonly) {
-                html += '      <i class="fas fa-times clear-icon" onclick="removeAreaProduct(' + area.id + ', 0)"></i>';
+                html += '      <i class="fas fa-times clear-icon" title="Xóa sản phẩm" onclick="removeAreaProduct(' + area.id + ', 0)"></i>';
             }
             html += '      <i class="fas fa-chevron-down toggle-icon" onclick="' + (isReadonly ? '' : 'toggleAreaProductList(' + area.id + ')') + '"></i>';
             html += '    </div>';
@@ -1632,6 +1751,25 @@
             html += '  </div>';
             html += '</div>';
             html += '</div>';
+            
+            // Quy cách
+            var ruleOptions = ['FIFO', 'FEFO', 'LIFO'];
+            var currentRule = area.rule || 'FIFO'; // Default value
+            
+            html += '<div class="area-field area-rule" style="margin-bottom: 5px;">';
+            html += '<span class="area-field-label">Quy cách<span style="color: red;">*</span></span>';
+            html += '<div class="area-field-value">';
+            html += '<div class="area-dropdown' + (isReadonly ? ' disabled' : '') + '" id="areaRuleDropdown-' + area.id + '">';
+            html += '<div class="area-dropdown-toggle" onclick="' + (isReadonly ? '' : 'toggleAreaRuleDropdown(' + area.id + ')') + '">';
+            html += '<span>' + currentRule + '</span>';
+            html += '<i class="fas fa-chevron-down" style="font-size: 12px; color: #8c8c8c"></i>';
+            html += '</div>';
+            html += '<div class="area-dropdown-menu">';
+            for(var r=0; r<ruleOptions.length; r++) {
+                var isSel = (currentRule === ruleOptions[r]);
+                html += '<div class="area-dropdown-item' + (isSel ? ' selected' : '') + '" onclick="' + (isReadonly ? '' : 'selectAreaRule(' + area.id + ', \'' + ruleOptions[r] + '\')') + '">' + ruleOptions[r] + '</div>';
+            }
+            html += '</div></div></div></div>';
             
             // Vị trí
             var areaPositionsCount = area.positions ? area.positions.length : 0;
@@ -1707,6 +1845,34 @@
     }
 
     /**
+     * Handlers for Rule dropdown
+     */
+    function toggleAreaRuleDropdown(areaId) {
+        var dropdowns = document.querySelectorAll('.area-dropdown');
+        dropdowns.forEach(function(d) {
+            if (d.id !== 'areaRuleDropdown-' + areaId) {
+                d.classList.remove('open');
+            }
+        });
+        
+        var dropdown = document.getElementById('areaRuleDropdown-' + areaId);
+        if (dropdown && !dropdown.classList.contains('disabled')) {
+            dropdown.classList.toggle('open');
+        }
+    }
+
+    function selectAreaRule(areaId, rule) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area) {
+            area.rule = rule;
+            renderAreaCards();
+            var dropdown = document.getElementById('areaRuleDropdown-' + areaId);
+            if (dropdown) dropdown.classList.remove('open');
+            saveWarehouseConfig();
+        }
+    }
+
+    /**
      * Add a new empty area
      */
     function addArea() {
@@ -1720,6 +1886,7 @@
             color: '#38A0F0',
             positions: [],
             direction: '',
+            rule: 'FIFO',
             collapsed: false
         });
         renderAreaCards();
@@ -1866,7 +2033,7 @@
         });
 
         if (results.length === 0) {
-            list.innerHTML = '<div class="init-equipment-list"><div class="item">Không tìm thấy vật tư</div></div>';
+            list.innerHTML = '<div class="init-equipment-list"><div class="item">Không tìm thấy sản phẩm</div></div>';
         } else {
             var area = areaData.find(function(a) { return a.id === areaId; });
             var selectedCodes = (area && area.selectedProducts) ? area.selectedProducts.map(function(p){return p.code;}) : [];
@@ -1892,14 +2059,9 @@
             productData.map(function(group, gIdx) {
                 var itemsHtml = group.items.map(function(item) {
                     var isSelected = selectedCodes.indexOf(item.code) > -1;
-                    var qt = item.quyTac || '';
-                    var qtColor = { 'FIFO': '#0284c7', 'FEFO': '#16a34a', 'LIFO': '#d97706' };
-                    var qtBg    = { 'FIFO': '#e0f2fe', 'FEFO': '#dcfce7', 'LIFO': '#fef3c7' };
-                    var qtBadge = qt ? '<span style="margin-left:auto;flex-shrink:0;background:' + (qtBg[qt]||'#f1f5f9') + ';color:' + (qtColor[qt]||'#64748b') + ';font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;">' + qt + '</span>' : '';
                     return '<div class="accordion-item ' + (isSelected ? 'selected' : '') + '" style="display:flex;align-items:center;gap:6px;" onclick="selectAreaProduct(' + areaId + ', \'' + item.code + '\', \'' + item.name + '\'); event.stopPropagation();">' +
                            '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">[' + item.code + '] ' + item.name + '</span>' +
-                           qtBadge +
-                           (isSelected ? '<i class="fas fa-check" style="color:#076EB8;font-size:10px;flex-shrink:0;"></i>' : '') +
+                           (isSelected ? '<i class="fas fa-check" style="color:#076EB8;font-size:10px;flex-shrink:0;margin-left:auto;"></i>' : '') +
                            '</div>';
                 }).join('');
 
@@ -2598,6 +2760,15 @@
     window.selectEquipment = selectEquipment;
     window.removeEquipment = removeEquipment;
     window.toggleAccordionGroup = toggleAccordionGroup;
+    // New inline-assignment equipment system
+    window.assignEqType = assignEqType;
+    window.setEqFilter = setEqFilter;
+    window.filterEqList = filterEqList;
+    window.toggleEqSumGroup = toggleEqSumGroup;
+    window.assignEqType = assignEqType;
+    window.setEqFilter = setEqFilter;
+    window.filterEqList = filterEqList;
+    window.toggleEqSumGroup = toggleEqSumGroup;
     window.toggleLocationDirDropdown = toggleLocationDirDropdown;
     window.updateLocationDirection = updateLocationDirection;
     window.addLocationQRCode = addLocationQRCode;
@@ -2620,6 +2791,8 @@
     window.filterAreaProductList = filterAreaProductList;
     window.toggleAreaDirectionDropdown = toggleAreaDirectionDropdown;
     window.selectAreaDirection = selectAreaDirection;
+    window.toggleAreaRuleDropdown = toggleAreaRuleDropdown;
+    window.selectAreaRule = selectAreaRule;
 
     // Auto-init if DOM is ready
     if (document.readyState === 'loading') {
