@@ -149,7 +149,9 @@
                 <td><input type="checkbox" class="row-checkbox" value="${item.id}" onchange="window.toggleBulkDeleteBtn()"></td>
                 <td style="text-align: center;">${startIndex + index + 1}</td>
                 <td style="color: #2563eb; cursor: pointer; font-weight: 500;">
-                    <span class="warehouse-name-cell" title="${item.name}" onclick="window.configureWarehouse(${item.id})">
+                    <span class="warehouse-name-cell ${item.status === 'Mới tạo' ? '' : 'disabled'}" 
+                          title="${item.status === 'Mới tạo' ? item.name : 'Chỉ có thể cấu hình kho mới tạo'}" 
+                          onclick="${item.status === 'Mới tạo' ? `window.configureWarehouse(${item.id})` : ''}">
                         ${item.name}
                     </span>
                 </td>
@@ -163,7 +165,11 @@
                 </td>
                 <td style="text-align: center;">
                     <div style="display: flex; gap: 4px; justify-content: center;">
-                        <div class="action-icon" onclick="window.configureWarehouse(${item.id})" title="Cấu hình layout kho"><i class="fas fa-cog"></i></div>
+                        <div class="action-icon ${item.status === 'Mới tạo' ? '' : 'disabled'}" 
+                             onclick="${item.status === 'Mới tạo' ? `window.configureWarehouse(${item.id})` : ''}" 
+                             title="${item.status === 'Mới tạo' ? 'Cấu hình layout kho' : 'Chỉ có thể cấu hình kho mới tạo'}">
+                             <i class="fas fa-cog"></i>
+                        </div>
                         <div class="action-icon" onclick="window.editWarehouse(${item.id})" title="Chỉnh sửa"><i class="fas fa-edit"></i></div>
                         <div class="action-icon delete" onclick="window.deleteWarehouse(${item.id})" title="Xóa"><i class="fas fa-trash"></i></div>
                     </div>

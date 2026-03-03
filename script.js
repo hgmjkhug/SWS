@@ -78,7 +78,7 @@ function loadPage(title) {
         'Quản lý bước': 'modules/workflow-step/workflow-step.html',
         'Phân hệ': 'modules/rbac/module/module.html',
         'Chức năng': 'modules/rbac/menu/menu.html',
-        'Lịch bảo trì thiết bị': 'modules/wcs/maintenance.html',
+        'Quản lý bảo trì': 'modules/maintenance/maintenance.html',
         'Quản lý Lệnh': 'modules/wcs/job/job.html',
         'Vật chứa': 'modules/master-data/pallet-list/container.html',
         'Tài nguyên': 'modules/rbac/resource/resource.html',
@@ -87,6 +87,9 @@ function loadPage(title) {
         'Phân quyền': 'modules/rbac/permission/permission.html',
         'Dashboard tổng quan': 'modules/dashboard/general-dashboard/general.html',
         'Dashboard chi tiết': 'modules/dashboard/detail-dashboard/detail.html',
+        'Hồ sơ': 'modules/info/info.html',
+        'Quy cách': 'modules/master-data/method/method.html',
+        'Quản lý sản phẩm': 'modules/product-method/product-method.html',
         // add more mappings here as modules are created
     };
 
@@ -124,8 +127,8 @@ function loadPage(title) {
         // Special mapping for Layout Kho to keep Danh sách Kho active
         if (title === 'Layout Kho' && text === 'Danh sách Kho') return true;
 
-        // Special mapping for Cấu hình Kho to keep Danh sách Kho active
-        if (title === 'Cấu hình Kho' && text === 'Danh sách Kho') return true;
+        // Special mapping for Cấu hình Kho to keep Quản lý Kho active
+        if (title === 'Cấu hình Kho' && text === 'Quản lý Kho') return true;
 
         const onclick = el.getAttribute('onclick') || '';
         if (onclick.includes(`loadPage('${title}')`)) return true; // Exact match including quotes
@@ -355,10 +358,10 @@ document.addEventListener('click', (e) => {
 });
 
 function openProfileModal() {
-    const modal = document.getElementById('profile-modal');
-    if (modal) {
-        modal.classList.add('show');
-        document.getElementById('user-dropdown').classList.remove('show');
+    if (window.loadPage) {
+        window.loadPage('Hồ sơ');
+        const dropdown = document.getElementById('user-dropdown');
+        if (dropdown) dropdown.classList.remove('show');
     }
 }
 
@@ -522,15 +525,7 @@ function showToast(message, type = 'success') {
     toast.innerHTML = `
         <i class="fas ${iconClass}" style="font-size: 18px;"></i>
         <span style="flex: 1;">${message}</span>
-        <div class="app-toast-progress" style="
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 3px;
-            background: ${progressColor};
-            width: 100%;
-            animation: toastProgress 3s linear forwards;
-        "></div>
+        <div class="app-toast-progress"></div>
     `;
 
     container.appendChild(toast);

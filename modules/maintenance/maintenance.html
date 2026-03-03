@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="maintenance.css" />
+</head>
+<body>
+<div class="maintenance-module">
+  <!-- Header / Tabs -->
+  <div class="module-header">
+    <div class="tabs-control">
+      <button class="tab-btn active" onclick="switchMaintenanceTab('list')">Danh sách bảo trì</button>
+      <button class="tab-btn" onclick="switchMaintenanceTab('monitoring')">Giám sát bảo trì</button>
+    </div>
+  </div>
+
+  <!-- Tab: List -->
+  <div class="tab-content active" id="tab-list">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="maintenance-search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="device-search" placeholder="Tìm mã / tên thiết bị..." oninput="filterMaintenanceList()">
+        </div>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn-bulk-action" id="btn-bulk-maintenance" disabled onclick="handleBulkMaintenance()">
+          <i class="fas fa-tools"></i> Bảo trì hàng loạt (<span id="selected-count">0</span>)
+        </button>
+      </div>
+    </div>
+
+    <!-- Accordion Table -->
+    <div class="table-container">
+      <table class="maintenance-table">
+        <thead>
+          <tr>
+            <th width="45" class="text-center"><input type="checkbox" id="select-all" onclick="toggleSelectAll(this)"></th>
+            <th width="55" class="text-center">STT</th>
+            <th width="150">Nhóm thiết bị</th>
+            <th width="140">Mã thiết bị</th>
+            <th width="180">Tên thiết bị</th>
+            <th width="120" class="text-center">Số lần BT</th>
+            <th width="145" class="text-center">Bảo trì lần cuối</th>
+            <th width="145" class="text-center">Bảo trì tiếp theo</th>
+            <th width="120" class="text-center">Bảo trì</th>
+            <th width="100" class="text-center">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="maintenance-list-body"></tbody>
+      </table>
+    </div>
+
+    <div class="pagination-bar">
+      <div class="pagination-info" id="pagination-info"></div>
+      <div class="pagination-controls" id="pagination-controls"></div>
+    </div>
+  </div>
+
+  <!-- Tab: Monitoring -->
+  <div class="tab-content" id="tab-monitoring">
+    <div class="monitoring-filters">
+      <div class="filter-group">
+        <label>Tìm thiết bị</label>
+        <div class="searchable-combobox" id="device-combobox">
+          <div class="combobox-input-wrap">
+            <i class="fas fa-search combobox-icon"></i>
+            <input type="text" placeholder="Mã/Tên thiết bị..." onfocus="showDeviceOptions()" oninput="filterDeviceOptions(this)" autocomplete="off">
+            <span class="combobox-clear" id="combobox-clear" onclick="clearDeviceFilter()" style="display:none"><i class="fas fa-times"></i></span>
+          </div>
+          <div class="options-list" id="device-options"></div>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Tháng</label>
+        <select id="month-select" class="form-select" onchange="renderCalendar()">
+          <option value="0">Tháng 1</option><option value="1">Tháng 2</option>
+          <option value="2">Tháng 3</option><option value="3">Tháng 4</option>
+          <option value="4">Tháng 5</option><option value="5">Tháng 6</option>
+          <option value="6">Tháng 7</option><option value="7">Tháng 8</option>
+          <option value="8">Tháng 9</option><option value="9">Tháng 10</option>
+          <option value="10">Tháng 11</option><option value="11">Tháng 12</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Năm</label>
+        <select id="year-select" class="form-select" onchange="renderCalendar()"></select>
+      </div>
+      <!-- Legend moved here -->
+      <div class="filter-group legend-filter-group">
+        <label>Chú thích</label>
+        <div class="calendar-legend inline">
+          <div class="legend-item"><span class="dot done"></span> Đã bảo trì</div>
+          <div class="legend-item"><span class="dot pending"></span> Chưa bảo trì</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calendar-container">
+      <div class="calendar-grid-header">
+        <div>Thứ 2</div><div>Thứ 3</div><div>Thứ 4</div><div>Thứ 5</div>
+        <div>Thứ 6</div><div>Thứ 7</div><div>Chủ nhật</div>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Record Maintenance Modal -->
+<div class="modal-overlay" id="maintenance-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title" id="maintenance-modal-title">Ghi nhận bảo trì</h3>
+      <span class="close-modal" onclick="closeModal('maintenance-modal')">&times;</span>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Mã thiết bị</label>
+          <input type="text" id="modal-device-code" readonly class="form-input readonly">
+        </div>
+        <div class="form-field">
+          <label>Tên thiết bị</label>
+          <input type="text" id="modal-device-name" readonly class="form-input readonly">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Ngày bảo trì</label>
+          <input type="date" id="modal-maintenance-date" class="form-input">
+        </div>
+        <div class="form-field">
+          <label>Người thực hiện</label>
+          <input type="text" id="modal-technician" class="form-input" placeholder="Tên kỹ thuật viên...">
+        </div>
+      </div>
+      <div class="form-field full">
+        <label>Kết quả bảo trì</label>
+        <select id="modal-result" class="form-input">
+          <option value="ok">Hoàn thành - Thiết bị hoạt động tốt</option>
+          <option value="partial">Hoàn thành một phần</option>
+          <option value="failed">Cần sửa chữa thêm</option>
+        </select>
+      </div>
+      <div class="form-field full">
+        <label>Ghi chú</label>
+        <textarea id="modal-note" class="form-input" rows="3" placeholder="Nhập ghi chú, quan sát trong quá trình bảo trì..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('maintenance-modal')">Hủy</button>
+        <button class="btn-save" onclick="saveMaintenance()"><i class="fas fa-save"></i> Lưu kết quả</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Info Modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title">Chỉnh sửa thông tin bảo trì</h3>
+      <span class="close-modal" onclick="closeModal('edit-modal')">&times;</span>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Mã thiết bị</label>
+          <input type="text" id="edit-device-code" readonly class="form-input readonly">
+        </div>
+        <div class="form-field">
+          <label>Chu kỳ bảo trì (ngày)</label>
+          <input type="number" id="edit-cycle" class="form-input" min="1" max="365">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Bảo trì lần cuối</label>
+          <input type="date" id="edit-last-date" class="form-input">
+        </div>
+        <div class="form-field">
+          <label>Bảo trì tiếp theo</label>
+          <input type="date" id="edit-next-date" class="form-input">
+        </div>
+      </div>
+      <div class="form-field full">
+        <label>Ghi chú</label>
+        <textarea id="edit-note" class="form-input" rows="3" placeholder="Ghi chú thêm..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('edit-modal')">Hủy</button>
+        <button class="btn-save" onclick="saveEdit()"><i class="fas fa-save"></i> Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="maintenance.js"></script>
+</body>
+</html>

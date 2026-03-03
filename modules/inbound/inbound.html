@@ -326,24 +326,62 @@
         </div>
       </div>
 
-      <div class="table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th class="text-center" style="width: 50px">STT</th>
-              <th style="width: 250px">Mã lệnh nhập</th>
-              <th style="width: 250px">Vật tư</th>
-              <th style="width: 180px; text-align: left">Thông tin lưu</th>
-              <th style="width: 150px; text-align: center">Loại lệnh nhập</th>
-              <th style="width: 200px; min-width: 200px; text-align: left">Quy trình</th>
-              <th style="width: 180px; text-align: left">Thời gian</th>
-              <th class="text-center" style="width: 140px">Trạng thái</th>
-              <th style="width: 150px; max-width: 150px; text-align: left">Người tạo</th>
-              <th class="text-center" style="width: 90px">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody id="inbound-table-body"></tbody>
-        </table>
+      <div class="table-scroll-container">
+        <!-- HEADER TABLE -->
+        <div class="table-scroll-head" id="headerScroll">
+          <table class="data-table" style="table-layout: fixed;">
+            <colgroup>
+              <col style="width: 50px">
+              <col style="width: 250px">
+              <col style="width: 250px">
+              <col style="width: 180px">
+              <col style="width: 150px">
+              <col style="width: 200px">
+              <col style="width: 180px">
+              <col style="width: 140px">
+              <col style="width: 150px">
+              <col style="width: 90px">
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="text-center">STT</th>
+                <th>Mã lệnh nhập</th>
+                <th>Vật tư</th>
+                <th style="text-align: left">Thông tin lưu</th>
+                <th style="text-align: center">Loại lệnh nhập</th>
+                <th style="text-align: left">Quy trình</th>
+                <th style="text-align: left">Thời gian</th>
+                <th class="text-center">Trạng thái</th>
+                <th style="text-align: left">Người tạo</th>
+                <th class="text-center">Thao tác</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+
+        <!-- BODY TABLE -->
+        <div class="table-scroll-body" id="bodyScroll">
+          <table class="data-table" style="table-layout: fixed;">
+            <colgroup>
+              <col style="width: 50px">
+              <col style="width: 250px">
+              <col style="width: 250px">
+              <col style="width: 180px">
+              <col style="width: 150px">
+              <col style="width: 200px">
+              <col style="width: 180px">
+              <col style="width: 140px">
+              <col style="width: 150px">
+              <col style="width: 90px">
+            </colgroup>
+            <tbody id="inbound-table-body"></tbody>
+          </table>
+        </div>
+
+        <!-- CUSTOM HORIZONTAL SCROLLBAR -->
+        <div class="custom-scrollbar-container" id="customScroll">
+            <div class="custom-scrollbar-content"></div>
+        </div>
       </div>
 
       <!-- Main Table Pagination -->
@@ -448,6 +486,11 @@
             <div id="pallet-helper-text" style="font-size: 12px; color: #64748b; margin-top: 6px; margin-left: 2px;">
               <i class="fas fa-info-circle" style="margin-right: 4px; color: #3b82f6;"></i>Nhập mã Pallet P-001/P-002 để xem chức năng nhập lại Pallet
             </div>
+            <!-- Pallet Capacity Info -->
+            <div id="pallet-capacity-info" style="display:none; margin-top: 8px; padding: 8px 12px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; font-size: 12px; color: #0369a1;">
+              <i class="fas fa-box" style="margin-right: 6px;"></i>
+              Sức chứa tối đa: <strong id="pallet-max-capacity-text">0 kg</strong>
+            </div>
           </div>
 
           <!-- Vật tư và Số lượng chung 1 dòng -->
@@ -476,6 +519,7 @@
                       class="pda-input with-scanner"
                       placeholder="Nhập mã hoặc quét QR"
                       autocomplete="off"
+                      oninput="handleVatTuInput(this.value)"
                     />
                     <button
                       type="button"
@@ -484,6 +528,11 @@
                     >
                       <i class="fa-solid fa-qrcode"></i>
                     </button>
+                  </div>
+                  <!-- Material weight info -->
+                  <div id="material-weight-info" style="display:none; margin-top: 6px; padding: 6px 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; font-size: 12px; color: #15803d;">
+                    <i class="fas fa-weight-hanging" style="margin-right: 5px;"></i>
+                    Khối lượng/đơn vị: <strong id="material-weight-text">0 kg</strong>
                   </div>
                 </div>
 
@@ -499,8 +548,13 @@
                       placeholder="Nhập số lượng"
                       autocomplete="off"
                       onkeypress="return event.charCode >= 48 && event.charCode <= 57;"
-                      oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                      oninput="this.value = this.value.replace(/[^0-9]/g, ''); handleSoLuongInput(this.value)"
                     />
+                  </div>
+                  <!-- Total weight display -->
+                  <div id="total-weight-info" style="display:none; margin-top: 6px; padding: 6px 10px; border-radius: 6px; font-size: 12px; transition: all 0.2s;">
+                    <i class="fas fa-balance-scale" style="margin-right: 5px;"></i>
+                    Tổng khối lượng: <strong id="total-weight-text">0 kg</strong>
                   </div>
                 </div>
               </div>
@@ -723,6 +777,21 @@
             <input type="hidden" id="selectedProcessId" />
           </div>
           </div> <!-- End Row grouping -->
+
+          <!-- Priority Toggle -->
+          <div class="pda-form-group" style="margin-bottom: 18px;">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;">
+              <label class="priority-toggle-switch">
+                <input type="checkbox" id="inputPriority" onchange="validatePDAForm()" />
+                <span class="priority-toggle-slider"></span>
+              </label>
+              <div>
+                <div style="font-size: 14px; font-weight: 600; color: #92400e;">Ưu tiên</div>
+                <div style="font-size: 12px; color: #a16207; margin-top: 2px;">Đánh dấu lệnh nhập này là ưu tiên xử lý</div>
+              </div>
+              <i class="fas fa-star" style="margin-left: auto; color: #f59e0b; font-size: 18px;" id="priority-star-icon"></i>
+            </div>
+          </div>
 
           <!-- Submit Button -->
           <button

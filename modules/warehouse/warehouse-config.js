@@ -909,6 +909,9 @@
             else if (activeBtn.innerText.includes('Loại vị trí')) tabId = 'floor';
             setConfigTab(tabId, activeBtn);
         }
+
+        // Initialize Resizer
+        initResizer();
     }
 
     function renderFloorMenu() {
@@ -937,6 +940,53 @@
         
         const headerDisplay = document.getElementById('currentFloorDisplay');
         if (headerDisplay) headerDisplay.innerText = `Tầng ${currentFloor}`;
+    }
+
+    // ===== RESIZER LOGIC =====
+    function initResizer() {
+        var resizer = document.getElementById('configResizer');
+        var leftPanel = document.querySelector('.config-left-panel');
+        var container = document.querySelector('.config-content');
+        if (!resizer || !leftPanel || !container) return;
+
+        // Restore saved width
+        var savedWidth = localStorage.getItem('warehouse_config_sidebar_width');
+        if (savedWidth) {
+            leftPanel.style.width = savedWidth + 'px';
+        }
+
+        resizer.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            var startX = e.clientX;
+            var startWidth = leftPanel.offsetWidth;
+
+            resizer.classList.add('active');
+            container.classList.add('resizing');
+
+            function onMouseMove(e) {
+                var newWidth = startWidth + (e.clientX - startX);
+                // Limits
+                if (newWidth < 300) newWidth = 300;
+                if (newWidth > 800) newWidth = 800;
+                
+                leftPanel.style.width = newWidth + 'px';
+            }
+
+            function onMouseUp() {
+                resizer.classList.remove('active');
+                container.classList.remove('resizing');
+                localStorage.setItem('warehouse_config_sidebar_width', leftPanel.offsetWidth);
+                
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                
+                // Trigger grid resize if needed
+                if (typeof initGrid === 'function') initGrid();
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
     }
 
     // ===== FLOOR TYPE MANAGEMENT (LOẠI VỊ TRÍ) =====
@@ -1742,6 +1792,12 @@
             html += '    <div class="init-equipment-search">';
             html += '      <i class="fas fa-search search-icon"></i>';
             html += '      <input type="text" id="areaProductSearch-' + area.id + '" value="' + displayValue + '" placeholder="Tìm theo mã hoặc tên sản phẩm..." onfocus="showAreaProductList(' + area.id + ')" oninput="filterAreaProductList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selectedProduct ? 'readonly' : '') + '>';
+            
+            if (selectedProduct) {
+                var badgeClass = 'badge-' + (selectedProduct.quyTac || 'FIFO').toLowerCase();
+                html += '      <span class="badge-spec ' + badgeClass + '">' + (selectedProduct.quyTac || 'FIFO') + '</span>';
+            }
+
             if (selectedProduct && !isReadonly) {
                 html += '      <i class="fas fa-times clear-icon" title="Xóa sản phẩm" onclick="removeAreaProduct(' + area.id + ', 0)"></i>';
             }
@@ -1752,26 +1808,7 @@
             html += '</div>';
             html += '</div>';
             
-            // Quy cách
-            var ruleOptions = ['FIFO', 'FEFO', 'LIFO'];
-            var currentRule = area.rule || 'FIFO'; // Default value
-            
-            html += '<div class="area-field area-rule" style="margin-bottom: 5px;">';
-            html += '<span class="area-field-label">Quy cách<span style="color: red;">*</span></span>';
-            html += '<div class="area-field-value">';
-            html += '<div class="area-dropdown' + (isReadonly ? ' disabled' : '') + '" id="areaRuleDropdown-' + area.id + '">';
-            html += '<div class="area-dropdown-toggle" onclick="' + (isReadonly ? '' : 'toggleAreaRuleDropdown(' + area.id + ')') + '">';
-            html += '<span>' + currentRule + '</span>';
-            html += '<i class="fas fa-chevron-down" style="font-size: 12px; color: #8c8c8c"></i>';
-            html += '</div>';
-            html += '<div class="area-dropdown-menu">';
-            for(var r=0; r<ruleOptions.length; r++) {
-                var isSel = (currentRule === ruleOptions[r]);
-                html += '<div class="area-dropdown-item' + (isSel ? ' selected' : '') + '" onclick="' + (isReadonly ? '' : 'selectAreaRule(' + area.id + ', \'' + ruleOptions[r] + '\')') + '">' + ruleOptions[r] + '</div>';
-            }
-            html += '</div></div></div></div>';
-            
-            // Vị trí
+            // Vị trí (Quy cách field removed per user request)
             var areaPositionsCount = area.positions ? area.positions.length : 0;
             html += '<div class="area-field area-position" style="margin-bottom: 5px;">';
             html += '<span class="area-field-label">Vị trí<span style="color: red;">*</span></span>';
@@ -2040,8 +2077,10 @@
             
             list.innerHTML = results.map(function(item) {
                 var isSelected = selectedCodes.indexOf(item.code) > -1;
+                var badgeClass = 'badge-' + (item.quyTac || 'FIFO').toLowerCase();
                 return '<div class="item ' + (isSelected ? 'selected' : '') + '" onclick="selectAreaProduct(' + areaId + ', \'' + item.code + '\', \'' + item.name + '\')">' + 
                        '[' + item.code + '] ' + item.name + 
+                       '<span class="badge-spec ' + badgeClass + '">' + (item.quyTac || 'FIFO') + '</span>' +
                        (isSelected ? ' <i class="fas fa-check" style="color: #076EB8; margin-left: 8px;"></i>' : '') +
                        '</div>';
             }).join('');
@@ -2059,8 +2098,10 @@
             productData.map(function(group, gIdx) {
                 var itemsHtml = group.items.map(function(item) {
                     var isSelected = selectedCodes.indexOf(item.code) > -1;
+                    var badgeClass = 'badge-' + (item.quyTac || 'FIFO').toLowerCase();
                     return '<div class="accordion-item ' + (isSelected ? 'selected' : '') + '" style="display:flex;align-items:center;gap:6px;" onclick="selectAreaProduct(' + areaId + ', \'' + item.code + '\', \'' + item.name + '\'); event.stopPropagation();">' +
                            '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">[' + item.code + '] ' + item.name + '</span>' +
+                           '<span class="badge-spec ' + badgeClass + '">' + (item.quyTac || 'FIFO') + '</span>' +
                            (isSelected ? '<i class="fas fa-check" style="color:#076EB8;font-size:10px;flex-shrink:0;margin-left:auto;"></i>' : '') +
                            '</div>';
                 }).join('');
@@ -2106,9 +2147,16 @@
             });
             // Single selection: Replace any existing choices
             area.selectedProducts = [{ code: code, name: name, quyTac: quyTac }];
+            // Automatically update area rule based on product specification
+            if (quyTac) {
+                area.rule = quyTac;
+            }
         }
         
         renderAreaCards(); // Re-render to show selection in bar
+        if (typeof saveWarehouseConfig === 'function') {
+            saveWarehouseConfig();
+        }
     }
 
 
@@ -2243,8 +2291,9 @@
             var loc = locationData[i];
             var isCollapsed = loc.collapsed ? ' collapsed' : '';
             var isActive = (activeLocationId === loc.id) ? ' active' : '';
+            var isReadonly = (activeLocationId !== loc.id) ? ' readonly' : '';
             
-            html += '<div class="location-card' + isCollapsed + isActive + '" data-location-id="' + loc.id + '">';
+            html += '<div class="location-card' + isCollapsed + isActive + isReadonly + '" data-location-id="' + loc.id + '">';
             html += '<div class="card-number-label-container"><span class="card-number-label">Vị trí ' + (i + 1) + '</span></div>';
             html += '<div class="location-card-body">';
             
@@ -2341,22 +2390,20 @@
             html += '</div></div>';
 
             // Positions Selection container
-            html += '<div class="location-field">';
-            html += '<span class="location-field-label">Vị trí <span style="color: red;">*</span></span>';
+            html += '<div class="location-field area-position" style="margin-bottom: 5px;">';
+            html += '<span class="location-field-label">Vị trí<span style="color: red;">*</span></span>';
             html += '<div class="location-field-value">';
             html += '<label style="font-size: 13px; display: block; margin-bottom: 5px;">Đã chọn: <strong style="color: #076eb8">' + (loc.positions ? loc.positions.length : 0) + '</strong> vị trí</label>';
-            html += '<div class="selection-container" style="max-height: 150px; overflow-y: auto;">';
-            html += '<div class="selection-list">';
+            html += '<div class="area-tags" style="overflow-y: auto; max-height: 120px; margin-bottom: 16px;">';
             if (loc.positions && loc.positions.length > 0) {
                 for (var posIdx = 0; posIdx < loc.positions.length; posIdx++) {
                     var pos = loc.positions[posIdx];
-                    html += '<span class="tag-item">' + pos + '<span class="tag-remove" onclick="removeLocationTag(' + loc.id + ', \'' + pos + '\')">&times;</span></span>';
+                    html += '<span class="tag-item">' + pos + '<span class="tag-remove" onclick="' + (isReadonly ? '' : 'removeLocationTag(' + loc.id + ', \'' + pos + '\')') + '">&times;</span></span>';
                 }
             } else {
                 html += '<span style="color: #9cb3c9; font-size: 13px; font-style: italic; display: inline-block; padding: 5px;">Chưa chọn vị trí nào</span>';
             }
-            html += '</div></div>';
-            html += '</div></div>';
+            html += '</div></div></div>';
 
             html += '</div>'; // end location-card-body
             

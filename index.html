@@ -23,6 +23,7 @@
 
     <link rel="stylesheet" href="sidebar.css" />
     <link rel="stylesheet" href="global-table.css" />
+    <link rel="stylesheet" href="falling.css" />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
@@ -86,6 +87,9 @@
             <a href="#" onclick="loadPage('Dashboard chi tiết')"
               ><i class="fas fa-chart-area"></i>Dashboard chi tiết</a
             >
+             <a href="#" onclick="loadPage('Giám sát hoạt động')"
+              ><i class="fa-solid fa-chalkboard-user"></i>Giám sát hoạt động</a
+            >
           </div>
         </div>
 
@@ -100,10 +104,11 @@
           </div>
           <div class="submenu">
             <a href="#" onclick="loadPage('Quản lý Kho')"><i class="fas fa-warehouse"></i>Quản lý Kho</a>
+            <!-- <a href="#" onclick="loadPage('Quản lý thiết bị')"><i class="fas fa-mobile-alt"></i>Quản lý thiết bị</a> -->
+            <a href="#" onclick="loadPage('Quản lý sản phẩm')"><i class="fa-solid fa-box-open"></i>Quản lý sản phẩm</a>
             <a href="#" onclick="loadPage('Quản lý vật chứa')"><i class="fas fa-pallet"></i>Quản lý vật chứa</a>
-            <a href="#" onclick="loadPage('Quản lý thiết bị')"><i class="fas fa-mobile-alt"></i>Quản lý thiết bị</a>
-             <a href="#" onclick="loadPage('Lịch bảo trì thiết bị')"
-              ><i class="fas fa-calendar-alt"></i>Lịch bảo trì thiết bị</a
+             <a href="#" onclick="loadPage('Quản lý bảo trì')"
+              ><i class="fa-solid fa-toolbox"></i>Quản lý bảo trì</a
             >
           </div>
         </div>
@@ -191,6 +196,7 @@
             <a href="#" onclick="loadPage('Thiết bị')"><i class="fas fa-mobile-alt"></i>Thiết bị</a>
             <a href="#" onclick="loadPage('Nhóm sản phẩm')"><i class="fas fa-cubes"></i>Nhóm sản phẩm</a>
             <a href="#" onclick="loadPage('Sản phẩm')"><i class="fas fa-box"></i>Sản phẩm</a>
+            <a href="#" onclick="loadPage('Quy cách')"><i class="fa-solid fa-route"></i>Quy cách</a>
             <a href="#" onclick="loadPage('Vật chứa')"><i class="fas fa-pallet"></i>Vật chứa</a>
             <a href="#" onclick="loadPage('Đơn vị tính')"><i class="fas fa-ruler"></i>Đơn vị tính</a>
             <a href="#" onclick="loadPage('Loại vị trí')"><i class="fas fa-map-marker-alt"></i>Loại vị trí</a>
@@ -370,9 +376,7 @@
               <div class="dropdown-item" onclick="openProfileModal()">
                 <i class="far fa-id-card"></i> Hồ sơ
               </div>
-              <div class="dropdown-item" onclick="openChangePasswordModal()">
-                <i class="fas fa-key"></i> Đổi mật khẩu
-              </div>
+
               <div class="dropdown-item text-danger" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> Đăng xuất
               </div>
@@ -569,5 +573,44 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
     <script src="script.js"></script>
+
+    <!-- Global Falling Effect (Snow & Blossoms) -->
+    <div class="falling-container" id="fallingContainer"></div>
+    <script>
+      function createParticles() {
+        const container = document.getElementById('fallingContainer');
+        const particleCount = 45;
+        const animationTypes = ['fall-a', 'fall-b', 'fall-c', 'fall-d'];
+        
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement('div');
+          // Mix of snowflakes and petals (40% snow, 60% petals)
+          const isSnow = Math.random() > 0.6;
+          
+          particle.className = `particle ${isSnow ? 'snowflake' : 'petal'}`;
+          
+          // Randomly assign one of the smooth falling animations defined in falling.css
+          const animClass = animationTypes[Math.floor(Math.random() * animationTypes.length)];
+          particle.classList.add(animClass);
+
+          // Randomize size: petals (18-30px), snow (4-12px)
+          const sizeInt = Math.random() * 12 + (isSnow ? 4 : 18);
+          particle.style.width = sizeInt + 'px';
+          particle.style.height = sizeInt + 'px';
+          
+          // Randomize starting horizontal position
+          particle.style.left = Math.random() * 100 + 'vw';
+          
+          // Randomize animation duration (8s to 15s) and start delay (0s to 10s)
+          const duration = Math.random() * 7 + 8 + 's';
+          const delay = Math.random() * 10 + 's';
+          particle.style.animationDuration = duration;
+          particle.style.animationDelay = delay;
+          
+          container.appendChild(particle);
+        }
+      }
+      document.addEventListener('DOMContentLoaded', createParticles);
+    </script>
   </body>
 </html>

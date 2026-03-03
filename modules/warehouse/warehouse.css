@@ -355,6 +355,22 @@ input:checked+.slider:before {
     color: #ef4444;
 }
 
+.action-icon.disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
+.action-icon.disabled:hover {
+    background: transparent;
+    color: #94a3b8;
+}
+
+.warehouse-name-cell.disabled {
+    cursor: not-allowed;
+    color: #94a3b8 !important;
+    text-decoration: none !important;
+}
+
 /* Pagination Custom */
 .pagination-wrapper {
     display: flex;

@@ -736,7 +736,7 @@ function closeImportModal() {
 
 function downloadSampleFile() {
     const sampleData = [
-        ['Họ và tên', 'Email', 'Mã đăng nhập', 'Vai trò (1=Admin, 2=Manager, 3=Operator, 4=User)'],
+        ['Họ và tên', 'Email', 'Tên đăng nhập', 'Vai trò (1=Admin, 2=Manager, 3=Operator, 4=User)'],
         ['Nguyễn Văn Mẫu', 'mau@yopmail.com', 'NV999', 3],
         ['Trần Thị Test', 'test@yopmail.com', 'NV998', 4]
     ];
@@ -746,7 +746,7 @@ function downloadSampleFile() {
     XLSX.utils.book_append_sheet(wb, ws, 'Accounts');
     ws['!cols'] = [{ wch: 25 }, { wch: 30 }, { wch: 15 }, { wch: 45 }];
     XLSX.writeFile(wb, 'mau_import_taikhoan.xlsx');
-    showToast('Đã tải file mẫu!', 'info');
+    showToast('Đã tải file mẫu!', 'success');
 }
 
 function handleFileSelect(input) {

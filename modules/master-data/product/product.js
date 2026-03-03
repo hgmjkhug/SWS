@@ -651,7 +651,7 @@
         XLSX.utils.book_append_sheet(wb, ws, 'Products');
         ws['!cols'] = [{ wch: 15 }, { wch: 25 }, { wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 20 }];
         XLSX.writeFile(wb, 'mau_import_sanpham.xlsx');
-        showToast('Đã tải file mẫu!', 'info');
+        showToast('Đã tải file mẫu!', 'success');
     };
 
     window.handleFileSelect = function (input) {

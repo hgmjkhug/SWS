@@ -30,37 +30,94 @@ input, button, select, textarea {
 
 /* Scrollable TBODY Implementation */
 /* Scrollable Table Implementation */
-.table-container { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: auto; max-height: 70vh; position: relative; }
+.table-scroll-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    max-height: 70vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.table-scroll-head {
+    overflow: hidden; /* Hide scrollbar but keep sticky headers working if synced */
+    background-color: #076EB8;
+    flex-shrink: 0;
+    border-radius: 8px 8px 0 0;
+}
+
+.table-scroll-head::-webkit-scrollbar {
+    display: none;
+}
+
+.table-scroll-body {
+    overflow: auto;
+    overflow-x: hidden; /* Hide default horizontal scrollbar */
+    flex: 1;
+}
 
 .data-table {
-    width: max-content;
-    min-width: 100%; /* Ensure it fills the container if space allows */
-    border-collapse: separate; /* Required for sticky to work well with borders sometimes, or use collapse if careful */
+    width: 1640px;
+    table-layout: fixed;
+    border-collapse: collapse;
     border-spacing: 0;
     margin-top: 0;
 }
 
 .data-table thead th {
-    position: sticky;
-    top: 0;
-    z-index: 30; /* Higher than sticky columns (20) */
-    background-color: #f8fafc;
-    box-shadow: 0 1px 0 var(--border-color); /* Bottom border for sticky header */
+    background-color: #076EB8;
+    color: white;
+    padding: 14px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    white-space: nowrap;
 }
 
 /* Define fixed column widths strictly - 11 Columns */
-/* STT */
-.data-table th:nth-child(1) { width: 50px; min-width: 50px; max-width: 50px; text-align: center; position: sticky; left: 0; z-index: 400 !important; background-color: #f8fafc; }
-.data-table td:nth-child(1) { width: 50px; min-width: 50px; max-width: 50px; text-align: center; position: sticky; left: 0; z-index: 200 !important; background-color: #ffffff; }
+/* Specific column alignments if needed */
+.text-center { text-align: center !important; }
 
-/* Code - Width 250px */
-.data-table th:nth-child(2) { width: 250px; min-width: 250px; max-width: 250px; position: sticky; left: 50px; z-index: 400 !important; background-color: #f8fafc; text-align: left !important; padding-left: 16px !important; }
-.data-table td:nth-child(2) { width: 250px; min-width: 250px; max-width: 250px; position: sticky; left: 50px; z-index: 200 !important; background-color: #ffffff; text-align: left !important; padding-left: 16px !important; }
-
-/* Material - Width min 200px, max 250px */
-.data-table th:nth-child(3) { min-width: 200px; max-width: 250px; position: sticky; left: 300px; z-index: 400 !important; background-color: #f8fafc; box-shadow: 4px 0 6px -2px rgba(0,0,0,0.1); clip-path: inset(0 -10px 0 0); }
-.data-table td:nth-child(3) { width: 250px; min-width: 200px; max-width: 250px; position: sticky; left: 300px; z-index: 200 !important; background-color: #ffffff; box-shadow: 4px 0 6px -2px rgba(0,0,0,0.1); clip-path: inset(0 -10px 0 0); }
-
+/* ── Sticky columns: STT | Mã lệnh nhập | Vật tư ── */
+.data-table th:nth-child(1), .data-table td:nth-child(1) {
+    position: sticky;
+    left: 0;
+    z-index: 200;
+    background-color: #fff;
+    width: 50px;
+    text-align: center;
+}
+.data-table th:nth-child(2), .data-table td:nth-child(2) {
+    position: sticky;
+    left: 50px;
+    z-index: 200;
+    background-color: #fff;
+    width: 250px;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.06);
+}
+.data-table th:nth-child(3), .data-table td:nth-child(3) {
+    position: sticky;
+    left: 300px;
+    z-index: 200;
+    background-color: #fff;
+    width: 250px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.08);
+}
+/* Sticky header cells get blue bg + higher z-index */
+.data-table thead th:nth-child(1),
+.data-table thead th:nth-child(2),
+.data-table thead th:nth-child(3) {
+    background-color: #076EB8 !important;
+    z-index: 400 !important;
+}
+/* Odd row background for sticky cols */
+.data-table tbody tr:nth-child(even) td:nth-child(1),
+.data-table tbody tr:nth-child(even) td:nth-child(2),
+.data-table tbody tr:nth-child(even) td:nth-child(3) {
+    background-color: #f8fafc;
+}
 
 /* Other Columns */
 .data-table th:nth-child(4), .data-table td:nth-child(4) { width: 180px; text-align: left; padding-left: 16px; } /* Thông tin lưu */
@@ -76,37 +133,71 @@ input, button, select, textarea {
 /* Generic Header (Top Row) - Must be higher than Sticky Body Cols (200) but lower than Intersection (400) */
 .data-table thead th {
     z-index: 300 !important;
+    background-color: #076EB8 !important;
+    color: white !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
 }
 
 /* Intersection Z-Index for Top-Left Header Cells */
 /* These are handled by the specific nth-child rules above with z-index: 400 */
 
-/* Ensure background color for sticky columns */
-.data-table th { background-color: #f8fafc; color: #475569; font-weight: 400; font-size: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border-color); text-align: left; white-space: nowrap; }
+/* Ensure background color for body/non-thead th elements */
+.data-table tbody th { background-color: #f8fafc; color: #475569; font-weight: 400; font-size: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border-color); text-align: left; white-space: nowrap; }
+.material-table th { background-color: #f8fafc; color: #475569; font-weight: 400; font-size: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border-color); text-align: left; white-space: nowrap; }
 
 /* Fix hover effect on rows finding sticky cells */
 .data-table tbody tr:hover td { background-color: #f1f5f9; }
-/* Override hover background for sticky columns to ensure consistency or match hover */
 .data-table tbody tr:hover td:nth-child(1),
 .data-table tbody tr:hover td:nth-child(2),
 .data-table tbody tr:hover td:nth-child(3) {
-    background-color: #f1f5f9 !important; /* Force sticky cols to show hover color */
+    background-color: #f1f5f9 !important;
 }
 
 /* Scrollbar styling for Container */
-.table-container::-webkit-scrollbar { width: 6px; height: 8px; }
-.table-container::-webkit-scrollbar-track { 
-    margin-top: 46px; /* Push vertical scrollbar down below header */
-    margin-left: 550px; /* Offset horizontal scrollbar past STT(50)+Mã lệnh(250)+Vật tư(250) */
-    background: transparent; 
-} 
-.table-container::-webkit-scrollbar-thumb { 
+.table-scroll-body::-webkit-scrollbar { width: 6px; height: 8px; }
+.table-scroll-body::-webkit-scrollbar-track { background: transparent; } 
+.table-scroll-body::-webkit-scrollbar-thumb { 
     background: #cbd5e1; 
     border-radius: 4px; 
     border: 2px solid transparent; 
     background-clip: padding-box;
 }
-.table-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; border: 2px solid transparent; background-clip: padding-box; }
+.table-scroll-body::-webkit-scrollbar-thumb:hover { background: #94a3b8; border: 2px solid transparent; background-clip: padding-box; }
+
+/* --- Custom Horizontal Scrollbar --- */
+.custom-scrollbar-container {
+    height: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    background: transparent;
+    margin-left: 550px; /* Width of fixed columns STT(50) + Mã lệnh(250) + Vật tư(250) */
+    position: relative;
+    border-bottom-right-radius: 8px;
+}
+
+.custom-scrollbar-content {
+    width: 1090px; /* 1640px (total) - 550px (fixed) */
+    height: 1px;
+}
+
+/* Custom Scrollbar Styling (Match the design) */
+.custom-scrollbar-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.custom-scrollbar-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.custom-scrollbar-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.custom-scrollbar-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
 .text-center { text-align: center; }
 
 /* ELEMENTS */
@@ -1673,4 +1764,44 @@ input, button, select, textarea {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+}
+
+/* Priority Toggle Switch */
+.priority-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+}
+.priority-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.priority-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #d1d5db;
+    border-radius: 26px;
+    transition: 0.3s;
+}
+.priority-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.priority-toggle-switch input:checked + .priority-toggle-slider {
+    background-color: #f59e0b;
+}
+.priority-toggle-switch input:checked + .priority-toggle-slider:before {
+    transform: translateX(22px);
 }

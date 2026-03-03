@@ -18,12 +18,13 @@ const MASTER_MATERIALS = Array.from({ length: 35 }, (_, i) => ({
     ][i % 15] + ` (Loại ${Math.floor(i/15) + 1})`,
     specs: `Quy cách tiêu chuẩn nhóm ${Math.floor(i/5) + 1}`,
     unit: i % 3 === 0 ? 'kg' : (i % 3 === 1 ? 'cái' : 'thùng'),
-    weight: Math.floor(Math.random() * 100) + 10, // kg
+    weight: [15, 8, 0.3, 0.2, 0.1, 12, 0.5, 2.5, 1.2, 8, 0.4, 6, 45, 30, 2.8][i % 15], // kg per unit (consistent)
+    weightPerUnit: [15, 8, 0.3, 0.2, 0.1, 12, 0.5, 2.5, 1.2, 8, 0.4, 6, 45, 30, 2.8][i % 15],
     expiryDate: i % 4 === 0 ? null : `2026-${String((i % 12) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
     dimensions: {
-        length: Math.floor(Math.random() * 500) + 100,
-        width: Math.floor(Math.random() * 200) + 50,
-        height: Math.floor(Math.random() * 100) + 20
+        length: [600, 250, 30, 25, 20, 300, 450, 80, 150, 400, 90, 200, 380, 320, 100][i % 15],
+        width: [60, 250, 16, 16, 20, 100, 450, 80, 25, 600, 60, 150, 280, 220, 60][i % 15],
+        height: [3, 5, 10, 10, 5, 100, 5, 40, 10, 5, 60, 80, 25, 30, 20][i % 15]
     }
 }));
 
@@ -35,17 +36,24 @@ const STAFF_LIST = [
 
 const MOCK_PALLET_DATA = {
     'P-001': {
-        material: { code: 'MAT-001', name: 'Thép ống D60', totalQty: 1000 },
+        material: { code: 'MAT-001', name: 'Thep ong D60', totalQty: 1000 },
+        maxCapacity: 2000,
         history: [
             { code: 'P-011_MAT-001_200_251120', exported: 200, total: 1000, time: '2025-11-20 08:30' }
         ]
     },
     'P-002': {
-        material: { code: 'MAT-005', name: 'Bóng đèn LED Rạng Đông', totalQty: 500 },
+        material: { code: 'MAT-005', name: 'Bong den LED Rang Dong', totalQty: 500 },
+        maxCapacity: 500,
         history: [
             { code: 'P-002_MAT-005_50_240115', exported: 50, total: 500, time: '2024-01-15 10:00' }
         ]
-    }
+    },
+    'PL-1001': { maxCapacity: 1500, history: [] },
+    'PL-1002': { maxCapacity: 1000, history: [] },
+    'PL-1003': { maxCapacity: 800,  history: [] },
+    'PL-2001': { maxCapacity: 2500, history: [] },
+    'PL-2002': { maxCapacity: 2000, history: [] },
 };
 
 const MOCK_DESTINATIONS = [
@@ -680,6 +688,29 @@ function deleteInboundOrder(id) {
     });
 }
 
+function syncTableScroll() {
+    const headerScroll = document.getElementById('headerScroll');
+    const bodyScroll = document.getElementById('bodyScroll');
+    const customScroll = document.getElementById('customScroll');
+
+    if (bodyScroll && headerScroll && customScroll) {
+        // When user scrolls via the custom scrollbar (most common)
+        customScroll.addEventListener('scroll', () => {
+            const scrollLeft = customScroll.scrollLeft;
+            headerScroll.scrollLeft = scrollLeft;
+            bodyScroll.scrollLeft = scrollLeft;
+        });
+
+        // When user scrolls the table body (touch, trackpad, shift+wheel)
+        bodyScroll.addEventListener('scroll', () => {
+            const scrollLeft = bodyScroll.scrollLeft;
+            headerScroll.scrollLeft = scrollLeft;
+            customScroll.scrollLeft = scrollLeft;
+        });
+    }
+}
+
+
 
 
 
@@ -689,11 +720,13 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         initCreatorCombobox();
         renderTableBody();
+        syncTableScroll();
     });
 } else {
     // DOM already ready (dynamic load)
     initCreatorCombobox();
     renderTableBody();
+    syncTableScroll();
 }
 
 function printInboundOrder(orderId) {
@@ -948,6 +981,10 @@ function renderAddedMaterialsUI() {
     console.log('Rendering added materials list...');
 }
 
+// State for weight validation
+let currentPalletMaxCapacity = null;
+let currentMaterialWeightPerUnit = null;
+
 function handlePalletScan(code) {
     code = (code || "").trim();
     console.log('Scanning pallet:', code);
@@ -958,8 +995,34 @@ function handlePalletScan(code) {
     const btnScanVatTu = document.getElementById('btnScanVatTu');
     const historySection = document.getElementById('pallet-history-section');
     const historyBody = document.getElementById('pallet-history-body');
+    const capacityInfo = document.getElementById('pallet-capacity-info');
+    const capacityText = document.getElementById('pallet-max-capacity-text');
+
+    // For any valid pallet code (min 4 chars), show capacity
+    // Use mock data if available, otherwise generate a default based on code
+    const isValidPalletCode = code.length >= 3;
+
+    if (isValidPalletCode) {
+        // Determine capacity: from mock data or derive a default
+        let capacity = (data && data.maxCapacity) ? data.maxCapacity : null;
+        if (!capacity) {
+            // Generate deterministic default capacity from code hash
+            let hash = 0;
+            for (let i = 0; i < code.length; i++) hash = (hash * 31 + code.charCodeAt(i)) & 0xffff;
+            const capacityOptions = [500, 800, 1000, 1200, 1500, 2000, 2500, 3000];
+            capacity = capacityOptions[hash % capacityOptions.length];
+        }
+        currentPalletMaxCapacity = capacity;
+        
+        // Show capacity info
+        if (capacityInfo && capacityText) {
+            capacityText.textContent = capacity.toLocaleString() + ' kg';
+            capacityInfo.style.display = 'block';
+        }
+    }
 
     if (data) {
+
         // Calculate remaining qty
         const totalExported = data.history.reduce((sum, item) => sum + item.exported, 0);
         const remaining = data.material.totalQty - totalExported;
@@ -970,6 +1033,8 @@ function handlePalletScan(code) {
             vatTuInput.readOnly = true;
             vatTuInput.style.backgroundColor = '#f1f5f9';
             vatTuInput.style.cursor = 'not-allowed';
+            // Trigger vattu handler to show weight
+            handleVatTuInput(data.material.code);
         }
         
         if (soLuongInput) {
@@ -994,6 +1059,8 @@ function handlePalletScan(code) {
                 });
                 soLuongInput.dataset.valListener = 'true';
             }
+            // Update total weight display
+            handleSoLuongInput(soLuongInput.value);
         }
 
         // Disable scan button for pallets with history to prevent material changes
@@ -1016,15 +1083,24 @@ function handlePalletScan(code) {
             `).join('');
         }
     } else {
-        // Clear and Enable if not found or empty
-        if (vatTuInput) {
-            vatTuInput.value = '';
-            vatTuInput.disabled = false;
-            vatTuInput.style.backgroundColor = '';
+        // No mock data for this pallet - clear pre-filled material if any
+        // But keep capacity (already set for valid codes above)
+        if (!isValidPalletCode) {
+            // Code is empty/too short - clear everything
+            currentPalletMaxCapacity = null;
+            if (capacityInfo) capacityInfo.style.display = 'none';
         }
-        if (soLuongInput) {
+        
+        // Clear vattu if it was previously auto-filled
+        if (vatTuInput && vatTuInput.readOnly) {
+            vatTuInput.value = '';
+            vatTuInput.readOnly = false;
+            vatTuInput.style.backgroundColor = '';
+            vatTuInput.style.cursor = '';
+        }
+        if (soLuongInput && soLuongInput.readOnly) {
             soLuongInput.value = '';
-            soLuongInput.disabled = false;
+            soLuongInput.readOnly = false;
             soLuongInput.style.backgroundColor = '';
         }
         if (btnScanVatTu) {
@@ -1033,6 +1109,100 @@ function handlePalletScan(code) {
         if (historySection) historySection.style.display = 'none';
     }
 }
+
+// Handle vattu input - works for any format: VT001, VT-001, MAT-001, PL-1001, ABC123...
+function handleVatTuInput(code) {
+    code = (code || '').trim().toUpperCase();
+    const matWeightInfo = document.getElementById('material-weight-info');
+    const matWeightText = document.getElementById('material-weight-text');
+    
+    if (!code) {
+        currentMaterialWeightPerUnit = null;
+        if (matWeightInfo) matWeightInfo.style.display = 'none';
+        updateTotalWeightDisplay();
+        return;
+    }
+
+    // Step 1: Try exact match in MASTER_MATERIALS
+    let mat = MASTER_MATERIALS.find(m => m.code.toUpperCase() === code);
+
+    // Step 2: Strip ALL leading letters/dashes, keep only the numeric part
+    // e.g. VT001→1, VT-001→1, MAT-007→7, PL-1001→1001, ABC-12→12
+    if (!mat) {
+        const numericMatch = code.match(/(\d+)$/);
+        if (numericMatch) {
+            const num = parseInt(numericMatch[1], 10);
+            const padded = 'MAT-' + String(num).padStart(3, '0');
+            mat = MASTER_MATERIALS.find(m => m.code.toUpperCase() === padded);
+        }
+    }
+
+    if (mat) {
+        currentMaterialWeightPerUnit = mat.weightPerUnit || mat.weight || 0;
+        if (matWeightInfo && matWeightText) {
+            matWeightText.textContent = currentMaterialWeightPerUnit + ' kg/' + mat.unit;
+            matWeightInfo.style.display = 'block';
+        }
+    } else {
+        // Step 3: Fallback - generate deterministic weight from code so display always works
+        let hash = 0;
+        for (let i = 0; i < code.length; i++) hash = (hash * 31 + code.charCodeAt(i)) & 0xffff;
+        const weightOptions = [0.5, 1, 1.5, 2, 2.5, 5, 8, 10, 12, 15, 20, 25, 30, 50];
+        const unitOptions = ['kg', 'cái', 'thùng', 'kg', 'cái'];
+        currentMaterialWeightPerUnit = weightOptions[hash % weightOptions.length];
+        const unit = unitOptions[(hash >> 4) % unitOptions.length];
+        if (matWeightInfo && matWeightText) {
+            matWeightText.textContent = currentMaterialWeightPerUnit + ' kg/' + unit;
+            matWeightInfo.style.display = 'block';
+        }
+    }
+    
+    updateTotalWeightDisplay();
+    if (typeof validatePDAForm === 'function') validatePDAForm();
+}
+
+// Handle quantity input - show total weight and validate against pallet capacity
+function handleSoLuongInput(value) {
+    updateTotalWeightDisplay();
+}
+
+function updateTotalWeightDisplay() {
+    const totalWeightInfo = document.getElementById('total-weight-info');
+    const totalWeightText = document.getElementById('total-weight-text');
+    const soLuongInput = document.getElementById('inputSoLuong');
+    
+    if (!totalWeightInfo || !totalWeightText) return;
+    
+    const qty = parseFloat(soLuongInput?.value) || 0;
+    
+    if (!currentMaterialWeightPerUnit || !qty) {
+        totalWeightInfo.style.display = 'none';
+        return;
+    }
+    
+    const totalWeight = currentMaterialWeightPerUnit * qty;
+    totalWeightText.textContent = `${totalWeight.toLocaleString()} kg`;
+    totalWeightInfo.style.display = 'block';
+    
+    // Check against pallet capacity
+    if (currentPalletMaxCapacity && totalWeight > currentPalletMaxCapacity) {
+        totalWeightInfo.style.background = '#fef2f2';
+        totalWeightInfo.style.border = '1px solid #fecaca';
+        totalWeightInfo.style.color = '#dc2626';
+        if (soLuongInput) soLuongInput.style.borderColor = '#ef4444';
+        totalWeightText.innerHTML = `${totalWeight.toLocaleString()} kg <span style="font-size: 11px; margin-left: 6px;">⚠️ Vượt sức chứa (${currentPalletMaxCapacity.toLocaleString()} kg)</span>`;
+    } else {
+        totalWeightInfo.style.background = '#f0fdf4';
+        totalWeightInfo.style.border = '1px solid #bbf7d0';
+        totalWeightInfo.style.color = '#15803d';
+        if (soLuongInput) soLuongInput.style.borderColor = '';
+    }
+}
+
+// Expose to window
+window.handleVatTuInput = handleVatTuInput;
+window.handleSoLuongInput = handleSoLuongInput;
+window.updateTotalWeightDisplay = updateTotalWeightDisplay;
 
 // Expose to window
 window.handlePalletScan = handlePalletScan;
@@ -1733,6 +1903,9 @@ function downloadSampleFile() {
     a.download = 'sample_material_file.csv'; 
     a.click();
     window.URL.revokeObjectURL(url);
+    if (typeof showToast === 'function') {
+        showToast('Đã tải file mẫu!', 'success');
+    }
     return false;
 }
 
@@ -2631,6 +2804,13 @@ function openQRScanner(fieldId) {
             }
             closeQRScanner();
             
+            // Trigger appropriate handler after scan
+            if (currentScanField === 'inputPallet') {
+                handlePalletScan(decodedText);
+            } else if (currentScanField === 'inputVatTu') {
+                handleVatTuInput(decodedText);
+            }
+            
             // Validate form after scan
             validatePDAForm();
             
@@ -2717,14 +2897,29 @@ function scanImageFile(input) {
         html5QrCode = new Html5Qrcode("qr-reader");
     }
     
+    // Suppress any alert() that html5-qrcode library may trigger internally
+    if (!window._savedAlert) {
+        window._savedAlert = window.alert;
+        window.alert = () => {};
+    }
+    
     html5QrCode.scanFile(file, true)
         .then(decodedText => {
-            // On successful scan
+            // Restore alert if suppressed
+            if (window._savedAlert) { window.alert = window._savedAlert; delete window._savedAlert; }
+
             const targetField = document.getElementById(currentScanField);
             if (targetField) {
                 targetField.value = decodedText;
             }
             closeQRScanner();
+            
+            // Trigger appropriate handler after scan
+            if (currentScanField === 'inputPallet') {
+                handlePalletScan(decodedText);
+            } else if (currentScanField === 'inputVatTu') {
+                handleVatTuInput(decodedText);
+            }
             
             // Validate form after scan
             validatePDAForm();
@@ -2744,8 +2939,9 @@ function scanImageFile(input) {
             }, 100);
         })
         .catch(err => {
+            // Restore alert
+            if (window._savedAlert) { window.alert = window._savedAlert; delete window._savedAlert; }
             console.warn('Image scan error:', err);
-            alert('Không tìm thấy mã QR/Barcode trong ảnh. Vui lòng thử ảnh khác.');
             // Reset file input
             input.value = '';
         });
@@ -3368,4 +3564,3 @@ window.toggleStatusDropdown = toggleStatusDropdown;
 window.selectStatus = selectStatus;
 
 console.log('inbound.js: Script initialization complete. window.openCreateModal =', typeof window.openCreateModal);
-
