@@ -152,69 +152,101 @@
     </div>
     <div class="properties-panel" id="propertiesPanel">
       <div class="properties-header">
-        <h3>Thuộc tính bước</h3>
-        <button class="close-panel-btn" onclick="deselectNode()">
+        <div class="properties-title-group">
+          <h3>Thuộc tính bước <span id="prop-step-number"></span></h3>
+          <div id="prop-step-name" class="properties-step-name"></div>
+        </div>
+        <button class="close-panel-btn" onclick="deselectNode()" title="Đóng">
           <i class="fas fa-times"></i>
         </button>
       </div>
       <div class="properties-body">
         
         <div class="properties-form" id="propertiesForm">
-           <div class="form-group">
-              <label>Tốc độ di chuyển</label>
-              <div class="custom-dropdown" id="speedDropdown">
-                <div class="combo-wrapper" onclick="toggleSpeedDropdown()">
-                  <input type="text" class="combo-input" id="prop-speed-display" readonly value="Bình thường" style="cursor: pointer;">
-                  <i class="fas fa-chevron-down combo-icon"></i>
-                </div>
-                <div class="dropdown-options" id="speedOptionsList">
-                    <div class="dropdown-option" onclick="selectSpeed('NORMAL', 'Bình thường')">Bình thường</div>
-                    <div class="dropdown-option" onclick="selectSpeed('FAST', 'Nhanh')">Nhanh</div>
-                    <div class="dropdown-option" onclick="selectSpeed('SLOW', 'Chậm')">Chậm</div>
-                </div>
-                <input type="hidden" id="prop-speed" value="NORMAL">
+          <div class="accordion">
+            <!-- New: Trình tự vận hành Accordion -->
+            <div class="accordion-item active">
+              <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Trình tự vận hành</span>
+                <i class="fas fa-chevron-down"></i>
               </div>
-           </div>
-           
-           <div class="form-group">
-              <label>Door Time (s)</label>
-              <input type="number" id="prop-door-time" min="0" placeholder="Nhập thời gian chờ đóng/mở cửa thang">
-           </div>
-
-           <div class="form-group">
-              <label>Ngưỡng pin tự động sạc (%)</label>
-              <input type="number" id="prop-battery-threshold" min="0" max="100" placeholder="0 - 100">
-           </div>
-
-           <div class="form-group">
-              <label>Âm thanh di chuyển</label>
-              <div class="file-upload-wrapper">
-                <input type="file" id="prop-audio-file" accept="audio/*">
-                <label for="prop-audio-file" class="file-upload-label">
-                    <i class="fas fa-upload"></i> <span id="audio-filename">Chọn file âm thanh...</span>
-                </label>
+              <div class="accordion-content">
+                <div id="sequence-container">
+                  <!-- Sequence cards will be rendered here by JS -->
+                </div>
+                <div style="padding: 12px 0 16px;">
+                  <button type="button" class="btn-add-sequence" onclick="addNewSequence()">
+                    <i class="fas fa-plus"></i> Thêm trình tự
+                  </button>
+                </div>
               </div>
-           </div>
+            </div>
 
-           <div class="form-group">
-              <label>Số lần quét thử (Retry)</label>
-              <input type="number" id="prop-retry-scan" min="1" step="1" placeholder="Nhập số lần quét thử">
-           </div>
-
-           <div class="form-group">
-              <label>Tốc độ vươn càng (m/s)</label>
-              <input type="number" id="prop-fork-speed" min="0" step="0.1" placeholder="Nhập tốc độ vươn càng">
-           </div>
-
-           <div class="form-group">
-              <label>Sai số cho phép (mm)</label>
-              <input type="number" id="prop-allowed-error" min="0" step="1" placeholder="Nhập sai số cho phép">
-           </div>
-
-           <div class="form-group">
-              <label>Tải trọng tối đa (kg)</label>
-              <input type="number" id="prop-max-payload" min="0" step="10" placeholder="Nhập tải trọng tối đa">
-           </div>
+            <!-- Existing: Thông số vận hành đầu vào Accordion -->
+            <div class="accordion-item">
+              <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Thông số vận hành đầu vào</span>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="accordion-content">
+                <div class="form-group">
+                   <label>Tốc độ di chuyển</label>
+                   <div class="custom-dropdown" id="speedDropdown">
+                     <div class="combo-wrapper" onclick="toggleSpeedDropdown()">
+                       <input type="text" class="combo-input" id="prop-speed-display" readonly value="Bình thường" style="cursor: pointer;">
+                       <i class="fas fa-chevron-down combo-icon"></i>
+                     </div>
+                     <div class="dropdown-options" id="speedOptionsList">
+                         <div class="dropdown-option" onclick="selectSpeed('NORMAL', 'Bình thường')">Bình thường</div>
+                         <div class="dropdown-option" onclick="selectSpeed('FAST', 'Nhanh')">Nhanh</div>
+                         <div class="dropdown-option" onclick="selectSpeed('SLOW', 'Chậm')">Chậm</div>
+                     </div>
+                     <input type="hidden" id="prop-speed" value="NORMAL">
+                   </div>
+                </div>
+                
+                <div class="form-group">
+                   <label>Door Time (s)</label>
+                   <input type="number" id="prop-door-time" min="0" placeholder="Nhập thời gian chờ đóng/mở cửa thang">
+                </div>
+     
+                <div class="form-group">
+                   <label>Ngưỡng pin tự động sạc (%)</label>
+                   <input type="number" id="prop-battery-threshold" min="0" max="100" placeholder="0 - 100">
+                </div>
+     
+                <div class="form-group">
+                   <label>Âm thanh di chuyển</label>
+                   <div class="file-upload-wrapper">
+                     <input type="file" id="prop-audio-file" accept="audio/*">
+                     <label for="prop-audio-file" class="file-upload-label">
+                         <i class="fas fa-upload"></i> <span id="audio-filename">Chọn file âm thanh...</span>
+                     </label>
+                   </div>
+                </div>
+     
+                <div class="form-group">
+                   <label>Số lần quét thử (Retry)</label>
+                   <input type="number" id="prop-retry-scan" min="1" step="1" placeholder="Nhập số lần quét thử">
+                </div>
+     
+                <div class="form-group">
+                   <label>Tốc độ vươn càng (m/s)</label>
+                   <input type="number" id="prop-fork-speed" min="0" step="0.1" placeholder="Nhập tốc độ vươn càng">
+                </div>
+     
+                <div class="form-group">
+                   <label>Sai số cho phép (mm)</label>
+                   <input type="number" id="prop-allowed-error" min="0" step="1" placeholder="Nhập sai số cho phép">
+                </div>
+     
+                <div class="form-group">
+                   <label>Tải trọng tối đa (kg)</label>
+                   <input type="number" id="prop-max-payload" min="0" step="10" placeholder="Nhập tải trọng tối đa">
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="properties-footer">

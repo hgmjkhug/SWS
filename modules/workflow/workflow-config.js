@@ -968,6 +968,31 @@ function initWorkflowConfig(workflowId, workflowName) {
     // --- PROPERTIES PANEL LOGIC ---
     let selectedNodeRef = null;
 
+    // Operation Sequence Mock Data
+    const locationNodes = [
+        { id: 'N1', name: 'Khu vực nhập hàng', direction: 'Trên, Phải', floor: 1, aisle: 'A', row: 1 },
+        { id: 'N2', name: 'Kệ A1', direction: 'Phải', floor: 1, aisle: 'A', row: 2 },
+        { id: 'N3', name: 'Kệ A2', direction: 'Phải', floor: 1, aisle: 'A', row: 3 },
+        { id: 'N4', name: 'Khu vực kiểm tra', direction: 'Dưới, Trái', floor: 1, aisle: 'B', row: 1 },
+        { id: 'N5', name: 'Cửa thang máy 1', direction: 'Trái', floor: 1, aisle: 'C', row: 1 },
+        { id: 'N6', name: 'Khu vực sạc', direction: 'Trên, Dưới', floor: 1, aisle: 'D', row: 1 },
+        { id: 'N7', name: 'Kệ B1', direction: 'Phải', floor: 2, aisle: 'A', row: 1 },
+        { id: 'N8', name: 'Kệ B2', direction: 'Dưới, Phải', floor: 2, aisle: 'A', row: 2 },
+        { id: 'N9', name: 'Đóng gói', direction: 'Dưới, Trái', floor: 2, aisle: 'B', row: 1 },
+        { id: 'N10', name: 'Xuất hàng', direction: 'Trái', floor: 2, aisle: 'C', row: 1 }
+    ];
+
+    const actionOptions = [
+        { id: 'NONE', name: 'Không làm gì cả' },
+        { id: 'PICK', name: 'Lấy hàng' },
+        { id: 'DROP', name: 'Bỏ hàng' },
+        { id: 'SLOW1', name: 'Giảm tốc cấp 1 (Chậm)' },
+        { id: 'SLOW2', name: 'Giảm tốc cấp 2 (Siêu chậm)' },
+        { id: 'STOP_END', name: 'Dừng khi di chuyển ở node cuối' },
+        { id: 'FAST_HALF', name: 'Đi nhanh 1/2' },
+        { id: 'CHARGE', name: 'Sạc pin' }
+    ];
+
     window.selectNode = function(node) {
         // Deselect previous
         if (selectedNodeRef) {
@@ -979,13 +1004,26 @@ function initWorkflowConfig(workflowId, workflowName) {
 
         // Show Panel
         const panel = document.getElementById('propertiesPanel');
-        if (panel) panel.classList.add('open');
+        if (panel) {
+            panel.classList.add('open');
+            
+            // Update Header with Step Number and Name
+            const nodes = Array.from(flowchartList.querySelectorAll('.node'));
+            const idx = nodes.indexOf(node);
+            const stepNumEl = document.getElementById('prop-step-number');
+            const stepNameEl = document.getElementById('prop-step-name');
+            if (stepNumEl) stepNumEl.textContent = idx !== -1 ? idx + 1 : '';
+            if (stepNameEl) stepNameEl.textContent = node.dataset.name || '';
+        }
 
         // Load Data
         let props = {};
         try {
             props = JSON.parse(node.dataset.properties || '{}');
         } catch(e) { props = {}; }
+
+        // Render Sequences
+        renderSequences(props.sequences || []);
 
         // Populate Fields
         document.getElementById('prop-speed').value = props.speed || 'NORMAL';
@@ -1006,6 +1044,312 @@ function initWorkflowConfig(workflowId, workflowName) {
         }
     }
 
+    // --- Sequence Management Functions ---
+    window.renderSequences = function(sequences) {
+        const container = document.getElementById('sequence-container');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        if (sequences.length === 0) {
+            // Bao gồm 1 card by default as requested
+            addNewSequence(true); 
+            return;
+        }
+
+        sequences.forEach((seq, index) => {
+            renderSequenceCard(seq, index);
+        });
+    }
+
+    window.addNewSequence = function(isInitial = false) {
+        const container = document.getElementById('sequence-container');
+        if (!container) return;
+        
+        const index = container.querySelectorAll('.sequence-card').length;
+        const seq = { locationId: '', actionType: 'NONE', direction: '-' };
+        
+        renderSequenceCard(seq, index);
+    }
+
+    function renderSequenceCard(seq, index) {
+        const container = document.getElementById('sequence-container');
+        const card = document.createElement('div');
+        card.className = 'sequence-card';
+        card.dataset.index = index;
+        
+        const hasLocation = !!seq.locationId;
+        const location = locationNodes.find(l => l.id === seq.locationId);
+        const action = actionOptions.find(a => a.id === seq.actionType) || actionOptions[0];
+
+        card.innerHTML = `
+            <div class="sequence-card-header">
+                <span class="sequence-title">Trình tự ${index + 1}</span>
+                <button type="button" class="btn-remove-sequence" onclick="removeSequence(${index})">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+            
+            <div class="form-group">
+                <label>Vị trí</label>
+                <div class="custom-dropdown sequence-location-dropdown" id="loc-dropdown-${index}">
+                    <div class="combo-wrapper">
+                        <input type="text" class="combo-input loc-input" placeholder="Tìm kiếm vị trí..." 
+                               value="${location ? location.name : ''}" autocomplete="off">
+                        <i class="fas fa-times combo-clear ${location ? 'show' : ''}"></i>
+                        <i class="fas fa-chevron-down combo-icon"></i>
+                    </div>
+                    <div class="dropdown-options loc-options"></div>
+                    <input type="hidden" class="loc-value" value="${seq.locationId}">
+                </div>
+            </div>
+
+            <div class="direction-box" style="display: ${hasLocation ? 'flex' : 'none'}">
+                <div class="direction-info">
+                    <div class="coord-label">Vị trí: <span class="loc-coord">${location ? `${location.floor}-${location.aisle}${location.row}` : ''}</span></div>
+                    <div class="direction-label">Hướng di chuyển: <span class="loc-direction">${location ? location.direction : ''}</span></div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 12px;">
+                <label>Tác vụ</label>
+                <div class="custom-dropdown sequence-action-dropdown" id="act-dropdown-${index}">
+                    <div class="combo-wrapper">
+                        <input type="text" class="combo-input act-input" placeholder="Chọn hoặc tìm tác vụ..." 
+                               value="${action.id !== 'NONE' ? action.name : ''}" autocomplete="off">
+                        <i class="fas fa-times combo-clear ${seq.actionType !== 'NONE' ? 'show' : ''}"></i>
+                        <i class="fas fa-chevron-down combo-icon"></i>
+                    </div>
+                    <div class="dropdown-options act-options"></div>
+                    <input type="hidden" class="seq-action-type" value="${action.id}">
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(card);
+        initLocationDropdown(card, index);
+        initActionDropdown(card, index);
+    }
+
+    function getLocationName(id) {
+        const loc = locationNodes.find(l => l.id === id);
+        return loc ? loc.name : '';
+    }
+
+    function initLocationDropdown(card, index) {
+        const dropdown = card.querySelector('.sequence-location-dropdown');
+        const input = dropdown.querySelector('.loc-input');
+        const optionsContainer = dropdown.querySelector('.loc-options');
+        const hiddenValue = dropdown.querySelector('.loc-value');
+        const coordValue = card.querySelector('.loc-coord');
+        const directionValue = card.querySelector('.loc-direction');
+        const directionBox = card.querySelector('.direction-box');
+        const clearBtn = dropdown.querySelector('.combo-clear');
+        const comboWrapper = dropdown.querySelector('.combo-wrapper');
+        const chevronIcon = comboWrapper.querySelector('.combo-icon');
+
+        function populateOptions(filter) {
+            var f = (filter || '').toLowerCase();
+            var html = '';
+            locationNodes.forEach(function(loc) {
+                if (!f || loc.name.toLowerCase().includes(f)) {
+                    html += '<div class="dropdown-option" data-id="' + loc.id + '">' + loc.name + '</div>';
+                }
+            });
+            optionsContainer.innerHTML = html || '<div class="dropdown-option" style="color:#94a3b8;pointer-events:none;">Không tìm thấy</div>';
+        }
+
+        function openDropdown() {
+            populateOptions(input.value);
+            dropdown.classList.add('active');
+            optionsContainer.classList.add('show');
+        }
+
+        function closeDropdown() {
+            dropdown.classList.remove('active');
+            optionsContainer.classList.remove('show');
+        }
+
+        // Chevron click - toggle
+        if (chevronIcon) {
+            chevronIcon.style.pointerEvents = 'auto';
+            chevronIcon.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (optionsContainer.classList.contains('show')) closeDropdown();
+                else { openDropdown(); input.focus(); }
+            });
+        }
+
+        // Input click - always open
+        input.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openDropdown();
+        });
+
+        // Input typing - filter
+        input.addEventListener('input', function(e) {
+            populateOptions(e.target.value);
+            dropdown.classList.add('active');
+            optionsContainer.classList.add('show');
+            if (e.target.value) clearBtn.classList.add('show');
+            else clearBtn.classList.remove('show');
+        });
+
+        // X button - use mousedown to fire before blur
+        clearBtn.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            input.value = '';
+            hiddenValue.value = '';
+            directionBox.style.display = 'none';
+            clearBtn.classList.remove('show');
+            closeDropdown();
+            if (window.saveProperties) window.saveProperties(true);
+        });
+
+        // Select option - use mousedown to fire before blur
+        optionsContainer.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            var opt = e.target.closest('.dropdown-option');
+            if (opt && opt.dataset.id) {
+                var loc = locationNodes.find(function(l) { return l.id === opt.dataset.id; });
+                if (!loc) return;
+                input.value = loc.name;
+                hiddenValue.value = loc.id;
+                coordValue.textContent = loc.floor + '-' + loc.aisle + loc.row;
+                directionValue.textContent = loc.direction;
+                directionBox.style.display = 'flex';
+                clearBtn.classList.add('show');
+                closeDropdown();
+                if (window.saveProperties) window.saveProperties(true);
+            }
+        });
+
+        // Close on outside click
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target)) {
+                closeDropdown();
+            }
+        });
+    }
+
+    function initActionDropdown(card, index) {
+        const dropdown = card.querySelector('.sequence-action-dropdown');
+        const input = dropdown.querySelector('.act-input');
+        const optionsContainer = dropdown.querySelector('.act-options');
+        const hiddenValue = dropdown.querySelector('.seq-action-type');
+        const clearBtn = dropdown.querySelector('.combo-clear');
+        const comboWrapper = dropdown.querySelector('.combo-wrapper');
+        const chevronIcon = comboWrapper.querySelector('.combo-icon');
+
+        function populateOptions(filter) {
+            var f = (filter || '').toLowerCase();
+            var html = '';
+            actionOptions.forEach(function(opt) {
+                if (!f || opt.name.toLowerCase().includes(f)) {
+                    html += '<div class="dropdown-option" data-id="' + opt.id + '">' + opt.name + '</div>';
+                }
+            });
+            optionsContainer.innerHTML = html || '<div class="dropdown-option" style="color:#94a3b8;pointer-events:none;">Không tìm thấy</div>';
+        }
+
+        function openDropdown() {
+            populateOptions(input.value);
+            dropdown.classList.add('active');
+            optionsContainer.classList.add('show');
+        }
+
+        function closeDropdown() {
+            dropdown.classList.remove('active');
+            optionsContainer.classList.remove('show');
+        }
+
+        // Chevron click - toggle
+        if (chevronIcon) {
+            chevronIcon.style.pointerEvents = 'auto';
+            chevronIcon.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (optionsContainer.classList.contains('show')) closeDropdown();
+                else { openDropdown(); input.focus(); }
+            });
+        }
+
+        // Input click - always open
+        input.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openDropdown();
+        });
+
+        // Input typing - filter
+        input.addEventListener('input', function(e) {
+            populateOptions(e.target.value);
+            dropdown.classList.add('active');
+            optionsContainer.classList.add('show');
+            var isDefault = !e.target.value || e.target.value === 'Không làm gì cả';
+            if (!isDefault) clearBtn.classList.add('show');
+            else clearBtn.classList.remove('show');
+        });
+
+        // X button - use mousedown to fire before blur
+        clearBtn.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            input.value = '';
+            hiddenValue.value = 'NONE';
+            clearBtn.classList.remove('show');
+            closeDropdown();
+            if (window.saveProperties) window.saveProperties(true);
+        });
+
+        // Select option - use mousedown to fire before blur
+        optionsContainer.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            var opt = e.target.closest('.dropdown-option');
+            if (opt && opt.dataset.id) {
+                var act = actionOptions.find(function(a) { return a.id === opt.dataset.id; });
+                if (!act) return;
+                input.value = act.name;
+                hiddenValue.value = act.id;
+                if (act.id !== 'NONE') clearBtn.classList.add('show');
+                else clearBtn.classList.remove('show');
+                closeDropdown();
+                if (window.saveProperties) window.saveProperties(true);
+            }
+        });
+
+        // Close on outside click
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target)) {
+                closeDropdown();
+            }
+        });
+    }
+
+    window.removeSequence = function(index) {
+        const container = document.getElementById('sequence-container');
+        const cards = container.querySelectorAll('.sequence-card');
+        if (cards.length > 1) {
+            cards[index].remove();
+            // Re-index remaining cards
+            container.querySelectorAll('.sequence-card').forEach((card, idx) => {
+                card.dataset.index = idx;
+                card.querySelector('.sequence-title').textContent = `Trình tự ${idx + 1}`;
+                card.querySelector('.btn-remove-sequence').setAttribute('onclick', `removeSequence(${idx})`);
+            });
+        } else {
+            // Keep at least one card, just clear it
+            const card = cards[0];
+            card.querySelector('.loc-input').value = '';
+            card.querySelector('.loc-value').value = '';
+            card.querySelector('.loc-direction').textContent = '-';
+            card.querySelector('.direction-box').style.display = 'none';
+            card.querySelector('.sequence-location-dropdown .combo-clear').classList.remove('show');
+            
+            card.querySelector('.act-input').value = 'Không làm gì cả';
+            card.querySelector('.seq-action-type').value = 'NONE';
+            card.querySelector('.sequence-action-dropdown .combo-clear').classList.remove('show');
+        }
+    }
+
     window.deselectNode = function() {
         if (selectedNodeRef) {
             selectedNodeRef.classList.remove('selected');
@@ -1021,10 +1365,6 @@ function initWorkflowConfig(workflowId, workflowName) {
         if(list) list.style.display = 'none';
     }
 
-    // Attach listeners to Property Inputs
-    // Auto-save listeners removed
-
-
     // File Input Special Handling
     const fileInput = document.getElementById('prop-audio-file');
     if (fileInput) {
@@ -1032,39 +1372,9 @@ function initWorkflowConfig(workflowId, workflowName) {
             if (e.target.files.length > 0) {
                 const file = e.target.files[0];
                 document.getElementById('audio-filename').textContent = file.name;
-                // updateSelectedNodeProperties removed
             }
         });
     }
-
-    // Function updateSelectedNodeProperties removed to support manual save
-
-
-    // Click outside to deselect and close dropdowns
-    document.addEventListener('click', function(e) {
-        // Close Speed Dropdown if clicked outside
-        const speedDropdown = document.getElementById('speedDropdown');
-        const list = document.getElementById('speedOptionsList');
-        const isOption = e.target.closest('.dropdown-option'); 
-        const isList = e.target.closest('#speedOptionsList');
-        // Check if click is inside Dropdown (wrapper) OR inside the List (in body)
-        const isInsideDropdown = (speedDropdown && speedDropdown.contains(e.target));
-        const isInsideList = (list && list.contains(e.target));
-
-        if (!isInsideDropdown && !isInsideList && !isOption) {
-            if (speedDropdown) speedDropdown.classList.remove('active');
-            if (list) list.style.display = 'none';
-        }
-
-        // If click is NOT inside properties panel AND NOT on a node AND NOT on a speed option
-        const isPanel = e.target.closest('.properties-panel');
-        const isNode = e.target.closest('.node');
-        // REUSE isOption from above
-        
-        if (!isPanel && !isNode && !isOption && selectedNodeRef) {
-            deselectNode();
-        }
-    });
 
     // Speed Dropdown Logic
     window.toggleSpeedDropdown = function() {
@@ -1074,33 +1384,23 @@ function initWorkflowConfig(workflowId, workflowName) {
 
         if (!dropdown || !list || !wrapper) return;
 
-        // Move list to body if not already there to escape overflow clipping
         if (list.parentElement !== document.body) {
             document.body.appendChild(list);
         }
 
-        // Toggle state
         const isActive = dropdown.classList.contains('active');
         
-        if (isActive) {
-            // Close
-            dropdown.classList.remove('active');
-            list.style.display = 'none';
-        } else {
-            // Open
+        if (!isActive) {
             dropdown.classList.add('active');
-            
-            // Calculate Position
             const rect = wrapper.getBoundingClientRect();
             list.style.top = (rect.bottom + 4) + 'px';
             list.style.left = rect.left + 'px';
             list.style.width = rect.width + 'px';
             list.style.display = 'block';
-            list.style.zIndex = '9999'; // Ensure top z-index
+            list.style.zIndex = '9999';
         }
     }
 
-    // Close fixed dropdown on scroll
     document.addEventListener('scroll', function() {
         const dropdown = document.getElementById('speedDropdown');
         const list = document.getElementById('speedOptionsList');
@@ -1108,19 +1408,17 @@ function initWorkflowConfig(workflowId, workflowName) {
              dropdown.classList.remove('active');
              if(list) list.style.display = 'none';
         }
-    }, true); // Capture phase
+    }, true);
 
     window.selectSpeed = function(value, text) {
         document.getElementById('prop-speed').value = value;
         document.getElementById('prop-speed-display').value = text;
         
-        // Close dropdown
         const dropdown = document.getElementById('speedDropdown');
         const list = document.getElementById('speedOptionsList');
         if(dropdown) dropdown.classList.remove('active');
         if(list) list.style.display = 'none';
 
-        // Auto save on selection (silent)
         if (typeof saveProperties === 'function') {
             saveProperties(true);
         }
@@ -1134,7 +1432,7 @@ function initWorkflowConfig(workflowId, workflowName) {
             props = JSON.parse(selectedNodeRef.dataset.properties || '{}');
         } catch(e) { props = {} }
 
-        // Gather values
+        // Gather basic values
         props.speed = document.getElementById('prop-speed').value;
         props.doorTime = document.getElementById('prop-door-time').value;
         props.batteryThreshold = document.getElementById('prop-battery-threshold').value;
@@ -1142,15 +1440,23 @@ function initWorkflowConfig(workflowId, workflowName) {
         props.forkSpeed = document.getElementById('prop-fork-speed').value;
         props.allowedError = document.getElementById('prop-allowed-error').value;
         props.maxPayload = document.getElementById('prop-max-payload').value;
-        props.audioFileName = document.getElementById('audio-filename').textContent; // Get from label text
+        props.audioFileName = document.getElementById('audio-filename').textContent;
+
+        // Gather Sequence values
+        const seqCards = document.querySelectorAll('.sequence-card');
+        props.sequences = Array.from(seqCards).map(card => {
+            return {
+                locationId: card.querySelector('.loc-value').value,
+                direction: card.querySelector('.loc-direction').textContent,
+                actionType: card.querySelector('.seq-action-type').value
+            };
+        });
 
         // Save back to node
         selectedNodeRef.dataset.properties = JSON.stringify(props);
         
-        // Trigger global save
         saveStepsLocal();
 
-        // Show Toast if NOT silent
         if (!silent) {
             if (typeof showToast === 'function') {
                 showToast('Thiết lập thuộc tính cho bước thành công', 'success');
@@ -1162,6 +1468,11 @@ function initWorkflowConfig(workflowId, workflowName) {
 
     window.closePropertiesPanel = function() {
         deselectNode();
+    }
+
+    window.toggleAccordion = function(header) {
+        const item = header.parentElement;
+        item.classList.toggle('active');
     }
 
 }

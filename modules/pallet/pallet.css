@@ -993,6 +993,10 @@ html, body {
     background: #f1f5f9;
 }
 
+.calendar-day.today {
+    border: 2px solid #076EB8;
+}
+
 .calendar-day.empty {
     cursor: default;
 }

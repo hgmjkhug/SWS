@@ -517,6 +517,12 @@
                 if (e && currentTs === e) cls += ' selected end';
                 if (s && e && currentTs > s && currentTs < e) cls += ' in-range';
 
+                const today = new Date();
+                const isToday = d.getDate() === today.getDate() && 
+                                d.getMonth() === today.getMonth() && 
+                                d.getFullYear() === today.getFullYear();
+                if (isToday) cls += ' today';
+
                 div.className = cls;
                 div.textContent = i;
                 div.onclick = (e) => {

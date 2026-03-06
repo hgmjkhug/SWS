@@ -80,7 +80,7 @@
     color: #64748b;
     padding: 8px 0;
     border-bottom: 1px solid #e2e8f0;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
 }
 
 .sidebar-step-count span {
@@ -121,7 +121,7 @@
     border: 1px dashed #cbd5e1;
     border-radius: 12px;
     padding: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     background-color: #f8fafc;
 }
 
@@ -176,7 +176,7 @@
     font-size: 13px;
     cursor: pointer;
     transition: all 0.2s;
-    margin-top: 4px;
+    margin-bottom: 16px;
 }
 
 .btn-add-step:hover {
@@ -260,12 +260,12 @@
     background: transparent !important;
     outline: none !important;
     box-shadow: none !important;
-    font-size: 14px; /* Match input font size */
+    font-size: 14px;
     color: #334155;
     width: 100%;
     cursor: pointer;
-    padding: 0; /* Remove padding to match input height exactly when wrapper has padding */
-    padding-right: 24px; /* Space for icon */
+    padding: 0 !important;
+    padding-right: 70px !important; /* Space for clear and dropdown icons */
     margin: 0;
     font-family: inherit;
     font-weight: 500;
@@ -277,16 +277,41 @@
     color: #64748b;
 }
 
-.combo-icon {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%); /* Center vertically */
-    color: #94a3b8;
-    font-size: 12px;
-    pointer-events: none;
-    transition: transform 0.2s ease;
-    z-index: 202;
+/* Explicitly target icons within the custom dropdown wrapper */
+.custom-dropdown .combo-wrapper .combo-icon {
+    position: absolute !important;
+    right: 14px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: #94a3b8 !important;
+    font-size: 12px !important;
+    pointer-events: none !important;
+    transition: transform 0.2s ease !important;
+    z-index: 202 !important;
+}
+
+.custom-dropdown .combo-wrapper .combo-clear {
+    position: absolute !important;
+    right: 32px !important; /* Closer to chevron */
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: #94a3b8 !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    display: none;
+    transition: all 0.2s !important;
+    z-index: 203 !important;
+    padding: 2px !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.custom-dropdown .combo-wrapper .combo-clear.show {
+    display: block !important;
+}
+
+.combo-clear:hover {
+    color: #ef4444;
 }
 
 .custom-dropdown.active .combo-icon,
@@ -989,6 +1014,22 @@
     letter-spacing: -0.01em;
 }
 
+#prop-step-number {
+    color: #0f172a;
+}
+
+.properties-step-name {
+    color: #076eb8;
+    font-weight: 700;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.properties-title-group {
+    display: flex;
+    flex-direction: column;
+}
+
 .close-panel-btn {
     width: 32px;
     height: 32px;
@@ -1012,12 +1053,19 @@
 
 .properties-body {
     flex: 1;
-    overflow-y: auto; /* Revert to auto for scrolling */
+    overflow-y: auto;
     padding: 24px;
     background: transparent;
-    /* WARNING: specific height or max-height on panel is handled by flex layout of parent. 
-       If content is too long, we might have issues. 
-       For now, assuming content fits or page scrolls. */
+    display: block; /* Go back to block to let content scroll naturally */
+}
+
+.properties-body::-webkit-scrollbar {
+    display: none;
+}
+
+.properties-body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 
@@ -1048,11 +1096,73 @@
     font-weight: 700;
     color: #64748b;
     margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
-.properties-form input,
+/* Accordion Styles - Borderless & Sticky */
+.accordion {
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    background: transparent;
+}
+
+.accordion-item {
+    border-bottom: none;
+}
+
+.accordion-item.active {
+    display: block;
+    overflow: visible;
+}
+
+.accordion-header {
+    padding: 12px 8px; /* Increased horizontal padding for better breathing room */
+    margin: 0 -8px 16px -8px; /* Negative margins to compensate padding and span full width */
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+    position: sticky;
+    top: -24px;
+    z-index: 10;
+    border-bottom: 1px solid #f1f5f9;
+    border-radius: 4px; /* Added border-radius for a more modern hover look */
+}
+
+.accordion-header:hover {
+    background: #f1f5f9;
+}
+
+.accordion-header span {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.accordion-header i {
+    font-size: 12px;
+    color: #64748b;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.accordion-item.active .accordion-header i {
+    transform: rotate(180deg);
+}
+
+.accordion-content {
+    padding: 0; /* Remove padding since it's transparent now */
+    display: none;
+    border-top: none;
+}
+
+.accordion-item.active .accordion-content {
+    display: block;
+}
+
+.properties-form input:not(.combo-input):not([type="hidden"]),
 .properties-form select {
     width: 100%;
     padding: 10px 14px;
@@ -1067,13 +1177,13 @@
     font-weight: 500;
 }
 
-.properties-form input:hover,
+.properties-form input:not(.combo-input):not([type="hidden"]):hover,
 .properties-form select:hover {
     background: #fff;
     border-color: #cbd5e1;
 }
 
-.properties-form input:focus,
+.properties-form input:not(.combo-input):not([type="hidden"]):focus,
 .properties-form select:focus {
     background: #fff;
     border-color: #076eb8;
@@ -1083,6 +1193,22 @@
 .properties-form input::placeholder {
     color: #94a3b8;
     font-weight: 400;
+}
+
+/* Ensure combo-input inside properties-form has no conflicting styles */
+.properties-form .combo-input {
+    width: 100% !important;
+    padding: 0 !important;
+    padding-right: 50px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none !important;
+    height: 100%;
+    color: #334155;
 }
 
 /* File Upload - Premium Dashed Style */
@@ -1200,4 +1326,109 @@
     z-index: 10 !important;
     transform: translateY(-2px);
     transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+/* Operation Sequence Card Styling */
+.sequence-card {
+    background: #f8fafc;
+    border: 1px dashed #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 8px -8px 12px -8px; /* Negative margins to align horizontally with accordion header */
+    position: relative;
+    transition: all 0.2s;
+}
+
+.sequence-card:hover {
+    border-color: #076EB8;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.sequence-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.sequence-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.btn-remove-sequence {
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    padding: 4px;
+}
+
+.btn-remove-sequence:hover {
+    color: #ef4444;
+}
+
+.btn-add-sequence {
+    width: calc(100% + 16px);
+    margin: 0 -8px; /* Negative margins to align with cards */
+    padding: 10px;
+    background: transparent;
+    color: #076eb8;
+    border: 1px dashed #076eb8;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-add-sequence:hover {
+    background: #f0f9ff;
+    border-style: solid;
+}
+
+.direction-box {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    display: none; /* Hidden by default */
+    align-items: center;
+    gap: 12px;
+}
+
+.direction-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+}
+
+.coord-label, .direction-label {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.loc-coord, .loc-direction {
+    color: #076eb8;
+    font-weight: 700;
+}
+
+.sequence-card .form-group label {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 4px;
 }

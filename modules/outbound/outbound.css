@@ -71,7 +71,6 @@ input, button, select, textarea {
     font-family: 'Roboto', sans-serif;
     background-color: var(--bg-body);
     margin: 0;
-    padding: 20px;
     color: var(--text-main);
 }
 
@@ -930,13 +929,11 @@ button:disabled {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 20px;
-    border-radius: 8px; /* Changed from 0 0 8px 8px */
+    padding: 12px 0;
     border-top: 1px solid var(--border-color);
     font-size: 14px;
     color: #64748b;
-    margin-top: 16px; /* Added gap */
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Added shadow */
+    margin-top: 16px;
 }
 .pagination-controls {
     display: flex;
@@ -1412,6 +1409,10 @@ button:disabled {
 .day:hover:not(.empty) {
     background: #f1f5f9;
     color: #1a73e8;
+}
+
+.day.today {
+    border: 2px solid #076EB8;
 }
 
 .day.empty {

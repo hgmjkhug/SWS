@@ -1000,7 +1000,7 @@
       tr.classList.remove("expanded");
     } else {
       // Close other open sub-rows
-      document.querySelectorAll(".outbound-sub-table-row").forEach((row) => row.remove());
+      document.querySelectorAll(".sub-table-row").forEach((row) => row.remove());
       document.querySelectorAll(".clickable-row").forEach((r) => r.classList.remove("expanded"));
 
       const item = outboundData.find((d) => d.id === id);
@@ -1009,7 +1009,7 @@
       tr.classList.add("expanded");
       const subRow = document.createElement("tr");
       subRow.id = `outbound-sub-row-${id}`;
-      subRow.className = "outbound-sub-table-row";
+      subRow.className = "sub-table-row";
 
       const batchesHtml = item.batches
         .map((batch) => {
@@ -1028,7 +1028,7 @@
 
       subRow.innerHTML = `
             <td colspan="1" style="border:none; background: transparent;"></td>
-            <td colspan="8" style="padding: 0;">
+            <td colspan="7" style="padding: 0;">
                 <div class="sub-table-container" style="padding: 10px 20px; background-color: #f1f5f9; border-bottom: 1px solid #e2e8f0; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);">
                     <table class="sub-table" style="width: 100%; border-collapse: collapse; background-color: white; border-radius: 6px; overflow: hidden; border: 1px solid #e2e8f0;">
                         <thead>
@@ -1520,6 +1520,12 @@
       ) {
         el.classList.add("in-range");
       }
+
+      const today = new Date();
+      const isToday = dayDate.getDate() === today.getDate() && 
+                      dayDate.getMonth() === today.getMonth() && 
+                      dayDate.getFullYear() === today.getFullYear();
+      if (isToday) el.classList.add("today");
 
       el.onclick = () => handleDayClick(dayDate);
       container.appendChild(el);

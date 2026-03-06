@@ -632,6 +632,12 @@
                 if (selectedEndDate && date.toDateString() === selectedEndDate.toDateString()) cls += " selected range-end";
                 if (selectedStartDate && selectedEndDate && date > selectedStartDate && date < selectedEndDate) cls += " in-range";
 
+                const today = new Date();
+                const isToday = date.getDate() === today.getDate() && 
+                                date.getMonth() === today.getMonth() && 
+                                date.getFullYear() === today.getFullYear();
+                if (isToday) cls += " today";
+
                 const dayEl = document.createElement('div');
                 dayEl.className = cls;
                 dayEl.textContent = d;
