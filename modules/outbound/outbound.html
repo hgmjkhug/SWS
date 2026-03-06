@@ -129,6 +129,11 @@
         </div>
       </div>
 
+      <!-- Priority Filter Button -->
+      <button id="btn-filter-priority" class="filter-priority-btn" onclick="togglePriorityFilter()" title="Lọc lệnh ưu tiên">
+        <i class="fas fa-star"></i>
+      </button>
+
       <!-- Date Picker (Copied from Pallet) -->
       <div class="unified-date-filter" style="position: relative">
         <div
@@ -251,31 +256,50 @@
     </div>
   </div>
 
-  <div class="table-container">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>STT</th>
-          <th>Mã lệnh xuất</th>
-          <th style="min-width: 200px; max-width: 250px">Vật tư</th>
-          <th style="min-width: 100px; max-width: 150px; text-align: center">
-            Loại xuất kho
-          </th>
-          <!-- <th style="min-width: 200px; max-width: 250px; text-align: left">
-            Quy trình
-          </th> -->
-          <th style="min-width: 200px; max-width: 250px">Thời gian tạo lệnh</th>
-          <th style="min-width: 100px; max-width: 150px; text-align: center">
-            Trạng thái
-          </th>
-          <th style="width: 140px">Người tạo</th>
-          <th style="width: 100px; text-align: center">Thao tác</th>
-        </tr>
-      </thead>
-      <tbody id="table-body">
-        <!-- Data will be rendered here -->
-      </tbody>
-    </table>
+  <div class="table-scroll-container">
+    <div class="table-scroll-head" id="mainHeaderScroll">
+      <table class="data-table">
+        <colgroup>
+          <col style="width: 50px">
+          <col style="width: 220px">
+          <col style="width: 250px">
+          <col style="width: 150px">
+          <col style="width: 230px">
+          <col style="width: 150px">
+          <col style="width: 150px">
+          <col style="width: 100px">
+        </colgroup>
+        <thead>
+          <tr>
+            <th class="text-center">STT</th>
+            <th>Mã lệnh xuất</th>
+            <th>Vật tư</th>
+            <th class="text-center">Loại xuất kho</th>
+            <th>Thời gian tạo lệnh</th>
+            <th class="text-center">Trạng thái</th>
+            <th>Người tạo</th>
+            <th class="text-center">Thao tác</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <div class="table-scroll-body" id="mainBodyScroll">
+      <table class="data-table">
+        <colgroup>
+          <col style="width: 50px">
+          <col style="width: 220px">
+          <col style="width: 250px">
+          <col style="width: 150px">
+          <col style="width: 230px">
+          <col style="width: 150px">
+          <col style="width: 150px">
+          <col style="width: 100px">
+        </colgroup>
+        <tbody id="table-body">
+          <!-- Data will be rendered here -->
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Pagination -->
@@ -369,104 +393,73 @@
             </div>
 
             <div class="material-table-wrapper">
-              <table class="material-selection-table">
-                <thead>
-                  <tr>
-                    <th style="width: 40px"></th>
-                    <th style="width: 50px; text-align: center">STT</th>
-                    <th>Mã vật tư</th>
-                    <th>Tên vật tư</th>
-                    <th style="min-width: 150px">
-                      <div class="header-content">
-                        <span>Nhóm vật tư</span>
-                        <i
-                          class="fas fa-filter filter-trigger"
-                          onclick="toggleColumnFilter(event, 'category')"
-                        ></i>
-                        <!-- Dropdown -->
-                        <div
-                          class="column-filter-dropdown"
-                          id="dropdown-category"
-                        >
-                          <div class="filter-list" id="list-category">
-                            <!-- Populated by JS -->
-                          </div>
-                          <div class="filter-actions">
-                            <button
-                              class="btn-secondary btn-sm"
-                              onclick="closeColumnFilter('category')"
-                            >
-                              Hủy
-                            </button>
-                            <button
-                              class="btn-primary btn-sm"
-                              onclick="applyColumnFilter('category')"
-                            >
-                              Xác nhận
-                            </button>
+              <div class="table-scroll-head" id="materialHeaderScroll">
+                <table class="material-selection-table">
+                  <colgroup>
+                    <col style="width: 40px">
+                    <col style="width: 50px">
+                    <col style="width: 150px">
+                    <col style="width: 250px">
+                    <col style="width: 180px">
+                    <col style="width: 130px">
+                    <col style="width: 150px">
+                    <col style="width: 150px">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th class="text-center">STT</th>
+                      <th>Mã vật tư</th>
+                      <th>Tên vật tư</th>
+                      <th>
+                        <div class="header-content">
+                          <span>Nhóm vật tư</span>
+                          <i class="fas fa-filter filter-trigger" onclick="toggleColumnFilter(event, 'category')"></i>
+                          <div class="column-filter-dropdown" id="dropdown-category">
+                            <div class="filter-list" id="list-category"></div>
+                            <div class="filter-actions">
+                              <button class="btn-secondary btn-sm" onclick="closeColumnFilter('category')">Hủy</button>
+                              <button class="btn-primary btn-sm" onclick="applyColumnFilter('category')">Xác nhận</button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </th>
-                    <th
-                      style="
-                        min-width: 50px;
-                        max-width: 100px;
-                        white-space: nowrap;
-                      "
-                    >
-                      <div
-                        class="header-content"
-                        style="justify-content: center; gap: 8px"
-                      >
-                        <span>PT xuất</span>
-                        <i
-                          class="fas fa-filter filter-trigger"
-                          onclick="toggleColumnFilter(event, 'method')"
-                        ></i>
-                        <!-- Dropdown -->
-                        <div
-                          class="column-filter-dropdown"
-                          id="dropdown-method"
-                          style="text-align: center"
-                        >
-                          <div class="filter-list" id="list-method">
-                            <!-- Populated by JS -->
-                          </div>
-                          <div class="filter-actions">
-                            <button
-                              class="btn-secondary btn-sm"
-                              onclick="closeColumnFilter('method')"
-                            >
-                              Hủy
-                            </button>
-                            <button
-                              class="btn-primary btn-sm"
-                              onclick="applyColumnFilter('method')"
-                            >
-                              Xác nhận
-                            </button>
+                      </th>
+                      <th>
+                        <div class="header-content" style="justify-content: center; gap: 8px">
+                          <span>Quy cách</span>
+                          <i class="fas fa-filter filter-trigger" onclick="toggleColumnFilter(event, 'method')"></i>
+                          <div class="column-filter-dropdown" id="dropdown-method" style="text-align: center">
+                            <div class="filter-list" id="list-method"></div>
+                            <div class="filter-actions">
+                              <button class="btn-secondary btn-sm" onclick="closeColumnFilter('method')">Hủy</button>
+                              <button class="btn-primary btn-sm" onclick="applyColumnFilter('method')">Xác nhận</button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </th>
-                    <!-- New Column -->
-                    <th style="text-align: center">SL hiện có</th>
-                    <th
-                      style="
-                        width: 100px;
-                        text-align: center;
-                        white-space: nowrap;
-                      "
-                    >
-                      SL xuất
-                    </th>
-                  </tr>
-                </thead>
-                <tbody id="material-selection-body">
-                  <!-- Populated by JS -->
-                </tbody>
-              </table>
+                      </th>
+                      <th class="text-center">SL hiện có</th>
+                      <th class="text-center">SL xuất</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+              <div class="table-scroll-body" id="materialBodyScroll">
+                <table class="material-selection-table">
+                  <colgroup>
+                    <col style="width: 40px">
+                    <col style="width: 50px">
+                    <col style="width: 150px">
+                    <col style="width: 250px">
+                    <col style="width: 180px">
+                    <col style="width: 130px">
+                    <col style="width: 150px">
+                    <col style="width: 150px">
+                  </colgroup>
+                  <tbody id="material-selection-body">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
@@ -488,131 +481,71 @@
               <i class="fas fa-search search-icon"></i>
             </div>
             <div class="material-table-wrapper">
-              <table
-                class="material-selection-table"
-                id="pallet-selection-table"
-              >
-                <thead>
-                  <tr>
-                    <th
-                      rowspan="2"
-                      style="
-                        width: 50px;
-                        text-align: center;
-                        border-bottom: 1px solid #e2e8f0;
-                        vertical-align: middle;
-                      "
-                    >
-                      <!-- Radio column -->
-                    </th>
-                    <th
-                      rowspan="2"
-                      style="
-                        width: 50px;
-                        text-align: center;
-                        border-bottom: 1px solid #e2e8f0;
-                        vertical-align: middle;
-                      "
-                    >
-                      STT
-                    </th>
-                    <th
-                      rowspan="2"
-                      style="
-                        width: 120px;
-                        text-align: left;
-                        border-bottom: 1px solid #e2e8f0;
-                        vertical-align: middle;
-                      "
-                    >
-                      Mã Pallet
-                    </th>
-                    <th
-                      rowspan="2"
-                      style="
-                        min-width: 200px;
-                        max-width: 250px;
-                        text-align: left;
-                        border-bottom: 1px solid #e2e8f0;
-                        vertical-align: middle;
-                      "
-                      class="truncate-header"
-                    >
-                      Mã lệnh nhập
-                    </th>
-                    <th
-                      colspan="3"
-                      style="
-                        text-align: center;
-                        border-bottom: 1px solid #e2e8f0;
-                      "
-                    >
-                      Thông tin vật tư
-                    </th>
-                    <th
-                      rowspan="2"
-                      style="
-                        width: 200px;
-                        text-align: center;
-                        white-space: nowrap;
-                        border-bottom: 1px solid #e2e8f0;
-                        vertical-align: middle;
-                      "
-                    >
-                      Thời gian tạo lệnh
-                    </th>
-                    <th
-                      rowspan="2"
-                      style="
-                        width: 100px;
-                        text-align: center;
-                        white-space: nowrap;
-                        border-bottom: 1px solid #e2e8f0;
-                        vertical-align: middle;
-                      "
-                    >
-                      Vị trí lưu
-                    </th>
-                  </tr>
-                  <tr>
-                    <th
-                      style="
-                        font-weight: 600;
-                        font-size: 13px;
-                        border-bottom: 1px solid #e2e8f0;
-                        width: 100px;
-                      "
-                    >
-                      Mã vật tư
-                    </th>
-                    <th
-                      style="
-                        font-weight: 600;
-                        font-size: 13px;
-                        border-bottom: 1px solid #e2e8f0;
-                      "
-                    >
-                      Tên vật tư
-                    </th>
-                    <th
-                      style="
-                        font-weight: 600;
-                        font-size: 13px;
-                        text-align: center;
-                        border-bottom: 1px solid #e2e8f0;
-                        width: 80px;
-                        white-space: nowrap;
-                      "
-                    >
-                      Số lượng
-                    </th>
-                  </tr>
-                </thead>
-                <tbody id="pallet-selection-body">
-                  <!-- Populated by JS -->
-                </tbody>
-              </table>
+              <div class="table-scroll-head" id="palletHeaderScroll">
+                <table class="material-selection-table" style="width: 1300px;">
+                  <colgroup>
+                    <col style="width: 50px">
+                    <col style="width: 50px">
+                    <col style="width: 120px">
+                    <col style="width: 230px">
+                    <col style="width: 150px">
+                    <col style="width: 250px">
+                    <col style="width: 100px">
+                    <col style="width: 250px">
+                    <col style="width: 100px">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th rowspan="2" style="border-bottom: 1px solid #e2e8f0; vertical-align: middle;"></th>
+                      <th rowspan="2" class="text-center" style="border-bottom: 1px solid #e2e8f0; vertical-align: middle;">STT</th>
+                      <th rowspan="2" style="border-bottom: 1px solid #e2e8f0; vertical-align: middle;">Mã Pallet</th>
+                      <th rowspan="2" style="border-bottom: 1px solid #e2e8f0; vertical-align: middle;" class="truncate-header">Mã lệnh nhập</th>
+                      <th colspan="3" class="text-center" style="border-bottom: 1px solid #e2e8f0;">Thông tin vật tư</th>
+                      <th rowspan="2" class="text-center" style="border-bottom: 1px solid #e2e8f0; vertical-align: middle;">Thời gian tạo lệnh</th>
+                      <th rowspan="2" class="text-center" style="border-bottom: 1px solid #e2e8f0; vertical-align: middle;">Vị trí lưu</th>
+                    </tr>
+                    <tr>
+                      <th style="font-weight: 600; font-size: 13px; border-bottom: 1px solid #e2e8f0;">Mã vật tư</th>
+                      <th style="font-weight: 600; font-size: 13px; border-bottom: 1px solid #e2e8f0;">Tên vật tư</th>
+                      <th class="text-center" style="font-weight: 600; font-size: 13px; border-bottom: 1px solid #e2e8f0;">Số lượng</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+              <div class="table-scroll-body" id="palletBodyScroll">
+                <table class="material-selection-table" style="width: 1300px;">
+                  <colgroup>
+                    <col style="width: 50px">
+                    <col style="width: 50px">
+                    <col style="width: 120px">
+                    <col style="width: 230px">
+                    <col style="width: 150px">
+                    <col style="width: 250px">
+                    <col style="width: 100px">
+                    <col style="width: 250px">
+                    <col style="width: 100px">
+                  </colgroup>
+                  <tbody id="pallet-selection-body">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Priority Toggle -->
+        <div class="priority-form-group" style="margin-top: 20px;">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;">
+            <label class="priority-toggle-switch">
+              <input type="checkbox" id="inputPriorityOutbound" />
+              <span class="priority-toggle-slider"></span>
+            </label>
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: #92400e;">Ưu tiên</div>
+              <div style="font-size: 12px; color: #a16207; margin-top: 2px;">Đánh dấu lệnh này là lệnh ưu tiên</div>
+            </div>
+            <i class="fas fa-star" style="margin-left: auto; color: #f59e0b; font-size: 18px;"></i>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@
   // Pagination Configuration
   const ITEMS_PER_PAGE = 20;
   let currentPage = 1;
+  let filterPriorityOnly = false;
 
   // Mock Data Generation
   const MASTER_MATERIALS = [
@@ -237,7 +238,8 @@
         outboundType: outboundType,
         workflow: wf,
         rawDate: date,
-        batches: batches
+        batches: batches,
+        priority: Math.random() > 0.8
       };
   }).sort((a, b) => b.rawDate - a.rawDate); // Sort by date descending
 
@@ -759,6 +761,21 @@
     initPickerDropdowns();
     renderCalendars();
     setupExtraListeners();
+
+    // Horizontal Scroll Synchronization
+    const scrollSync = (bodyId, headerId) => {
+      const body = document.getElementById(bodyId);
+      const header = document.getElementById(headerId);
+      if (body && header) {
+        body.addEventListener("scroll", () => {
+          header.scrollLeft = body.scrollLeft;
+        });
+      }
+    };
+
+    scrollSync("mainBodyScroll", "mainHeaderScroll");
+    scrollSync("materialBodyScroll", "materialHeaderScroll");
+    scrollSync("palletBodyScroll", "palletHeaderScroll");
   }
 
   // Render Table with Pagination
@@ -789,6 +806,8 @@
       const matchesCreator =
         !selectedCreatorId || item.creator.includes(`(${selectedCreatorId})`);
 
+      const matchesPriority = !filterPriorityOnly || item.priority === true;
+
       // Date Range Filter
       let matchesDate = true;
       if (selectedRange.start && selectedRange.end) {
@@ -804,6 +823,7 @@
         matchesStatus &&
         matchesType &&
         matchesCreator &&
+        matchesPriority &&
         matchesDate
       );
     });
@@ -849,6 +869,7 @@
                 <td style="text-align:center">${start + index + 1}</td>
                 <td>
                     <div class="code-container" style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #475569;">
+                        ${item.priority ? '<i class="fas fa-star priority-star" title="Lệnh ưu tiên"></i>' : ''}
                         <span class="code-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">${item.code}</span>
                         <span class="copy-icon" onclick="copyCode('${item.code}', this, event)" title="Sao chép">
                             <i class="far fa-copy"></i>
@@ -1705,6 +1726,10 @@
       const searchInput = document.getElementById("material-search-input");
       if (searchInput) searchInput.value = "";
 
+      // Reset priority toggle
+      const priorityToggle = document.getElementById("inputPriorityOutbound");
+      if (priorityToggle) priorityToggle.checked = false;
+
       // Reset selection to MATERIAL (default)
       const materialRadio = document.querySelector(
         'input[name="outbound-type"][value="MATERIAL"]',
@@ -1975,6 +2000,8 @@
       ? selectedTypeInput.value
       : "MATERIAL";
 
+    const isPriority = document.getElementById("inputPriorityOutbound")?.checked || false;
+
     if (selectedType === "MATERIAL") {
       // Find selected row
       const selectedRow = document.querySelector(
@@ -2020,6 +2047,7 @@
         status: "PENDING",
         creator: "Bùi Thanh Sơn (user006)",
         outboundType: "MATERIAL",
+        priority: isPriority,
         rawDate: dateVal,
       };
 
@@ -2069,6 +2097,7 @@
         status: "PENDING",
         creator: "Bùi Thanh Sơn (user006)",
         outboundType: "PALLET",
+        priority: isPriority,
         rawDate: dateVal,
       };
 
@@ -2082,4 +2111,20 @@
       if (tr) tr.classList.remove("selected");
     }
   };
+
+  const togglePriorityFilter = () => {
+    filterPriorityOnly = !filterPriorityOnly;
+    const btn = document.getElementById("btn-filter-priority");
+    if (btn) {
+      if (filterPriorityOnly) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    }
+    currentPage = 1;
+    renderOutboundTable();
+  };
+
+  window.togglePriorityFilter = togglePriorityFilter;
 })();

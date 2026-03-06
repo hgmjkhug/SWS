@@ -1,5 +1,4 @@
-
-  <link rel="stylesheet" href="permission.css" />
+<link rel="stylesheet" href="permission.css" />
   <body>
     <div class="permission-container">
       <div class="permission-header">
@@ -14,22 +13,30 @@
       </div>
 
       <div class="table-container">
-        <table class="permission-table">
-          <thead>
-            <tr>
-              <th class="col-stt">STT</th>
-              <th class="col-name">Tên menu</th>
-              <th class="col-action">Tất cả</th>
-              <th class="col-action">Xem</th>
-              <th class="col-action">Thêm</th>
-              <th class="col-action">Sửa</th>
-              <th class="col-action">Xóa</th>
-            </tr>
-          </thead>
-          <tbody id="permission-table-body">
-            <!-- Javascript will populate this -->
-          </tbody>
-        </table>
+        <div class="table-wrapper">
+          <div class="table-scroll-head">
+            <table class="permission-table">
+              <thead>
+                <tr>
+                  <th class="col-stt">STT</th>
+                  <th class="col-name">Tên menu</th>
+                  <th class="col-action">Tất cả</th>
+                  <th class="col-action">Xem</th>
+                  <th class="col-action">Thêm</th>
+                  <th class="col-action">Sửa</th>
+                  <th class="col-action">Xóa</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+          <div class="table-scroll-body">
+            <table class="permission-table" id="permission-data-table">
+              <tbody id="permission-table-body">
+                <!-- Javascript will populate this -->
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 

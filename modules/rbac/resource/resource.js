@@ -323,6 +323,20 @@
   }
 
   // --- INIT ---
-  initData();
+  function initialize() {
+    initData();
+
+    // Synchronization scroll
+    const scrollHead = document.querySelector('.table-scroll-head');
+    const scrollBody = document.querySelector('.table-scroll-body');
+
+    if (scrollHead && scrollBody) {
+        scrollBody.addEventListener('scroll', () => {
+            scrollHead.scrollLeft = scrollBody.scrollLeft;
+        });
+    }
+  }
+
+  initialize();
 
 })();

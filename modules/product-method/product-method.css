@@ -2,7 +2,7 @@
 .product-method-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0; /* Changed from 12px to 0 to keep table components together */
   background-color: transparent;
   padding: 0;
   height: calc(100vh - 120px);
@@ -21,47 +21,144 @@
   border-radius: 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
   flex-shrink: 0;
+  margin-bottom: 12px;
 }
 
-/* ── Search Box: icon fixed so it never overlaps text ── */
-.product-method-container .search-box {
+.product-method-container .search-controls {
+  display: flex;
+  align-items: flex-end; /* Align inputs to bottom baseline */
+  gap: 8px;
+}
+
+.product-method-container .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.product-method-container .filter-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #475569;
+}
+
+/* Custom Dropdown (Premium UI) */
+.product-method-container .custom-dropdown {
   position: relative;
-  width: 280px;
-}
-
-.product-method-container .search-box i {
-  position: absolute;
-  left: 11px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #94a3b8;
-  pointer-events: none;
-  font-size: 13px;
-  line-height: 1;
-  width: 14px;
-  text-align: center;
-  z-index: 1;
-}
-
-.product-method-container .search-box input {
   width: 100%;
-  /* left padding = icon-left(11) + icon-width(14) + gap(10) = 35px */
-  padding: 9px 12px 9px 36px;
+}
+
+.product-method-container .custom-dropdown-toggle {
+  width: 100%;
+  padding: 0 14px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  outline: none;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: 14px;
+  color: #333;
+  height: 40px; /* Force to 40px */
+  box-sizing: border-box;
+  transition: all 0.2s;
+  user-select: none;
+  line-height: normal;
+}
+
+.product-method-container .custom-dropdown-toggle:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.product-method-container .custom-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  max-height: 250px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  z-index: 1001; 
+  display: none;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-method-container .custom-dropdown-menu.show {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Scrollbar for dropdown */
+.product-method-container .custom-dropdown-menu::-webkit-scrollbar {
+  width: 5px;
+}
+
+.product-method-container .custom-dropdown-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.product-method-container .custom-dropdown-menu::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+
+.product-method-container .custom-dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+.product-method-container .custom-dropdown-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.product-method-container .custom-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.product-method-container .custom-dropdown-item:hover {
+  background-color: #f1f5f9;
+  color: #2563eb;
+  padding-left: 18px;
+}
+
+.product-method-container .custom-dropdown-item.selected {
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.product-method-container .product-search-input {
+  width: 320px;
+  height: 40px; /* Standardized for this module */
+  padding: 0 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
   background: #fff;
   color: #1e293b;
-  transition: border-color 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
 }
 
-.product-method-container .search-box input::placeholder {
+.product-method-container .product-search-input::placeholder {
   color: #94a3b8;
 }
 
-.product-method-container .search-box input:focus {
+.product-method-container .product-search-input:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
@@ -69,57 +166,67 @@
 /* ══════════════════════════════════════════
    SECTION 2 — TABLE (scrollable body only)
 ══════════════════════════════════════════ */
-.product-method-container .table-wrapper {
+/* ── Header container: No scrollbar, syncs scroll with body ── */
+.product-method-container .table-scroll-head {
+  overflow: hidden;
+  background: #2563eb;
+  border-radius: 10px 10px 0 0;
+  flex-shrink: 0;
+}
+
+/* ── Body container: Scrollable vertically and horizontally ── */
+.product-method-container .table-scroll-body {
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   background: #fff;
-  border-radius: 10px;
+  border-radius: 0 0 10px 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-/* Custom scrollbar */
-.product-method-container .table-wrapper::-webkit-scrollbar { width: 6px; }
-.product-method-container .table-wrapper::-webkit-scrollbar-track { background: #f8fafc; }
-.product-method-container .table-wrapper::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-.product-method-container .table-wrapper::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+/* Custom scrollbar for the body */
+.product-method-container .table-scroll-body::-webkit-scrollbar { 
+  width: 6px; 
+  height: 6px; 
+}
+.product-method-container .table-scroll-body::-webkit-scrollbar-track { background: #f8fafc; }
+.product-method-container .table-scroll-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.product-method-container .table-scroll-body::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 .product-method-container .data-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
   table-layout: fixed;
+  min-width: 800px; /* Ensure content is wide enough for alignment testing */
 }
 
-/* Sticky thead — sticks inside .table-wrapper scroll container */
+/* No longer need sticky th because the header container itself is fixed at the top */
 .product-method-container .data-table thead th {
-  position: sticky;
-  top: 0;
   background-color: #2563eb;
   color: #fff;
   font-weight: 600;
   padding: 13px 16px;
   text-align: left;
   border-bottom: none;
-  z-index: 10;
 }
 
 .product-method-container .data-table thead th:first-child { border-radius: 10px 0 0 0; }
 .product-method-container .data-table thead th:last-child  { border-radius: 0 10px 0 0; }
 
-/* Column widths */
+/* Column widths adjusted for harmony */
 .product-method-container .data-table th:nth-child(1),
-.product-method-container .data-table td:nth-child(1) { width: 50px;  text-align: center; }
+.product-method-container .data-table td:nth-child(1) { width: 50px;  text-align: center !important; }
 .product-method-container .data-table th:nth-child(2),
-.product-method-container .data-table td:nth-child(2) { width: 60px;  text-align: center; }
+.product-method-container .data-table td:nth-child(2) { width: 50px;  text-align: center !important; }
 .product-method-container .data-table th:nth-child(3),
-.product-method-container .data-table td:nth-child(3) { width: 140px; }
+.product-method-container .data-table td:nth-child(3) { width: 120px; text-align: left !important; padding-left: 15px !important; }
 .product-method-container .data-table th:nth-child(4),
-.product-method-container .data-table td:nth-child(4) { width: auto;  }
+.product-method-container .data-table td:nth-child(4) { width: 250px; text-align: left !important; padding-left: 15px !important; }
 .product-method-container .data-table th:nth-child(5),
-.product-method-container .data-table td:nth-child(5) { width: 180px; }
+.product-method-container .data-table td:nth-child(5) { width: 200px; text-align: left !important; padding-left: 15px !important; }
 .product-method-container .data-table th:nth-child(6),
-.product-method-container .data-table td:nth-child(6) { width: 120px; text-align: center; }
+.product-method-container .data-table td:nth-child(6) { width: 140px; text-align: center !important; }
 
 .product-method-container .data-table tbody tr:hover { background-color: #f8fafc; }
 
@@ -139,11 +246,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #fff;
   padding: 12px 20px;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
   flex-shrink: 0;
+  margin-top: 12px;
 }
 
 .product-method-container .pagination-info {
@@ -201,12 +306,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  height: 42px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  min-height: 40px;
   animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 100;
 }
@@ -229,59 +332,54 @@
   padding-left: 16px;
 }
 
-/* ── Custom Combobox: #EFF6FF style (matches UI reference) ── */
-.product-method-container .custom-select-wrapper {
-  position: relative;
-  width: 120px;
-  height: 36px;
-}
-
-.product-method-container .custom-select-wrapper select {
-  width: 100%;
-  height: 100%;
-  padding: 0 28px 0 12px;
-  border: 1.5px solid #bfdbfe;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  outline: none;
+/* Support for themed custom dropdown (internal to bulk bar) */
+.product-method-container #method-bulk-dropdown .custom-dropdown-toggle {
   background-color: #eff6ff;
+  border-color: #bfdbfe;
   color: #1d4ed8;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  transition: border-color 0.2s, background-color 0.2s;
+  font-weight: 600;
 }
 
-.product-method-container .custom-select-wrapper select:hover {
-  border-color: #93c5fd;
+.product-method-container #method-bulk-dropdown .custom-dropdown-toggle:hover {
   background-color: #dbeafe;
-}
-
-.product-method-container .custom-select-wrapper select:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-}
-
-.product-method-container .custom-select-wrapper i {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 10px;
-  color: #3b82f6;
-  pointer-events: none;
+  border-color: #93c5fd;
 }
 
 .product-method-container .bulk-actions-btns {
   display: flex;
   gap: 8px;
-  height: 36px;
+  height: 40px; /* Harmonized with global height */
   padding-right: 4px;
 }
 
+.product-method-container .btn-trigger-bulk {
+  height: 40px;
+  padding: 0 16px;
+  background-color: #fff;
+  color: #1a56db;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.product-method-container .btn-trigger-bulk:hover {
+  background-color: none;
+  border-color: #076EB8;
+}
+
 .product-method-container .btn-apply {
-  height: 36px;
+  height: 40px; /* Harmonized with global height */
+  width: fit-content;
+  white-space: nowrap;
   padding: 0 16px;
   background-color: #3b82f6;
   color: white;
@@ -296,14 +394,22 @@
   transition: all 0.2s;
 }
 
-.product-method-container .btn-apply:hover {
+.product-method-container .btn-apply:disabled {
+  background-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.product-method-container .btn-apply:hover:not(:disabled) {
   background-color: #2563eb;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
 .product-method-container .btn-cancel {
-  height: 36px;
+  height: 40px; /* Harmonized with global height */
   padding: 0 16px;
   background-color: #fff;
   color: #64748b;
@@ -324,16 +430,95 @@
   border-color: #fecaca;
 }
 
-/* ── Method badge ── */
-.product-method-container .data-table .method-text {
+/* ── Method column: allow dropdown overflow ── */
+.product-method-container .data-table td:nth-child(6) {
+  overflow: visible;
+}
+.module-actions :hover {
+  border-color: #076EB8;
+}
+
+/* ── Inline Custom Dropdown ── */
+.product-method-container .method-badge-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto; /* Center within td */
+  padding: 0;
+  border-radius: 6px;
   font-weight: 600;
-  color: #1d4ed8;
-  background-color: #eff6ff;
-  padding: 3px 10px;
-  border-radius: 4px;
   font-size: 12px;
-  border: 1px solid #bfdbfe;
-  display: inline-block;
-  min-width: 50px;
-  text-align: center;
+  min-width: 90px;
+  height: 32px; /* Slightly taller than badges */
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  position: relative;
+  cursor: pointer;
+}
+
+.product-method-container .method-badge-container .custom-dropdown {
+  width: 100%;
+  height: 100%;
+}
+
+.product-method-container .method-badge-container .custom-dropdown-toggle {
+  height: 100%;
+  padding: 0 10px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: inherit;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.product-method-container .method-badge-container .custom-dropdown-menu {
+  width: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  z-index: 1005; /* Above other rows */
+}
+
+.product-method-container .method-badge-container .custom-dropdown-menu.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.product-method-container .method-badge-container.method-fifo {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+.product-method-container .method-badge-container.method-fifo:hover {
+  background-color: #dbeafe;
+}
+
+.product-method-container .method-badge-container.method-fefo {
+  background-color: #f0fdf4;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+.product-method-container .method-badge-container.method-fefo:hover {
+  background-color: #dcfce7;
+}
+
+.product-method-container .method-badge-container.method-lifo {
+  background-color: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+.product-method-container .method-badge-container.method-lifo:hover {
+  background-color: #fef3c7;
+}
+
+/* Ensure Row has Z-index stacking context for open dropdowns */
+.product-method-container .data-table tbody tr {
+  position: relative;
+}
+
+.product-method-container .data-table tbody tr:has(.custom-dropdown-menu.show) {
+  z-index: 10;
 }

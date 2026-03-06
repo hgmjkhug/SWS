@@ -20,6 +20,7 @@ input, button, select, textarea {
 /* TOOLBAR & TABLE */
 .toolbar { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; background: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 16px; gap: 16px; }
 .toolbar-left { display: flex; gap: 8px; flex: 1; min-width: 300px; flex-wrap: wrap; row-gap: 12px; align-items: flex-end; }
+.toolbar-left label { font-size: 12px !important; margin-bottom: 2px; }
 .search-input { padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 6px; width: 250px; font-size: 12px; }
 .small-search { width: 260px; max-width: 40%; }
 .filter-select { padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: white; cursor: pointer; outline: none; transition: all 0.2s; }
@@ -155,7 +156,7 @@ input, button, select, textarea {
 }
 
 /* Scrollbar styling for Container */
-.table-scroll-body::-webkit-scrollbar { width: 6px; height: 8px; }
+.table-scroll-body::-webkit-scrollbar { width: 8px; height: 8px; }
 .table-scroll-body::-webkit-scrollbar-track { background: transparent; } 
 .table-scroll-body::-webkit-scrollbar-thumb { 
     background: #cbd5e1; 
@@ -599,6 +600,58 @@ input, button, select, textarea {
 .apply-btn:hover {
     background: #1a73e8;
     color: #fff;
+}
+
+/* Sidebar Items for filter mode */
+.sidebar-item.filter-mode-item {
+    padding-left: 32px; /* Inset to distinguish from range options */
+    font-size: 13px;
+    border-bottom: none;
+}
+
+.sidebar-item.filter-mode-item::before {
+    content: '\f058';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 400;
+    margin-right: 8px;
+    color: #cbd5e1;
+}
+
+.sidebar-item.filter-mode-item.active::before {
+    font-weight: 900;
+    color: #1a73e8;
+}
+
+/* Priority Filter Button */
+.filter-priority-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-color);
+    background: white;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #94a3b8;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filter-priority-btn:hover {
+    border-color: #f59e0b;
+    color: #f59e0b;
+    background: #fffbeb;
+}
+
+.filter-priority-btn.active {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    color: white;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.filter-priority-btn i {
+    font-size: 16px;
 }
 
 /* Body & Calendars */

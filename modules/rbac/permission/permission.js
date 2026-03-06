@@ -301,6 +301,16 @@ function init() {
             </div>
         `;
     }
+
+    // NEW: Horizontal Scroll Sync
+    const scrollBody = document.querySelector('.table-scroll-body');
+    const scrollHead = document.querySelector('.table-scroll-head');
+    
+    if (scrollBody && scrollHead) {
+        scrollBody.addEventListener('scroll', () => {
+            scrollHead.scrollLeft = scrollBody.scrollLeft;
+        });
+    }
 }
 
 if (document.readyState === 'loading') {

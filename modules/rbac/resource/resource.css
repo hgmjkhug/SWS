@@ -96,18 +96,35 @@
   color: #ef4444 !important;
 }
 
-/* Table styling with 70vh constraint */
+/* Table Wrapper - split head/body pattern */
 .table-wrapper {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow-y: auto;
-  max-height: 70vh; /* Requirement */
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   width: 100%;
+}
+
+.table-scroll-head {
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #076eb8;
+}
+
+.table-scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  min-height: 0;
+  background: white;
 }
 
 .data-table {
   width: 100%;
+  table-layout: fixed; /* Keep layout consistent */
   border-collapse: collapse;
 }
 
@@ -125,10 +142,35 @@
   background-color: #076eb8;
   color: white;
   font-weight: 600;
-  position: sticky;
-  top: 0;
-  z-index: 5;
+  text-align: left;
 }
+
+/* Scrollbar styling for table scroll body - matching unit.css */
+.table-scroll-body::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.table-scroll-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.table-scroll-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.table-scroll-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Force consistent column widths across header and body */
+.data-table th:nth-child(1), .data-table td:nth-child(1) { width: 50px; text-align: center; }
+.data-table th:nth-child(2), .data-table td:nth-child(2) { width: 60px; text-align: center; }
+.data-table th:nth-child(3), .data-table td:nth-child(3) { width: 220px; }
+.data-table th:nth-child(4), .data-table td:nth-child(4) { width: 300px; }
+.data-table th:nth-child(5), .data-table td:nth-child(5) { width: auto; }
+.data-table th:nth-child(6), .data-table td:nth-child(6) { width: 120px; text-align: center; }
 
 .data-table tbody tr:hover {
   background-color: #f8fafc;

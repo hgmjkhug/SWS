@@ -71,14 +71,14 @@ const MOCK_INBOUND_ORDERS = [
   // --- Tháng 10/2025 ---
   { 
     id: 1, code: 'P-A01-L3_MAT-001_500_25102025', 
-    materials: [{ code: 'MAT-001', name: 'Thép ống D60', qty: 500, unit: 'kg', specs: '6000x60x3', weight: 500, expiryDate: '2025-10-25' }], 
-    pallets: ['P-A01-L3'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', exportMethod: 'FIFO',
+    materials: [{ code: 'MAT-001', name: 'Thép ống D60', qty: 500, unit: 'kg', specs: 'Φ60mm x 6m', weight: 500, expiryDate: '2025-10-25' }], 
+    pallets: ['P-A01-L3'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', priority: true,
     creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2025-10-25T08:30:00')
   },
   { 
     id: 2, code: 'P-B01-L1_MAT-002_1000_26102025', 
-    materials: [{ code: 'MAT-002', name: 'Xi măng Hà Tiên', qty: 1000, unit: 'bao', specs: '50x30x10', weight: 50000, expiryDate: '2025-06-15' }], 
-    pallets: ['P-B01-L1'], bin: 'T1-F1-P2-A5', status: 'COMPLETED', 
+    materials: [{ code: 'MAT-002', name: 'Xi măng Hà Tiên', qty: 1000, unit: 'bao', specs: 'Bao 50kg', weight: 50000, expiryDate: '2025-06-15' }], 
+    pallets: ['P-B01-L1'], bin: 'T1-F1-P2-A5', status: 'COMPLETED', priority: false,
     creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: new Date('2025-10-26T09:15:00')
   },
   { 
@@ -130,7 +130,7 @@ const MOCK_INBOUND_ORDERS = [
   { 
     id: 10, code: 'P-Z01-L1_MAT-012_20_28122025', 
     materials: [{ code: 'MAT-012', name: 'Cát xây dựng', qty: 20, unit: 'm3', specs: 'Không quy cách', weight: 32000, expiryDate: '2025-12-28' }], 
-    pallets: ['P-Z01-L1'], bin: 'T1-F9-P1-A1', status: 'PENDING', 
+    pallets: ['P-Z01-L1'], bin: 'T1-F9-P1-A1', status: 'PENDING', priority: true,
     creator: { id: 'US04', name: 'Phạm Minh Dũng' }, createdAt: new Date('2025-12-28T07:45:00')
   },
 
@@ -138,7 +138,7 @@ const MOCK_INBOUND_ORDERS = [
   { 
     id: 11, code: 'P-F01-L1_MAT-013_10_05012024', 
     materials: [{ code: 'MAT-013', name: 'Laptop Dell Latitude', qty: 10, unit: 'cái', specs: '38x26x2.5', weight: 18, expiryDate: '2028-01-05' }], 
-    pallets: ['P-F01-L1'], bin: 'T5-F1-P1-A1', status: 'COMPLETED', 
+    pallets: ['P-F01-L1'], bin: 'T5-F1-P1-A1', status: 'COMPLETED', priority: true,
     creator: { id: 'US06', name: 'Vũ Thị Giang' }, createdAt: new Date('2024-01-05T08:15:00')
   },
   { 
@@ -210,7 +210,7 @@ const MOCK_INBOUND_ORDERS = [
   { 
     id: 22, code: 'P-K04-L1_MAT-026_2_12042024', 
     materials: [{ code: 'MAT-026', name: 'Khuôn ép nhựa', qty: 2, unit: 'bộ', specs: '100x80x50', weight: 150, expiryDate: '2026-04-12' }], 
-    pallets: ['P-K04-L1'], bin: 'T8-F2-P5-A1', status: 'COMPLETED', 
+    pallets: ['P-K04-L1'], bin: 'T8-F2-P5-A1', status: 'COMPLETED', priority: true,
     creator: { id: 'US05', name: 'Hoàng Tuấn Em' }, createdAt: new Date('2024-04-12T11:00:00')
   },
 
@@ -593,6 +593,7 @@ function renderTableBody() {
                 <td class="text-center">${startIdx + i + 1}</td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 6px;">
+                        ${o.priority ? `<i class="fas fa-star" style="color: #f59e0b; font-size: 14px; margin-right: 2px;" title="Lệnh này là lệnh ưu tiên"></i>` : ''}
                         <a href="#" class="text-link code-link-truncate" title="${o.code}">${o.code}</a>
                         <i class="fas fa-copy btn-copy" onclick="copyToClipboard('${o.code}', this)" title="Sao chép"></i>
                     </div>
@@ -601,12 +602,14 @@ function renderTableBody() {
                     <div class="product-list">
                         ${o.materials.map(m => `
                             <div class="product-item">
-                                <span class="prod-code">${m.code}</span> 
-                                <span style="font-weight: 500; color: #334155; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display:block; margin-bottom:2px;">${m.name}</span>
-                                <div style="font-size:12px; color:#475569; display:flex; align-items:center; gap:8px;">
-                                    <span style="font-weight:600">SL: ${m.qty} ${m.unit}</span>
+                                <span style="font-weight: 600; color: #334155; font-size: 14px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display:block; margin-bottom:2px;">${m.name}</span>
+                                <div style="font-size:12px; display:flex; align-items:center; gap:8px; margin-bottom: 2px;">
+                                    <span class="prod-code" style="font-size: 12px; font-weight: 500;">${m.code}</span>
                                     <span style="color:#cbd5e1">|</span>
-                                    <span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:12px; font-weight:500;">Quy cách: ${o.exportMethod || 'FIFO'}</span>
+                                    <span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:500;">Quy cách: ${o.exportMethod || 'FIFO'}</span>
+                                </div>
+                                <div style="font-size:13px; color:#334155; font-weight:700;">
+                                    SL: ${m.qty} ${m.unit}
                                 </div>
                             </div>
                         `).join('')}
@@ -2287,6 +2290,36 @@ let currentViewRight = new Date();
 currentViewRight.setMonth(currentViewRight.getMonth() + 1);
 let activeStartDate = null;
 let activeEndDate = null;
+let activeDateFilterType = 'all'; // 'all', 'createdAt', or 'expiryDate'
+let filterPriorityOnly = false;
+
+function togglePriorityFilter() {
+    filterPriorityOnly = !filterPriorityOnly;
+    const btn = document.getElementById('btn-filter-priority');
+    if (btn) {
+        if (filterPriorityOnly) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    }
+    mainCurrentPage = 1;
+    renderTableBody();
+}
+window.togglePriorityFilter = togglePriorityFilter;
+
+function setDateFilterMode(mode) {
+    activeDateFilterType = mode;
+    
+    // Update UI
+    const items = document.querySelectorAll('.filter-mode-item');
+    items.forEach(item => item.classList.remove('active'));
+    
+    const targetId = mode === 'all' ? 'mode-all' : (mode === 'createdAt' ? 'mode-inbound' : 'mode-expiry');
+    const targetItem = document.getElementById(targetId);
+    if (targetItem) targetItem.classList.add('active');
+}
+window.setDateFilterMode = setDateFilterMode;
 
 function initDatePicker() {
     const trigger = document.getElementById('dateRangeTrigger');
@@ -2294,7 +2327,8 @@ function initDatePicker() {
     const applyBtn = document.getElementById('applyPicker');
     const cancelBtn = document.getElementById('cancelPicker');
     const clearBtn = document.getElementById('clearPicker');
-    const sidebarItems = document.querySelectorAll('.sidebar-item');
+    const rangeItems = document.querySelectorAll('.sidebar-item[data-range]');
+    const modeItems = document.querySelectorAll('.filter-mode-item');
     
     if (!trigger || !picker) return;
     
@@ -2345,10 +2379,9 @@ function initDatePicker() {
         clearBtn.onclick = function() {
             selectedStartDate = null;
             selectedEndDate = null;
-            activeStartDate = null;
             activeEndDate = null;
             document.getElementById('dateRangeDisplay').textContent = 'dd/mm/yyyy - dd/mm/yyyy';
-            sidebarItems.forEach(function(i) { i.classList.remove('active'); });
+            rangeItems.forEach(function(i) { i.classList.remove('active'); });
             renderCalendars();
             mainCurrentPage = 1;
             renderTableBody();
@@ -2356,10 +2389,10 @@ function initDatePicker() {
     }
     
     // Sidebar quick select items
-    sidebarItems.forEach(function(item) {
+    rangeItems.forEach(function(item) {
         item.onclick = function(e) {
             e.stopPropagation();
-            sidebarItems.forEach(function(i) { i.classList.remove('active'); });
+            rangeItems.forEach(function(i) { i.classList.remove('active'); });
             item.classList.add('active');
             
             var range = item.getAttribute('data-range');
@@ -2576,13 +2609,36 @@ getFilteredMainData = function() {
             if (!codeMatch && !materialMatch) return false;
         }
 
+        // Priority Filter
+        if (filterPriorityOnly && !o.priority) return false;
+
         // Date range filter
         if (activeStartDate && activeEndDate) {
             var s = new Date(activeStartDate).setHours(0, 0, 0, 0);
             var e = new Date(activeEndDate).setHours(23, 59, 59, 999);
-            if (o.createdAt) {
-                var t = o.createdAt.getTime();
-                if (t < s || t > e) return false;
+            
+            if (activeDateFilterType === 'all') {
+                var createMatch = o.createdAt && o.createdAt.getTime() >= s && o.createdAt.getTime() <= e;
+                var expiryMatch = false;
+                if (o.materials && o.materials[0] && o.materials[0].expiryDate) {
+                    var expDate = new Date(o.materials[0].expiryDate).getTime();
+                    expiryMatch = expDate >= s && expDate <= e;
+                }
+                if (!createMatch && !expiryMatch) return false;
+            } else {
+                var targetDate = null;
+                if (activeDateFilterType === 'createdAt') {
+                    targetDate = o.createdAt;
+                } else if (o.materials && o.materials[0] && o.materials[0].expiryDate) {
+                    targetDate = new Date(o.materials[0].expiryDate);
+                }
+
+                if (targetDate) {
+                    var t = targetDate.getTime();
+                    if (t < s || t > e) return false;
+                } else {
+                    return false;
+                }
             }
         }
         return true;
@@ -3331,6 +3387,7 @@ function generateReceipt() {
         code: code,
         supplier: 'PDA Import',
         status: 'PENDING',
+        priority: document.getElementById('inputPriority')?.checked || false,
         type: 'Nhập nội bộ',
         creator: { id: 'US_PDA', name: 'PDA User' },
         createdAt: now,

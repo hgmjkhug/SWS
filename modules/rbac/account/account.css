@@ -143,24 +143,37 @@
 
 
 /* Table Wrapper - scrollable with sticky header */
-/* Table Wrapper - scrollable body only */
-/* Table Wrapper - scrollable with sticky header */
+/* Table Wrapper - split head/body pattern */
 .table-wrapper {
     background: white;
     border-radius: 8px 8px 0 0;
-    /* box-shadow: 0 1px 3px rgba(0,0,0,0.05); */
-    /* Enable scrolling on wrapper instead of tbody */
-    overflow-y: auto;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     max-height: 70vh;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     position: relative;
-    z-index: 1; /* Explicitly lower than account-actions */
+    z-index: 1;
+}
+
+.table-scroll-head {
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #076EB8;
+}
+
+.table-scroll-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    min-height: 0;
+    background: white;
 }
 
 .account-table {
     width: 100%;
+    table-layout: fixed; /* Crucial for alignment */
     border-collapse: collapse;
-    /* Remove flex/block display to restore natural table alignment */
 }
 
 .account-table thead {
@@ -178,58 +191,37 @@
     display: table-row;
 }
 
-/* Sticky header for account table */
+/* Standard header styling - No sticky needed in split mode */
 .account-table th {
-    position: sticky;
-    top: 0;
-    z-index: 10;
     background-color: #076EB8 !important;
     color: #FFFFFF !important;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    border-bottom: 2px solid #e2e8f0;
 }
 
-/* Hide scrollbar behind header - the last th cell extends to cover scrollbar area */
-.account-table thead tr th:last-child {
-    position: sticky;
-    right: 0;
+/* Scrollbar styling for table scroll body - matching unit.css */
+.table-scroll-body::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
 
-/* Scrollbar styling for table wrapper */
-.table-wrapper::-webkit-scrollbar {
-    width: 8px;
-}
-
-.table-wrapper::-webkit-scrollbar-track {
+.table-scroll-body::-webkit-scrollbar-track {
     background: #f1f5f9;
-    border-radius: 4px;
 }
 
-.table-wrapper::-webkit-scrollbar-thumb {
+.table-scroll-body::-webkit-scrollbar-thumb {
     background: #cbd5e1;
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
-.table-wrapper::-webkit-scrollbar-thumb:hover {
+.table-scroll-body::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
 
-/* Header scrollbar cover - pseudo element to hide scrollbar behind header */
-.table-wrapper {
-    position: relative;
-}
-
-.table-wrapper::before {
-    content: '';
-    position: sticky;
-    top: 0;
-    right: 0;
-    width: 8px;
-    height: 45px; /* Approximate header height */
-    background-color: #076EB8;
-    z-index: 20;
-    display: block;
-    float: right;
-    margin-bottom: -45px;
-}
+/* Legacy hacks removed */
 
 .account-table th, .account-table td {
     padding: 14px 16px;
@@ -243,18 +235,17 @@
     /* Sticky header implementation già được định nghĩa ở trên */
 }
 
-/* Explicit Column Widths for Alignment */
-.account-table th:nth-child(1), .account-table td:nth-child(1) { width: 40px; } /* Checkbox */
+/* Explicit Column Widths for Alignment - MUST BE IDENTICAL FOR HEAD AND BODY */
+.account-table th:nth-child(1), .account-table td:nth-child(1) { width: 45px; text-align: center; } /* Checkbox */
 .account-table th:nth-child(2), .account-table td:nth-child(2) { width: 50px; text-align: center; } /* STT */
-.account-table th:nth-child(3), .account-table td:nth-child(3) { width: 60px; text-align: center; } /* Avatar */
-.account-table th:nth-child(4), .account-table td:nth-child(4) { width: 10%; white-space: nowrap; } /* Code */
-.account-table th:nth-child(5), .account-table td:nth-child(5) { width: 250px; white-space: nowrap; } /* Name */
-.account-table th:nth-child(6), .account-table td:nth-child(6) { width: 150px; } /* Email */
-
-.account-table th:nth-child(7), .account-table td:nth-child(7) { width: 120px; text-align: center; } /* Role - Centered */
-.account-table th:nth-child(8), .account-table td:nth-child(8) { width: 300px; text-align: left; } /* Warehouse Scope - Left Aligned */
-.account-table th:nth-child(9), .account-table td:nth-child(9) { width: 120px; text-align: center; vertical-align: middle; white-space: nowrap; } /* Status */
-.account-table th:nth-child(10), .account-table td:nth-child(10) { width: 120px; text-align: center; vertical-align: middle; } /* Action */
+.account-table th:nth-child(3), .account-table td:nth-child(3) { width: 65px; text-align: center; } /* Avatar */
+.account-table th:nth-child(4), .account-table td:nth-child(4) { width: 130px; } /* Code */
+.account-table th:nth-child(5), .account-table td:nth-child(5) { width: 220px; } /* Name */
+.account-table th:nth-child(6), .account-table td:nth-child(6) { width: 200px; } /* Email */
+.account-table th:nth-child(7), .account-table td:nth-child(7) { width: 110px; text-align: center; } /* Role */
+.account-table th:nth-child(8), .account-table td:nth-child(8) { width: 250px; } /* Warehouse Scope */
+.account-table th:nth-child(9), .account-table td:nth-child(9) { width: 90px; text-align: center; } /* Status */
+.account-table th:nth-child(10), .account-table td:nth-child(10) { width: 110px; text-align: center; } /* Action */
 
 /* Universal Vertical Alignment */
 .account-table th, .account-table td {
@@ -867,11 +858,60 @@ input[type="text"], input[type="email"], select {
     grid-template-columns: 140px 1fr; /* Fixed width for Role, expanded for Warehouse */
     gap: 16px;
     align-items: flex-start;
-    padding: 20px 16px 16px 16px;
+    padding: 24px 16px 16px 16px; /* Increased top padding for icons */
     background: white;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     margin-bottom: 12px;
+}
+
+.permission-row-actions {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    z-index: 10;
+}
+
+.btn-icon-add, .btn-icon-remove {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    border-radius: 4px;
+}
+
+.btn-icon-add {
+    color: #2563eb; /* Blue per user request */
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.btn-icon-add:hover {
+    background: #eff6ff;
+    transform: scale(1.1);
+}
+
+.btn-icon-remove {
+    color: #94a3b8;
+}
+
+.btn-icon-remove:hover:not(.disabled) {
+    color: #ef4444;
+    background: #fef2f2;
+}
+
+.btn-icon-remove.disabled {
+    cursor: not-allowed !important;
+    opacity: 0.3;
 }
 
 .permission-row:last-child {

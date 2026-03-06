@@ -361,6 +361,65 @@
         // Function to handle printing if needed
     };
 
+    // Helper for Vietnamese search
+    const normalizeString = (str) => {
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    };
+
+    const unitOptions = ['Cái', 'Hộp', 'Thùng', 'Cuộn', 'Kg', 'Mét', 'Lít', 'Bộ', 'Viên', 'Phuy', 'Chai', 'Lon', 'Bao', 'Tấm', 'Đôi', 'Gói'];
+
+    window.renderGroupItems = function (filter = '') {
+        const list = document.getElementById('group-items-list');
+        if (!list) return;
+
+        const searchTerm = normalizeString(filter);
+        const filtered = categoryData.filter(c => 
+            normalizeString(c.name).includes(searchTerm)
+        );
+        
+        if (filtered.length === 0) {
+            list.innerHTML = '<div class="no-results">Không tìm thấy nhóm</div>';
+            return;
+        }
+
+        list.innerHTML = filtered.map(c => `
+            <div class="custom-dropdown-item" onclick="selectGroup('${c.code}', '${c.name}')">
+                ${c.name}
+            </div>
+        `).join('');
+    };
+
+    window.renderUnitItems = function (filter = '') {
+        const list = document.getElementById('unit-items-list');
+        if (!list) return;
+
+        const searchTerm = normalizeString(filter);
+        const filtered = unitOptions.filter(u => 
+            normalizeString(u).includes(searchTerm)
+        );
+
+        if (filtered.length === 0) {
+            list.innerHTML = '<div class="no-results">Không tìm thấy ĐVT</div>';
+            return;
+        }
+
+        list.innerHTML = filtered.map(u => `
+            <div class="custom-dropdown-item" onclick="selectUnit('${u}')">
+                ${u}
+            </div>
+        `).join('');
+    };
+
+    window.filterGroupItems = function (query) {
+        if (!query) document.getElementById('prod-group').value = '';
+        window.renderGroupItems(query);
+    };
+
+    window.filterUnitItems = function (query) {
+        if (!query) document.getElementById('prod-unit').value = '';
+        window.renderUnitItems(query);
+    };
+
     // Product Modal
     window.openProductModal = function (id = null) {
         const modal = document.getElementById('product-modal');
@@ -368,6 +427,15 @@
         const form = document.getElementById('product-form');
         form.reset();
         document.getElementById('prod-id').value = '';
+
+        // Reset search inputs
+        const gSearchInput = document.getElementById('group-search-input');
+        if (gSearchInput) gSearchInput.value = '';
+        const uSearchInput = document.getElementById('unit-search-input');
+        if (uSearchInput) uSearchInput.value = '';
+        
+        renderGroupItems();
+        renderUnitItems();
 
         if (id) {
             const prod = products.find(p => p.id === id);
@@ -377,16 +445,17 @@
                 document.getElementById('prod-code').value = prod.code;
                 document.getElementById('prod-name').value = prod.name;
                 document.getElementById('prod-description').value = prod.description || '';
-                // Set Group Dropdown
+                
+                // Set Group Search Input
                 const gVal = prod.group || '';
-                const gName = categoryData.find(c => c.code === gVal)?.name || '-- Chọn nhóm --';
+                const gName = categoryData.find(c => c.code === gVal)?.name || '';
                 document.getElementById('prod-group').value = gVal;
-                document.getElementById('selected-group-span').innerText = gName;
+                if (gSearchInput) gSearchInput.value = gName;
 
-                // Set custom dropdown value
+                // Set Unit Search Input
                 const uVal = prod.unit || '';
                 document.getElementById('prod-unit').value = uVal;
-                document.getElementById('selected-unit-span').innerText = uVal || '-- Chọn ĐVT --';
+                if (uSearchInput) uSearchInput.value = uVal;
 
                 document.getElementById('prod-weight').value = prod.weight || '';
                 document.getElementById('prod-status').checked = prod.status === 1;
@@ -395,54 +464,79 @@
             title.innerText = 'Thêm mới sản phẩm';
             document.getElementById('prod-code').value = '';
             
-            // Reset custom dropdowns
-            document.getElementById('selected-unit-span').innerText = '-- Chọn ĐVT --';
+            // Reset fields
             document.getElementById('prod-unit').value = '';
-
-            document.getElementById('selected-group-span').innerText = '-- Chọn nhóm --';
             document.getElementById('prod-group').value = '';
-
             document.getElementById('prod-status').checked = true;
         }
         modal.classList.add('show');
     };
 
-    // Custom Dropdown Logic
-    window.toggleUnitDropdown = function () {
+    // Integrated Search Dropdown Logic
+    window.toggleUnitDropdown = function (forceOpen = null) {
+        const dropdown = document.getElementById('unit-dropdown');
         const menu = document.getElementById('unit-dropdown-menu');
-        menu.classList.toggle('show');
+        const isCurrentlyOpen = menu.classList.contains('show');
+        const targetState = forceOpen !== null ? forceOpen : !isCurrentlyOpen;
+
+        // Close all other dropdowns
+        document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.remove('show'));
+        document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.remove('open'));
+
+        if (targetState) {
+            menu.classList.add('show');
+            dropdown.classList.add('open');
+            window.renderUnitItems(document.getElementById('unit-search-input').value);
+        } else {
+            menu.classList.remove('show');
+            dropdown.classList.remove('open');
+        }
     };
 
     window.selectUnit = function (val) {
         document.getElementById('prod-unit').value = val;
-        document.getElementById('selected-unit-span').innerText = val || '-- Chọn ĐVT --';
-        document.getElementById('unit-dropdown-menu').classList.remove('show');
+        document.getElementById('unit-search-input').value = val;
+        toggleUnitDropdown(false);
     };
 
-    // Group Dropdown Logic
-    window.toggleGroupDropdown = function () {
+    window.toggleGroupDropdown = function (forceOpen = null) {
+        const dropdown = document.getElementById('group-dropdown');
         const menu = document.getElementById('group-dropdown-menu');
-        menu.classList.toggle('show');
+        const isCurrentlyOpen = menu.classList.contains('show');
+        const targetState = forceOpen !== null ? forceOpen : !isCurrentlyOpen;
+
+        // Close all other dropdowns
+        document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.remove('show'));
+        document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.remove('open'));
+
+        if (targetState) {
+            menu.classList.add('show');
+            dropdown.classList.add('open');
+            window.renderGroupItems(document.getElementById('group-search-input').value);
+        } else {
+            menu.classList.remove('show');
+            dropdown.classList.remove('open');
+        }
     };
 
     window.selectGroup = function (val, label) {
         document.getElementById('prod-group').value = val;
-        document.getElementById('selected-group-span').innerText = label;
-        document.getElementById('group-dropdown-menu').classList.remove('show');
+        document.getElementById('group-search-input').value = label;
+        toggleGroupDropdown(false);
     };
-
-
 
     // Close dropdown when clicking outside
     window.addEventListener('click', function (e) {
         // Unit
         const uDropdown = document.getElementById('unit-dropdown');
         if (uDropdown && !uDropdown.contains(e.target)) {
+            uDropdown.classList.remove('open');
             document.getElementById('unit-dropdown-menu').classList.remove('show');
         }
         // Group
         const gDropdown = document.getElementById('group-dropdown');
         if (gDropdown && !gDropdown.contains(e.target)) {
+            gDropdown.classList.remove('open');
             document.getElementById('group-dropdown-menu').classList.remove('show');
         }
     });

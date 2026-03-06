@@ -7,28 +7,28 @@
 
     // Mock Data
     let warehouses = [
-        { id: 1, type: 'Kho tower', name: 'CÔNG TY THÉP', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
+        { id: 1, type: 'Kho Tower', name: 'CÔNG TY THÉP', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
         { id: 2, type: 'Kho stacker crane', name: 'CÔNG TY TNHH TẬP ĐOÀN CÔNG NGHIỆP TRƯỜNG HẢI', floors: 3, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
         { id: 3, type: 'Kho Flat', name: 'CÔNG TY TNHH SẢN XUẤT MÁY LẠNH Ô TÔ VINA', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang bảo trì' },
-        { id: 4, type: 'Kho tower', name: 'CÔNG TY LINH KIỆN KHUNG THÂN VỎ Ô TÔ', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
+        { id: 4, type: 'Kho Tower', name: 'CÔNG TY LINH KIỆN KHUNG THÂN VỎ Ô TÔ', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
         { id: 5, type: 'Kho stacker crane', name: 'CÔNG TY BẢO HỘ LAO ĐỘNG', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Ngưng sử dụng' },
         { id: 6, type: 'Kho Flat', name: 'CÔNG TY THIẾT BỊ CƠ KHÍ DÂN DỤNG', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Mới tạo' },
-        { id: 7, type: 'Kho tower', name: 'CÔNG TY THACO INDUSTRIES TẠI MỸ', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
+        { id: 7, type: 'Kho Tower', name: 'CÔNG TY THACO INDUSTRIES TẠI MỸ', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
         { id: 8, type: 'Kho stacker crane', name: 'DỰ ÁN MỚI', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Mới tạo' },
         { id: 9, type: 'Kho Flat', name: 'CÔNG TY CƠ KHÍ CHÍNH XÁC & KHUÔN MẪU', floors: 3, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 10, type: 'Kho tower', name: 'CÔNG TY KEO & DUNG DỊCH CHUYÊN DỤNG', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
+        { id: 10, type: 'Kho Tower', name: 'CÔNG TY KEO & DUNG DỊCH CHUYÊN DỤNG', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
         { id: 11, type: 'Kho stacker crane', name: 'CÔNG TY NHỰA CÔNG NGHIỆP', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
         { id: 12, type: 'Kho Flat', name: 'CÔNG TY CƠ ĐIỆN', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang bảo trì' },
-        { id: 13, type: 'Kho tower', name: 'VPĐH THACO INDUSTRIES', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
+        { id: 13, type: 'Kho Tower', name: 'VPĐH THACO INDUSTRIES', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
         { id: 14, type: 'Kho stacker crane', name: 'CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO (TOMC)', floors: 4, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
         { id: 15, type: 'Kho Flat', name: 'CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO CHU LAI (TCMC)', floors: 4, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 16, type: 'Kho tower', name: 'CÔNG TY THIẾT BỊ CHUYÊN DỤNG', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Ngưng sử dụng' },
+        { id: 16, type: 'Kho Tower', name: 'CÔNG TY THIẾT BỊ CHUYÊN DỤNG', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Ngưng sử dụng' },
         { id: 17, type: 'Kho stacker crane', name: 'CÔNG TY BAO BÌ', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
         { id: 18, type: 'Kho Flat', name: 'CÔNG TY NỘI THẤT Ô TÔ TẢI, BUS', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 19, type: 'Kho tower', name: 'CÔNG TY NHÍP Ô TÔ', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
+        { id: 19, type: 'Kho Tower', name: 'CÔNG TY NHÍP Ô TÔ', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
         { id: 20, type: 'Kho stacker crane', name: 'CÔNG TY LINH KIỆN NHỰA', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
         { id: 21, type: 'Kho Flat', name: 'CÔNG TY MÁY LẠNH Ô TÔ TẢI, BUS', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 22, type: 'Kho tower', name: 'CÔNG TY TNHH SẢN XUẤT THIẾT BỊ ĐIỆN Ô TÔ', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
+        { id: 22, type: 'Kho Tower', name: 'CÔNG TY TNHH SẢN XUẤT THIẾT BỊ ĐIỆN Ô TÔ', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
         { id: 23, type: 'Kho stacker crane', name: 'CÔNG TY GHẾ Ô TÔ DU LỊCH', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
         { id: 24, type: 'Kho Flat', name: 'TRUNG TÂM R&D - INDUSTRIES', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Mới tạo' }
     ];
@@ -487,7 +487,7 @@
 
     function getTypeBadgeClass(type) {
         switch(type) {
-            case 'Kho tower': return 'badge-tower';
+            case 'Kho Tower': return 'badge-tower';
             case 'Kho stacker crane': return 'badge-stacker';
             case 'Kho Flat': return 'badge-Flat';
             default: return 'badge-inactive';

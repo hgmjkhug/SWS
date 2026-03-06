@@ -91,40 +91,69 @@
 /* Table Container */
 .table-container {
     width: 100%;
-    overflow-y: auto;
     flex: 1;
     min-height: 0;
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: white;
 }
+
+.table-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.table-scroll-head {
+    overflow: hidden;
+    background-color: #3b82f6;
+    flex-shrink: 0;
+    border-radius: 0;
+}
+
+.table-scroll-body {
+    overflow-y: auto;
+    overflow-x: auto;
+    flex: 1;
+}
+
+/* Ẩn scrollbar hoàn toàn nhưng vẫn scroll được */
+.table-scroll-body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+.table-scroll-body {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
 
 .permission-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 900px;
+    table-layout: fixed; /* Crucial for alignment */
 }
 
 /* Header Styles */
 .permission-table thead th {
-    background-color: #3b82f6; /* Softer Blue (Blue 500) */
+    background-color: #3b82f6;
     color: white;
     font-weight: 600;
     font-size: 14px;
     text-align: center;
     padding: 12px 8px;
     border-right: 1px solid rgba(255,255,255,0.2);
-    vertical-align: top;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.1); /* Bottom shadow for sticky effect */
+    vertical-align: middle;
+    border-radius: 0 !important;
 }
 
 .permission-table thead th:last-child { border-right: none; }
 
-/* Columns */
+/* Columns - Explicit Widths */
 .col-stt { width: 60px; }
-.col-name { text-align: left !important; padding-left: 16px !important; }
-.col-action { width: 100px; }
+.col-name { width: auto; text-align: left !important; padding-left: 16px !important; }
+.col-action { width: 80px; }
 
 /* Table Body */
 .permission-table tbody td {
@@ -133,6 +162,7 @@
     font-size: 14px;
     color: #334155;
     vertical-align: middle;
+    word-break: break-word;
 }
 
 /* Group Row (Accordion Header) */

@@ -37,17 +37,38 @@
               </div>
               <div
                 class="custom-option"
-                data-value="IMPORT"
-                onclick="JobModule.selectType('IMPORT', 'Nhập kho', this)"
+                data-value="IMPORT_NEW"
+                onclick="JobModule.selectType('IMPORT_NEW', 'Nhập mới', this)"
               >
-                Nhập kho
+                Nhập mới
               </div>
               <div
                 class="custom-option"
-                data-value="EXPORT"
-                onclick="JobModule.selectType('EXPORT', 'Xuất kho', this)"
+                data-value="IMPORT_RETURN"
+                onclick="JobModule.selectType('IMPORT_RETURN', 'Nhập lại', this)"
               >
-                Xuất kho
+                Nhập lại
+              </div>
+              <div
+                class="custom-option"
+                data-value="IMPORT_DIRECT"
+                onclick="JobModule.selectType('IMPORT_DIRECT', 'Nhập chuyền thẳng', this)"
+              >
+                Nhập chuyền thẳng
+              </div>
+              <div
+                class="custom-option"
+                data-value="EXPORT_MATERIAL"
+                onclick="JobModule.selectType('EXPORT_MATERIAL', 'Xuất theo vật tư', this)"
+              >
+                Xuất theo vật tư
+              </div>
+              <div
+                class="custom-option"
+                data-value="EXPORT_PALLET"
+                onclick="JobModule.selectType('EXPORT_PALLET', 'Xuất theo pallet', this)"
+              >
+                Xuất theo pallet
               </div>
             </div>
           </div>
@@ -83,18 +104,14 @@
               <div
                 class="custom-option"
                 data-value="PROCESSING"
-                onclick="
-                  JobModule.selectStatus('PROCESSING', 'Đang xử lý', this)
-                "
+                onclick="JobModule.selectStatus('PROCESSING', 'Đang xử lý', this)"
               >
                 Đang xử lý
               </div>
               <div
                 class="custom-option"
                 data-value="COMPLETED"
-                onclick="
-                  JobModule.selectStatus('COMPLETED', 'Đã hoàn thành', this)
-                "
+                onclick="JobModule.selectStatus('COMPLETED', 'Đã hoàn thành', this)"
               >
                 Đã hoàn thành
               </div>
@@ -109,6 +126,11 @@
           </div>
           <input type="hidden" id="filter-status" value="ALL" />
         </div>
+
+        <!-- Priority Filter Button -->
+        <button id="btn-filter-priority" class="filter-priority-btn" onclick="JobModule.togglePriorityFilter()" title="Lọc lệnh ưu tiên">
+          <i class="fas fa-star"></i>
+        </button>
 
         <!-- Date Range Filter -->
         <div class="filter-group">
@@ -240,25 +262,59 @@
           </div>
         </div>
       </div>
+      <div class="toolbar-right">
+        <div class="status-legend">
+          <div class="legend-item"><span class="dot dot-completed"></span>Hoàn thành</div>
+          <div class="legend-item"><span class="dot dot-processing"></span>Đang xử lý</div>
+          <div class="legend-item"><span class="dot dot-pending"></span>Đang chờ</div>
+          <div class="legend-item"><span class="dot dot-error"></span>Lỗi</div>
+        </div>
+      </div>
     </div>
 
     <div class="table-container">
-      <table class="job-table">
-        <thead>
-          <tr>
-            <th class="col-stt">STT</th>
-            <th class="col-code">Mã phiếu nhập/ xuất</th>
-            <th class="col-type">Loại lệnh</th>
-            <th class="col-material">Vật tư</th>
-            <th class="col-time">Thời gian khởi tạo</th>
-            <th class="col-process">Công đoạn</th>
-            <th class="col-action">Hành động</th>
-          </tr>
-        </thead>
-        <tbody id="job-table-body">
-          <!-- Data Rendered Here -->
-        </tbody>
-      </table>
+      <div class="table-wrapper">
+        <div class="table-scroll-head">
+          <table class="job-table">
+            <colgroup>
+              <col style="width: 50px">
+              <col style="width: 260px">
+              <col style="width: 160px">
+              <col style="width: 250px">
+              <col style="width: 180px">
+              <col style="width: 180px">
+              <col style="width: 350px">
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="col-stt">STT</th>
+                <th class="col-code">Mã phiếu nhập/ xuất</th>
+                <th class="col-type">Loại lệnh</th>
+                <th class="col-material">Vật tư</th>
+                <th class="col-time">Thời gian khởi tạo</th>
+                <th class="col-duration">Thời gian hoàn thành</th>
+                <th class="col-process">Công đoạn</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+        <div class="table-scroll-body">
+          <table class="job-table" id="job-data-table">
+            <colgroup>
+              <col style="width: 50px">
+              <col style="width: 260px">
+              <col style="width: 160px">
+              <col style="width: 250px">
+              <col style="width: 180px">
+              <col style="width: 180px">
+              <col style="width: 350px">
+            </colgroup>
+            <tbody id="job-table-body">
+              <!-- Data Rendered Here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- Pagination -->

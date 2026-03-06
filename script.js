@@ -89,7 +89,7 @@ function loadPage(title) {
         'Dashboard chi tiết': 'modules/dashboard/detail-dashboard/detail.html',
         'Hồ sơ': 'modules/info/info.html',
         'Quy cách': 'modules/master-data/method/method.html',
-        'Quản lý sản phẩm': 'modules/product-method/product-method.html',
+        'Quy cách sản phẩm': 'modules/product-method/product-method.html',
         // add more mappings here as modules are created
     };
 

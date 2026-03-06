@@ -61,7 +61,7 @@
               <option value="COMPLETED">Hoàn thành</option>
               <option value="CANCELLED">Lỗi</option>
             </select> -->
-            <div class="status-custom-dropdown" id="status-dropdown">
+            <div class="status-custom-dropdown" id="status-dropdown" style="width: 140px;">
               <div
                 class="dropdown-selected"
                 onclick="toggleStatusDropdown('status-dropdown')"
@@ -149,7 +149,7 @@
             <label style="font-size: 14px; font-weight: 500; color: #334155"
               >Loại lệnh nhập</label
             >
-            <div class="status-custom-dropdown" id="entry-type-dropdown">
+            <div class="status-custom-dropdown" id="entry-type-dropdown" style="width: 160px;">
               <div
                 class="dropdown-selected"
                 onclick="toggleStatusDropdown('entry-type-dropdown')"
@@ -195,6 +195,11 @@
               </div>
             </div>
           </div>
+          <!-- Priority Filter Button -->
+          <button id="btn-filter-priority" class="filter-priority-btn" onclick="togglePriorityFilter()" title="Lọc lệnh ưu tiên">
+            <i class="fas fa-star"></i>
+          </button>
+          
           <!-- Date Range Picker -->
           <div class="unified-date-filter">
             <div class="date-picker-trigger" id="dateRangeTrigger">
@@ -221,11 +226,15 @@
                 <div class="sidebar-item" data-range="last6mo">
                   6 tháng gần đây
                 </div>
-                <div class="sidebar-item" data-range="last1yr">1 năm qua</div>
-              </div>
+                  <div class="sidebar-item active" data-range="last1yr">1 năm qua</div>
+                  <div style="margin: 8px 12px; height: 1px; background: #f1f5f9;"></div>
+                  <div class="sidebar-item filter-mode-item active" id="mode-all" onclick="setDateFilterMode('all')">Tất cả</div>
+                  <div class="sidebar-item filter-mode-item" id="mode-inbound" onclick="setDateFilterMode('createdAt')">Nhập</div>
+                  <div class="sidebar-item filter-mode-item" id="mode-expiry" onclick="setDateFilterMode('expiryDate')">Hết hạn</div>
+                </div>
               <div class="picker-main">
                 <div class="picker-header">
-                  <div class="selected-range-box" id="tempRangeDisplay">
+                  <div class="selected-range-box" id="tempRangeDisplay" style="flex: 1;">
                     Chọn khoảng thời gian
                   </div>
                   <div class="header-actions">
@@ -787,7 +796,7 @@
               </label>
               <div>
                 <div style="font-size: 14px; font-weight: 600; color: #92400e;">Ưu tiên</div>
-                <div style="font-size: 12px; color: #a16207; margin-top: 2px;">Đánh dấu lệnh nhập này là ưu tiên xử lý</div>
+                <div style="font-size: 12px; color: #a16207; margin-top: 2px;">Đánh dấu lệnh này là lệnh ưu tiên</div>
               </div>
               <i class="fas fa-star" style="margin-left: auto; color: #f59e0b; font-size: 18px;" id="priority-star-icon"></i>
             </div>

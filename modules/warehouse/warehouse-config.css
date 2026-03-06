@@ -2394,3 +2394,42 @@
     color: #d97706;
     border: 1px solid #f59e0b;
 }
+
+/* Goods Popover */
+.goods-popover {
+    position: fixed;
+    z-index: 10000;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(7, 110, 184, 0.2);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    min-width: 240px;
+    pointer-events: none;
+    font-family: 'Nunito', sans-serif;
+    display: none;
+}
+
+.popover-title {
+    font-weight: 700;
+    color: #076EB8;
+    font-size: 15px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 8px;
+}
+
+.popover-row {
+    font-size: 13px;
+    color: #475569;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.popover-row strong {
+    color: #1e293b;
+    font-weight: 600;
+    margin-right: 8px;
+}

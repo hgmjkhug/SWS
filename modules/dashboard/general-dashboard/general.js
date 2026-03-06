@@ -42,11 +42,20 @@ const DATA = {
 })();
 
 /* ── SYNC ─────────────────────────────────────────── */
+/* ── SYNC ─────────────────────────────────────────── */
 function doSync() {
   const btn = document.getElementById('btn-sync');
   if (!btn) return;
   btn.classList.add('spinning');
-  setTimeout(() => { btn.classList.remove('spinning'); initAll(); }, 800);
+  
+  // Show loading state
+  document.querySelectorAll('.card').forEach(c => c.classList.add('is-loading'));
+
+  setTimeout(() => { 
+    btn.classList.remove('spinning'); 
+    renderData();
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('is-loading'));
+  }, 1000);
 }
 
 /* ── DONUT CHART ──────────────────────────────────── */
@@ -197,13 +206,15 @@ function drawTrend() {
 }
 
 /* ── INIT ─────────────────────────────────────────── */
-function initAll() {
+/* ── INIT ─────────────────────────────────────────── */
+function renderData() {
   // Donut Kho
   const wh = DATA.wh;
   ['total','new','active','inactive','maint'].forEach(k=>{
     const el=document.getElementById('wh-'+k); if(el) el.textContent=wh[k];
   });
-  document.getElementById('wh-center').textContent=wh.total;
+  const whCenter = document.getElementById('wh-center');
+  if(whCenter) whCenter.textContent=wh.total;
   drawDonut('c-wh',[wh.new,wh.active,wh.inactive,wh.maint],['#38bdf8','#4ade80','#f87171','#fbbf24']);
 
   // Donut Lệnh
@@ -211,17 +222,112 @@ function initAll() {
   ['total','wait','prog','done','err'].forEach(k=>{
     const el=document.getElementById('cmd-'+k); if(el) el.textContent=cmd[k];
   });
-  document.getElementById('cmd-center').textContent=cmd.total;
+  const cmdCenter = document.getElementById('cmd-center');
+  if(cmdCenter) cmdCenter.textContent=cmd.total;
   drawDonut('c-cmd',[cmd.wait,cmd.prog,cmd.done,cmd.err],['#94a3b8','#60a5fa','#34d399','#f87171']);
 
   drawGauge(94);
   renderOcc();
   renderOEE();
   renderAlerts();
-  setTimeout(drawTrend,80);
+  setTimeout(drawTrend, 80);
+  renderTraffic();
+}
+
+function initAll() {
+  // Initial delay of exactly 1s
+  setTimeout(() => {
+    renderData();
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('is-loading'));
+  }, 1000);
 }
 
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initAll);
 else initAll();
 
 window.addEventListener('resize',()=>{ if(typeof drawTrend==='function') drawTrend(); });
+
+/* ── TRAFFIC WIDGET (AMR Congestion + PLC Heartbeat + Buffer) ── */
+const TRAFFIC = {
+  amrCongestion: [
+    { zone:'Hành lang A', amrCount:6, maxAMR:4, pct:95, cls:'crit' },
+    { zone:'Hành lang B', amrCount:3, maxAMR:4, pct:60, cls:'warn' },
+    { zone:'Hành lang C', amrCount:2, maxAMR:4, pct:40, cls:'ok' },
+    { zone:'Hành lang D', amrCount:1, maxAMR:4, pct:20, cls:'ok' },
+  ],
+  plcHeartbeat: [
+    { name:'PLC-01', latency:12, status:'ok' },
+    { name:'PLC-02', latency:18, status:'ok' },
+    { name:'PLC-03', latency:980, status:'error' },
+    { name:'PLC-04', latency:45, status:'warn' },
+    { name:'PLC-05', latency:9, status:'ok' },
+    { name:'PLC-06', latency:22, status:'ok' },
+  ],
+  buffers: [
+    { name:'Buffer Nhập — Cửa 1', pct:78, cap:'78/100', cls:'warn' },
+    { name:'Buffer Xuất — Cửa 3', pct:92, cap:'46/50', cls:'crit' },
+    { name:'Buffer ASRS → AMR', pct:34, cap:'17/50', cls:'ok' },
+    { name:'Buffer Conveyor B', pct:55, cap:'55/100', cls:'ok' },
+  ],
+};
+
+function renderTraffic() {
+  const el = document.getElementById('traffic-widget'); if(!el) return;
+
+  const congestionHTML = TRAFFIC.amrCongestion.map(z => {
+    const barCls = z.cls === 'crit' ? 'hi' : z.cls === 'warn' ? 'mid' : 'lo';
+    return `
+    <div style="padding:9px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
+        <span style="font-size:11.5px;font-weight:600;color:var(--text-1)">${z.zone}</span>
+        <span style="font-size:11px;font-family:monospace;font-weight:700;color:var(--${z.cls==='crit'?'red':z.cls==='warn'?'amber':'green'})">${z.amrCount}/${z.maxAMR} AMR</span>
+      </div>
+      <div style="height:5px;background:var(--bg);border-radius:99px;overflow:hidden;border:1px solid var(--border)">
+        <div class="occ-fill ${barCls}" style="width:0%" data-w="${z.pct}%"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const heartbeatHTML = TRAFFIC.plcHeartbeat.map(p => {
+    const col = p.status === 'ok' ? 'var(--green)' : p.status === 'error' ? 'var(--red)' : 'var(--amber)';
+    const latLabel = p.status === 'error' ? 'OFFLINE' : p.latency+'ms';
+    return `
+    <div class="plc-hb-item">
+      <span class="plc-hb-dot" style="background:${col};${p.status==='ok'?'':p.status==='error'?'animation:blink 1s infinite':''}"></span>
+      <span class="plc-hb-name">${p.name}</span>
+      <span class="plc-hb-lat" style="color:${col}">${latLabel}</span>
+    </div>`;
+  }).join('');
+
+  const bufferHTML = TRAFFIC.buffers.map(b => {
+    const barCls = b.cls === 'crit' ? 'hi' : b.cls === 'warn' ? 'mid' : 'lo';
+    return `
+    <div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:11px;color:var(--text-2)">${b.name}</span>
+        <span style="font-size:11px;font-family:monospace;font-weight:700;color:var(--${b.cls==='crit'?'red':b.cls==='warn'?'amber':'text-3'})">${b.cap}</span>
+      </div>
+      <div style="height:4px;background:var(--bg);border-radius:99px;overflow:hidden;border:1px solid var(--border)">
+        <div class="occ-fill ${barCls}" style="width:0%" data-w="${b.pct}%"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="traffic-col">
+      <div class="traffic-col-title"><i class="fas fa-route" style="color:var(--accent);margin-right:6px"></i>AMR Grid Congestion</div>
+      ${congestionHTML}
+    </div>
+    <div class="traffic-col">
+      <div class="traffic-col-title"><i class="fas fa-heartbeat" style="color:var(--red);margin-right:6px"></i>PLC Heartbeat</div>
+      <div class="plc-hb-list">${heartbeatHTML}</div>
+    </div>
+    <div class="traffic-col">
+      <div class="traffic-col-title"><i class="fas fa-database" style="color:var(--cyan);margin-right:6px"></i>Buffer Occupancy</div>
+      ${bufferHTML}
+    </div>`;
+
+  setTimeout(()=>{
+    el.querySelectorAll('.occ-fill').forEach(b=>b.style.width=b.dataset.w);
+  },80);
+}

@@ -227,7 +227,13 @@
                 // Closure to capture row/col
                 (function(r, c) {
                     node.onmousedown = function(e) { handleMouseDown(e, r, c); };
-                    node.onmouseenter = function(e) { handleMouseEnter(e, r, c); };
+                    node.onmouseenter = function(e) { 
+                        handleMouseEnter(e, r, c); 
+                        showGoodsPopover(e, r, c);
+                    };
+                    node.onmouseleave = function(e) {
+                        hideGoodsPopover();
+                    };
                 })(row, col);
 
                 wrapper.appendChild(node);
@@ -296,20 +302,9 @@
         var minC = Math.min(startPos.c, currentC);
         var maxC = Math.max(startPos.c, currentC);
 
-        if (activeLocationId !== null && currentMode === 'position') {
-            minR = currentR;
-            maxR = currentR;
-            minC = currentC;
-            maxC = currentC;
-        }
-
         var targetSet = (currentMode === 'goods') ? config.goods : config.selected;
         
-        // Reset to initial state before applying current drag rect
-        // BUT we need to be careful. drag logic usually re-applies changes from start.
-        // Simplified: We restore initial selection, then apply change to rect.
-        
-        var newSet = (activeLocationId !== null && currentMode === 'position') ? {} : copySelection(initialSelection);
+        var newSet = copySelection(initialSelection);
         
         for (var r = minR; r <= maxR; r++) {
             for (var c = minC; c <= maxC; c++) {
@@ -466,6 +461,8 @@
         var id = node.dataset.id;
         var parts = id.split('-').map(Number);
         var posLabel = getColName(parts[1]) + (parts[0] + 1);
+        // Floor-prefixed label used by updateSelection when saving positions
+        var posLabelWithFloor = currentFloor + '-' + posLabel;
         
         // 1. Check Active Selection (the one being edited)
         var isActive = hasSelection(config.selected, id);
@@ -475,10 +472,11 @@
             node.classList.remove('active');
         }
         
-        // 2. Check Assigned Area (Any area)
+        // 2. Check Assigned Area (Any area) - match both formats for compatibility
         var isAreaAssigned = false;
         for (var a = 0; a < areaData.length; a++) {
-            if (areaData[a].positions.indexOf(posLabel) > -1) {
+            if (areaData[a].positions.indexOf(posLabelWithFloor) > -1 ||
+                areaData[a].positions.indexOf(posLabel) > -1) {
                 isAreaAssigned = true;
                 break;
             }
@@ -494,8 +492,8 @@
             node.style.borderColor = '';
         }
 
-        // 3. Check Assigned Location (Any location type)
-        if (allLocPositions[posLabel]) {
+        // 3. Check Assigned Location (Any location type) - match both formats for compatibility
+        if (allLocPositions[posLabelWithFloor] || allLocPositions[posLabel]) {
             node.classList.add('is-location');
         } else {
             node.classList.remove('is-location');
@@ -633,6 +631,89 @@
         }
     }
 
+    // ===== GOODS POPOVER LOGIC =====
+    var popoverEl = null;
+    // Tracks which cells have been *saved* with goods mode (per floor).
+    // Only saved goods cells show the hover popover.
+    var savedGoodsData = {}; // { [floor]: { [cellId]: true } }
+
+    function showGoodsPopover(e, r, c) {
+        var id = r + '-' + c;
+        var floorSaved = savedGoodsData[currentFloor] || {};
+        
+        // Only show popover for cells that were saved with goods mode
+        if (!floorSaved[id]) return;
+
+        if (!popoverEl) {
+            popoverEl = document.createElement('div');
+            popoverEl.className = 'goods-popover';
+            document.body.appendChild(popoverEl);
+        }
+
+        // Find associated product from areas
+        var colName = getColName(c);
+        var posLabel = colName + (r + 1);
+        var product = null;
+        
+        for (var i = 0; i < areaData.length; i++) {
+            if (areaData[i].positions.indexOf(posLabel) > -1 || areaData[i].positions.indexOf(currentFloor + '-' + posLabel) > -1) {
+                if (areaData[i].selectedProducts && areaData[i].selectedProducts.length > 0) {
+                    product = areaData[i].selectedProducts[0];
+                    break;
+                }
+            }
+        }
+
+        // If no product found, use a demo one
+        if (!product) {
+            product = { code: 'VT001', name: 'Thép tấm ống hộp', quyTac: 'FIFO' };
+        }
+
+        var html = '';
+        html += '<div class="popover-title">' + product.code + ' - ' + product.name + '</div>';
+        html += '<div class="popover-row"><strong>Số lượng:</strong> 150 cái</div>';
+        html += '<div class="popover-row"><strong>Quy cách:</strong> ' + (product.quyTac || 'FIFO/FEFO') + '</div>';
+        html += '<div class="popover-row"><strong>Ngày nhập:</strong> 08:30:27 15/02/2026</div>';
+        html += '<div class="popover-row"><strong>Ngày hết hạn:</strong> 15/02/2027</div>';
+
+        popoverEl.innerHTML = html;
+        popoverEl.style.display = 'block';
+
+        updatePopoverPosition(e);
+    }
+
+    function hideGoodsPopover() {
+        if (popoverEl) {
+            popoverEl.style.display = 'none';
+        }
+    }
+
+    function updatePopoverPosition(e) {
+        if (!popoverEl) return;
+        var padding = 15;
+        var x = e.clientX + padding;
+        var y = e.clientY + padding;
+
+        // Boundary check
+        var rect = popoverEl.getBoundingClientRect();
+        if (x + rect.width > window.innerWidth) {
+            x = e.clientX - rect.width - padding;
+        }
+        if (y + rect.height > window.innerHeight) {
+            y = e.clientY - rect.height - padding;
+        }
+
+        popoverEl.style.left = x + 'px';
+        popoverEl.style.top = y + 'px';
+    }
+
+    // Monitor mouse move for popover positioning (optional, but makes it feel smoother)
+    document.addEventListener('mousemove', function(e) {
+        if (popoverEl && popoverEl.style.display === 'block') {
+            updatePopoverPosition(e);
+        }
+    });
+
     // Zoom functions
     function zoomIn() {
         step += 5;
@@ -740,6 +821,12 @@
             // Ensure goods and metadata structure exists
             for (let f in floorConfigs) {
                 if (!floorConfigs[f].goods) floorConfigs[f].goods = {};
+            }
+            // Restore savedGoodsData so hover popovers work after page reload
+            for (var f in floorConfigs) {
+                if (floorConfigs[f].goods && Object.keys(floorConfigs[f].goods).length > 0) {
+                    savedGoodsData[f] = JSON.parse(JSON.stringify(floorConfigs[f].goods));
+                }
             }
         } else if (currentWarehouse) {
             // Initialize defaults based on floor count
@@ -2209,12 +2296,13 @@
             config.selected = {};
             
             // Load types from tags back to selection
-            // Note: This assumes current floor only for now
+            // Positions are stored as "floor-ColRow" (e.g. "1-A1") or legacy "ColRow" (e.g. "A1")
             area.positions.forEach(function(pos) {
-                // Parse "A1" etc.
                 for (var r = 0; r < config.rows; r++) {
                     for (var c = 0; c < config.cols; c++) {
-                        if ((getColName(c) + (r + 1)) === pos) {
+                        var cellLabel = getColName(c) + (r + 1);
+                        var cellLabelWithFloor = currentFloor + '-' + cellLabel;
+                        if (cellLabelWithFloor === pos || cellLabel === pos) {
                             addSelection(config.selected, r + '-' + c);
                             break;
                         }
@@ -2539,7 +2627,9 @@
             loc.positions.forEach(function(pos) {
                 for (var r = 0; r < config.rows; r++) {
                     for (var c = 0; c < config.cols; c++) {
-                        if ((getColName(c) + (r + 1)) === pos) {
+                        var cellLabel = getColName(c) + (r + 1);
+                        var cellLabelWithFloor = currentFloor + '-' + cellLabel;
+                        if (cellLabelWithFloor === pos || cellLabel === pos) {
                             addSelection(config.selected, r + '-' + c);
                             break;
                         }
@@ -2743,7 +2833,34 @@
             return;
         }
 
+        // Final sync: Ensure current selection (including goods) is reflected before saving
+        if (activeLocationId !== null) {
+            var config = floorConfigs[currentFloor];
+            for (var i = 0; i < locationData.length; i++) {
+                if (locationData[i].id === activeLocationId) {
+                    locationData[i].positions = getSelectionKeys(config.selected).sort(function(a,b){
+                        var pa = a.split('-').map(Number), pb = b.split('-').map(Number);
+                        if (pa[0] !== pb[0]) return pa[0] - pb[0];
+                        return pa[1] - pb[1];
+                    }).map(function(key) {
+                        var pts = key.split('-').map(Number);
+                        return currentFloor + '-' + getColName(pts[1]) + (pts[0] + 1);
+                    });
+                    break;
+                }
+            }
+        }
+
         currentWarehouse.locationTypes = JSON.parse(JSON.stringify(locationData));
+        // Also persist floorConfigs (goods data lives here)
+        currentWarehouse.configData = JSON.parse(JSON.stringify(floorConfigs));
+
+        // Snapshot the saved goods state so hover popover only shows for saved cells
+        for (var f in floorConfigs) {
+            if (floorConfigs[f].goods) {
+                savedGoodsData[f] = JSON.parse(JSON.stringify(floorConfigs[f].goods));
+            }
+        }
 
         var stored = localStorage.getItem('wms_warehouses_v5');
         if (stored) {
@@ -2754,6 +2871,13 @@
                 localStorage.setItem('wms_warehouses_v5', JSON.stringify(list));
             }
         }
+
+        // Reset active location and clear grid selection after save
+        activeLocationId = null;
+        var cfg = floorConfigs[currentFloor];
+        if (cfg) cfg.selected = {};
+        refreshVisuals();
+        renderLocationCards();
 
         if (window.showToast) {
             window.showToast('Đã lưu cấu hình vị trí thành công!', 'success');

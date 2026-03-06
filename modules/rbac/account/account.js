@@ -116,7 +116,7 @@ var pendingDeleteAccountId = null;
 
 // Initialization - always init when script runs (module may be reloaded)
 function initAccountModule() {
-    const table = document.querySelector('.account-table');
+    const table = document.getElementById('account-data-table');
     if (!table) return;
 
     filteredData = [...accounts];
@@ -125,6 +125,16 @@ function initAccountModule() {
     
     // Explicitly render warehouse filter options
     updateWarehouseFilters();
+
+    // Synchronization scroll
+    const scrollHead = document.querySelector('.table-scroll-head');
+    const scrollBody = document.querySelector('.table-scroll-body');
+
+    if (scrollHead && scrollBody) {
+        scrollBody.addEventListener('scroll', () => {
+            scrollHead.scrollLeft = scrollBody.scrollLeft;
+        });
+    }
 
     // Global Exposure
     window.closeDeleteConfirm = closeDeleteConfirm;
@@ -206,23 +216,23 @@ function selectWarehouseFilter(value, label) {
 // Try immediate init
 initAccountModule();
 
-// Use MutationObserver to detect when account-table is added to DOM
+// Use MutationObserver to detect when account-data-table is added to DOM
 var accountObserver = new MutationObserver((mutations, obs) => {
-    if (document.querySelector('.account-table')) {
+    if (document.getElementById('account-data-table')) {
         initAccountModule();
         obs.disconnect();
     }
 });
 
 // Only observe if table doesn't exist yet
-if (!document.querySelector('.account-table')) {
+if (!document.getElementById('account-data-table')) {
     accountObserver.observe(document.body, { childList: true, subtree: true });
     setTimeout(initAccountModule, 100);
     setTimeout(initAccountModule, 300);
 }
 
 function renderAccounts() {
-    const table = document.querySelector('.account-table');
+    const table = document.getElementById('account-data-table');
     if (!table) return;
 
     // Remove existing tbodies except the head/foot if any (but here we just remove all tbodies)
@@ -978,7 +988,20 @@ function renderPermissionRows(perms = []) {
             warehouseValue = perm.warehouses.join(', ');
         }
         
+        const isOnlyRow = currentPermissions.length === 1 && idx === 0;
+        const isFirstRow = idx === 0;
+
         row.innerHTML = `
+            <div class="permission-row-actions">
+                <button type="button" class="btn-icon-add" onclick="addPermissionRow()" title="Thêm phân quyền">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button type="button" class="btn-icon-remove ${isFirstRow ? 'disabled' : ''}" 
+                        ${isFirstRow ? '' : `onclick="removePermissionRow(${idx})"`} 
+                        title="${isFirstRow ? 'Không thể xóa quyền mặc định' : 'Xóa phân quyền'}">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             <div class="form-group">
                 <label>Vai trò <span class="required">*</span></label>
                 <div class="editable-combobox" id="perm-role-dropdown-${idx}">
@@ -1014,10 +1037,6 @@ function renderPermissionRows(perms = []) {
                     </div>
                 </div>
             </div>
-            ${idx === 0 ? '' : `
-            <button type="button" class="btn-remove-permission" onclick="removePermissionRow(${idx})" title="Xóa phân quyền">
-                <i class="fas fa-times"></i>
-            </button>`}
         `;
         container.appendChild(row);
     });
@@ -1075,8 +1094,8 @@ function renderRoleOptions(rowIdx, currentRole) {
 function toggleRoleDropdown(event, idx) {
     if (event) event.stopPropagation();
     
-    // Close other dropdowns
-    document.querySelectorAll('.editable-combobox').forEach(el => {
+    // Close ALL dropdowns (including permission warehouses and filters)
+    document.querySelectorAll('.editable-combobox, .custom-dropdown').forEach(el => {
         if (el.id !== `perm-role-dropdown-${idx}`) {
             el.classList.remove('open');
         }
@@ -1092,18 +1111,22 @@ function selectPermissionRole(event, rowIdx, role) {
     if (event) event.stopPropagation();
     
     if (currentPermissions[rowIdx]) {
+        // Update model
         currentPermissions[rowIdx].role = role;
-        // Close dropdown
-        const dropdown = document.getElementById(`perm-role-dropdown-${rowIdx}`);
-        if (dropdown) dropdown.classList.remove('open');
         
-        // Update input value
+        // Update input display
         const input = document.getElementById(`perm-role-input-${rowIdx}`);
         if (input) input.value = role;
         
-        // Re-render options to update checkmark
+        // Refresh options to show ONLY the correct checkmark for THIS row
         const options = document.getElementById(`perm-role-options-${rowIdx}`);
-        if (options) options.innerHTML = renderRoleOptions(rowIdx, role);
+        if (options) {
+            options.innerHTML = renderRoleOptions(rowIdx, role);
+        }
+
+        // Close dropdown
+        const dropdown = document.getElementById(`perm-role-dropdown-${rowIdx}`);
+        if (dropdown) dropdown.classList.remove('open');
     }
 }
 

@@ -263,3 +263,81 @@ body { background: var(--bg); color: var(--text-1); min-height: 100vh; }
   .kanban-body { grid-template-columns: 1fr; }
   .kanban-col + .kanban-col { border-left: none; border-top: 1px solid var(--border); }
 }
+/* ── CHAIN STATUS (WCS→PLC→AMR) ── */
+.chain-row {
+  display: flex; align-items: center; gap: 4px;
+  margin: 7px 0 5px; flex-wrap: wrap;
+}
+.chain-step {
+  font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+  letter-spacing: .3px; font-family: monospace;
+}
+.chain-done  { background: var(--grn-s); color: var(--green); border: 1px solid #bbf7d0; }
+.chain-running { background: var(--acc-s); color: var(--accent); border: 1px solid #bfdbfe; }
+.chain-error { background: var(--red-s); color: var(--red); border: 1px solid #fecaca; }
+.chain-pending { background: var(--bg); color: var(--text-3); border: 1px solid var(--border); }
+.chain-arrow { font-size: 10px; color: var(--text-3); }
+
+/* ── SLA COUNTDOWN BAR ── */
+.sla-bar-wrap {
+  margin: 6px 0 0; display: flex; align-items: center; gap: 8px;
+}
+.sla-track {
+  flex: 1; height: 5px; background: var(--border); border-radius: 99px; overflow: hidden;
+}
+.sla-countdown-bar {
+  height: 100%; border-radius: 99px; background: var(--green);
+  transition: background .5s;
+}
+.sla-time-label {
+  font-size: 10px; font-family: monospace; color: var(--text-3);
+  min-width: 80px; text-align: right; font-weight: 600;
+}
+
+/* ── FORCE FINISH BUTTON ── */
+.btn-force {
+  font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: var(--rs);
+  border: 1px solid #c4b5fd; cursor: pointer; letter-spacing: .3px; transition: all .15s;
+  background: var(--pur-s); color: var(--purple);
+}
+.btn-force:hover { background: var(--purple); color: #fff; }
+
+/* ── ERROR ENHANCEMENTS ── */
+.err-name-row {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;
+}
+.err-meta-row {
+  display: flex; align-items: center; justify-content: space-between; margin-top: 5px; gap: 8px;
+}
+.err-mttr {
+  font-size: 10px; color: var(--text-3); display: flex; align-items: center; gap: 4px;
+}
+.err-mttr i { color: var(--amber); }
+.err-devs { display: flex; gap: 4px; flex-wrap: wrap; }
+.err-dev-tag {
+  font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px;
+  background: var(--bg); border: 1px solid var(--border); color: var(--text-3);
+  font-family: monospace;
+}
+.err-item { cursor: pointer; }
+.err-item:hover { background: var(--bg); }
+
+/* ── PRED HIGHLIGHTED ── */
+.pred-highlighted {
+  background: var(--amb-s) !important;
+  border-left: 3px solid var(--amber) !important;
+  transition: all .3s;
+}
+.pred-linked {
+  margin-top: 3px; font-size: 10.5px; color: var(--text-3);
+}
+
+/* ── CYCLE TIME BREAKDOWN ── */
+.ct-legend {
+  display: flex; gap: 14px; padding: 8px 18px 4px; border-bottom: 1px solid var(--border);
+}
+.ct-leg { display: flex; align-items: center; gap: 5px; font-size: 10.5px; color: var(--text-2); }
+.ct-leg-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.ct-bk-tip {
+  display: flex; gap: 10px; margin-top: 3px; font-size: 10px; font-family: monospace;
+}
