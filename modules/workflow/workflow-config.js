@@ -1066,7 +1066,7 @@ function initWorkflowConfig(workflowId, workflowName) {
         if (!container) return;
         
         const index = container.querySelectorAll('.sequence-card').length;
-        const seq = { locationId: '', actionType: 'NONE', direction: '-' };
+        const seq = { locationStartId: '', locationEndId: '', actionType: 'NONE' };
         
         renderSequenceCard(seq, index);
     }
@@ -1074,39 +1074,65 @@ function initWorkflowConfig(workflowId, workflowName) {
     function renderSequenceCard(seq, index) {
         const container = document.getElementById('sequence-container');
         const card = document.createElement('div');
-        card.className = 'sequence-card';
+        card.className = 'sequence-card sequence-readonly';
         card.dataset.index = index;
         
-        const hasLocation = !!seq.locationId;
-        const location = locationNodes.find(l => l.id === seq.locationId);
+        // Support both old (locationId) and new (locationStartId/locationEndId) data format
+        const startId = seq.locationStartId || seq.locationId || '';
+        const endId = seq.locationEndId || '';
+        const hasStart = !!startId;
+        const hasEnd = !!endId;
+        const hasAnyLocation = hasStart || hasEnd;
+        const locStart = locationNodes.find(l => l.id === startId);
+        const locEnd = locationNodes.find(l => l.id === endId);
         const action = actionOptions.find(a => a.id === seq.actionType) || actionOptions[0];
 
         card.innerHTML = `
             <div class="sequence-card-header">
                 <span class="sequence-title">Trình tự ${index + 1}</span>
-                <button type="button" class="btn-remove-sequence" onclick="removeSequence(${index})">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
+                <div class="sequence-card-actions">
+                    <button type="button" class="btn-edit-sequence" onclick="toggleSequenceEdit(${index})" title="Chỉnh sửa">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <button type="button" class="btn-remove-sequence" onclick="removeSequence(${index})">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
             </div>
             
             <div class="form-group">
-                <label>Vị trí</label>
-                <div class="custom-dropdown sequence-location-dropdown" id="loc-dropdown-${index}">
+                <label>Vị trí đầu</label>
+                <div class="custom-dropdown sequence-location-dropdown loc-start-dropdown" id="loc-start-dropdown-${index}">
                     <div class="combo-wrapper">
-                        <input type="text" class="combo-input loc-input" placeholder="Tìm kiếm vị trí..." 
-                               value="${location ? location.name : ''}" autocomplete="off">
-                        <i class="fas fa-times combo-clear ${location ? 'show' : ''}"></i>
+                        <input type="text" class="combo-input loc-start-input" placeholder="Tìm kiếm vị trí..." 
+                               value="${locStart ? locStart.name : ''}" autocomplete="off">
+                        <i class="fas fa-times combo-clear ${locStart ? 'show' : ''}"></i>
                         <i class="fas fa-chevron-down combo-icon"></i>
                     </div>
-                    <div class="dropdown-options loc-options"></div>
-                    <input type="hidden" class="loc-value" value="${seq.locationId}">
+                    <div class="dropdown-options loc-start-options"></div>
+                    <input type="hidden" class="loc-start-value" value="${startId}">
                 </div>
             </div>
 
-            <div class="direction-box" style="display: ${hasLocation ? 'flex' : 'none'}">
+            <div class="form-group" style="margin-top: 12px;">
+                <label>Vị trí cuối</label>
+                <div class="custom-dropdown sequence-location-dropdown loc-end-dropdown" id="loc-end-dropdown-${index}">
+                    <div class="combo-wrapper">
+                        <input type="text" class="combo-input loc-end-input" placeholder="Tìm kiếm vị trí..." 
+                               value="${locEnd ? locEnd.name : ''}" autocomplete="off">
+                        <i class="fas fa-times combo-clear ${locEnd ? 'show' : ''}"></i>
+                        <i class="fas fa-chevron-down combo-icon"></i>
+                    </div>
+                    <div class="dropdown-options loc-end-options"></div>
+                    <input type="hidden" class="loc-end-value" value="${endId}">
+                </div>
+            </div>
+
+            <div class="direction-box" style="display: ${hasAnyLocation ? 'flex' : 'none'}">
                 <div class="direction-info">
-                    <div class="coord-label">Vị trí: <span class="loc-coord">${location ? `${location.floor}-${location.aisle}${location.row}` : ''}</span></div>
-                    <div class="direction-label">Hướng di chuyển: <span class="loc-direction">${location ? location.direction : ''}</span></div>
+                    <div class="coord-label">Vị trí đầu: <span class="loc-start-coord">${locStart ? `${locStart.floor}-${locStart.aisle}${locStart.row}` : '-'}</span></div>
+                    <div class="coord-label">Vị trí cuối: <span class="loc-end-coord">${locEnd ? `${locEnd.floor}-${locEnd.aisle}${locEnd.row}` : '-'}</span></div>
+                    <div class="direction-label">Hướng di chuyển: <span class="loc-direction">${locStart ? locStart.direction : (locEnd ? locEnd.direction : '')}</span></div>
                 </div>
             </div>
 
@@ -1126,7 +1152,8 @@ function initWorkflowConfig(workflowId, workflowName) {
         `;
         
         container.appendChild(card);
-        initLocationDropdown(card, index);
+        initLocationDropdown(card, index, 'start');
+        initLocationDropdown(card, index, 'end');
         initActionDropdown(card, index);
     }
 
@@ -1135,12 +1162,13 @@ function initWorkflowConfig(workflowId, workflowName) {
         return loc ? loc.name : '';
     }
 
-    function initLocationDropdown(card, index) {
-        const dropdown = card.querySelector('.sequence-location-dropdown');
-        const input = dropdown.querySelector('.loc-input');
-        const optionsContainer = dropdown.querySelector('.loc-options');
-        const hiddenValue = dropdown.querySelector('.loc-value');
-        const coordValue = card.querySelector('.loc-coord');
+    // type = 'start' or 'end'
+    function initLocationDropdown(card, index, type) {
+        const dropdown = card.querySelector('.loc-' + type + '-dropdown');
+        const input = dropdown.querySelector('.loc-' + type + '-input');
+        const optionsContainer = dropdown.querySelector('.loc-' + type + '-options');
+        const hiddenValue = dropdown.querySelector('.loc-' + type + '-value');
+        const coordValue = card.querySelector('.loc-' + type + '-coord');
         const directionValue = card.querySelector('.loc-direction');
         const directionBox = card.querySelector('.direction-box');
         const clearBtn = dropdown.querySelector('.combo-clear');
@@ -1167,6 +1195,19 @@ function initWorkflowConfig(workflowId, workflowName) {
         function closeDropdown() {
             dropdown.classList.remove('active');
             optionsContainer.classList.remove('show');
+        }
+
+        function updateDirectionBox() {
+            var startVal = card.querySelector('.loc-start-value').value;
+            var endVal = card.querySelector('.loc-end-value').value;
+            var hasAny = !!startVal || !!endVal;
+            directionBox.style.display = hasAny ? 'flex' : 'none';
+            // Update direction text from start location if available, else from end
+            var startLoc = locationNodes.find(function(l) { return l.id === startVal; });
+            var endLoc = locationNodes.find(function(l) { return l.id === endVal; });
+            if (startLoc) directionValue.textContent = startLoc.direction;
+            else if (endLoc) directionValue.textContent = endLoc.direction;
+            else directionValue.textContent = '';
         }
 
         // Chevron click - toggle
@@ -1200,8 +1241,9 @@ function initWorkflowConfig(workflowId, workflowName) {
             e.stopPropagation();
             input.value = '';
             hiddenValue.value = '';
-            directionBox.style.display = 'none';
+            coordValue.textContent = '-';
             clearBtn.classList.remove('show');
+            updateDirectionBox();
             closeDropdown();
             if (window.saveProperties) window.saveProperties(true);
         });
@@ -1216,8 +1258,7 @@ function initWorkflowConfig(workflowId, workflowName) {
                 input.value = loc.name;
                 hiddenValue.value = loc.id;
                 coordValue.textContent = loc.floor + '-' + loc.aisle + loc.row;
-                directionValue.textContent = loc.direction;
-                directionBox.style.display = 'flex';
+                updateDirectionBox();
                 clearBtn.classList.add('show');
                 closeDropdown();
                 if (window.saveProperties) window.saveProperties(true);
@@ -1324,6 +1365,22 @@ function initWorkflowConfig(workflowId, workflowName) {
         });
     }
 
+    window.toggleSequenceEdit = function(index) {
+        const container = document.getElementById('sequence-container');
+        const cards = container.querySelectorAll('.sequence-card');
+        if (!cards[index]) return;
+        const card = cards[index];
+        const editBtn = card.querySelector('.btn-edit-sequence');
+        const isReadonly = card.classList.contains('sequence-readonly');
+        if (isReadonly) {
+            card.classList.remove('sequence-readonly');
+            if (editBtn) editBtn.classList.add('editing');
+        } else {
+            card.classList.add('sequence-readonly');
+            if (editBtn) editBtn.classList.remove('editing');
+        }
+    }
+
     window.removeSequence = function(index) {
         const container = document.getElementById('sequence-container');
         const cards = container.querySelectorAll('.sequence-card');
@@ -1334,17 +1391,25 @@ function initWorkflowConfig(workflowId, workflowName) {
                 card.dataset.index = idx;
                 card.querySelector('.sequence-title').textContent = `Trình tự ${idx + 1}`;
                 card.querySelector('.btn-remove-sequence').setAttribute('onclick', `removeSequence(${idx})`);
+                card.querySelector('.btn-edit-sequence').setAttribute('onclick', `toggleSequenceEdit(${idx})`);
             });
         } else {
             // Keep at least one card, just clear it
             const card = cards[0];
-            card.querySelector('.loc-input').value = '';
-            card.querySelector('.loc-value').value = '';
-            card.querySelector('.loc-direction').textContent = '-';
+            card.querySelector('.loc-start-input').value = '';
+            card.querySelector('.loc-start-value').value = '';
+            card.querySelector('.loc-start-coord').textContent = '-';
+            card.querySelector('.loc-start-dropdown .combo-clear').classList.remove('show');
+
+            card.querySelector('.loc-end-input').value = '';
+            card.querySelector('.loc-end-value').value = '';
+            card.querySelector('.loc-end-coord').textContent = '-';
+            card.querySelector('.loc-end-dropdown .combo-clear').classList.remove('show');
+
+            card.querySelector('.loc-direction').textContent = '';
             card.querySelector('.direction-box').style.display = 'none';
-            card.querySelector('.sequence-location-dropdown .combo-clear').classList.remove('show');
             
-            card.querySelector('.act-input').value = 'Không làm gì cả';
+            card.querySelector('.act-input').value = '';
             card.querySelector('.seq-action-type').value = 'NONE';
             card.querySelector('.sequence-action-dropdown .combo-clear').classList.remove('show');
         }
@@ -1446,7 +1511,8 @@ function initWorkflowConfig(workflowId, workflowName) {
         const seqCards = document.querySelectorAll('.sequence-card');
         props.sequences = Array.from(seqCards).map(card => {
             return {
-                locationId: card.querySelector('.loc-value').value,
+                locationStartId: card.querySelector('.loc-start-value').value,
+                locationEndId: card.querySelector('.loc-end-value').value,
                 direction: card.querySelector('.loc-direction').textContent,
                 actionType: card.querySelector('.seq-action-type').value
             };

@@ -308,6 +308,7 @@
 
 .custom-dropdown .combo-wrapper .combo-clear.show {
     display: block !important;
+    pointer-events: auto !important;
 }
 
 .combo-clear:hover {
@@ -1197,9 +1198,10 @@
 
 /* Ensure combo-input inside properties-form has no conflicting styles */
 .properties-form .combo-input {
-    width: 100% !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    width: auto !important;
     padding: 0 !important;
-    padding-right: 50px !important;
     border: none !important;
     border-radius: 0 !important;
     background: transparent !important;
@@ -1209,6 +1211,8 @@
     outline: none !important;
     height: 100%;
     color: #334155;
+    position: relative;
+    z-index: 1;
 }
 
 /* File Upload - Premium Dashed Style */
@@ -1373,6 +1377,46 @@
     color: #ef4444;
 }
 
+.sequence-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-edit-sequence {
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 13px;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    padding: 4px;
+}
+
+.btn-edit-sequence:hover {
+    color: #076eb8;
+}
+
+.btn-edit-sequence.editing {
+    color: #076eb8;
+}
+
+/* Readonly mode for sequence card */
+.sequence-readonly .combo-wrapper {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.sequence-readonly .combo-input {
+    background: #f1f5f9 !important;
+    cursor: not-allowed !important;
+}
+
+.sequence-readonly .combo-icon,
+.sequence-readonly .combo-clear {
+    display: none !important;
+}
+
 .btn-add-sequence {
     width: calc(100% + 16px);
     margin: 0 -8px; /* Negative margins to align with cards */
@@ -1427,7 +1471,6 @@
 
 .sequence-card .form-group label {
     font-size: 11px;
-    text-transform: uppercase;
     font-weight: 700;
     color: #64748b;
     margin-bottom: 4px;

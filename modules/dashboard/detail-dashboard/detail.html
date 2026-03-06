@@ -24,61 +24,95 @@
 
   <!-- ROW 0: KPI STRIP -->
   <div class="row-kpi">
-    <div class="kpi-card info">
-      <div class="kpi-label">Tổng Pallet Tồn</div>
-      <div class="kpi-val accent">23,040</div>
-      <div class="kpi-sub">Công suất: 24,000</div>
+    <!-- Pie: Vị trí kho (chiếm 2 cột) -->
+    <div class="kpi-pie-card">
+      <div class="kpi-pie-head">
+        <i class="fas fa-warehouse"></i>
+        <span>Vị trí kho</span>
+      </div>
+      <div class="kpi-pie-body">
+        <div class="kpi-pie-wrap">
+          <canvas id="c-pos" width="110" height="110"></canvas>
+          <div class="kpi-pie-center">
+            <span class="kpi-pie-n" id="pos-pct">0%</span>
+          </div>
+        </div>
+        <div class="kpi-pie-legend">
+          <div class="kpi-leg-row"><span class="kpi-leg-dot" style="background:#4ade80"></span><span class="kpi-leg-label">Đã lấp đầy</span><span class="kpi-leg-val" id="pos-filled">0</span></div>
+          <div class="kpi-leg-row"><span class="kpi-leg-dot" style="background:#e2e8f0"></span><span class="kpi-leg-label">Còn trống</span><span class="kpi-leg-val" id="pos-empty">0</span></div>
+        </div>
+      </div>
     </div>
-    <div class="kpi-card warn">
-      <div class="kpi-label">Tỉ lệ lấp đầy</div>
-      <div class="kpi-val amber">96%</div>
-      <div class="kpi-sub"><span class="warn-tag">⚠ Gần giới hạn</span></div>
+    <!-- Pie: Tổng lệnh (chiếm 2 cột) -->
+    <div class="kpi-pie-card">
+      <div class="kpi-pie-head">
+        <i class="fas fa-list-check"></i>
+        <span>Tổng lệnh</span>
+      </div>
+      <div class="kpi-pie-body">
+        <div class="kpi-pie-wrap">
+          <canvas id="c-cmd" width="110" height="110"></canvas>
+          <div class="kpi-pie-center">
+            <span class="kpi-pie-n" id="cmd-total">0</span>
+          </div>
+        </div>
+        <div class="kpi-pie-legend">
+          <div class="kpi-leg-row"><span class="kpi-leg-dot" style="background:#94a3b8"></span><span class="kpi-leg-label">Đang chờ</span><span class="kpi-leg-val" id="cmd-wait">0</span></div>
+          <div class="kpi-leg-row"><span class="kpi-leg-dot" style="background:#60a5fa"></span><span class="kpi-leg-label">Đang thực hiện</span><span class="kpi-leg-val" id="cmd-prog">0</span></div>
+          <div class="kpi-leg-row"><span class="kpi-leg-dot" style="background:#34d399"></span><span class="kpi-leg-label">Hoàn thành</span><span class="kpi-leg-val" id="cmd-done">0</span></div>
+          <div class="kpi-leg-row"><span class="kpi-leg-dot" style="background:#f87171"></span><span class="kpi-leg-label">Lỗi</span><span class="kpi-leg-val" id="cmd-err">0</span></div>
+        </div>
+      </div>
     </div>
-    <div class="kpi-card good">
-      <div class="kpi-label">Lệnh Thành Công</div>
-      <div class="kpi-val green">1,842</div>
-      <div class="kpi-sub"><span class="good-tag">Success rate: 98.2%</span></div>
-    </div>
-    <div class="kpi-card crit">
-      <div class="kpi-label">Lệnh Lỗi</div>
-      <div class="kpi-val red">33</div>
-      <div class="kpi-sub"><span class="crit-tag">Cần retry/cancel</span></div>
-    </div>
-    <div class="kpi-card purple">
-      <div class="kpi-label">Cycle Time TB</div>
-      <div class="kpi-val purple">4.2<span style="font-size:16px;font-weight:500">ph</span></div>
-      <div class="kpi-sub">Stacker Crane avg</div>
-    </div>
-    <div class="kpi-card cyan">
-      <div class="kpi-label">Throughput / Giờ</div>
-      <div class="kpi-val accent">840</div>
-      <div class="kpi-sub">Thiết kế: 900</div>
+    <!-- Pie: Số thiết bị (chiếm 2 cột) -->
+    <div class="kpi-pie-card kpi-pie-wide">
+      <div class="kpi-pie-head">
+        <i class="fas fa-microchip"></i>
+        <span>Số thiết bị</span>
+      </div>
+      <div class="kpi-pie-body">
+        <div class="kpi-pie-wrap">
+          <canvas id="c-dev" width="110" height="110"></canvas>
+          <div class="kpi-pie-center">
+            <span class="kpi-pie-n" id="dev-total">0</span>
+          </div>
+        </div>
+        <div class="kpi-pie-legend dev-legend" id="dev-legend">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- ROW 1: KANBAN + ERROR ANALYSIS -->
-  <div class="row-main">
-
+  <!-- KANBAN ROW (FULL WIDTH) -->
+  <div class="row-kanban" style="margin-bottom:20px;">
     <!-- Mission Kanban -->
     <div class="card">
       <div class="card-head">
-        <div class="card-title"><i class="fas fa-table-columns"></i>Quản lý lệnh theo ưu tiên</div>
-        <span class="card-tag">MISSION KANBAN</span>
+        <div class="card-title"><i class="fas fa-table-columns"></i>Danh sách lệnh trong ngày</div>
       </div>
       <div class="kanban-body">
-        <!-- KHẨN CẤP -->
+        <!-- ƯU TIÊN -->
         <div class="kanban-col">
           <div class="col-head">
-            <span class="col-label red"><span class="col-icon">🔴</span>Khẩn cấp</span>
-            <span class="col-count red" id="k-urgent-count">0</span>
+            <span class="col-label amber"><span class="col-icon">🔴</span>Ưu tiên</span>
+            <span class="col-count amber" id="k-urgent-count">0</span>
           </div>
           <div class="kanban-items" id="k-urgent"></div>
+        </div>
+        <!-- ĐANG CHỜ -->
+        <div class="kanban-col">
+          <div class="col-head">
+            <span class="col-label gray" style="color:var(--text-3);"><span class="col-icon">⏳</span>Đang chờ</span>
+            <span class="col-count gray" id="k-wait-count" style="background:var(--border);color:var(--text-2);">0</span>
+          </div>
+          <div class="kanban-items" id="k-wait"></div>
         </div>
         <!-- ĐANG XỬ LÝ -->
         <div class="kanban-col">
           <div class="col-head">
-            <span class="col-label amber"><span class="col-icon">⚡</span>Đang xử lý</span>
-            <span class="col-count amber" id="k-prog-count">0</span>
+            <span class="col-label accent" style="color:var(--accent);"><span class="col-icon">⚡</span>Đang xử lý</span>
+            <span class="col-count accent" id="k-prog-count" style="background:var(--acc-s);color:var(--accent);">0</span>
           </div>
           <div class="kanban-items" id="k-prog"></div>
         </div>
@@ -90,19 +124,56 @@
           </div>
           <div class="kanban-items" id="k-done"></div>
         </div>
+        <!-- LỖI -->
+        <div class="kanban-col">
+          <div class="col-head">
+            <span class="col-label red"><span class="col-icon">❌</span>Lỗi</span>
+            <span class="col-count red" id="k-err-count">0</span>
+          </div>
+          <div class="kanban-items" id="k-err"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ERROR ANALYSIS ROW -->
+  <div class="row-err" style="display:grid; grid-template-columns: 1fr 340px; gap:16px; margin-bottom:16px;">
+    
+    <!-- Average Completion Time Chart -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-chart-bar"></i>Thời gian trung bình hoàn thành lệnh</div>
+      </div>
+      <div class="chart-body" style="padding: 20px 20px 10px 40px; height: 380px; position:relative;">
+        <!-- Y Axis -->
+        <div class="y-axis" style="position:absolute; left:10px; top:20px; bottom:30px; display:flex; flex-direction:column; justify-content:space-between; font-size:11px; color:var(--text-3); align-items:flex-end;">
+          <span>60</span><span>50</span><span>40</span><span>30</span><span>20</span><span>10</span><span>0</span>
+        </div>
+        <!-- Grid lines -->
+        <div class="grid-lines" style="position:absolute; left:40px; right:20px; top:20px; bottom:30px; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none;">
+          <div style="border-top:1px dashed var(--border); width:100%; height:0;"></div>
+          <div style="border-top:1px dashed var(--border); width:100%; height:0;"></div>
+          <div style="border-top:1px dashed var(--border); width:100%; height:0;"></div>
+          <div style="border-top:1px dashed var(--border); width:100%; height:0;"></div>
+          <div style="border-top:1px dashed var(--border); width:100%; height:0;"></div>
+          <div style="border-top:1px dashed var(--border); width:100%; height:0;"></div>
+          <div style="border-top:1px solid var(--border); width:100%; height:0;"></div>
+        </div>
+        <!-- Bars Container -->
+        <div class="bars-wrap" id="completion-bars" style="position:absolute; left:40px; right:20px; top:20px; bottom:30px; display:flex; align-items:flex-end; justify-content:space-around; z-index:1;">
+          <!-- JS will render bars here -->
+        </div>
       </div>
     </div>
 
     <!-- Error Analysis -->
     <div class="card">
       <div class="card-head">
-        <div class="card-title"><i class="fas fa-chart-simple"></i>Phân tích lỗi</div>
-        <span class="card-tag">TOP ERRORS — 30 NGÀY</span>
+        <div class="card-title"><i class="fas fa-chart-simple"></i>Thống kê lỗi</div>
       </div>
       <div class="err-list" id="err-list"></div>
       <div class="err-tip" id="err-tip"></div>
     </div>
-
   </div>
 
   <!-- ROW 2: CYCLE TIME + PREDICTIVE -->
@@ -112,7 +183,6 @@
     <div class="card">
       <div class="card-head">
         <div class="card-title"><i class="fas fa-stopwatch"></i>Cycle Time</div>
-        <span class="card-tag">THỜI GIAN CHU KỲ</span>
       </div>
       <div class="ct-body" id="ct-body"></div>
     </div>
@@ -121,7 +191,6 @@
     <div class="card">
       <div class="card-head">
         <div class="card-title"><i class="fas fa-screwdriver-wrench"></i>Dự báo bảo trì</div>
-        <span class="card-tag">PREDICTIVE MAINT.</span>
       </div>
       <div class="pred-list" id="pred-list"></div>
     </div>

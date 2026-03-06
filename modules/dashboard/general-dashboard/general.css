@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -24,7 +25,7 @@
 }
 
 html { font-size: 14px; }
-body { background: var(--bg); color: var(--text-1); min-height: 100vh; }
+body { background: var(--bg); color: var(--text-1); min-height: 100vh; font-family: 'Roboto', sans-serif; }
 
 /* ── TOPBAR ── */
 .topbar {
@@ -56,8 +57,8 @@ body { background: var(--bg); color: var(--text-1); min-height: 100vh; }
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 20px 12px; border-bottom: 1px solid var(--border);
 }
-.card-title { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .9px; color: var(--text-2); display: flex; align-items: center; gap: 7px; }
-.card-title i { color: var(--accent); font-size: 13px; }
+.card-title { font-size: 16px; font-weight: 700; letter-spacing: .5px; color: var(--text-2); display: flex; align-items: center; gap: 7px; }
+.card-title i { color: var(--accent); font-size: 15px; }
 .card-tag { font-size: 10px; font-weight: 600; color: var(--text-3); background: var(--bg); border: 1px solid var(--border); padding: 2px 8px; border-radius: 4px; letter-spacing: .5px; }
 .card-total { text-align: right; }
 .total-n { font-size: 24px; font-weight: 700; color: var(--text-1); line-height: 1; }
@@ -75,8 +76,8 @@ body { background: var(--bg); color: var(--text-1); min-height: 100vh; }
 .leg-row { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 7px; border: 1px solid transparent; transition: all .15s; }
 .leg-row:hover { background: var(--bg); border-color: var(--border); }
 .leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.leg-label { flex: 1; font-size: 12px; color: var(--text-2); }
-.leg-val { font-size: 13px; font-weight: 700; color: var(--text-1); font-family: monospace; }
+.leg-label { flex: 1; font-size: 14px; color: var(--text-2); }
+.leg-val { font-size: 14px; font-weight: 700; color: var(--text-1); }
 
 /* ── ROW 2: MID 3-COL ── */
 .row-mid { display: grid; grid-template-columns: 1fr 1fr 1.1fr; gap: 20px; }

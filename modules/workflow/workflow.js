@@ -17,12 +17,24 @@ const NAMES = [
     'Quy trình xuất kho kho Stacker crane theo pallet'
 ];
 
+// Type constants
+const TYPE_MAP = {
+    'NHAP_MOI': 'Nhập mới',
+    'NHAP_LAI': 'Nhập lại',
+    'NHAP_CHUYEN_THANG': 'Nhập chuyền thẳng',
+    'XUAT_VAT_TU': 'Xuất theo vật tư',
+    'XUAT_PALLET': 'Xuất theo pallet'
+};
+
+// Assign types to mock data
+const TYPES = ['NHAP_MOI', 'NHAP_MOI', 'XUAT_VAT_TU', 'XUAT_VAT_TU', 'XUAT_VAT_TU', 'XUAT_VAT_TU', 'XUAT_VAT_TU', 'XUAT_VAT_TU', 'XUAT_PALLET', 'XUAT_PALLET'];
+
 const mockWorkflows = NAMES.map((name, i) => {
     return {
         id: i + 1,
         code: `WF-${1000 + i}`,
         name: name,
-        type: i < 2 ? 'IMPORT' : 'EXPORT', // Mock type based on index
+        type: TYPES[i] || 'NHAP_MOI',
         steps: Math.floor(Math.random() * 5) + 3,
         description: `Mô tả chi tiết cho quy trình ${i + 1}...`,
         isActive: true
@@ -108,7 +120,7 @@ function renderTable(page) {
 
     if (pageData.length === 0) {
         console.warn("DEBUG: No page data to render");
-        dom.tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: #64748b;">không có dữ liệu để hiển thị</td></tr>`;
+        dom.tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: #64748b;">không có dữ liệu để hiển thị</td></tr>`;
         renderPagination(); // Still call to update info/hide controls
         return;
     }
@@ -133,15 +145,23 @@ function renderTable(page) {
 
         if (isSelected) row.classList.add('selected-row');
 
+        // Badge class mapping
+        const badgeClass = {
+            'NHAP_MOI': 'type-nhap-moi',
+            'NHAP_LAI': 'type-nhap-lai',
+            'NHAP_CHUYEN_THANG': 'type-nhap-chuyen-thang',
+            'XUAT_VAT_TU': 'type-xuat-vat-tu',
+            'XUAT_PALLET': 'type-xuat-pallet'
+        };
+
         row.innerHTML = `
             <td class="first-col" style="text-align: center;">
                 <input type="checkbox" class="row-checkbox" data-id="${item.id}" ${isSelected ? 'checked' : ''}>
             </td>
             <td style="text-align: center;">${start + index + 1}</td>
-             <td style="font-weight: 600;">${item.code}</td>
             <td>${item.name}</td>
-            <td style="text-align: center; font-weight: 500; color: ${item.type === 'IMPORT' ? '#2563eb' : '#16a34a'}">
-                ${item.type === 'IMPORT' ? 'Nhập kho' : 'Xuất kho'}
+            <td style="text-align: center;">
+                <span class="type-badge ${badgeClass[item.type] || ''}">${TYPE_MAP[item.type] || item.type}</span>
             </td>
             <td style="text-align: center;">${item.steps || 0}</td>
             <td class="cell-truncate" style="max-width: 200px;" title="${item.description}">${item.description}</td>
@@ -272,7 +292,6 @@ window.openModal = function(mode, id = null) {
         const item = workflows.find(w => w.id === id);
         if (item) {
             dom.wfId.value = item.id;
-            dom.wfCode.value = item.code;
             dom.wfName.value = item.name;
             dom.wfDescription.value = item.description;
             dom.wfActive.checked = item.isActive;
@@ -280,8 +299,7 @@ window.openModal = function(mode, id = null) {
             // Set Order Type
             if (item.type) {
                  dom.wfType.value = item.type;
-                 const typeMap = { 'IMPORT': 'Nhập kho', 'EXPORT': 'Xuất kho' };
-                 dom.modalTypeSelected.textContent = typeMap[item.type] || 'Chọn loại lệnh';
+                 dom.modalTypeSelected.textContent = TYPE_MAP[item.type] || 'Chọn loại lệnh';
                  
                  // Highlight selected
                  dom.modalTypeList.querySelectorAll('.dropdown-item').forEach(i => {
@@ -310,11 +328,10 @@ window.closeModal = function() {
 window.saveWorkflow = function() {
     const dom = getDOM();
     const id = dom.wfId.value ? parseInt(dom.wfId.value) : null;
-    const code = dom.wfCode.value.trim();
     const name = dom.wfName.value.trim();
     const type = dom.wfType.value; // Get type
     
-    if (!code || !name) {
+    if (!name) {
         alert("Vui lòng nhập đầy đủ thông tin bắt buộc!");
         return;
     }
@@ -324,7 +341,6 @@ window.saveWorkflow = function() {
         if (idx !== -1) {
             workflows[idx] = { 
                 ...workflows[idx], 
-                code, 
                 name, 
                 type, // Update type
                 steps: workflows[idx].steps || 0, 
@@ -336,9 +352,9 @@ window.saveWorkflow = function() {
         const newId = workflows.length > 0 ? Math.max(...workflows.map(w => w.id)) + 1 : 1;
         workflows.unshift({
             id: newId,
-            code,
+            code: `WF-${1000 + newId}`,
             name,
-            type: type || 'IMPORT', // Default?
+            type: type || 'NHAP_MOI',
             steps: 0, 
             description: dom.wfDescription.value,
             isActive: dom.wfActive.checked
@@ -671,6 +687,15 @@ function init() {
                 const p = parseInt(dom.pageInput.value);
                 if(p >= 1) changePage(p);
             }
+        });
+    }
+
+    // Horizontal scroll sync between split head/body
+    const scrollBody = document.getElementById('tableScrollBody');
+    const scrollHead = document.querySelector('.table-scroll-head');
+    if (scrollBody && scrollHead) {
+        scrollBody.addEventListener('scroll', () => {
+            scrollHead.scrollLeft = scrollBody.scrollLeft;
         });
     }
 

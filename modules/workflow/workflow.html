@@ -35,11 +35,12 @@
                 Tất cả loại lệnh
               </div>
               <div class="dropdown-list" id="typeList">
-                <div class="dropdown-item selected" data-value="ALL">
-                  Tất cả loại lệnh
-                </div>
-                <div class="dropdown-item" data-value="IMPORT">Nhập kho</div>
-                <div class="dropdown-item" data-value="EXPORT">Xuất kho</div>
+                <div class="dropdown-item selected" data-value="ALL">Tất cả loại lệnh</div>
+                <div class="dropdown-item" data-value="NHAP_MOI">Nhập mới</div>
+                <div class="dropdown-item" data-value="NHAP_LAI">Nhập lại</div>
+                <div class="dropdown-item" data-value="NHAP_CHUYEN_THANG">Nhập chuyền thẳng</div>
+                <div class="dropdown-item" data-value="XUAT_VAT_TU">Xuất theo vật tư</div>
+                <div class="dropdown-item" data-value="XUAT_PALLET">Xuất theo pallet</div>
               </div>
               <i class="fas fa-chevron-down"></i>
             </div>
@@ -68,42 +69,52 @@
       </div>
 
       <!-- Table -->
-      <div class="table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th
-                class="sticky-col first-col"
-                style="width: 40px; min-width: 40px; text-align: center"
-              >
-                <input type="checkbox" id="selectAll" />
-              </th>
-              <th style="width: 50px; min-width: 50px; text-align: center">
-                STT
-              </th>
-              <th style="width: 150px; min-width: 150px">Mã quy trình</th>
-              <th style="width: 250px; min-width: 300px">Tên quy trình</th>
-              <th style="width: 140px; min-width: 140px; text-align: center">
-                Loại lệnh áp dụng
-              </th>
-              <!-- New Column -->
-
-              <th style="width: 100px; min-width: 100px; text-align: center">
-                Số bước
-              </th>
-              <th style="min-width: 300px; width: 300px">Mô tả</th>
-              <th style="width: 140px; min-width: 140px; text-align: center">
-                Trạng thái
-              </th>
-              <th style="width: 120px; min-width: 120px; text-align: center">
-                Thao tác
-              </th>
-            </tr>
-          </thead>
-          <tbody id="tableBody">
-            <!-- JS will populate -->
-          </tbody>
-        </table>
+      <div class="table-wrapper">
+        <div class="table-scroll-head">
+          <table class="data-table">
+            <colgroup>
+              <col style="width: 45px">
+              <col style="width: 50px">
+              <col style="width: 300px">
+              <col style="width: 160px">
+              <col style="width: 80px">
+              <col style="width: 300px">
+              <col style="width: 120px">
+              <col style="width: 120px">
+            </colgroup>
+            <thead>
+              <tr>
+                <th style="text-align: center">
+                  <input type="checkbox" id="selectAll" />
+                </th>
+                <th style="text-align: center">STT</th>
+                <th>Tên quy trình</th>
+                <th style="text-align: center">Loại lệnh áp dụng</th>
+                <th style="text-align: center">Số bước</th>
+                <th>Mô tả</th>
+                <th style="text-align: center">Trạng thái</th>
+                <th style="text-align: center">Thao tác</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+        <div class="table-scroll-body" id="tableScrollBody">
+          <table class="data-table">
+            <colgroup>
+              <col style="width: 45px">
+              <col style="width: 50px">
+              <col style="width: 300px">
+              <col style="width: 160px">
+              <col style="width: 80px">
+              <col style="width: 300px">
+              <col style="width: 120px">
+              <col style="width: 120px">
+            </colgroup>
+            <tbody id="tableBody">
+              <!-- JS will populate -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Pagination -->
@@ -161,15 +172,7 @@
           <div class="modal-body">
             <form id="workflowForm">
               <input type="hidden" id="workflowId" />
-              <div class="form-group">
-                <label class="required">Mã quy trình</label>
-                <input
-                  type="text"
-                  id="wfCode"
-                  required
-                  placeholder="VD: WF-001"
-                />
-              </div>
+
               <div class="form-group">
                 <label class="required">Tên quy trình</label>
                 <input
@@ -195,12 +198,11 @@
                     Chọn loại lệnh
                   </div>
                   <div class="dropdown-list" id="modalTypeList">
-                    <div class="dropdown-item" data-value="IMPORT">
-                      Nhập kho
-                    </div>
-                    <div class="dropdown-item" data-value="EXPORT">
-                      Xuất kho
-                    </div>
+                    <div class="dropdown-item" data-value="NHAP_MOI">Nhập mới</div>
+                    <div class="dropdown-item" data-value="NHAP_LAI">Nhập lại</div>
+                    <div class="dropdown-item" data-value="NHAP_CHUYEN_THANG">Nhập chuyền thẳng</div>
+                    <div class="dropdown-item" data-value="XUAT_VAT_TU">Xuất theo vật tư</div>
+                    <div class="dropdown-item" data-value="XUAT_PALLET">Xuất theo pallet</div>
                   </div>
                   <i class="fas fa-chevron-down" style="right: 12px"></i>
                   <input type="hidden" id="wfType" required />

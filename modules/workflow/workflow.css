@@ -172,43 +172,54 @@
 }
 .btn-danger-outline:hover { background: #fef2f2; }
 
-/* Table Wrapper */
-.table-container {
-    background: #fff;
-    border: 1px solid #e2e8f0;
+/* Table Wrapper - split head/body pattern */
+.table-wrapper {
+    background: white;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    overflow: auto;
-    /* flex: 1; Removed to allow shrink */
-    height: auto; /* Fit content */
-    max-height: calc(100vh - 220px); /* Limit to viewport */
-    min-height: 200px;
-    position: relative;
+    max-height: calc(100vh - 220px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
 }
 
-/* Scrollbar styling */
-.table-container::-webkit-scrollbar { width: 8px; height: 8px; }
-.table-container::-webkit-scrollbar-track:vertical { background: #f1f5f9; margin-top: 44px; }
-.table-container::-webkit-scrollbar-track:horizontal { background: #f1f5f9; }
-.table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-.table-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.table-scroll-head {
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #076EB8;
+}
+
+.table-scroll-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    min-height: 0;
+    background: white;
+}
+
+/* Scrollbar styling for table scroll body */
+.table-scroll-body::-webkit-scrollbar { width: 6px; height: 6px; }
+.table-scroll-body::-webkit-scrollbar-track { background: #f1f5f9; }
+.table-scroll-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+.table-scroll-body::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 .data-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
+    table-layout: fixed;
+    border-collapse: collapse;
 }
 
 .data-table th {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: #076EB8; /* Blue Header */
+    background-color: #076EB8;
     color: #fff;
-    padding: 12px;
+    padding: 14px 16px;
     font-weight: 600;
     text-align: left;
     white-space: nowrap;
+    text-transform: uppercase;
+    font-size: 13px;
+    vertical-align: middle;
 }
 
 .data-table td {
@@ -219,12 +230,29 @@
     font-size: 14px;
 }
 
-/* Sticky First Column */
-.data-table th.first-col { left: 0; z-index: 50 !important; }
-.data-table td.first-col { position: sticky; left: 0; background: #fff; z-index: 10; border-right: 1px solid #e2e8f0; }
+/* Sticky First Column - no longer needed in split mode but kept for safety */
+.data-table th.first-col { left: 0; }
+.data-table td.first-col { background: #fff; }
 
 .data-table tbody tr:hover td { background-color: #f8fafc; }
 .data-table tbody tr.selected-row td { background-color: #eff6ff; }
+
+/* Type Badge */
+.type-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    background: transparent;
+    border: 1px solid;
+}
+.type-badge.type-nhap-moi          { color: #1d4ed8; border-color: #93c5fd; }
+.type-badge.type-nhap-lai          { color: #7c3aed; border-color: #c4b5fd; }
+.type-badge.type-nhap-chuyen-thang { color: #0d9488; border-color: #5eead4; }
+.type-badge.type-xuat-vat-tu       { color: #b45309; border-color: #fcd34d; }
+.type-badge.type-xuat-pallet       { color: #be123c; border-color: #fda4af; }
 
 /* Action Buttons in Table */
 .action-btn {

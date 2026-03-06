@@ -284,6 +284,13 @@
             </div>
           </div>
 
+          <!-- Blossom Toggle -->
+          <div class="notification-container" style="margin-right: 12px;">
+            <div class="notification-btn" id="btn-cherry" onclick="toggleBlossom()" title="Bật hiệu ứng" style="color: var(--text-3); background: var(--surface); border: 1px solid var(--border);">
+              <i class="fas fa-seedling"></i>
+            </div>
+          </div>
+
           <!-- Notifcation System -->
           <div class="notification-container">
             <div class="notification-btn" onclick="toggleNotificationMenu()">
@@ -577,8 +584,13 @@
     <!-- Global Falling Effect (Snow & Blossoms) -->
     <div class="falling-container" id="fallingContainer"></div>
     <script>
+      let blossomsActive = false;
+      let particleInterval = null;
+
       function createParticles() {
         const container = document.getElementById('fallingContainer');
+        if (!container) return;
+        container.innerHTML = ''; // clear existing
         const particleCount = 45;
         const petalTypes = ['petal-1', 'petal-2', 'petal-3', 'petal-4', 'petal-5', 'petal-6'];
         const sizeTypes = ['size-xs', 'size-sm', 'size-md', 'size-lg', 'size-xl'];
@@ -586,33 +598,46 @@
         
         for (let i = 0; i < particleCount; i++) {
           const particle = document.createElement('div');
-          
-          // Base class
           particle.className = 'particle';
-          
-          // Random blossom type (1-6)
           const petalClass = petalTypes[Math.floor(Math.random() * petalTypes.length)];
           particle.classList.add(petalClass);
-
-          // Random size (xs to xl)
           const sizeClass = sizeTypes[Math.floor(Math.random() * sizeTypes.length)];
           particle.classList.add(sizeClass);
-          
-          // Random animation (a to f)
           const animClass = animationTypes[Math.floor(Math.random() * animationTypes.length)];
           particle.classList.add(animClass);
-          
-          // Random horizontal position
           particle.style.left = Math.random() * 100 + 'vw';
-          
-          // Random animation delay to stagger the start
           const delay = Math.random() * 15 + 's';
           particle.style.animationDelay = delay;
-          
           container.appendChild(particle);
         }
       }
-      document.addEventListener('DOMContentLoaded', createParticles);
+
+      function toggleBlossom() {
+        blossomsActive = !blossomsActive;
+        const container = document.getElementById('fallingContainer');
+        const btn = document.getElementById('btn-cherry');
+        if (blossomsActive) {
+          createParticles();
+          if (btn) {
+            btn.style.background = '#fdf2f8';
+            btn.style.color = '#f472b6';
+            btn.style.borderColor = '#fbcfe8';
+            btn.title = "Tắt hiệu ứng";
+          }
+        } else {
+          if (container) container.innerHTML = '';
+          if (btn) {
+            btn.style.background = 'var(--surface)';
+            btn.style.color = 'var(--text-3)';
+            btn.style.borderColor = 'var(--border)';
+            btn.title = "Bật hiệu ứng";
+          }
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        if (blossomsActive) createParticles();
+      });
     </script>
   </body>
 </html>
