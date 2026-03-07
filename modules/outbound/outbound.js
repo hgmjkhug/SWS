@@ -83,32 +83,32 @@
     {
       id: 3,
       code: "WF-1002",
-      name: "Quy trình xuất kho Tower theo vật tư có method FIFO",
+      name: "Quy trình xuất kho Tower theo sản phẩm có method FIFO",
     },
     {
       id: 4,
       code: "WF-1003",
-      name: "Quy trình xuất kho Tower theo vật tư có method LIFO",
+      name: "Quy trình xuất kho Tower theo sản phẩm có method LIFO",
     },
     {
       id: 5,
       code: "WF-1004",
-      name: "Quy trình xuất kho Tower theo vật tư có method FEFO",
+      name: "Quy trình xuất kho Tower theo sản phẩm có method FEFO",
     },
     {
       id: 6,
       code: "WF-1005",
-      name: "Quy trình xuất kho Stacker crane theo vật tư có method FIFO",
+      name: "Quy trình xuất kho Stacker crane theo sản phẩm có method FIFO",
     },
     {
       id: 7,
       code: "WF-1006",
-      name: "Quy trình xuất kho Stacker crane theo vật tư có method LIFO",
+      name: "Quy trình xuất kho Stacker crane theo sản phẩm có method LIFO",
     },
     {
       id: 8,
       code: "WF-1007",
-      name: "Quy trình xuất kho Stacker crane theo vật tư có method FEFO",
+      name: "Quy trình xuất kho Stacker crane theo sản phẩm có method FEFO",
     },
     {
       id: 9,
@@ -129,7 +129,11 @@
   let currentRightDate = new Date();
   currentRightDate.setMonth(currentRightDate.getMonth() + 1);
 
-  let selectedRange = { start: null, end: null };
+  // Default to today: 07/03/2026
+  let selectedRange = { 
+    start: new Date(2026, 2, 7), 
+    end: new Date(2026, 2, 7) 
+  };
   let tempRange = { start: null, end: null }; // For internal selection before Apply
 
   // Generate 50 mock records
@@ -148,9 +152,12 @@
         Math.floor(Math.random() * MOCK_EXPORT_WORKFLOWS.length)
       ];
 
-    // Random date in last 3 months
-    const date = new Date();
-    date.setDate(date.getDate() - Math.floor(Math.random() * 90));
+    // Random date logic: First 10 records are for today (07/03/2026)
+    const date = new Date(2026, 2, 7);
+    if (i >= 10) {
+      // Others are random in last 3 months
+      date.setDate(date.getDate() - Math.floor(Math.random() * 90));
+    }
     date.setHours(Math.floor(Math.random() * 24));
     date.setMinutes(Math.floor(Math.random() * 60));
 
@@ -352,7 +359,7 @@
 
     if (filtered.length === 0) {
       tbody.innerHTML =
-        '<tr><td colspan="8" style="text-align:center; padding: 20px; color:#64748b;">Không tìm thấy vật tư</td></tr>';
+        '<tr><td colspan="8" style="text-align:center; padding: 20px; color:#64748b;">Không tìm thấy sản phẩm</td></tr>';
       return;
     }
 
@@ -437,7 +444,7 @@
                                         <th rowspan="2" style="vertical-align: middle;">Mã lệnh nhập</th>
                                         <th rowspan="2" style="text-align: center; vertical-align: middle;">Số lượng</th>
                                         <th colspan="2" style="text-align: center;">Thông tin lưu</th>
-                                        <th rowspan="2" style="text-align: center; vertical-align: middle;">Ngày tạo lệnh</th>
+                                        <th rowspan="2" style="text-align: center; vertical-align: middle;">Thời gian tạo</th>
                                     </tr>
                                     <tr>
                                         <th style="font-weight: 500; text-align: center;">Pallet</th>
@@ -585,7 +592,7 @@
       .querySelectorAll(".filter-trigger")
       .forEach((d) => d.classList.remove("active"));
     document
-      .querySelectorAll(".data-table th")
+      .querySelectorAll("th")
       .forEach((th) => th.classList.remove("active-filter-header"));
 
     if (!isActive) {
@@ -762,20 +769,40 @@
     renderCalendars();
     setupExtraListeners();
 
+    // Initial Date Display Sync
+    const triggerDisplay = document.getElementById("dateRangeDisplay");
+    if (triggerDisplay && selectedRange.start && selectedRange.end) {
+      const s = selectedRange.start;
+      const e = selectedRange.end;
+      const dayS = String(s.getDate()).padStart(2, "0");
+      const monthS = String(s.getMonth() + 1).padStart(2, "0");
+      const dayE = String(e.getDate()).padStart(2, "0");
+      const monthE = String(e.getMonth() + 1).padStart(2, "0");
+      triggerDisplay.textContent = `${dayS}/${monthS}/${s.getFullYear()} - ${dayE}/${monthE}/${e.getFullYear()}`;
+      
+      // Also sync temp range so picker matches main display
+      tempRange = { ...selectedRange };
+      updateRangeDisplay();
+    }
+
     // Horizontal Scroll Synchronization
-    const scrollSync = (bodyId, headerId) => {
+    const scrollSync = (bodyId, headerId, isTransform = false) => {
       const body = document.getElementById(bodyId);
       const header = document.getElementById(headerId);
       if (body && header) {
         body.addEventListener("scroll", () => {
-          header.scrollLeft = body.scrollLeft;
+          if (isTransform) {
+            header.style.transform = `translateX(-${body.scrollLeft}px)`;
+          } else {
+            header.scrollLeft = body.scrollLeft;
+          }
         });
       }
     };
 
     scrollSync("mainBodyScroll", "mainHeaderScroll");
-    scrollSync("materialBodyScroll", "materialHeaderScroll");
-    scrollSync("palletBodyScroll", "palletHeaderScroll");
+    scrollSync("materialBodyScroll", "materialHeaderTable", true);
+    scrollSync("palletBodyScroll", "palletHeaderTable", true);
   }
 
   // Render Table with Pagination
@@ -804,7 +831,7 @@
         filterType === "ALL" || item.outboundType === filterType;
 
       const matchesCreator =
-        !selectedCreatorId || item.creator.includes(`(${selectedCreatorId})`);
+        !selectedCreatorId || item.creatorId === selectedCreatorId;
 
       const matchesPriority = !filterPriorityOnly || item.priority === true;
 
@@ -880,19 +907,17 @@
 
                 <td>
                     <div class="product-item" style="position: relative; padding-left: 22px;">
-                        <div style="font-weight:600; color:#334155">${item.materialName}</div>
-                        <div style="font-size:12px; color:#64748b; margin-top: 2px;">
-                            ${item.materialCode} 
-                            <span style="margin-left: 8px;">|</span>
-                            <span style="margin-left: 8px; color: #475569;">Quy cách: <span style="font-weight: 600; color: #076EB8;">${item.materialMethod || 'FIFO'}</span></span>
+                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">
+                            <span class="prod-code" style="font-weight: 500; color: #0284c7; font-size: 13px;">${item.materialCode}</span>
+                            <span style="font-weight: 600; color: #334155; font-size: 14px; margin-left: 4px;"> - ${item.materialName}</span>
                         </div>
-                        <div style="font-size:12px; color:#076EB8; font-weight: 600; margin-top: 2px;">SL: ${item.quantity}</div>
+                        <div style="font-size:12px; color:#076EB8; font-weight: 600; margin-top: 4px;">Số lượng: ${item.quantity}</div>
                     </div>
                 </td>
 
                 <td style="text-align: center">
                     <span class="outbound-type-badge type-${item.outboundType}">
-                        ${item.outboundType === "PALLET" ? "Xuất theo pallet" : "Xuất theo vật tư"}
+                        ${item.outboundType === "PALLET" ? "Xuất theo pallet" : "Xuất theo sản phẩm"}
                     </span>
                 </td>
                 <!-- <td style="text-align: left;">
@@ -900,13 +925,18 @@
                         ${item.workflow ? `[${item.workflow.code}] ${item.workflow.name}` : '-'}
                     </div>
                 </td> -->
-                <td style="text-align: center;">${item.date}</td>
                 <td style="text-align:center">
                     <span class="status-badge ${statusInfo.class}">${statusInfo.label}</span>
                 </td>
-                <td>
-                    <div style="font-weight: 600; color: #334155;">${item.creatorName}</div>
-                    <div style="font-size: 12px; color: #64748b;">${item.creatorId}</div>
+                <td style="text-align: left;">
+                    <div class="product-item" style="border-bottom:none; min-height: fit-content; padding-left: 18px;">
+                        <div style="font-size: 13px; color: #334155;">
+                            <span style="font-weight: 600;">Thời gian:</span> ${item.date}
+                        </div>
+                        <div style="font-size: 13px; color: #334155; margin-top: 2px;">
+                            <span style="font-weight: 600;">Người tạo:</span> ${item.creatorName} (${item.creatorId})
+                        </div>
+                    </div>
                 </td>
                 <td style="text-align:center">
                     <button class="btn-icon btn-delete" title="${deleteTitle}" onclick="deleteOutboundItem(${item.id})" ${deleteDisabled}>
@@ -1015,12 +1045,12 @@
         .map((batch) => {
           return `
                 <tr>
-                    <td style="text-align: left; padding-left: 15px; white-space: nowrap;">${batch.inboundCode}</td>
-                    <td style="text-align: center; font-weight: 600; color: #076EB8;">${batch.exportedQty}/${batch.totalQty}</td>
-                    <td style="text-align: center">${batch.pallet}</td>
-                    <td style="text-align: center">${batch.location}</td>
-                    <td style="text-align: center">${batch.date}</td>
-                    <td style="text-align: center">${batch.expiryDate || '-'}</td>
+                    <td style="text-align: left; padding-left: 15px; width: 350px;">${batch.inboundCode}</td>
+                    <td style="text-align: center; font-weight: 600; color: #076EB8; width: 130px;">${batch.exportedQty}/${batch.totalQty}</td>
+                    <td style="text-align: center; width: 130px;">${batch.pallet}</td>
+                    <td style="text-align: center; width: 100px;">${batch.location}</td>
+                    <td style="text-align: center; width: 180px;">${batch.date}</td>
+                    <td style="text-align: center; width: 150px;">${batch.expiryDate || '-'}</td>
                 </tr>
             `;
         })
@@ -1028,17 +1058,17 @@
 
       subRow.innerHTML = `
             <td colspan="1" style="border:none; background: transparent;"></td>
-            <td colspan="7" style="padding: 0;">
+            <td colspan="6" style="padding: 0;">
                 <div class="sub-table-container" style="padding: 10px 20px; background-color: #f1f5f9; border-bottom: 1px solid #e2e8f0; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);">
                     <table class="sub-table" style="width: 100%; border-collapse: collapse; background-color: white; border-radius: 6px; overflow: hidden; border: 1px solid #e2e8f0;">
                         <thead>
                             <tr style="background-color: #076eb8;">
-                                <th style="text-align: left; color: white; padding: 10px 15px; font-weight: 600; min-width: 250px;">Mã lệnh nhập</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600;">Đã xuất/Tổng</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600;">Pallet</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600;">Vị trí</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600;">Thời gian hoàn thành</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600;">Ngày hết hạn</th>
+                                <th style="text-align: left; color: white; padding: 10px 15px; font-weight: 600; width: 350px;">Mã lệnh nhập</th>
+                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 130px;">Đã xuất/Tổng</th>
+                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 130px;">Container</th>
+                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 100px;">Vị trí</th>
+                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 180px;">Thời gian hoàn thành</th>
+                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 150px;">Ngày hết hạn</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1814,8 +1844,8 @@
       }
       if (!materialCode || quantity <= 0) {
         if (window.showToast)
-          window.showToast("Vui lòng chọn vật tư và nhập số lượng!", "error");
-        else alert("Vui lòng chọn vật tư và nhập số lượng!");
+          window.showToast("Vui lòng chọn sản phẩm và nhập số lượng!", "error");
+        else alert("Vui lòng chọn sản phẩm và nhập số lượng!");
         return;
       }
       const m = MASTER_MATERIALS.find((x) => x.code === materialCode);
@@ -1827,8 +1857,8 @@
       );
       if (!selectedRadio) {
         if (window.showToast)
-          window.showToast("Vui lòng chọn một vật tư từ danh sách!", "error");
-        else alert("Vui lòng chọn một vật tư từ danh sách!");
+          window.showToast("Vui lòng chọn một sản phẩm từ danh sách!", "error");
+        else alert("Vui lòng chọn một sản phẩm từ danh sách!");
         return;
       }
 
@@ -2014,7 +2044,7 @@
         "#material-selection-body tr.selected",
       );
       if (!selectedRow) {
-        alert("Vui lòng chọn vật tư!");
+        alert("Vui lòng chọn sản phẩm!");
         return;
       }
 

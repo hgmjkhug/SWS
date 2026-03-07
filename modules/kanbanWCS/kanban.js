@@ -39,6 +39,64 @@
     let currentWarehouseFilter = 'all';
     let currentSearchTerm = '';
 
+    // Date Range Picker State
+    const today = new Date();
+    // Default to from Monday of current week to today
+    const currentDayOfWeek = today.getDay(); // 0 is Sunday, 1 is Monday
+    const daysSinceMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    let startDate = new Date(today);
+    startDate.setDate(today.getDate() - daysSinceMonday);
+    startDate.setHours(0,0,0,0);
+    let endDate = new Date(today);
+    endDate.setHours(23,59,59,999);
+    
+    let tempRange = { start: new Date(startDate), end: new Date(endDate) };
+    let selectedRange = { start: new Date(startDate), end: new Date(endDate) };
+    
+    let currentLeftDate = new Date(startDate);
+    let currentRightDate = new Date(endDate);
+    if (currentLeftDate.getMonth() === currentRightDate.getMonth() && currentLeftDate.getFullYear() === currentRightDate.getFullYear()) {
+        currentRightDate.setMonth(currentRightDate.getMonth() + 1);
+    }
+
+    // Initialize Dates for Mock Data
+    mockTasks.forEach((t, index) => {
+        const date = new Date(today);
+        // distribute within the last 7 days to show up in the default filter
+        date.setDate(date.getDate() - Math.floor(Math.random() * 5)); 
+        date.setHours(Math.floor(Math.random() * 24));
+        date.setMinutes(Math.floor(Math.random() * 60));
+        
+        t.rawDate = date;
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+        t.createdDate = `${hours}:${minutes} ${day}/${month}/${year}`;
+        
+        // Dynamically update logs to be logically after creation time
+        if (t.logs && t.logs.length > 0) {
+            let logDate = new Date(date);
+            t.logs.forEach((log, logIndex) => {
+                // Add seconds to make log time after card creation time
+                // E.g. first log at 37 seconds, next log a few minutes later
+                let addedMinutes = logIndex === 0 ? 0 : Math.floor(Math.random() * 3) + 1;
+                logDate.setMinutes(logDate.getMinutes() + addedMinutes);
+                
+                // Add a random amount of seconds
+                let addedSeconds = Math.floor(Math.random() * 45) + 5; 
+                logDate.setSeconds(logDate.getSeconds() + addedSeconds);
+
+                const logHours = String(logDate.getHours()).padStart(2, "0");
+                const logMinutes = String(logDate.getMinutes()).padStart(2, "0");
+                const logSeconds = String(logDate.getSeconds()).padStart(2, "0");
+                
+                log.time = `${logHours}:${logMinutes}:${logSeconds}`;
+            });
+        }
+    });
+
     // Initialize function
     function initKanban() {
         // Safety check for DOM readiness
@@ -50,6 +108,7 @@
 
         initDropdown();
         initSearch();
+        initDatePicker();
         renderBoard();
     }
 
@@ -239,12 +298,21 @@
 
     // Render Kanban Board
     function renderBoard() {
-        // 1. Filter Data (using names now to match the dropdown)
+        // 1. Filter Data
         const filteredTasks = mockTasks.filter(task => {
             const matchesWarehouse = currentWarehouseFilter === 'all' || task.warehouse === currentWarehouseFilter;
             const matchesSearch = task.id.toLowerCase().includes(currentSearchTerm) || 
                                   task.device.toLowerCase().includes(currentSearchTerm);
-            return matchesWarehouse && matchesSearch;
+            
+            let matchesDate = true;
+            if (selectedRange.start && selectedRange.end && task.rawDate) {
+                const taskDate = new Date(task.rawDate).setHours(0,0,0,0);
+                const s = new Date(selectedRange.start).setHours(0,0,0,0);
+                const e = new Date(selectedRange.end).setHours(0,0,0,0);
+                matchesDate = taskDate >= s && taskDate <= e;
+            }
+                                  
+            return matchesWarehouse && matchesSearch && matchesDate;
         });
 
         // 2. Clear Columns
@@ -309,8 +377,8 @@
                 
                 <div class="card-info">
                     <div class="info-row">
-                        <i class="fas fa-warehouse info-icon"></i>
-                        <span>${task.warehouse}</span>
+                        <i class="fas fa-clock info-icon"></i>
+                        <span>${task.createdDate}</span>
                     </div>
                     <div class="info-row">
                         <i class="fas fa-robot info-icon"></i>
@@ -329,6 +397,274 @@
                 </div>
             </div>
         `;
+    }
+
+    // --- DATE PICKER LOGIC ---
+    function getDaysInMonth(month, year) {
+        return new Date(year, month + 1, 0).getDate();
+    }
+    function formatDate(date) {
+        if (!date) return "";
+        const d = String(date.getDate()).padStart(2, "0");
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const y = date.getFullYear();
+        return `${d}/${m}/${y}`;
+    }
+    function isSameDay(d1, d2) {
+        if (!d1 || !d2) return false;
+        return d1.getDate() === d2.getDate() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear();
+    }
+    function isDateInRange(date, start, end) {
+        if (!start || !end || !date) return false;
+        const d = new Date(date).setHours(0, 0, 0, 0);
+        const s = new Date(start).setHours(0, 0, 0, 0);
+        const e = new Date(end).setHours(0, 0, 0, 0);
+        return d >= s && d <= e;
+    }
+    
+    window.toggleDateRangePicker = function(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        const picker = document.getElementById("analyticsPicker");
+        if (picker) {
+            picker.classList.toggle("active");
+            if (picker.classList.contains("active")) {
+                renderCalendars();
+                initPickerDropdowns();
+            }
+        }
+    };
+
+    function initDatePicker() {
+        const triggerDisplay = document.getElementById("dateRangeDisplay");
+        if (triggerDisplay && selectedRange.start && selectedRange.end) {
+            triggerDisplay.textContent = `${formatDate(selectedRange.start)} - ${formatDate(selectedRange.end)}`;
+        }
+        setupExtraListeners();
+    }
+
+    function initPickerDropdowns() {
+        const months = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+        ["left", "right"].forEach((side) => {
+            const current = side === "left" ? currentLeftDate : currentRightDate;
+            const monthList = document.getElementById(`${side}MonthList`);
+            const yearList = document.getElementById(`${side}YearList`);
+            if (monthList) {
+                monthList.innerHTML = "";
+                months.forEach((m, idx) => {
+                    const item = document.createElement("div");
+                    item.className = `dropdown-item ${idx === current.getMonth() ? "selected" : ""}`;
+                    item.textContent = m;
+                    item.onclick = (e) => {
+                        e.stopPropagation();
+                        current.setMonth(idx);
+                        document.getElementById(`${side}MonthSelected`).textContent = m;
+                        const dd = document.getElementById(`${side}MonthDropdown`);
+                        if (dd) dd.classList.remove("active");
+                        renderCalendars();
+                    };
+                    monthList.appendChild(item);
+                });
+                document.getElementById(`${side}MonthSelected`).textContent = months[current.getMonth()];
+            }
+            if (yearList) {
+                yearList.innerHTML = "";
+                const currentYear = new Date().getFullYear();
+                for (let y = currentYear - 5; y <= currentYear + 5; y++) {
+                    const item = document.createElement("div");
+                    item.className = `dropdown-item ${y === current.getFullYear() ? "selected" : ""}`;
+                    item.textContent = y;
+                    item.onclick = (e) => {
+                        e.stopPropagation();
+                        current.setFullYear(y);
+                        document.getElementById(`${side}YearSelected`).textContent = y;
+                        const dd = document.getElementById(`${side}YearDropdown`);
+                        if (dd) dd.classList.remove("active");
+                        renderCalendars();
+                    };
+                    yearList.appendChild(item);
+                }
+                document.getElementById(`${side}YearSelected`).textContent = current.getFullYear();
+            }
+        });
+    }
+
+    function renderCalendars() {
+        renderCalendar("left", currentLeftDate);
+        renderCalendar("right", currentRightDate);
+        updateRangeDisplay();
+    }
+
+    function renderCalendar(side, date) {
+        const grid = document.getElementById(`${side}Calendar`);
+        if (!grid) return;
+        const container = grid.querySelector(".days-container");
+        if (!container) return;
+        container.innerHTML = "";
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = getDaysInMonth(month, year);
+        let startOffset = firstDay === 0 ? 6 : firstDay - 1;
+        for (let i = 0; i < startOffset; i++) {
+            const empty = document.createElement("div");
+            empty.className = "day empty";
+            container.appendChild(empty);
+        }
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dayDate = new Date(year, month, d);
+            const el = document.createElement("div");
+            el.className = "day";
+            el.textContent = d;
+            if (tempRange.start && isSameDay(dayDate, tempRange.start)) el.classList.add("selected", "range-start");
+            if (tempRange.end && isSameDay(dayDate, tempRange.end)) el.classList.add("selected", "range-end");
+            if (tempRange.start && tempRange.end && isDateInRange(dayDate, tempRange.start, tempRange.end)) el.classList.add("in-range");
+            const today = new Date();
+            if (isSameDay(dayDate, today)) el.classList.add("today");
+            el.onclick = () => handleDayClick(dayDate);
+            container.appendChild(el);
+        }
+    }
+
+    function handleDayClick(date) {
+        if (!tempRange.start || (tempRange.start && tempRange.end)) {
+            tempRange.start = date;
+            tempRange.end = null;
+        } else {
+            if (date < tempRange.start) {
+                tempRange.end = tempRange.start;
+                tempRange.start = date;
+            } else {
+                tempRange.end = date;
+            }
+        }
+        renderCalendars();
+    }
+
+    function updateRangeDisplay() {
+        const display = document.getElementById("tempRangeDisplay");
+        if (!display) return;
+        if (tempRange.start && tempRange.end) {
+            display.textContent = `${formatDate(tempRange.start)} — ${formatDate(tempRange.end)}`;
+        } else if (tempRange.start) {
+            display.textContent = `${formatDate(tempRange.start)} — ...`;
+        } else {
+            display.textContent = "Chọn khoảng thời gian";
+        }
+    }
+
+    function setupExtraListeners() {
+        document.querySelectorAll(".kanban-view .custom-dropdown, .kanban-view .year-dropdown, .kanban-view .month-dropdown").forEach((dd) => {
+            const sel = dd.querySelector(".dropdown-selected");
+            if (sel) {
+                sel.onclick = (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll(".kanban-view .custom-dropdown, .kanban-view .year-dropdown, .kanban-view .month-dropdown").forEach((d) => {
+                        if (d !== dd) d.classList.remove("active");
+                    });
+                    dd.classList.toggle("active");
+                };
+            }
+        });
+        document.addEventListener("click", () => {
+            document.querySelectorAll(".kanban-view .custom-dropdown, .kanban-view .year-dropdown, .kanban-view .month-dropdown").forEach((d) => d.classList.remove("active"));
+        });
+        document.querySelectorAll(".sidebar-item").forEach((item) => {
+            item.onclick = (e) => {
+                e.preventDefault();
+                document.querySelectorAll(".sidebar-item").forEach((i) => i.classList.remove("active"));
+                item.classList.add("active");
+                const range = item.getAttribute("data-range");
+                const today = new Date();
+                
+                if (range === "thisweek") {
+                    const currentDayOfWeek = today.getDay();
+                    const daysSinceMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+                    const start = new Date(today);
+                    start.setDate(today.getDate() - daysSinceMonday);
+                    tempRange.start = start;
+                    tempRange.end = today;
+                } else if (range === "today") {
+                    tempRange.start = today;
+                    tempRange.end = today;
+                } else if (range === "last3") {
+                    const start = new Date();
+                    start.setDate(today.getDate() - 3);
+                    tempRange.start = start;
+                    tempRange.end = today;
+                } else if (range === "last7") {
+                    const start = new Date();
+                    start.setDate(today.getDate() - 7);
+                    tempRange.start = start;
+                    tempRange.end = today;
+                } else if (range === "last30") {
+                    const start = new Date();
+                    start.setDate(today.getDate() - 30);
+                    tempRange.start = start;
+                    tempRange.end = today;
+                } else if (range === "last3mo") {
+                    const start = new Date();
+                    start.setMonth(today.getMonth() - 3);
+                    tempRange.start = start;
+                    tempRange.end = today;
+                } else if (range === "last6mo") {
+                    const start = new Date();
+                    start.setMonth(today.getMonth() - 6);
+                    tempRange.start = start;
+                    tempRange.end = today;
+                } else if (range === "last1yr") {
+                    const start = new Date();
+                    start.setFullYear(today.getFullYear() - 1);
+                    tempRange.start = start;
+                    tempRange.end = today;
+                }
+                currentLeftDate = new Date(tempRange.start);
+                currentRightDate = new Date(tempRange.end);
+                if (isSameDay(currentLeftDate, currentRightDate)) {
+                    currentRightDate.setMonth(currentRightDate.getMonth() + 1);
+                }
+                renderCalendars();
+            };
+        });
+
+        const applyBtn = document.getElementById("applyPicker");
+        if (applyBtn) {
+            applyBtn.onclick = () => {
+                selectedRange = { ...tempRange };
+                const triggerDisplay = document.getElementById("dateRangeDisplay");
+                if (triggerDisplay && selectedRange.start && selectedRange.end) {
+                    triggerDisplay.textContent = `${formatDate(selectedRange.start)} - ${formatDate(selectedRange.end)}`;
+                }
+                const picker = document.getElementById("analyticsPicker");
+                if (picker) picker.classList.remove("active");
+                renderBoard();
+            };
+        }
+        const cancelBtn = document.getElementById("cancelPicker");
+        if (cancelBtn) {
+            cancelBtn.onclick = () => {
+                const picker = document.getElementById("analyticsPicker");
+                if (picker) picker.classList.remove("active");
+                tempRange = { ...selectedRange };
+                renderCalendars();
+            };
+        }
+        const clearBtn = document.getElementById("clearPicker");
+        if (clearBtn) {
+            clearBtn.onclick = () => {
+                tempRange = { start: null, end: null };
+                selectedRange = { start: null, end: null };
+                document.querySelectorAll(".sidebar-item").forEach((i) => i.classList.remove("active"));
+                renderCalendars();
+                const triggerDisplay = document.getElementById("dateRangeDisplay");
+                if (triggerDisplay) triggerDisplay.textContent = "dd/mm/yyyy - dd/mm/yyyy";
+                const picker = document.getElementById("analyticsPicker");
+                if (picker) picker.classList.remove("active");
+                renderBoard();
+            };
+        }
     }
 
 })();

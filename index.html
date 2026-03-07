@@ -123,7 +123,7 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Quản lý Lệnh')"><i class="fas fa-clipboard-list"></i>Quản lý Lệnh</a>
+            <!-- <a href="#" onclick="loadPage('Quản lý Lệnh')"><i class="fas fa-clipboard-list"></i>Quản lý Lệnh</a> -->
             <a href="#" onclick="loadPage('Kanban WCS')"><i class="fas fa-columns"></i>Kanban WCS</a>
             <!-- <a href="#" onclick="loadPage('Quản lý Thiết bị')"
               >Quản lý Thiết bị</a
@@ -199,11 +199,11 @@
             <a href="#" onclick="loadPage('Quy cách')"><i class="fa-solid fa-route"></i>Quy cách</a>
             <a href="#" onclick="loadPage('Vật chứa')"><i class="fas fa-pallet"></i>Vật chứa</a>
             <a href="#" onclick="loadPage('Đơn vị tính')"><i class="fas fa-ruler"></i>Đơn vị tính</a>
-            <a href="#" onclick="loadPage('Loại vị trí')"><i class="fas fa-map-marker-alt"></i>Loại vị trí</a>
+            <a href="#" onclick="loadPage('Loại khu vực')"><i class="fas fa-map-marker-alt"></i>Loại khu vực</a>
           </div>
         </div>
 
-        <!-- Báo cáo thống kê
+        <!-- <Báo cáo thống kê -->
         <div class="menu-item">
           <div class="menu-link" onclick="toggleSubmenu(this)">
             <div class="link-content">
@@ -214,10 +214,10 @@
           </div>
           <div class="submenu">
             <a href="#" onclick="loadPage('Báo cáo Nhập/Xuất')"
-              >Báo cáo Nhập/Xuất</a
+              ><i class="fa-solid fa-arrow-up-right-dots"></i>Báo cáo Nhập/Xuất</a
             >
           </div>
-        </div> -->
+        </div>
 
         <!-- Hệ thống -->
         <div class="menu-item">
@@ -286,7 +286,7 @@
 
           <!-- Blossom Toggle -->
           <div class="notification-container" style="margin-right: 12px;">
-            <div class="notification-btn" id="btn-cherry" onclick="toggleBlossom()" title="Bật hiệu ứng" style="color: var(--text-3); background: var(--surface); border: 1px solid var(--border);">
+            <div class="notification-btn" id="btn-cherry" onclick="toggleBlossom()" title="Hoa nở" style="color: var(--text-3); background: var(--surface); border: 1px solid var(--border);">
               <i class="fas fa-seedling"></i>
             </div>
           </div>
@@ -579,6 +579,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="script.js"></script>
 
     <!-- Global Falling Effect (Snow & Blossoms) -->
@@ -622,7 +624,7 @@
             btn.style.background = '#fdf2f8';
             btn.style.color = '#f472b6';
             btn.style.borderColor = '#fbcfe8';
-            btn.title = "Tắt hiệu ứng";
+            btn.title = "Hoa tàn";
           }
         } else {
           if (container) container.innerHTML = '';
@@ -630,7 +632,7 @@
             btn.style.background = 'var(--surface)';
             btn.style.color = 'var(--text-3)';
             btn.style.borderColor = 'var(--border)';
-            btn.title = "Bật hiệu ứng";
+            btn.title = "Hoa nở";
           }
         }
       }

@@ -9,6 +9,17 @@ let selectPage = 1;
 let createSearchQuery = "";
 let createSearchPage = 1;
 
+let selectedStartDate = null;
+let selectedEndDate = null;
+let currentViewLeft = new Date();
+let currentViewRight = new Date();
+currentViewRight.setMonth(currentViewRight.getMonth() + 1);
+let activeStartDate = null;
+let activeEndDate = null;
+let activeDateFilterType = 'all'; // 'all', 'createdAt', or 'expiryDate'
+let filterPriorityOnly = false;
+let timeSortOrder = null; // null, 'asc', 'desc'
+
 const MASTER_MATERIALS = Array.from({ length: 35 }, (_, i) => ({
     code: `MAT-${String(i + 1).padStart(3, '0')}`,
     name: [
@@ -264,6 +275,25 @@ const MOCK_INBOUND_ORDERS = [
     materials: [{ code: 'MAT-036', name: 'Gạo ST25', qty: 500, unit: 'kg', specs: 'Bao 25kg', weight: 500, expiryDate: '2026-02-20' }], 
     pallets: ['P-M07-L0'], bin: 'T1-F2-P4-A1', status: 'PENDING', exportMethod: 'FIFO',
     creator: { id: 'US04', name: 'Phạm Minh Dũng' }, createdAt: new Date('2024-06-20T08:30:00')
+  },
+  // --- Hôm nay ---
+  { 
+    id: 31, code: 'P-N01-L1_MAT-001_100_TDAY', 
+    materials: [{ code: 'MAT-001', name: 'Thép ống D60', qty: 100, unit: 'kg', specs: 'Φ60mm x 6m', weight: 100, expiryDate: '2026-08-15' }], 
+    pallets: ['P-N01-L1'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', priority: true,
+    creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: (() => { const d = new Date(); d.setHours(8, 30, 0, 0); return d; })()
+  },
+  { 
+    id: 32, code: 'P-N02-L2_MAT-002_200_TDAY', 
+    materials: [{ code: 'MAT-002', name: 'Xi măng Hà Tiên', qty: 200, unit: 'bao', specs: 'Bao 50kg', weight: 10000, expiryDate: '2026-10-10' }], 
+    pallets: ['P-N02-L2'], bin: 'T2-F2-P2-A2', status: 'PROCESSING', priority: false,
+    creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: (() => { const d = new Date(); d.setHours(9, 15, 0, 0); return d; })()
+  },
+  { 
+    id: 33, code: 'P-N03-L3_MAT-003_50_TDAY', 
+    materials: [{ code: 'MAT-003', name: 'Gạch men 60x60', qty: 50, unit: 'thùng', specs: '600x600x10', weight: 1000, expiryDate: '2027-01-01' }], 
+    pallets: ['P-N03-L3'], bin: 'T3-F3-P3-A3', status: 'PENDING', priority: false,
+    creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: (() => { const d = new Date(); d.setHours(14, 45, 0, 0); return d; })()
   }
 ];
 
@@ -287,6 +317,14 @@ MOCK_INBOUND_ORDERS.forEach((o, i) => {
         'Quy trình Xuất - Kho Thành Phẩm'
     ];
     o.process = processes[i % processes.length];
+
+    // Mock completion time (< 10 minutes) for COMPLETED orders
+    if (o.status === 'COMPLETED') {
+        const addMinutes = Math.floor(Math.random() * 9) + 1; // 1 to 9 minutes
+        const addSeconds = Math.floor(Math.random() * 60); // 0 to 59 seconds
+        o.completedAt = new Date(o.createdAt.getTime() + addMinutes * 60000 + addSeconds * 1000);
+        o.completedDisplay = `${addMinutes} phút ${addSeconds} giây`;
+    }
 });
 
 const MOCK_USER_DATA = {
@@ -323,7 +361,7 @@ function getFilteredMainData() {
     const filterEntryType = document.getElementById('filter-entry-type')?.value || 'ALL';
     const search = (document.getElementById('search-input')?.value || '').toLowerCase();
     
-    return MOCK_INBOUND_ORDERS.filter(o => {
+    let filtered = MOCK_INBOUND_ORDERS.filter(o => {
         // Status filter
         const statusMatch = filterStatus === 'ALL' || o.status === filterStatus;
 
@@ -335,6 +373,25 @@ function getFilteredMainData() {
             o.code.toLowerCase().includes(search) || 
             o.materials.some(m => m.name.toLowerCase().includes(search) || m.code.toLowerCase().includes(search));
         
+        // Date filter
+        let dateMatch = true;
+        if (activeStartDate && activeEndDate) {
+            const start = new Date(activeStartDate);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(activeEndDate);
+            end.setHours(23, 59, 59, 999);
+            
+            if (activeDateFilterType === 'all') {
+                const createdMatch = o.createdAt >= start && o.createdAt <= end;
+                const expiryMatch = o.materials.some(m => m.expiryDate && new Date(m.expiryDate) >= start && new Date(m.expiryDate) <= end);
+                dateMatch = createdMatch || expiryMatch;
+            } else if (activeDateFilterType === 'expiryDate') {
+                dateMatch = o.materials.some(m => m.expiryDate && new Date(m.expiryDate) >= start && new Date(m.expiryDate) <= end);
+            } else { // createdAt
+                dateMatch = o.createdAt >= start && o.createdAt <= end;
+            }
+        }
+
         // Creator Filter (Custom Select)
         let creatorMatch = true;
         if (selectedCreatorId) {
@@ -342,8 +399,16 @@ function getFilteredMainData() {
             creatorMatch = o.creator.id === selectedCreatorId;
         }
 
-        return statusMatch && entryTypeMatch && searchMatch && creatorMatch;
+        return statusMatch && entryTypeMatch && searchMatch && dateMatch && creatorMatch;
     });
+
+    if (timeSortOrder === 'asc') {
+        filtered.sort((a, b) => a.createdAt - b.createdAt);
+    } else if (timeSortOrder === 'desc') {
+        filtered.sort((a, b) => b.createdAt - a.createdAt);
+    }
+
+    return filtered;
 }
 
 function selectEntryType(val, label) {
@@ -594,22 +659,20 @@ function renderTableBody() {
                 <td>
                     <div style="display: flex; align-items: center; gap: 6px;">
                         ${o.priority ? `<i class="fas fa-star" style="color: #f59e0b; font-size: 14px; margin-right: 2px;" title="Lệnh này là lệnh ưu tiên"></i>` : ''}
-                        <a href="#" class="text-link code-link-truncate" title="${o.code}">${o.code}</a>
+                        <a href="javascript:void(0)" class="text-link code-link-truncate" title="${o.code}" onclick="openOrderDetailModal('${o.id}')">${o.code}</a>
                         <i class="fas fa-copy btn-copy" onclick="copyToClipboard('${o.code}', this)" title="Sao chép"></i>
                     </div>
                 </td>
                 <td>
                     <div class="product-list">
                         ${o.materials.map(m => `
-                            <div class="product-item">
-                                <span style="font-weight: 600; color: #334155; font-size: 14px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display:block; margin-bottom:2px;">${m.name}</span>
-                                <div style="font-size:12px; display:flex; align-items:center; gap:8px; margin-bottom: 2px;">
-                                    <span class="prod-code" style="font-size: 12px; font-weight: 500;">${m.code}</span>
-                                    <span style="color:#cbd5e1">|</span>
-                                    <span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:500;">Quy cách: ${o.exportMethod || 'FIFO'}</span>
+                            <div class="product-item" style="max-width: 100%; overflow: hidden;">
+                                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">
+                                    <span class="prod-code" style="font-weight: 500; color: #0284c7; font-size: 13px;">${m.code}</span>
+                                    <span style="font-weight: 600; color: #334155; font-size: 14px; margin-left: 4px;"> - ${m.name}</span>
                                 </div>
-                                <div style="font-size:13px; color:#334155; font-weight:700;">
-                                    SL: ${m.qty} ${m.unit}
+                                <div style="font-size:13px; color:#334155; margin-top: 4px;">
+                                    Số lượng: <span style="font-weight:700;">${m.qty} ${m.unit}</span>
                                 </div>
                             </div>
                         `).join('')}
@@ -619,12 +682,12 @@ function renderTableBody() {
                     <div class="product-item" style="border-bottom:none; min-height: fit-content; padding-left: 18px;">
                         <div class="pallet-list" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom: 2px;">
                             ${o.pallets.length ? o.pallets.map(p => `
-                                <span class="pallet-tag" style="background:#e0f2fe;border:1px solid #7dd3fc;padding:2px 6px;font-size:12px;font-weight:500;border-radius:4px;color:#0369a1">Pallet: ${p}</span>
+                                <span class="pallet-tag" style="background:#e0f2fe;border:1px solid #7dd3fc;padding:2px 6px;font-size:12px;font-weight:500;border-radius:4px;color:#0369a1">Container: ${p}</span>
                             `).join('') : '<span class="no-pallet">-</span>'}
                         </div>
                         ${o.status === 'COMPLETED' && o.bin 
                             ? `<div style="color:#cbd5e1; font-size:10px; margin: 2px 0;">-</div>
-                               <span class="bin-tag" style="background:#f8fafc;border:1px solid #e2e8f0;padding:2px 6px;font-size:12px;font-weight:500;border-radius:4px;color:#64748b; width: fit-content;">Vị trí: ${o.bin}</span>` 
+                               <span class="bin-tag" style="background:#f8fafc;border:1px solid #e2e8f0;padding:2px 6px;font-size:12px;font-weight:500;border-radius:4px;color:#64748b; width: fit-content;">Vị trí: ${formatBinLocation(o.bin)}</span>` 
                             : ''
                         }
                     </div>
@@ -632,26 +695,19 @@ function renderTableBody() {
                 <td class="text-center">
                     ${getEntryTypeBadge(o.type)}
                 </td>
-                <td>
-                    <div style="font-size: 13px; color: #334155; font-weight: 500;">${o.process || '-'}</div>
-                </td>
+                <td style="text-align:center;">${getStatusBadge(o.status)}</td>
                 <td style="text-align: left;">
                     <div class="product-item" style="border-bottom:none; min-height: fit-content; padding-left: 18px;">
                         <div style="font-size: 13px; color: #334155;">
-                            <span style="font-weight: 600;">Nhập:</span> ${formatDateTime(o.createdAt).replace(' - ', ' ')}
+                            <span style="font-weight: 600;">Thời gian:</span> ${formatDateTime(o.createdAt).replace(' - ', ' ')}
                         </div>
-                        ${o.materials[0]?.expiryDate ? `
                         <div style="font-size: 13px; color: #334155; margin-top: 2px;">
-                            <span style="font-weight: 600;">Hết hạn:</span> ${new Date(o.materials[0].expiryDate).toLocaleDateString('en-GB')}
-                        </div>` : ''}
+                            <span style="font-weight: 600;">Người tạo:</span> ${(() => {
+                                const u = MOCK_USER_DATA[o.creator.id];
+                                return u ? `${u.fullname} (${u.username})` : o.creator.name;
+                            })()}
+                        </div>
                     </div>
-                </td>
-                <td style="text-align:center;">${getStatusBadge(o.status)}</td>
-                <td>
-                    ${(() => {
-                        const u = MOCK_USER_DATA[o.creator.id];
-                        return u ? `<div style="font-weight: 500;">${u.fullname}</div><div style="font-style: italic; color: #64748b; font-size: 12px;">${u.username}</div>` : o.creator.name;
-                    })()}
                 </td>
                 <td class="text-center">
                     <button class="btn-icon btn-delete" 
@@ -721,12 +777,14 @@ function syncTableScroll() {
 // Check if loaded dynamically (DOMContentLoaded already fired) or standalone
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
+        initDefaultDateRange();
         initCreatorCombobox();
         renderTableBody();
         syncTableScroll();
     });
 } else {
     // DOM already ready (dynamic load)
+    initDefaultDateRange();
     initCreatorCombobox();
     renderTableBody();
     syncTableScroll();
@@ -1816,13 +1874,17 @@ function addMaterialFromInput() {
     // Check if already in list
     const existingIndex = selectedMaterials.findIndex(s => s.code.toLowerCase() === mat.code.toLowerCase());
     
+    const expiryInput = document.getElementById('inputExpiry');
+    const expiryDate = expiryInput ? expiryInput.value : '';
+
     if (existingIndex >= 0) {
         // Update quantity
         selectedMaterials[existingIndex].qty += qty;
+        if (expiryDate) selectedMaterials[existingIndex].expiryDate = expiryDate;
         showToast(`Đã cộng dồn ${qty} vào vật tư ${mat.code}`, 'success');
     } else {
         // Add new
-        selectedMaterials.push(Object.assign({}, mat, { qty: qty }));
+        selectedMaterials.push(Object.assign({}, mat, { qty: qty, expiryDate: expiryDate }));
         showToast(`Đã thêm vật tư ${mat.code}`, 'success');
     }
 
@@ -1865,7 +1927,8 @@ function renderAddedMaterialsUI() {
                 <span style="font-size: 13px; font-weight: 500; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${m.name}">${m.name}</span>
             </div>
             <div style="display: flex; align-items: center; gap: 12px; margin-left: 12px;">
-                <span style="font-size: 13px; font-weight: 600; color: #0d6bb9;">SL: ${m.qty}</span>
+                <span style="font-size: 12px; color: #64748b; margin-right: 8px;">HSD: ${m.expiryDate || '-'}</span>
+                <span style="font-size: 13px; font-weight: 600; color: #0d6bb9;">Số lượng: ${m.qty}</span>
                 <button type="button" class="btn-icon btn-delete" style="width: 28px; height: 28px; min-width: 28px;" onclick="removeAddedMaterial(${i})" title="Xóa">
                     <i class="fas fa-times" style="font-size: 12px;"></i>
                 </button>
@@ -2103,7 +2166,7 @@ function renderSyncTable() {
             return `<div style="font-size:11px;color:#64748b;line-height:1.4;">
                 <div>Quy cách: ${specs}</div>
                 <div>HSD: ${expStr}</div>
-                <div>KL: ${weight}kg | SL: ${m.qty} ${m.unit}</div>
+                <div>KL: ${weight}kg | Số lượng: ${m.qty} ${m.unit}</div>
             </div>`;
         };
 
@@ -2283,15 +2346,57 @@ function updateLastSyncTime() {
 }
 
 // --- DATE RANGE PICKER FUNCTIONS ---
-let selectedStartDate = null;
-let selectedEndDate = null;
-let currentViewLeft = new Date();
-let currentViewRight = new Date();
-currentViewRight.setMonth(currentViewRight.getMonth() + 1);
-let activeStartDate = null;
-let activeEndDate = null;
-let activeDateFilterType = 'all'; // 'all', 'createdAt', or 'expiryDate'
-let filterPriorityOnly = false;
+function toggleTimeSort() {
+    if (timeSortOrder === null) timeSortOrder = 'desc';
+    else if (timeSortOrder === 'desc') timeSortOrder = 'asc';
+    else timeSortOrder = null;
+    
+    // update icon
+    const icon = document.getElementById('time-sort-icon');
+    if (icon) {
+        if (timeSortOrder === null) {
+            icon.className = 'fas fa-sort';
+            icon.style.color = '#cbd5e1';
+        } else if (timeSortOrder === 'asc') {
+            icon.className = 'fas fa-sort-up';
+            icon.style.color = '#334155';
+        } else {
+            icon.className = 'fas fa-sort-down';
+            icon.style.color = '#334155';
+        }
+    }
+    mainCurrentPage = 1;
+    renderTableBody();
+}
+window.toggleTimeSort = toggleTimeSort;
+
+function initDefaultDateRange() {
+    const today = new Date();
+    activeStartDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    activeEndDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
+    selectedStartDate = new Date(activeStartDate);
+    selectedEndDate = new Date(activeEndDate);
+    
+    const format = function(d) { 
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        return dd + '/' + mm + '/' + yyyy;
+    };
+    const display = document.getElementById('dateRangeDisplay');
+    if (display) {
+        display.textContent = format(activeStartDate) + ' - ' + format(activeEndDate);
+    }
+    
+    // Set sidebar item "Hôm nay" to active
+    setTimeout(() => {
+        const rangeItems = document.querySelectorAll('.sidebar-item[data-range]');
+        rangeItems.forEach(i => {
+            if (i.getAttribute('data-range') === 'today') i.classList.add('active');
+            else i.classList.remove('active');
+        });
+    }, 100);
+}
 
 function togglePriorityFilter() {
     filterPriorityOnly = !filterPriorityOnly;
@@ -3627,3 +3732,141 @@ window.toggleStatusDropdown = toggleStatusDropdown;
 window.selectStatus = selectStatus;
 
 console.log('inbound.js: Script initialization complete. window.openCreateModal =', typeof window.openCreateModal);
+
+// --- ORDER DETAIL MODAL ---
+function formatBinLocation(binInfo) {
+    if (!binInfo) return '';
+    // Expected incoming format: T1-F1-P1-A1
+    // T = Tầng, F = Cột, P = Rack, A = Ô
+    // Format to: {Tầng}-{Letter(F)}{A}
+    const parts = binInfo.split('-');
+    if (parts.length === 4) {
+        const floor = parseInt(parts[0].replace('T', ''));
+        const colNum = parseInt(parts[1].replace('F', ''));
+        const cell = parseInt(parts[3].replace('A', ''));
+        
+        // Convert colNum to letters (1=A, 2=B... 27=AA)
+        let colLetter = '';
+        let temp = colNum;
+        while (temp > 0) {
+            let remain = (temp - 1) % 26;
+            colLetter = String.fromCharCode(65 + remain) + colLetter;
+            temp = Math.floor((temp - 1) / 26);
+        }
+        
+        return `${floor}-${colLetter}${cell}`;
+    }
+    return binInfo;
+}
+
+function openOrderDetailModal(orderId) {
+    const order = MOCK_INBOUND_ORDERS.find(o => o.id == orderId || o.code === orderId);
+    if (!order) return;
+
+    // Update Title
+    const title = document.getElementById('order-detail-title');
+    if (title) title.innerText = `Thông tin lệnh ${order.code}`;
+
+    // Helper functions
+    const formatDate = (dateObj) => {
+        if (!dateObj) return '-';
+        const d = new Date(dateObj);
+        return d.toLocaleDateString('en-GB') + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const getStatusLabel = (status) => {
+        const map = {
+            'COMPLETED': '<span style="color: #166534; background: #f0fdf4; padding: 2px 8px; border-radius: 4px; font-weight: 500;">Hoàn thành</span>',
+            'PROCESSING': '<span style="color: #0369a1; background: #e0f2fe; padding: 2px 8px; border-radius: 4px; font-weight: 500;">Đang xử lý</span>',
+            'PENDING': '<span style="color: #475569; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-weight: 500;">Đang chờ</span>',
+            'CANCELLED': '<span style="color: #9f1239; background: #ffe4e6; padding: 2px 8px; border-radius: 4px; font-weight: 500;">Lỗi</span>',
+        };
+        return map[status] || status;
+    };
+
+    const getTypeLabel = (type) => {
+        const types = {
+            'NEW': { label: 'Nhập mới', color: '#3b82f6', bg: '#eff6ff' },
+            'REENTRY': { label: 'Nhập lại', color: '#f59e0b', bg: '#fffbeb' },
+            'TRANSFER': { label: 'Nhập chuyền thẳng', color: '#10b981', bg: '#f0fdf4' }
+        };
+        const config = types[type] || { label: type, color: '#64748b', bg: '#f1f5f9' };
+        return `<span style="display:inline-block; width: 130px; text-align: center; background:${config.bg}; color:${config.color}; border:1px solid ${config.color}44; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:500; white-space:nowrap;">${config.label}</span>`;
+    };
+
+    // Build Rows
+    let coreRowsHtml = '';
+    let matRowsHtml = '';
+
+    const renderRow = (label, value) => {
+        return `
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 12px 0; font-weight: 500; color: #64748b; width: 40%;">${label}</td>
+            <td style="padding: 12px 0; color: #1e293b; font-weight: 500;">${value}</td>
+        </tr>`;
+    };
+    
+    // Left Column: Core Info
+    coreRowsHtml += renderRow('Loại lệnh nhập', getTypeLabel(order.type));
+    coreRowsHtml += renderRow('Trạng thái', getStatusLabel(order.status));
+    coreRowsHtml += renderRow('Ưu tiên', order.priority ? `<i class="fas fa-star" style="color: #f59e0b; margin-right: 4px;"></i> Có` : '-');
+    coreRowsHtml += renderRow('Thời gian tạo', formatDate(order.createdAt));
+    coreRowsHtml += renderRow('Thời gian hoàn thành', order.completedAt ? formatDate(order.completedAt) : '-');
+    
+    // Calculate Execution Time
+    let executionTimeStr = '-';
+    if (order.createdAt && order.completedAt) {
+        let diffMs = order.completedAt.getTime() - order.createdAt.getTime();
+        if (diffMs < 0) diffMs = 0; // Sanity check
+        
+        const diffSeconds = Math.floor(diffMs / 1000);
+        const minutes = Math.floor(diffSeconds / 60);
+        const seconds = diffSeconds % 60;
+        
+        if (minutes > 0) {
+            executionTimeStr = `${minutes} phút ${seconds} giây`;
+        } else {
+            executionTimeStr = `${seconds} giây`;
+        }
+    }
+    coreRowsHtml += renderRow('Thời gian thực hiện', executionTimeStr);
+
+    const creatorUser = MOCK_USER_DATA[order.creator.id];
+    const creatorName = creatorUser ? `${creatorUser.fullname} (${creatorUser.username})` : order.creator.name;
+    coreRowsHtml += renderRow('Người tạo', creatorName);
+
+
+    // Right Column: Materials & Status
+    matRowsHtml += renderRow('Container', (order.pallets && order.pallets.length > 0) ? order.pallets.join(', ') : '-');
+    matRowsHtml += renderRow('Vị trí lưu', order.bin ? formatBinLocation(order.bin) : '-');
+    
+    const mat = order.materials && order.materials.length > 0 ? order.materials[0] : null;
+    matRowsHtml += renderRow('Mã vật tư', mat ? mat.code : '-');
+    matRowsHtml += renderRow('Tên vật tư', mat ? mat.name : '-');
+    matRowsHtml += renderRow('Số lượng', mat ? `${mat.qty} ${mat.unit}` : '-');
+    matRowsHtml += renderRow('Quy cách', order.exportMethod || 'FIFO');
+    matRowsHtml += renderRow('Ngày hết hạn', (mat && mat.expiryDate) ? new Date(mat.expiryDate).toLocaleDateString('en-GB') : '-');
+
+    const coreTbody = document.getElementById('order-detail-core-tbody');
+    if (coreTbody) coreTbody.innerHTML = coreRowsHtml;
+
+    const matTbody = document.getElementById('order-detail-mat-tbody');
+    if (matTbody) matTbody.innerHTML = matRowsHtml;
+
+    // Show Modal
+    const modal = document.getElementById('modal-order-detail');
+    if (modal) {
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('show'), 10);
+    }
+}
+
+function closeOrderDetailModal() {
+    const modal = document.getElementById('modal-order-detail');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => modal.style.display = 'none', 300);
+    }
+}
+window.openOrderDetailModal = openOrderDetailModal;
+window.closeOrderDetailModal = closeOrderDetailModal;

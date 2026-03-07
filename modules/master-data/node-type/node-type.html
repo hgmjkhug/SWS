@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quản lý Loại vị trí</title>
+    <title>Quản lý Loại khu vực</title>
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
       rel="stylesheet"
@@ -21,7 +21,7 @@
               type="text"
               class="node-type-search-input"
               id="node-type-search-input"
-              placeholder="Tìm theo tên loại vị trí"
+              placeholder="Tìm theo mã, tên loại khu vực"
             />
           </div>
         </div>
@@ -55,7 +55,8 @@
                 />
               </th>
               <th>STT</th>
-              <th>Tên loại vị trí</th>
+              <th>Mã loại khu vực</th>
+              <th>Tên loại khu vực</th>
               <th>Hình ảnh</th>
               <th>Thao tác</th>
             </tr>
@@ -106,16 +107,24 @@
           <i class="fas fa-times"></i>
         </button>
         <div class="modal-header">
-          <h3 class="modal-title" id="node-type-modal-title">Thêm mới Loại vị trí</h3>
+          <h3 class="modal-title" id="node-type-modal-title">Thêm mới loại khu vực</h3>
         </div>
         <div class="modal-body">
           <input type="hidden" id="node-type-id" />
           <div class="form-group">
-            <label>Tên loại vị trí <span class="required">*</span></label>
+            <label>Mã loại khu vực <span class="required">*</span></label>
+            <input
+              type="text"
+              id="node-type-code"
+              placeholder="Nhập mã loại khu vực"
+            />
+          </div>
+          <div class="form-group">
+            <label>Tên loại khu vực <span class="required">*</span></label>
             <input
               type="text"
               id="node-type-name"
-              placeholder="Nhập tên loại vị trí"
+              placeholder="Nhập tên loại khu vực"
             />
           </div>
           <div class="form-group">
@@ -153,7 +162,7 @@
         </div>
         <h3 class="confirm-title">Xác nhận xóa</h3>
         <p class="confirm-message" id="node-type-confirm-delete-message">
-          Bạn có chắc chắn muốn xóa loại vị trí này không?<br />Hành động này
+          Bạn có chắc chắn muốn xóa loại khu vực này không?<br />Hành động này
           không thể hoàn tác.
         </p>
         <div class="confirm-actions">

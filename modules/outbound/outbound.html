@@ -5,7 +5,7 @@
         type="text"
         class="search-input"
         id="search-input"
-        placeholder="Tìm theo mã lệnh, mã hoặc tên vật tư"
+        placeholder="Tìm theo mã lệnh, mã hoặc tên sản phẩm"
         onkeyup="filterOutboundData()"
       />
 
@@ -95,9 +95,9 @@
           <div
             class="dropdown-option"
             data-value="MATERIAL"
-            onclick="selectOutboundType('MATERIAL', 'Xuất theo vật tư')"
+            onclick="selectOutboundType('MATERIAL', 'Xuất theo sản phẩm')"
           >
-            Xuất theo vật tư
+            Xuất theo sản phẩm
           </div>
         </div>
       </div>
@@ -261,23 +261,21 @@
       <table class="data-table">
         <colgroup>
           <col style="width: 50px">
-          <col style="width: 220px">
-          <col style="width: 250px">
-          <col style="width: 150px">
           <col style="width: 230px">
+          <col style="width: 300px">
           <col style="width: 150px">
           <col style="width: 150px">
+          <col style="width: 320px">
           <col style="width: 100px">
         </colgroup>
         <thead>
           <tr>
             <th class="text-center">STT</th>
             <th>Mã lệnh xuất</th>
-            <th>Vật tư</th>
+            <th>Sản phẩm</th>
             <th class="text-center">Loại xuất kho</th>
-            <th>Thời gian tạo lệnh</th>
             <th class="text-center">Trạng thái</th>
-            <th>Người tạo</th>
+            <th>Thông tin tạo</th>
             <th class="text-center">Thao tác</th>
           </tr>
         </thead>
@@ -287,12 +285,11 @@
       <table class="data-table">
         <colgroup>
           <col style="width: 50px">
-          <col style="width: 220px">
-          <col style="width: 250px">
-          <col style="width: 150px">
           <col style="width: 230px">
+          <col style="width: 300px">
           <col style="width: 150px">
           <col style="width: 150px">
+          <col style="width: 320px">
           <col style="width: 100px">
         </colgroup>
         <tbody id="table-body">
@@ -354,8 +351,8 @@
             <div class="card-content">
               <div class="card-icon"><i class="fas fa-cubes"></i></div>
               <div class="card-text">
-                <span class="title">Xuất theo vật tư</span>
-                <span class="desc">Xuất lẻ vật tư</span>
+                <span class="title">Xuất theo sản phẩm</span>
+                <span class="desc">Xuất lẻ số lượng sản phẩm nhất định</span>
               </div>
               <div class="check-icon"><i class="fas fa-check-circle"></i></div>
             </div>
@@ -371,7 +368,7 @@
               <div class="card-icon"><i class="fa-solid fa-pallet"></i></div>
               <div class="card-text">
                 <span class="title">Xuất theo pallet</span>
-                <span class="desc">Xuất nguyên pallet hàng</span>
+                <span class="desc">Xuất toàn bộ container chứa hàng</span>
               </div>
               <div class="check-icon"><i class="fas fa-check-circle"></i></div>
             </div>
@@ -386,15 +383,15 @@
                 type="text"
                 id="material-search-input"
                 class="form-control"
-                placeholder="Tìm kiếm theo mã vật tư hoặc tên vật tư..."
+                placeholder="Tìm kiếm theo mã sản phẩm hoặc tên sản phẩm..."
                 onkeyup="window.filterMaterialSelection()"
               />
               <i class="fas fa-search search-icon"></i>
             </div>
 
-            <div class="material-table-wrapper">
-              <div class="table-scroll-head" id="materialHeaderScroll">
-                <table class="material-selection-table">
+            <div class="material-table-wrapper-split">
+              <div class="table-scroll-head-visible" id="materialHeaderContainer">
+                <table class="material-selection-table" id="materialHeaderTable">
                   <colgroup>
                     <col style="width: 40px">
                     <col style="width: 50px">
@@ -409,11 +406,11 @@
                     <tr>
                       <th></th>
                       <th class="text-center">STT</th>
-                      <th>Mã vật tư</th>
-                      <th>Tên vật tư</th>
+                      <th>Mã sản phẩm</th>
+                      <th>Tên sản phẩm</th>
                       <th>
                         <div class="header-content">
-                          <span>Nhóm vật tư</span>
+                          <span>Nhóm sản phẩm</span>
                           <i class="fas fa-filter filter-trigger" onclick="toggleColumnFilter(event, 'category')"></i>
                           <div class="column-filter-dropdown" id="dropdown-category">
                             <div class="filter-list" id="list-category"></div>
@@ -443,7 +440,7 @@
                   </thead>
                 </table>
               </div>
-              <div class="table-scroll-body" id="materialBodyScroll">
+              <div class="table-scroll-body-only" id="materialBodyScroll">
                 <table class="material-selection-table">
                   <colgroup>
                     <col style="width: 40px">
@@ -475,14 +472,14 @@
                 type="text"
                 id="pallet-search-input"
                 class="form-control"
-                placeholder="Tìm kiếm theo mã pallet..."
+                placeholder="Tìm kiếm theo mã container..."
                 onkeyup="window.filterPalletSelection()"
               />
               <i class="fas fa-search search-icon"></i>
             </div>
-            <div class="material-table-wrapper">
-              <div class="table-scroll-head" id="palletHeaderScroll">
-                <table class="material-selection-table" style="width: 1300px;">
+            <div class="material-table-wrapper-split">
+              <div class="table-scroll-head-visible" id="palletHeaderContainer">
+                <table class="material-selection-table" id="palletHeaderTable" style="min-width: 1300px;">
                   <colgroup>
                     <col style="width: 50px">
                     <col style="width: 50px">
@@ -496,24 +493,24 @@
                   </colgroup>
                   <thead>
                     <tr>
-                      <th rowspan="2" style="border-bottom: 1px solid #e2e8f0; vertical-align: middle;"></th>
-                      <th rowspan="2" class="text-center" style="border-bottom: 1px solid #e2e8f0; vertical-align: middle;">STT</th>
-                      <th rowspan="2" style="border-bottom: 1px solid #e2e8f0; vertical-align: middle;">Mã Pallet</th>
-                      <th rowspan="2" style="border-bottom: 1px solid #e2e8f0; vertical-align: middle;" class="truncate-header">Mã lệnh nhập</th>
-                      <th colspan="3" class="text-center" style="border-bottom: 1px solid #e2e8f0;">Thông tin vật tư</th>
-                      <th rowspan="2" class="text-center" style="border-bottom: 1px solid #e2e8f0; vertical-align: middle;">Thời gian tạo lệnh</th>
-                      <th rowspan="2" class="text-center" style="border-bottom: 1px solid #e2e8f0; vertical-align: middle;">Vị trí lưu</th>
+                      <th rowspan="2" style="border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;"></th>
+                      <th rowspan="2" class="text-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;">STT</th>
+                      <th rowspan="2" style="border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;">Mã container</th>
+                      <th rowspan="2" style="border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;" class="truncate-header">Mã lệnh nhập</th>
+                      <th colspan="3" class="text-center" style="border-bottom: 1px solid rgba(255,255,255,0.1);">Thông tin sản phẩm</th>
+                      <th rowspan="2" class="text-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;">Thời gian tạo</th>
+                      <th rowspan="2" class="text-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;">Vị trí lưu</th>
                     </tr>
                     <tr>
-                      <th style="font-weight: 600; font-size: 13px; border-bottom: 1px solid #e2e8f0;">Mã vật tư</th>
-                      <th style="font-weight: 600; font-size: 13px; border-bottom: 1px solid #e2e8f0;">Tên vật tư</th>
-                      <th class="text-center" style="font-weight: 600; font-size: 13px; border-bottom: 1px solid #e2e8f0;">Số lượng</th>
+                      <th style="font-weight: 600; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.1);">Mã sản phẩm</th>
+                      <th style="font-weight: 600; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.1);">Tên sản phẩm</th>
+                      <th class="text-center" style="font-weight: 600; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.1);">Số lượng</th>
                     </tr>
                   </thead>
                 </table>
               </div>
-              <div class="table-scroll-body" id="palletBodyScroll">
-                <table class="material-selection-table" style="width: 1300px;">
+              <div class="table-scroll-body-only" id="palletBodyScroll">
+                <table class="material-selection-table" style="min-width: 1300px;">
                   <colgroup>
                     <col style="width: 50px">
                     <col style="width: 50px">

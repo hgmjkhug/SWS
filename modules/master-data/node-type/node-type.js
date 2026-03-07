@@ -4,8 +4,9 @@
     for (let i = 1; i <= 45; i++) {
         nodeTypes.push({
             id: i,
-            name: `Loại vị trí ${i}`,
-            image: i % 2 === 0 ? 'https://via.placeholder.com/40x40?text=V' : ''
+            code: `LKV${i.toString().padStart(3, '0')}`,
+            name: `Loại khu vực ${i}`,
+            image: i % 2 === 0 ? 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNlMmU4ZjAiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTBweCIgZmlsbD0iIzk0YTNiOCI+VjwvdGV4dD48L3N2Zz4=' : ''
         });
     }
 
@@ -61,7 +62,10 @@
         if (selectAll) selectAll.checked = false;
 
         const term = keyword.toLowerCase().trim();
-        filteredData = nodeTypes.filter(item => item.name.toLowerCase().includes(term));
+        filteredData = nodeTypes.filter(item => 
+            item.name.toLowerCase().includes(term) || 
+            (item.code && item.code.toLowerCase().includes(term))
+        );
 
         // Calculate Pagination
         const totalItems = filteredData.length;
@@ -87,7 +91,7 @@
         renderPaginationControls(totalPages);
 
         if (totalItems === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Không tìm thấy loại vị trí nào</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Không tìm thấy loại khu vực nào</td></tr>';
             return;
         }
 
@@ -96,7 +100,7 @@
             const tr = document.createElement('tr');
             
             const imageHtml = item.image 
-                ? `<img src="${item.image}" alt="${item.name}" class="node-type-thumbnail" onerror="this.onerror=null; this.src='https://via.placeholder.com/40x40?text=Err';"/>`
+                ? `<img src="${item.image}" alt="${item.name}" class="node-type-thumbnail" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIGZpbGw9IiNlMmU4ZjAiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTBweCIgZmlsbD0iIzk0YTNiOCI+RXJyPC90ZXh0Pjwvc3ZnPg==';"/>`
                 : `<div class="node-type-thumbnail" style="display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size: 12px; text-align:center; line-height: 1.2;">No img</div>`;
 
             tr.innerHTML = `
@@ -104,6 +108,7 @@
                     <input type="checkbox" class="node-type-row-checkbox" value="${item.id}" onclick="toggleNodeTypeRow(${item.id})">
                 </td>
                 <td style="text-align:center">${stt}</td>
+                <td style="font-weight:500;">${item.code}</td>
                 <td style="font-weight:500;">${item.name}</td>
                 <td>${imageHtml}</td>
                 <td style="text-align:center">
@@ -175,7 +180,7 @@
 
     // Modals
     window.openNodeTypeAddModal = function () {
-        document.getElementById('node-type-modal-title').innerText = 'Thêm mới Loại vị trí';
+        document.getElementById('node-type-modal-title').innerText = 'Thêm mới loại khu vực';
         document.getElementById('node-type-id').value = '';
         document.getElementById('node-type-name').value = '';
         document.getElementById('node-type-image').value = '';
@@ -194,8 +199,9 @@
         const item = nodeTypes.find(d => d.id === id);
         if (!item) return;
 
-        document.getElementById('node-type-modal-title').innerText = 'Cập nhật Loại vị trí';
+        document.getElementById('node-type-modal-title').innerText = 'Cập nhật Loại khu vực';
         document.getElementById('node-type-id').value = item.id;
+        document.getElementById('node-type-code').value = item.code;
         document.getElementById('node-type-name').value = item.name;
         document.getElementById('node-type-image').value = ''; // Reset file input
         
@@ -220,6 +226,7 @@
 
     window.saveNodeType = function () {
         const id = document.getElementById('node-type-id').value;
+        const code = document.getElementById('node-type-code').value.trim();
         const name = document.getElementById('node-type-name').value.trim();
         const imageInput = document.getElementById('node-type-image');
         
@@ -229,9 +236,15 @@
             image = URL.createObjectURL(imageInput.files[0]);
         }
 
+        if (!code) {
+            if (typeof showToast === 'function') showToast('Vui lòng nhập Mã loại khu vực', 'error');
+            else alert('Vui lòng nhập Mã loại khu vực');
+            return;
+        }
+
         if (!name) {
-            if (typeof showToast === 'function') showToast('Vui lòng nhập Tên loại vị trí', 'error');
-            else alert('Vui lòng nhập Tên loại vị trí');
+            if (typeof showToast === 'function') showToast('Vui lòng nhập Tên loại khu vực', 'error');
+            else alert('Vui lòng nhập Tên loại khu vực');
             return;
         }
 
@@ -241,13 +254,13 @@
             if (index !== -1) {
                 // Only update image if a new one is uploaded, otherwise keep old
                 const newImg = image ? image : nodeTypes[index].image;
-                nodeTypes[index] = { ...nodeTypes[index], name, image: newImg };
+                nodeTypes[index] = { ...nodeTypes[index], code, name, image: newImg };
                 if (typeof showToast === 'function') showToast('Cập nhật thành công');
             }
         } else {
             // Create
             const newId = nodeTypes.length > 0 ? Math.max(...nodeTypes.map(d => d.id)) + 1 : 1;
-            nodeTypes.unshift({ id: newId, name, image }); // Thêm lên đầu danh sách
+            nodeTypes.unshift({ id: newId, code, name, image }); // Thêm lên đầu danh sách
             if (typeof showToast === 'function') showToast('Thêm mới thành công');
             currentPage = 1;
         }
@@ -317,7 +330,7 @@
         const item = nodeTypes.find(d => d.id === id);
         const msgEl = document.getElementById('node-type-confirm-delete-message');
         if (msgEl) {
-            msgEl.innerHTML = `Bạn có chắc chắn muốn xóa loại vị trí <strong>${item?.name}</strong> không?<br />Hành động này không thể hoàn tác.`;
+            msgEl.innerHTML = `Bạn có chắc chắn muốn xóa loại khu vực <strong>${item?.name}</strong> không?<br />Hành động này không thể hoàn tác.`;
         }
         const modal = document.getElementById('node-type-delete-confirm-modal');
         if (modal) modal.classList.add('show');
@@ -343,7 +356,7 @@
 
             renderTable(document.getElementById('node-type-search-input')?.value || '');
             if (typeof showToast === 'function') {
-                showToast(`Đã xóa thành công ${pendingDeleteNodeTypeIds.length} loại vị trí`);
+                showToast(`Đã xóa thành công ${pendingDeleteNodeTypeIds.length} loại khu vực`);
             }
             closeNodeTypeDeleteConfirm();
             
@@ -359,7 +372,7 @@
         pendingDeleteNodeTypeIds = selectedIds;
         const msgEl = document.getElementById('node-type-confirm-delete-message');
         if (msgEl) {
-            msgEl.innerHTML = `Bạn có chắc chắn muốn xóa <strong>${selectedIds.length}</strong> loại vị trí đã chọn không?<br />Hành động này không thể hoàn tác.`;
+            msgEl.innerHTML = `Bạn có chắc chắn muốn xóa <strong>${selectedIds.length}</strong> loại khu vực đã chọn không?<br />Hành động này không thể hoàn tác.`;
         }
         const modal = document.getElementById('node-type-delete-confirm-modal');
         if (modal) modal.classList.add('show');

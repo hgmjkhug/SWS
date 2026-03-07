@@ -6,7 +6,9 @@
         { id: 2, code: 'CRANE-STACK', name: 'Cần trục Stacker Crane', desc: 'Cần trục xếp dỡ tự động', specs: { height: '12m', speed: '2m/s' } },
         { id: 3, code: 'CONVEYOR-BELT', name: 'Băng tải dây', desc: 'Băng tải vận chuyển thùng carton', specs: { length: '50m', width: '600mm' } },
         { id: 4, code: 'LIFTER-VERT', name: 'Thang máy nâng hàng', desc: 'Nâng chuyển tầng', specs: { load: '2000kg', floors: 4 } },
-        { id: 5, code: 'SCANNER-Gate', name: 'Cổng Scan RFID', desc: 'Cổng đọc RFID tự động', specs: { range: '5m', freq: 'UHF' } }
+        { id: 5, code: 'SCANNER-Gate', name: 'Cổng Scan RFID', desc: 'Cổng đọc RFID tự động', specs: { range: '5m', freq: 'UHF' } },
+        { id: 6, code: 'SHUTTLE', name: 'Shuttle', desc: 'Shuttle chạy theo ray', specs: { range: '5m', freq: 'UHF' } }
+
     ];
 
     let selectedIds = [];

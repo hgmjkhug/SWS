@@ -82,7 +82,7 @@ function loadPage(title) {
         'Quản lý Lệnh': 'modules/wcs/job/job.html',
         'Vật chứa': 'modules/master-data/pallet-list/container.html',
         'Tài nguyên': 'modules/rbac/resource/resource.html',
-        'Loại vị trí': 'modules/master-data/node-type/node-type.html',
+        'Loại khu vực': 'modules/master-data/node-type/node-type.html',
         'Thiết bị': 'modules/master-data/device-list/device-list.html',
         'Phân quyền': 'modules/rbac/permission/permission.html',
         'Dashboard tổng quan': 'modules/dashboard/general-dashboard/general.html',
@@ -90,6 +90,7 @@ function loadPage(title) {
         'Hồ sơ': 'modules/info/info.html',
         'Quy cách': 'modules/master-data/method/method.html',
         'Quy cách sản phẩm': 'modules/product-method/product-method.html',
+        'Báo cáo Nhập/Xuất': 'modules/statistic/statistic.html',
         // add more mappings here as modules are created
     };
 
@@ -808,8 +809,12 @@ function refreshNotifications(btn) {
 
 // Close notification dropdown when clicking outside
 document.addEventListener('click', (e) => {
-    const container = document.querySelector('.notification-container');
-    if (container && !container.contains(e.target)) {
+    const containers = document.querySelectorAll('.notification-container');
+    let clickedInsideNotification = false;
+    containers.forEach(c => {
+        if (c.contains(e.target)) clickedInsideNotification = true;
+    });
+    if (!clickedInsideNotification) {
         const dropdown = document.getElementById('notification-dropdown');
         if (dropdown) dropdown.classList.remove('show');
     }

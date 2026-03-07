@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thống kê & Báo cáo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="statistic.css" />
+</head>
+<body>
+<div id="main-view">
+  <div class="stat-container">
+    <!-- Header with Filters -->
+    <div class="stat-header">
+      <div class="header-right" style="margin-left: auto;">
+        <div class="filter-group">
+          <!-- Advanced Date Picker from Outbound -->
+          <div class="unified-date-filter" style="position: relative">
+            <div class="date-picker-trigger" id="dateRangeTrigger" onclick="window.toggleDateRangePicker(event)">
+              <i class="fas fa-calendar-alt"></i>
+              <span id="dateRangeDisplay">dd/mm/yyyy - dd/mm/yyyy</span>
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+
+            <!-- Analytics Date Picker Modal -->
+            <div class="analytics-date-picker" id="analyticsPicker">
+              <div class="picker-sidebar">
+                <div class="sidebar-item" data-range="today">Hôm nay</div>
+                <div class="sidebar-item" data-range="last3">3 ngày gần đây</div>
+                <div class="sidebar-item" data-range="last7">7 ngày gần đây</div>
+                <div class="sidebar-item" data-range="last30">30 ngày gần đây</div>
+                <div class="sidebar-item" data-range="last3mo">3 tháng gần đây</div>
+                <div class="sidebar-item" data-range="last6mo">6 tháng gần đây</div>
+                <div class="sidebar-item" data-range="last1yr">1 năm qua</div>
+              </div>
+
+              <div class="picker-main">
+                <div class="picker-header">
+                  <div class="selected-range-box" id="tempRangeDisplay">-</div>
+                  <div class="header-actions">
+                    <button type="button" class="text-btn clear-btn" id="clearPicker">Xóa bộ lọc</button>
+                    <button type="button" class="text-btn cancel-btn" id="cancelPicker">Hủy</button>
+                    <button type="button" class="apply-btn" id="applyPicker">Áp dụng</button>
+                  </div>
+                </div>
+
+                <div class="picker-body">
+                  <div class="calendar-panel left-panel">
+                    <div class="panel-title">Từ ngày</div>
+                    <div class="panel-nav">
+                      <div class="custom-dropdown month-dropdown" id="leftMonthDropdown">
+                        <div class="dropdown-selected" id="leftMonthSelected">Tháng</div>
+                        <div class="dropdown-list" id="leftMonthList"></div>
+                      </div>
+                      <div class="custom-dropdown year-dropdown" id="leftYearDropdown">
+                        <div class="dropdown-selected" id="leftYearSelected">Năm</div>
+                        <div class="dropdown-list" id="leftYearList"></div>
+                      </div>
+                    </div>
+                    <div class="calendar-grid" id="leftCalendar">
+                      <div class="day-names">
+                        <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                      </div>
+                      <div class="days-container"></div>
+                    </div>
+                  </div>
+
+                  <div class="calendar-panel right-panel">
+                    <div class="panel-title">Đến ngày</div>
+                    <div class="panel-nav">
+                      <div class="custom-dropdown month-dropdown" id="rightMonthDropdown">
+                        <div class="dropdown-selected" id="rightMonthSelected">Tháng</div>
+                        <div class="dropdown-list" id="rightMonthList"></div>
+                      </div>
+                      <div class="custom-dropdown year-dropdown" id="rightYearDropdown">
+                        <div class="dropdown-selected" id="rightYearSelected">Năm</div>
+                        <div class="dropdown-list" id="rightYearList"></div>
+                      </div>
+                    </div>
+                    <div class="calendar-grid" id="rightCalendar">
+                      <div class="day-names">
+                        <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                      </div>
+                      <div class="days-container"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-item actions-row" style="flex-direction: row; gap: 8px;">
+            <button class="btn-primary" onclick="refreshData()">
+              <i class="fas fa-sync-alt"></i> Làm mới
+            </button>
+            <button class="btn-export" onclick="exportReport()">
+              <i class="fas fa-file-excel"></i> Xuất báo cáo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="stat-cards">
+      <div class="s-card">
+        <div class="s-card-icon inv"><i class="fas fa-boxes"></i></div>
+        <div class="s-card-info">
+          <span class="s-label">Tổng tồn kho</span>
+          <h3 class="s-value" id="stats-total-inv">0</h3>
+          <span class="s-trend up"><i class="fas fa-arrow-up"></i> 12% so với tháng trước</span>
+        </div>
+      </div>
+      <div class="s-card">
+        <div class="s-card-icon in"><i class="fas fa-file-import"></i></div>
+        <div class="s-card-info">
+          <span class="s-label">Nhập kho (Hôm nay)</span>
+          <h3 class="s-value" id="stats-inbound">0</h3>
+          <span class="s-trend up"><i class="fas fa-arrow-up"></i> 5% hôm qua</span>
+        </div>
+      </div>
+      <div class="s-card">
+        <div class="s-card-icon out"><i class="fas fa-file-export"></i></div>
+        <div class="s-card-info">
+          <span class="s-label">Xuất kho (Hôm nay)</span>
+          <h3 class="s-value" id="stats-outbound">0</h3>
+          <span class="s-trend down"><i class="fas fa-arrow-down"></i> 2% hôm qua</span>
+        </div>
+      </div>
+      <div class="s-card">
+        <div class="s-card-icon alert"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="s-card-info">
+          <span class="s-label">Cảnh báo tồn</span>
+          <h3 class="s-value" id="stats-alerts">0</h3>
+          <span class="s-trend text-red" style="color: #ef4444;">Dưới định mức</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="stat-charts">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h4>Xu hướng Nhập/Xuất</h4>
+          <div class="chart-legend">
+            <span class="l-item"><span class="dot in"></span> Nhập</span>
+            <span class="l-item"><span class="dot out"></span> Xuất</span>
+          </div>
+        </div>
+        <div class="chart-body">
+          <canvas id="io-trend-chart" width="800" height="300"></canvas>
+        </div>
+      </div>
+      <div class="chart-card donut-section">
+        <div class="chart-header">
+          <h4>Cơ cấu Tồn kho</h4>
+        </div>
+        <div class="chart-body">
+          <canvas id="inv-donut-chart" width="200" height="200"></canvas>
+          <div id="inv-legend" class="donut-legend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="stat-table-card">
+      <div class="table-header">
+        <h4>Chi tiết biến động kho</h4>
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="table-search" placeholder="Tìm kiếm mã vật tư, tên sản phẩm..." onkeyup="filterTable()">
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table id="stat-table" class="global-table">
+          <thead>
+            <tr>
+              <th>Thời gian</th>
+              <th>Mã vật tư</th>
+              <th>Tên sản phẩm</th>
+              <th>Loại giao dịch</th>
+              <th>Số lượng</th>
+              <th>Đơn vị</th>
+              <th>Kho</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody id="stat-table-body">
+            <!-- Data will be populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="statistic.js"></script>
+</body>
+</html>

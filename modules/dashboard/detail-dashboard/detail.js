@@ -1,5 +1,5 @@
 /* ── DATA ─────────────────────────────────────────── */
-const DATA = {
+var DATA = {
   positions: { total: 2400, filled: 2304 },
   commands: { total: 1875, wait: 24, prog: 12, done: 1842, err: 33 },
   devices: {
@@ -219,7 +219,7 @@ function renderDevicePie() {
 }
 
 /* ── SLA COUNTDOWN ──────────────────────────────────── */
-let slaTimers = {};
+var slaTimers = {};
 function startSLACountdowns() {
   Object.values(slaTimers).forEach(clearInterval);
   slaTimers = {};

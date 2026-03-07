@@ -4,7 +4,7 @@
     <div class="toolbar">
       <div class="toolbar-left">
         <!-- Warehouse Filter (Searchable Combobox) -->
-        <div class="custom-dropdown" id="warehouse-filter">
+        <div class="custom-dropdown" id="warehouse-filter" style="display: none;">
           <div class="combo-wrapper">
             <input type="text" class="combo-input" placeholder="Chọn kho..." id="warehouse-input" autocomplete="off" />
             <i class="fas fa-chevron-down combo-icon"></i>
@@ -15,11 +15,126 @@
         </div>
       </div>
 
-      <div class="toolbar-right">
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 8px;">
         <!-- Search Box -->
         <div class="search-box-panel">
           <i class="fas fa-search search-icon"></i>
           <input type="text" id="search-input" placeholder="Tìm phiếu nhập/xuất..." autocomplete="off" />
+        </div>
+
+        <!-- Date Picker (Copied from Pallet) -->
+        <div class="unified-date-filter" style="position: relative;">
+          <div
+            class="date-picker-trigger"
+            id="dateRangeTrigger"
+            onclick="window.toggleDateRangePicker(event)"
+          >
+            <i class="fas fa-calendar-alt"></i>
+            <span id="dateRangeDisplay">dd/mm/yyyy - dd/mm/yyyy</span>
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+
+          <!-- Bespoke Analytics Date Picker -->
+          <div class="analytics-date-picker" id="analyticsPicker">
+            <div class="picker-sidebar">
+              <div class="sidebar-item" data-range="today">Hôm nay</div>
+              <div class="sidebar-item" data-range="last3">3 ngày gần đây</div>
+              <div class="sidebar-item" data-range="last7">7 ngày gần đây</div>
+              <div class="sidebar-item" data-range="last30">30 ngày gần đây</div>
+              <div class="sidebar-item" data-range="last3mo">3 tháng gần đây</div>
+              <div class="sidebar-item" data-range="last6mo">6 tháng gần đây</div>
+              <div class="sidebar-item" data-range="last1yr">1 năm qua</div>
+            </div>
+
+            <div class="picker-main">
+              <div class="picker-header">
+                <div class="selected-range-box" id="tempRangeDisplay">-</div>
+                <div class="header-actions">
+                  <button
+                    type="button"
+                    class="text-btn clear-btn"
+                    id="clearPicker"
+                  >
+                    Xóa bộ lọc
+                  </button>
+                  <button
+                    type="button"
+                    class="text-btn cancel-btn"
+                    id="cancelPicker"
+                  >
+                    Hủy
+                  </button>
+                  <button type="button" class="apply-btn" id="applyPicker">
+                    Áp dụng
+                  </button>
+                </div>
+              </div>
+
+              <div class="picker-body">
+                <div class="calendar-panel left-panel">
+                  <div class="panel-title">Từ ngày</div>
+                  <div class="panel-nav">
+                    <div
+                      class="custom-dropdown month-dropdown"
+                      id="leftMonthDropdown"
+                    >
+                      <div class="dropdown-selected" id="leftMonthSelected">
+                        Tháng
+                      </div>
+                      <div class="dropdown-list" id="leftMonthList"></div>
+                    </div>
+                    <div
+                      class="custom-dropdown year-dropdown"
+                      id="leftYearDropdown"
+                    >
+                      <div class="dropdown-selected" id="leftYearSelected">
+                        Năm
+                      </div>
+                      <div class="dropdown-list" id="leftYearList"></div>
+                    </div>
+                  </div>
+                  <div class="calendar-grid" id="leftCalendar">
+                    <div class="day-names">
+                      <span>T2</span><span>T3</span><span>T4</span><span>T5</span
+                      ><span>T6</span><span>T7</span><span>CN</span>
+                    </div>
+                    <div class="days-container"></div>
+                  </div>
+                </div>
+
+                <div class="calendar-panel right-panel">
+                  <div class="panel-title">Đến ngày</div>
+                  <div class="panel-nav">
+                    <div
+                      class="custom-dropdown month-dropdown"
+                      id="rightMonthDropdown"
+                    >
+                      <div class="dropdown-selected" id="rightMonthSelected">
+                        Tháng
+                      </div>
+                      <div class="dropdown-list" id="rightMonthList"></div>
+                    </div>
+                    <div
+                      class="custom-dropdown year-dropdown"
+                      id="rightYearDropdown"
+                    >
+                      <div class="dropdown-selected" id="rightYearSelected">
+                        Năm
+                      </div>
+                      <div class="dropdown-list" id="rightYearList"></div>
+                    </div>
+                  </div>
+                  <div class="calendar-grid" id="rightCalendar">
+                    <div class="day-names">
+                      <span>T2</span><span>T3</span><span>T4</span><span>T5</span
+                      ><span>T6</span><span>T7</span><span>CN</span>
+                    </div>
+                    <div class="days-container"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

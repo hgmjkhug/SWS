@@ -977,6 +977,7 @@
 
 /* Properties Panel - Premium Redesign */
 .properties-panel {
+    cursor: not-allowed;
     position: absolute;
     right: 0;
     top: 0;

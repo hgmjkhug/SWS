@@ -170,22 +170,21 @@ input, button, select, textarea {
     background-color: #f8fafc;
 }/* Columns */
 .data-table th:nth-child(1), .data-table td:nth-child(1) { width: 50px; text-align: center; } /* STT */
-.data-table th:nth-child(2), .data-table td:nth-child(2) { width: 220px; } /* Mã phiếu */
+.data-table th:nth-child(2), .data-table td:nth-child(2) { width: 230px; } /* Mã lệnh xuất */
 .data-table th:nth-child(3), .data-table td:nth-child(3) { 
-    width: 200px; 
-    min-width: 200px; 
-    max-width: 250px; 
-} /* Vật tư */
+    width: 300px; 
+    min-width: 300px; 
+    max-width: 350px; 
+} /* Sản phẩm */
 .data-table th:nth-child(4), .data-table td:nth-child(4) { 
     width: 150px; 
     text-align: center; 
     padding-left: 0; 
     padding-right: 0; 
 } /* Loại xuất kho */
-.data-table th:nth-child(5), .data-table td:nth-child(5) { width: 160px; text-align: center; } /* Thời gian - Centered */
-.data-table th:nth-child(6), .data-table td:nth-child(6) { width: 130px; text-align: center; } /* Trạng thái - Centered */
-.data-table th:nth-child(7), .data-table td:nth-child(7) { width: 170px; } /* Người tạo */
-.data-table th:nth-child(8), .data-table td:nth-child(8) { width: 80px; text-align: center; } /* Thao tác */
+.data-table th:nth-child(5), .data-table td:nth-child(5) { width: 150px; text-align: center; } /* Trạng thái */
+.data-table th:nth-child(6), .data-table td:nth-child(6) { width: 320px; text-align: left; } /* Thông tin tạo */
+.data-table th:nth-child(7), .data-table td:nth-child(7) { width: 100px; text-align: center; } /* Thao tác */
 
 /* Status Badges */
 .status-badge {
@@ -756,49 +755,77 @@ button:disabled {
 }
 
 .material-table-wrapper {
-    max-height: 400px;
-    overflow: hidden;
+    max-height: 450px;
+    overflow: auto;
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    display: flex;
-    flex-direction: column;
+    background: white;
 }
 
-/* Custom Scrollbar */
-.material-table-wrapper::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+.material-table-wrapper-split {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    max-height: 480px;
+    position: relative;
 }
-.material-table-wrapper::-webkit-scrollbar-track {
-    background: #f1f5f9;
+
+.table-scroll-head-visible {
+    overflow: visible; /* CRITICAL: Allows dropdowns to show outside */
+    background-color: #076EB8;
+    flex-shrink: 0;
+    border-radius: 8px 8px 0 0;
+    position: relative;
+    z-index: 1002; /* Above body */
 }
-.material-table-wrapper::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1;
-    border-radius: 3px;
+
+.table-scroll-body-only {
+    overflow: auto;
+    flex: 1;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Sync Scroll Transform Target */
+#materialHeaderTable, #palletHeaderTable {
+    will-change: transform;
+    transition: none;
 }
 
 .material-selection-table {
-    width: 1100px;
+    width: 100%;
+    min-width: 1100px;
     table-layout: fixed;
     border-collapse: collapse;
     font-size: 14px;
+    background: white;
 }
 
 .material-selection-table th {
-    background-color: #f8fafc;
+    background-color: #076EB8;
     padding: 12px 16px;
     text-align: left;
     font-weight: 600;
-    color: #475569;
-    position: sticky;
-    top: 0;
-    border-bottom: 2px solid #e2e8f0;
-    z-index: 1000;
+    color: white;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    z-index: 1001;
     font-size: 13px;
     white-space: nowrap;
 }
+
+.material-selection-table th .filter-trigger {
+    color: rgba(255,255,255,0.7);
+}
+
+.material-selection-table th .filter-trigger:hover,
+.material-selection-table th .filter-trigger.active {
+    color: white;
+    background-color: rgba(255,255,255,0.1);
+}
+
 .material-selection-table th.active-filter-header {
-    z-index: 9999 !important;
+    z-index: 10002 !important;
 }
 
 /* Standardize header heights for sticky alignment */
@@ -812,7 +839,7 @@ button:disabled {
     top: 45px !important; /* Must match the height of 1st row */
     height: 45px;
     box-sizing: border-box;
-    z-index: 1000;
+    z-index: 1001;
 }
 
 .material-selection-table td {
@@ -1733,3 +1760,42 @@ button:disabled {
     font-size: 16px;
 }
 
+
+.product-item { 
+    position: relative;
+    display: flex; 
+    flex-direction: column; 
+    gap: 4px; 
+    padding: 6px 0 6px 20px;
+    border-bottom: 1px dashed #e2e8f0; 
+    min-height: 52px; 
+    justify-content: center;
+    border-left: none; 
+}
+
+.product-item::before {
+    content: '';
+    position: absolute;
+    left: 8px; 
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 80%; 
+    background-color: transparent; 
+    border: 2px solid var(--active-color);
+    border-right: none; 
+    border-radius: 8px 0 0 8px; 
+    opacity: 1; 
+}
+
+.product-item:last-child { border-bottom: none; }
+.prod-code { 
+    font-size: 14px; 
+    font-weight: 700; 
+    color: #64748b; 
+    padding: 0; 
+    background: transparent; 
+    border: none;
+    width: fit-content; 
+    margin-bottom: 0; 
+}

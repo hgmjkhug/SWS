@@ -7,6 +7,33 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="inbound.css" />
+    <style>
+      .modal-close-btn-rotate i {
+        transition: transform 0.3s ease;
+      }
+      .modal-close-btn-rotate:hover i {
+        transform: rotate(180deg);
+      }
+      
+      .btn-cancel-custom {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        color: #475569;
+        font-weight: 500;
+        font-size: 14px;
+        padding: 8px 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-cancel-custom:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+      }
+    </style>
   </head>
   <body>
     <div id="main-view">
@@ -229,7 +256,7 @@
                   <div class="sidebar-item active" data-range="last1yr">1 năm qua</div>
                   <div style="margin: 8px 12px; height: 1px; background: #f1f5f9;"></div>
                   <div class="sidebar-item filter-mode-item active" id="mode-all" onclick="setDateFilterMode('all')">Tất cả</div>
-                  <div class="sidebar-item filter-mode-item" id="mode-inbound" onclick="setDateFilterMode('createdAt')">Nhập</div>
+                  <div class="sidebar-item filter-mode-item" id="mode-inbound" onclick="setDateFilterMode('createdAt')">Tạo</div>
                   <div class="sidebar-item filter-mode-item" id="mode-expiry" onclick="setDateFilterMode('expiryDate')">Hết hạn</div>
                 </div>
               <div class="picker-main">
@@ -345,10 +372,8 @@
               <col style="width: 250px">
               <col style="width: 180px">
               <col style="width: 150px">
-              <col style="width: 200px">
-              <col style="width: 180px">
               <col style="width: 140px">
-              <col style="width: 150px">
+              <col style="width: 240px">
               <col style="width: 90px">
             </colgroup>
             <thead>
@@ -358,10 +383,10 @@
                 <th>Vật tư</th>
                 <th style="text-align: left">Thông tin lưu</th>
                 <th style="text-align: center">Loại lệnh nhập</th>
-                <th style="text-align: left">Quy trình</th>
-                <th style="text-align: left">Thời gian</th>
                 <th class="text-center">Trạng thái</th>
-                <th style="text-align: left">Người tạo</th>
+                <th style="text-align: left; cursor: pointer; user-select: none;" onclick="toggleTimeSort()" title="Sắp xếp theo thời gian tạo">
+                  Thông tin tạo <i id="time-sort-icon" class="fas fa-sort" style="color: #cbd5e1; margin-left: 4px;"></i>
+                </th>
                 <th class="text-center">Thao tác</th>
               </tr>
             </thead>
@@ -377,10 +402,8 @@
               <col style="width: 250px">
               <col style="width: 180px">
               <col style="width: 150px">
-              <col style="width: 200px">
-              <col style="width: 180px">
               <col style="width: 140px">
-              <col style="width: 150px">
+              <col style="width: 240px">
               <col style="width: 90px">
             </colgroup>
             <tbody id="inbound-table-body"></tbody>
@@ -519,7 +542,7 @@
 
               <div style="display: flex; gap: 8px; align-items: flex-start;">
                 <!-- Mã Vật tư -->
-                <div style="flex: 2;">
+                <div style="flex: 6;">
                   <label style="font-size: 13px; font-weight: 500; color: #475569; display: block; margin-bottom: 8px;">Quét/Nhập mã vật tư<span style="color: red">*</span></label>
                   <div class="pda-input-box">
                     <input
@@ -546,7 +569,7 @@
                 </div>
 
                 <!-- Số lượng -->
-                <div style="flex: 1;">
+                <div style="flex: 2;">
                   <label style="font-size: 13px; font-weight: 500; color: #475569; display: block; margin-bottom: 8px;">Số lượng<span style="color: red">*</span></label>
                   <div class="pda-input-box">
                     <input
@@ -566,6 +589,121 @@
                     Tổng khối lượng: <strong id="total-weight-text">0 kg</strong>
                   </div>
                 </div>
+                <!-- Ngày hết hạn (EXP) - Custom Date Picker (Hiển thị cho Nhập mới/Nhập lại) -->
+                <div id="expiry-date-group" style="flex: 2;">
+                  <label style="font-size: 13px; font-weight: 500; color: #475569; display: block; margin-bottom: 8px;">Ngày hết hạn<span style="color: red">*</span></label>
+                  <div class="pda-datepicker-wrapper">
+                    <div class="pda-input-box">
+                      <input
+                        type="text"
+                        id="inputExpiry"
+                        class="pda-input pda-datepicker-input"
+                        placeholder="dd/mm/yyyy"
+                        readonly
+                        onclick="togglePdaCalendar()"
+                      />
+                      <button
+                        type="button"
+                        class="pda-calendar-btn"
+                        onclick="togglePdaCalendar()"
+                      >
+                        <i class="fas fa-calendar-alt"></i>
+                      </button>
+                    </div>
+
+                    <!-- Custom Calendar Dropdown -->
+                    <div id="pda-calendar-dropdown" class="pda-calendar-dropdown">
+                      <div class="pda-cal-container">
+                        <!-- Sidebar for quick options -->
+                        <div class="pda-cal-sidebar">
+                          <div class="pda-cal-option" onclick="addQuickDays(30)">30 Ngày</div>
+                          <div class="pda-cal-option" onclick="addQuickDays(90)">90 Ngày</div>
+                          <div class="pda-cal-option" onclick="addQuickDays(180)">180 Ngày</div>
+                          <div class="pda-cal-option" onclick="addQuickYears(1)">1 Năm</div>
+                          <div class="pda-cal-option" onclick="addQuickYears(3)">3 Năm</div>
+                          <div class="pda-cal-option" onclick="addQuickYears(5)">5 Năm</div>
+                        </div>
+
+                        <!-- Main calendar area -->
+                        <div class="pda-cal-main">
+                          <div class="pda-cal-header">
+                            <button
+                              type="button"
+                              class="pda-cal-nav"
+                              onclick="pdaCalPrevMonth()"
+                            >
+                              <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div
+                              class="pda-cal-selectors"
+                              style="display: flex; gap: 8px"
+                            >
+                              <!-- Custom Month Dropdown -->
+                              <div
+                                class="custom-dropdown month-dropdown"
+                                id="pdaMonthDropdown"
+                                style="width: 120px"
+                              >
+                                <div class="dropdown-selected" id="pdaMonthSelected">
+                                  Tháng
+                                </div>
+                                <div
+                                  class="dropdown-list month-grid"
+                                  id="pdaMonthList"
+                                ></div>
+                              </div>
+                              <!-- Custom Year Dropdown -->
+                              <div
+                                class="custom-dropdown year-dropdown"
+                                id="pdaYearDropdown"
+                                style="width: 100px"
+                              >
+                                <div class="dropdown-selected" id="pdaYearSelected">
+                                  Năm
+                                </div>
+                                <div
+                                  class="dropdown-list year-grid"
+                                  id="pdaYearList"
+                                ></div>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              class="pda-cal-nav"
+                              onclick="pdaCalNextMonth()"
+                            >
+                              <i class="fas fa-chevron-right"></i>
+                            </button>
+                          </div>
+                          <div class="pda-cal-weekdays">
+                            <span>T2</span><span>T3</span><span>T4</span><span>T5</span
+                            ><span>T6</span><span>T7</span><span>CN</span>
+                          </div>
+                          <div id="pda-cal-days" class="pda-cal-days">
+                            <!-- Days generated by JS -->
+                          </div>
+                          <div class="pda-cal-footer">
+                            <button
+                              type="button"
+                              class="pda-cal-btn-secondary"
+                              onclick="closePdaCalendar()"
+                            >
+                              Hủy
+                            </button>
+                            <button
+                              type="button"
+                              class="pda-cal-btn-primary"
+                              onclick="pdaCalApply()"
+                            >
+                              Áp dụng
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
             
@@ -599,192 +737,35 @@
 
           <!-- Row grouping Expiry Date/Next Destination and Applied Process -->
           <div style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 18px;">
-            
-            <!-- Ngày hết hạn (EXP) - Custom Date Picker (Hiển thị cho Nhập mới/Nhập lại) -->
-            <div id="expiry-date-group" class="pda-form-group" style="flex: 2; margin-bottom: 0;">
-              <label class="pda-label"
-                >Ngày hết hạn<span style="color: red">*</span></label
-              >
-              <div class="pda-datepicker-wrapper">
-                <div class="pda-input-box">
-                  <input
+            <!-- Đích đến tiếp theo (Hiển thị cho Nhập chuyển thẳng) -->
+            <div id="next-destination-group" class="pda-form-group" style="flex: 2; margin-bottom: 0; display: none;">
+              <label class="pda-label">Vị trí đích<span style="color: red">*</span></label>
+              <div class="pda-input-box" style="position: relative">
+                <input
                   type="text"
-                  id="inputExpiry"
-                  class="pda-input pda-datepicker-input"
-                  placeholder="dd/mm/yyyy"
-                  readonly
-                  onclick="togglePdaCalendar()"
+                  id="inputNextDestination"
+                  class="pda-input"
+                  placeholder="Chọn hoặc tìm kiếm đích đến"
+                  autocomplete="off"
+                  onclick="toggleDestinationCombobox()"
+                  oninput="handleDestinationSearch(this.value)"
                 />
-                <button
-                  type="button"
-                  class="pda-calendar-btn"
-                  onclick="togglePdaCalendar()"
+                <i
+                  class="fas fa-chevron-down"
+                  style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #64748b; pointer-events: none;"
+                ></i>
+
+                <!-- Dropdown List -->
+                <div
+                  id="destination-combobox-list"
+                  class="combobox-dropdown dropdown-up"
+                  style="width: 100%; display: none;"
                 >
-                  <i class="fas fa-calendar-alt"></i>
-                </button>
-              </div>
-
-              <!-- Custom Calendar Dropdown -->
-              <div id="pda-calendar-dropdown" class="pda-calendar-dropdown">
-                <div class="pda-cal-container">
-                  <!-- Sidebar for quick options -->
-                  <div class="pda-cal-sidebar">
-                    <div class="pda-cal-option" onclick="addQuickDays(30)">30 Ngày</div>
-                    <div class="pda-cal-option" onclick="addQuickDays(90)">90 Ngày</div>
-                    <div class="pda-cal-option" onclick="addQuickDays(180)">180 Ngày</div>
-                    <div class="pda-cal-option" onclick="addQuickYears(1)">1 Năm</div>
-                    <div class="pda-cal-option" onclick="addQuickYears(3)">3 Năm</div>
-                    <div class="pda-cal-option" onclick="addQuickYears(5)">5 Năm</div>
-                  </div>
-
-                  <!-- Main calendar area -->
-                  <div class="pda-cal-main">
-                    <div class="pda-cal-header">
-                      <button
-                        type="button"
-                        class="pda-cal-nav"
-                        onclick="pdaCalPrevMonth()"
-                      >
-                        <i class="fas fa-chevron-left"></i>
-                      </button>
-                      <div
-                        class="pda-cal-selectors"
-                        style="display: flex; gap: 8px"
-                      >
-                        <!-- Custom Month Dropdown -->
-                        <div
-                          class="custom-dropdown month-dropdown"
-                          id="pdaMonthDropdown"
-                          style="width: 120px"
-                        >
-                          <div class="dropdown-selected" id="pdaMonthSelected">
-                            Tháng
-                          </div>
-                          <div
-                            class="dropdown-list month-grid"
-                            id="pdaMonthList"
-                          ></div>
-                        </div>
-                        <!-- Custom Year Dropdown -->
-                        <div
-                          class="custom-dropdown year-dropdown"
-                          id="pdaYearDropdown"
-                          style="width: 100px"
-                        >
-                          <div class="dropdown-selected" id="pdaYearSelected">
-                            Năm
-                          </div>
-                          <div
-                            class="dropdown-list year-grid"
-                            id="pdaYearList"
-                          ></div>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        class="pda-cal-nav"
-                        onclick="pdaCalNextMonth()"
-                      >
-                        <i class="fas fa-chevron-right"></i>
-                      </button>
-                    </div>
-                    <div class="pda-cal-weekdays">
-                      <span>T2</span><span>T3</span><span>T4</span><span>T5</span
-                      ><span>T6</span><span>T7</span><span>CN</span>
-                    </div>
-                    <div id="pda-cal-days" class="pda-cal-days">
-                      <!-- Days generated by JS -->
-                    </div>
-                    <div class="pda-cal-footer">
-                      <button
-                        type="button"
-                        class="pda-cal-btn-secondary"
-                        onclick="closePdaCalendar()"
-                      >
-                        Hủy
-                      </button>
-                      <button
-                        type="button"
-                        class="pda-cal-btn-primary"
-                        onclick="pdaCalApply()"
-                      >
-                        Áp dụng
-                      </button>
-                    </div>
-                  </div>
+                  <!-- Options will be rendered here -->
                 </div>
               </div>
+              <input type="hidden" id="selectedDestinationId" />
             </div>
-          </div>
-
-          <!-- Đích đến tiếp theo (Hiển thị cho Nhập chuyển thẳng) -->
-          <div id="next-destination-group" class="pda-form-group" style="flex: 2; margin-bottom: 0; display: none;">
-            <label class="pda-label">Đích đến tiếp theo <span style="color: red">*</span></label>
-            <div class="pda-input-box" style="position: relative">
-              <input
-                type="text"
-                id="inputNextDestination"
-                class="pda-input"
-                placeholder="Chọn hoặc tìm kiếm đích đến"
-                autocomplete="off"
-                onclick="toggleDestinationCombobox()"
-                oninput="handleDestinationSearch(this.value)"
-              />
-              <i
-                class="fas fa-chevron-down"
-                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #64748b; pointer-events: none;"
-              ></i>
-
-              <!-- Dropdown List -->
-              <div
-                id="destination-combobox-list"
-                class="combobox-dropdown dropdown-up"
-                style="width: 100%; display: none;"
-              >
-                <!-- Options will be rendered here -->
-              </div>
-            </div>
-            <input type="hidden" id="selectedDestinationId" />
-          </div>
-
-          <!-- Quy trình áp dụng -->
-          <div class="pda-form-group" style="flex: 1; margin-bottom: 0;">
-            <label class="pda-label"
-              >Quy trình áp dụng <span style="color: red">*</span></label
-            >
-            <div class="pda-input-box" style="position: relative">
-              <input
-                type="text"
-                id="inputProcess"
-                class="pda-input"
-                placeholder="Chọn hoặc tìm kiếm quy trình"
-                autocomplete="off"
-                onclick="toggleProcessCombobox()"
-                oninput="handleProcessSearch(this.value)"
-              />
-              <i
-                class="fas fa-chevron-down"
-                style="
-                  position: absolute;
-                  right: 12px;
-                  top: 50%;
-                  transform: translateY(-50%);
-                  color: #64748b;
-                  pointer-events: none;
-                "
-              ></i>
-
-              <!-- Dropdown List -->
-              <div
-                id="process-combobox-list"
-                class="combobox-dropdown dropdown-up"
-                style="width: 100%; display: none;"
-              >
-                <!-- Options will be rendered here -->
-              </div>
-            </div>
-            <input type="hidden" id="selectedProcessId" />
-          </div>
           </div> <!-- End Row grouping -->
 
           <!-- Priority Toggle -->
@@ -1685,6 +1666,54 @@
           >
             Xác nhận
           </button>
+        </div>
+      </div>
+    </div>
+
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div id="modal-order-detail" class="modal-overlay" style="display: none;">
+      <div
+        class="modal-box"
+        onclick="event.stopPropagation()"
+        style="max-width: 1000px; width: 1000px; position: relative"
+      >
+        <div class="modal-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
+          <div class="modal-title" id="order-detail-title" style="font-size: 18px; color: #0f172a;">
+            Thông tin lệnh
+          </div>
+          <div class="close-modal modal-close-btn-rotate" onclick="closeOrderDetailModal()">
+            <i class="fas fa-times" title="Đóng"></i>
+          </div>
+        </div>
+        <div class="modal-body" style="padding: 0 24px 24px 24px; max-height: calc(100vh - 120px); overflow-y: auto;">
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <!-- Left Column: Core Info -->
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">Thông tin chung</div>
+              <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <tbody id="order-detail-core-tbody">
+                  <!-- JS populated -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Right Column: Materials & Status -->
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">Chi tiết vật tư</div>
+              <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <tbody id="order-detail-mat-tbody">
+                  <!-- JS populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style="margin-top: 32px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+            <button class="btn-cancel-custom" onclick="closeOrderDetailModal()">Đóng</button>
+          </div>
         </div>
       </div>
     </div>

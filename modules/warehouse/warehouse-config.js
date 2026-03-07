@@ -108,6 +108,18 @@
                 }
             }
         });
+
+        // Area Type Dropdowns
+        var areaTypeLists = document.querySelectorAll('.init-equipment-list[id^="areaTypeList-"]');
+        areaTypeLists.forEach(function(list) {
+            var areaId = list.id.split('-')[1];
+            var container = document.getElementById('areaTypeSearch-' + areaId).parentElement;
+            if (list.classList.contains('show')) {
+                if (!container.contains(e.target) && !list.contains(e.target)) {
+                    list.classList.remove('show');
+                }
+            }
+        });
     });
 
     function initGrid() {
@@ -1809,6 +1821,15 @@
     var areaData = [];
     var areaIdCounter = 1;
 
+    // Mock Area Type Data
+    var areaTypeData = [
+        { id: 1, code: 'LKV01', name: 'Khu vực Chung' },
+        { id: 2, code: 'LKV02', name: 'Khu vực Lưu trữ' },
+        { id: 3, code: 'LKV03', name: 'Khu vực Nhập hàng' },
+        { id: 4, code: 'LKV04', name: 'Khu vực Xuất hàng' },
+        { id: 5, code: 'LKV05', name: 'Khu vực Lỗi' }
+    ];
+
     /**
      * Render area cards into the area card list
      */
@@ -1826,16 +1847,39 @@
             html += '<div class="area-card' + isCollapsed + isActive + isReadonly + '" data-area-id="' + area.id + '">';
             html += '<div class="card-number-label-container"><span class="card-number-label">Khu vực ' + (i + 1) + '</span></div>';
             html += '<div class="area-card-body">';
+
+            // Loại khu vực (Searchable combobox)
+            var selectedAreaType = area.selectedAreaType || null;
+            var displayType = selectedAreaType ? '[' + selectedAreaType.code + '] ' + selectedAreaType.name : '';
+            var hasTypeSelection = selectedAreaType ? ' has-selection' : '';
+
+            html += '<div class="init-info-row init-equipment-section" style="padding: 0; margin-bottom: 8px;">';
+            html += '<label class="area-field-label" style="padding-top: 10px; width: 100px;">Loại khu vực<span style="color: red;">*</span></label>';
+            html += '<div class="init-equipment-container" style="flex: 1;">';
+            html += '  <div class="init-equipment-search-wrapper' + hasTypeSelection + '">';
+            html += '    <div class="init-equipment-search">';
+            html += '      <i class="fas fa-search search-icon"></i>';
+            html += '      <input type="text" id="areaTypeSearch-' + area.id + '" value="' + displayType + '" placeholder="Tìm theo mã hoặc tên loại..." onfocus="showAreaTypeList(' + area.id + ')" oninput="filterAreaTypeList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selectedAreaType ? 'readonly' : '') + '>';
+            
+            if (selectedAreaType && !isReadonly) {
+                html += '      <i class="fas fa-times clear-icon" title="Xóa" onclick="removeAreaType(' + area.id + ')"></i>';
+            }
+            html += '      <i class="fas fa-chevron-down toggle-icon" onclick="' + (isReadonly ? '' : 'toggleAreaTypeList(' + area.id + ')') + '"></i>';
+            html += '    </div>';
+            html += '    <div class="init-equipment-list" id="areaTypeList-' + area.id + '" style="max-height: 200px; overflow-y: auto;"></div>';
+            html += '  </div>';
+            html += '</div>';
+            html += '</div>';
             
             // Mã khu vực
-            html += '<div class="area-field area-code">';
+            html += '<div class="area-field area-code" style="margin-bottom: 8px;">';
             html += '<span class="area-field-label">Mã khu vực</span>';
             html += '<div class="area-field-value">';
             html += '<input type="text" value="' + (area.code || '') + '" onchange="updateAreaField(' + area.id + ', \'code\', this.value)" placeholder="Nhập mã khu vực..." ' + (isReadonly ? 'disabled' : '') + '>';
             html += '</div></div>';
             
             // Tên khu vực
-            html += '<div class="area-field">';
+            html += '<div class="area-field" style="margin-bottom: 8px;">';
             html += '<span class="area-field-label">Tên khu vực<span style="color: red;">*</span></span>';
             html += '<div class="area-field-value">';
             html += '<input type="text" value="' + (area.name || '') + '" onchange="updateAreaField(' + area.id + ', \'name\', this.value)" placeholder="Nhập tên khu vực..." ' + (isReadonly ? 'disabled' : '') + '>';
@@ -1867,12 +1911,20 @@
             
             html += '</div></div></div>';
             
+            // Check if selected type should display conditional fields
+            var shouldShowConditionalFields = false;
+            if (selectedAreaType && (selectedAreaType.code === 'LKV02' || selectedAreaType.code === 'LKV03' || selectedAreaType.code === 'LKV04')) {
+                shouldShowConditionalFields = true;
+            }
+
+            var conditionalDisplay = shouldShowConditionalFields ? '' : ' style="display: none;"';
+
             // Sản phẩm (In-bar selection display)
             var selectedProduct = (area.selectedProducts && area.selectedProducts.length > 0) ? area.selectedProducts[0] : null;
             var displayValue = selectedProduct ? '[' + selectedProduct.code + '] ' + selectedProduct.name : '';
             var hasSelectionClass = selectedProduct ? ' has-selection' : '';
 
-            html += '<div class="init-info-row init-equipment-section" style="padding: 0; margin: 0;">';
+            html += '<div class="init-info-row init-equipment-section" style="padding: 0; margin-bottom: 8px;' + (shouldShowConditionalFields ? '' : ' display: none;') + '">';
             html += '<label class="area-field-label" style="padding-top: 10px;">Sản phẩm <span style="color: red;">*</span></label>';
             html += '<div class="init-equipment-container">';
             html += '  <div class="init-equipment-search-wrapper' + hasSelectionClass + '">';
@@ -1897,7 +1949,7 @@
             
             // Vị trí (Quy cách field removed per user request)
             var areaPositionsCount = area.positions ? area.positions.length : 0;
-            html += '<div class="area-field area-position" style="margin-bottom: 5px;">';
+            html += '<div class="area-field area-position" style="margin-bottom: 8px;">';
             html += '<span class="area-field-label">Vị trí<span style="color: red;">*</span></span>';
             html += '<div class="area-field-value">';
             html += '<label style="font-size: 13px; display: block; margin-bottom: 5px;">Đã chọn: <strong style="color: #076eb8">' + areaPositionsCount + '</strong> vị trí</label>';
@@ -1929,7 +1981,7 @@
                 }
             }
 
-            html += '<div class="area-field area-direction">';
+            html += '<div class="area-field area-direction" style="margin-bottom: 8px;' + (shouldShowConditionalFields ? '' : ' display: none;') + '">';
             html += '<span class="area-field-label">Chiều nhập<span style="color: red;">*</span></span>';
             html += '<div class="area-field-value">';
             html += '<div class="area-dropdown' + (isReadonly ? ' disabled' : '') + '" id="areaDirectionDropdown-' + area.id + '">';
@@ -2126,6 +2178,87 @@
                 renderAreaProductAccordion(areaId);
             }
         }
+    }
+
+    window.showAreaTypeList = function(areaId) {
+        var list = document.getElementById('areaTypeList-' + areaId);
+        if (list) {
+            list.classList.add('show');
+            renderAreaTypeListHTML(areaId, areaTypeData);
+        }
+    }
+
+    window.toggleAreaTypeList = function(areaId) {
+        var list = document.getElementById('areaTypeList-' + areaId);
+        if (list) {
+            if (list.classList.contains('show')) {
+                list.classList.remove('show');
+            } else {
+                showAreaTypeList(areaId);
+            }
+        }
+    }
+
+    window.filterAreaTypeList = function(areaId) {
+        var input = document.getElementById('areaTypeSearch-' + areaId);
+        var term = input ? input.value.toLowerCase().trim() : '';
+
+        if (term === '') {
+            renderAreaTypeListHTML(areaId, areaTypeData);
+            return;
+        }
+
+        var results = areaTypeData.filter(function(item) {
+            return (item.name && item.name.toLowerCase().indexOf(term) > -1) ||
+                   (item.code && item.code.toLowerCase().indexOf(term) > -1);
+        });
+        
+        renderAreaTypeListHTML(areaId, results);
+    }
+
+    function renderAreaTypeListHTML(areaId, listData) {
+        var list = document.getElementById('areaTypeList-' + areaId);
+        if (!list) return;
+
+        if (listData.length === 0) {
+            list.innerHTML = '<div style="padding: 10px; text-align: center; color: #64748b; font-size: 13px;">Không tìm thấy loại khu vực</div>';
+            return;
+        }
+
+        var html = '';
+        html += '<div class="init-equipment-items">';
+        listData.forEach(function(item) {
+            html += '<div class="init-equipment-item" onclick="selectAreaType(' + areaId + ', \'' + item.code + '\', \'' + item.name + '\')" style="padding: 8px 12px; cursor: pointer;">';
+            html += '<div style="flex: 1">';
+            html += '<div class="eq-name" style="font-weight: 500; color: #1e293b; font-size: 13px;">' + item.name + '</div>';
+            html += '<div class="eq-code" style="color: #64748b; font-size: 11px;">' + item.code + '</div>';
+            html += '</div></div>';
+        });
+        html += '</div>';
+        
+        list.innerHTML = html;
+    }
+
+    window.selectAreaType = function(areaId, code, name) {
+        for (var i = 0; i < areaData.length; i++) {
+            if (areaData[i].id === areaId) {
+                areaData[i].selectedAreaType = { code: code, name: name };
+                break;
+            }
+        }
+        var list = document.getElementById('areaTypeList-' + areaId);
+        if (list) list.classList.remove('show');
+        renderAreaCards();
+    }
+
+    window.removeAreaType = function(areaId) {
+        for (var i = 0; i < areaData.length; i++) {
+            if (areaData[i].id === areaId) {
+                areaData[i].selectedAreaType = null;
+                break;
+            }
+        }
+        renderAreaCards();
     }
 
     function showAreaProductList(areaId) {
@@ -2403,7 +2536,7 @@
             var locationTypes = ['Vị trí ô trống', 'Vị trí chứa hàng', 'Vị trí sạc pin', 'Vị trí dừng đỗ', 'Vị trí lifter', 'Vị trí đã chứa hàng (Không tạt ngang)'];
             var currentLocType = loc.locationType || 'Vị trí ô trống';
             
-            html += '<div class="location-field">';
+            html += '<div class="location-field" style="display: none;">';
             html += '<span class="location-field-label">Loại vị trí <span style="color: red;">*</span></span>';
             html += '<div class="location-field-value">';
             html += '<div class="area-dropdown" id="locationTypeDropdown-' + loc.id + '">';

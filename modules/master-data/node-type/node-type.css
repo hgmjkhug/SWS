@@ -25,12 +25,14 @@
 .node-type-search-input {
   padding: 8px 12px;
   border: 1px solid #cbd5e1;
+  background-color: #F8FAFC;
   border-radius: 8px;
   height: 40px !important;
   width: 300px;
   outline: none;
 }
 .node-type-search-input:focus {
+  background-color: #FFFFFF;
   border-color: #3b82f6;
 }
 
@@ -117,9 +119,10 @@
 /* Explicit Column Widths to ensure head and body align */
 .node-type-table th:nth-child(1), .node-type-table td:nth-child(1) { width: 4%; text-align: center; } /* Checkbox */
 .node-type-table th:nth-child(2), .node-type-table td:nth-child(2) { width: 6%; text-align: center; } /* STT */
-.node-type-table th:nth-child(3), .node-type-table td:nth-child(3) { width: 60%; } /* Tên loại */
-.node-type-table th:nth-child(4), .node-type-table td:nth-child(4) { width: 15%; text-align: center; } /* Hình ảnh */
-.node-type-table th:nth-child(5), .node-type-table td:nth-child(5) { width: 15%; text-align: center; } /* Thao tác */
+.node-type-table th:nth-child(3), .node-type-table td:nth-child(3) { width: 25%; } /* Mã loại */
+.node-type-table th:nth-child(4), .node-type-table td:nth-child(4) { width: 35%; } /* Tên loại */
+.node-type-table th:nth-child(5), .node-type-table td:nth-child(5) { width: 15%; text-align: center; } /* Hình ảnh */
+.node-type-table th:nth-child(6), .node-type-table td:nth-child(6) { width: 15%; text-align: center; } /* Thao tác */
 
 .node-type-table th, .node-type-table td {
   padding: 14px 16px;

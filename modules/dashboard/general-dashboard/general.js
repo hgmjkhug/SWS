@@ -1,5 +1,5 @@
 /* ── DATA ─────────────────────────────────────────── */
-const DATA = {
+var DATA = {
   wh:  { total:10, new:2, active:5, inactive:1, maint:2 },
   cmd: { total:156, wait:24, prog:12, done:115, err:5 },
   occ: [
@@ -248,7 +248,7 @@ else initAll();
 window.addEventListener('resize',()=>{ if(typeof drawTrend==='function') drawTrend(); });
 
 /* ── TRAFFIC WIDGET (AMR Congestion + PLC Heartbeat + Buffer) ── */
-const TRAFFIC = {
+var TRAFFIC = {
   amrCongestion: [
     { zone:'Hành lang A', amrCount:6, maxAMR:4, pct:95, cls:'crit' },
     { zone:'Hành lang B', amrCount:3, maxAMR:4, pct:60, cls:'warn' },
