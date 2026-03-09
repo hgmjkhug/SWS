@@ -436,12 +436,11 @@ function filterTable() {
 }
 
 function refreshData() {
-    const btn = document.querySelector('.btn-primary');
-    const icon = btn ? btn.querySelector('i') : null;
-    if (icon) icon.classList.add('fa-spin');
+    const btn = document.querySelector('.btn-refresh');
+    if (btn) btn.classList.add('spinning');
 
     setTimeout(() => {
-        if (icon) icon.classList.remove('fa-spin');
+        if (btn) btn.classList.remove('spinning');
         // Randomize data to simulate result of date filtering
         STAT_DATA.summary.inbound = Math.floor(Math.random() * 500) + 100;
         STAT_DATA.summary.outbound = Math.floor(Math.random() * 400) + 50;

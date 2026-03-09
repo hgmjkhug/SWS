@@ -71,12 +71,12 @@
 }
 
 .btn-export {
-  background: #10b981;
-  color: white;
-  border: none;
+  background: #ffffff;
+  color: #10b981;
+  border: 1px solid #10b981;
   padding: 8px 16px;
   border-radius: 6px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -85,9 +85,46 @@
 }
 
 .btn-export:hover {
-  background: #059669;
+  background: #f8fafc;
+  border-color: #059669;
   transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
+
+.btn-refresh {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: #4a5568;
+    border: 1px solid #e8ecf4;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+}
+
+.btn-refresh:hover {
+    background: #eff4ff;
+    color: #2563eb;
+    border-color: #2563eb;
+}
+
+.btn-refresh i {
+    font-size: 13px;
+}
+
+.btn-refresh.spinning i {
+    animation: spin-refresh 0.8s linear infinite;
+}
+
+@keyframes spin-refresh {
+    to { transform: rotate(360deg); }
+}
+
 
 /* Cards Section */
 .stat-cards {
