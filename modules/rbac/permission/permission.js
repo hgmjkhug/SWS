@@ -44,7 +44,7 @@ var permissionData = [
     },
     {
         id: 6,
-        name: 'Quản lý bước và quy trình',
+        name: 'Quản lý quy trình',
         children: [
             { id: 601, name: 'Quản lý quy trình' }
         ]

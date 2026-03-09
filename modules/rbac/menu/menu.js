@@ -14,7 +14,7 @@
         { id: 3, code: 'WCS', name: 'Quản lý điều phối WCS', icon: 'fas fa-microchip', path: 'modules/wcs', order: 3 },
         { id: 4, code: 'INBOUND', name: 'Nhập kho', icon: 'fas fa-file-import', path: 'modules/inbound', order: 4 },
         { id: 5, code: 'OUTBOUND', name: 'Xuất kho', icon: 'fas fa-file-export', path: 'modules/outbound', order: 5 },
-        { id: 6, code: 'WORKFLOW', name: 'Quản lý bước và quy trình', icon: 'fas fa-project-diagram', path: 'modules/workflow', order: 6 },
+        { id: 6, code: 'WORKFLOW', name: 'Quản lý quy trình', icon: 'fas fa-project-diagram', path: 'modules/workflow', order: 6 },
         { id: 7, code: 'MASTER_DATA', name: 'Danh mục chung', icon: 'fas fa-database', path: 'modules/master-data', order: 7 },
         { id: 8, code: 'STATISTIC', name: 'Báo cáo thống kê', icon: 'fas fa-chart-bar', path: 'modules/statistic', order: 8 },
         { id: 9, code: 'SYSTEM', name: 'Hệ thống', icon: 'fas fa-cogs', path: 'modules/rbac', order: 9 }
