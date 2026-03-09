@@ -50,11 +50,11 @@ window.closeExitConfirmModal = function() {
 window.forceExitWorkflowConfig = function() {
     if (window.clearWorkflowConfigState && window.loadPage) {
         window.clearWorkflowConfigState(); 
-        window.loadPage('Danh sách Quy trình');
+        window.loadPage('Quản lý quy trình');
     } else {
         console.error("Navigation functions not found");
         // Fallback
-        if(window.loadPage) window.loadPage('Danh sách Quy trình');
+        if(window.loadPage) window.loadPage('Quản lý quy trình');
     }
 }
 

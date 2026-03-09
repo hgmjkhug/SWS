@@ -407,10 +407,10 @@ window.configureWorkflow = function(id) {
     if (breadcrumb) {
         breadcrumb.innerHTML = `
             <div style="display: flex; align-items: center; font-size: 13px; text-transform: uppercase;">
-                <i class="fas fa-arrow-left" onclick="if(window.tryCloseWorkflowConfig) window.tryCloseWorkflowConfig(); else { clearWorkflowConfigState(); loadPage('Danh sách Quy trình'); }" style="cursor: pointer; margin-right: 12px; color: #1e3a8a; font-size: 16px;"></i>
+                <i class="fas fa-arrow-left" onclick="if(window.tryCloseWorkflowConfig) window.tryCloseWorkflowConfig(); else { clearWorkflowConfigState(); loadPage('Quản lý quy trình'); }" style="cursor: pointer; margin-right: 12px; color: #1e3a8a; font-size: 16px;"></i>
                 <span class="breadcrumb-item" style="color: #64748b;">QUẢN LÝ QUY TRÌNH</span>
                 <span style="margin: 0 8px; color: #94a3b8;">/</span>
-                <span class="breadcrumb-item" onclick="if(window.tryCloseWorkflowConfig) window.tryCloseWorkflowConfig(); else { clearWorkflowConfigState(); loadPage('Danh sách Quy trình'); }" style="cursor: pointer; color: #64748b;">QUẢN LÝ QUY TRÌNH</span>
+                <span class="breadcrumb-item" onclick="if(window.tryCloseWorkflowConfig) window.tryCloseWorkflowConfig(); else { clearWorkflowConfigState(); loadPage('Quản lý quy trình'); }" style="cursor: pointer; color: #64748b;">QUẢN LÝ QUY TRÌNH</span>
                 <span style="margin: 0 8px; color: #94a3b8;">/</span>
                 <span class="breadcrumb-item active" style="font-weight: 700; color: #0f172a;">THIẾT LẬP QUY TRÌNH</span>
             </div>
