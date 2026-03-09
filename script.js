@@ -31,6 +31,57 @@ function toggleSubmenu(element) {
     submenu.style.maxHeight = parent.classList.contains('open') ? submenu.scrollHeight + "px" : null;
 }
 
+/**
+ * Re-orders the sidebar menu items based on a provided list of module codes.
+ * @param {string[]} moduleOrderList - Array of module codes in the new order.
+ */
+function refreshSidebarOrder(moduleOrderList) {
+    const menuList = document.getElementById('menu-list');
+    if (!menuList || !moduleOrderList || moduleOrderList.length === 0) return;
+
+    // Get all current menu items
+    const menuItems = Array.from(menuList.querySelectorAll('.menu-item'));
+    
+    // Check which items are actually handled (to avoid duplicate orderings)
+    const sortedItems = [];
+    
+    // First, place items that are in the order list
+    moduleOrderList.forEach(code => {
+        const item = menuItems.find(el => el.dataset.module === code);
+        if (item) sortedItems.push(item);
+    });
+
+    // Then, append any items that weren't in the list
+    menuItems.forEach(item => {
+        if (!sortedItems.includes(item)) {
+            sortedItems.push(item);
+        }
+    });
+
+    // Re-append to the DOM in new order
+    sortedItems.forEach(item => {
+        menuList.appendChild(item);
+    });
+
+    // Persist order in LocalStorage
+    try {
+        localStorage.setItem('sidebar_module_order', JSON.stringify(moduleOrderList));
+    } catch (e) { console.warn('Failed to persist sidebar order', e); }
+}
+
+/**
+ * Restores sidebar order from LocalStorage.
+ */
+function restoreSidebarOrder() {
+    try {
+        const storedOrder = localStorage.getItem('sidebar_module_order');
+        if (storedOrder) {
+            const orderList = JSON.parse(storedOrder);
+            refreshSidebarOrder(orderList);
+        }
+    } catch (e) { /* ignore */ }
+}
+
 function filterMenu() {
     const filter = document.getElementById('menu-search').value.toLowerCase();
     document.querySelectorAll('.menu-item').forEach(item => {
@@ -824,6 +875,7 @@ document.addEventListener('click', (e) => {
 // Initialize on load
 document.addEventListener('DOMContentLoaded', function () {
     initNotifications();
+    restoreSidebarOrder();
 
     // Restore Last Page if exists
     try {

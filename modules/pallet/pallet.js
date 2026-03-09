@@ -22,17 +22,15 @@
         const wh = warehouses[Math.floor(Math.random() * warehouses.length)];
         const code = `PL-${1000 + i}`;
 
-        // Detailed Location Generation: T1-F8-P3-A1
-        // T: Tower/Type, F: Floor, P: Position/Hộc, A: Label
-        const t = Math.floor(Math.random() * 3) + 1; // 1-3
-        const f = Math.floor(Math.random() * 10) + 1; // 1-10
-        const p = Math.floor(Math.random() * 5) + 1; // 1-5
-        const a = Math.random() > 0.5 ? 'A1' : 'A2';
+        // Detailed Location Generation: 1-A2 (tầng-cột hàng)
+        const floor = Math.floor(Math.random() * 5) + 1; // 1-5
+        const col = String.fromCharCode(65 + Math.floor(Math.random() * 5)); // A-E
+        const rowVal = Math.floor(Math.random() * 5) + 1; // 1-5
 
         // Short code for display
-        let locationCode = `T${t}-F${f}-P${p}-${a}`;
+        let locationCode = `${floor}-${col}${rowVal}`;
         // Detailed text for tooltip or print
-        let locationDetail = `Tháp ${t} - Tầng ${f} - Hộc ${p} (${a})`;
+        let locationDetail = `Tầng ${floor} - Cột ${col} - Hàng ${rowVal}`;
 
         // Constraint 2: Moving pallets have no fixed location
         if (status === "Đang di chuyển") {
@@ -63,12 +61,28 @@
             };
         }
 
-        // Generate random entry date in hh:mm dd/mm/yyyy format (Range: 2025 - Jan 2026)
-        const is2026 = Math.random() > 0.8;
-        const yr = is2026 ? 2026 : 2025;
-        const mo = is2026 ? 0 : Math.floor(Math.random() * 12);
-        const dy = Math.floor(Math.random() * 28) + 1;
-        const randomDate = invStatus === "Có hàng" ? new Date(yr, mo, dy, Math.floor(Math.random() * 24), Math.floor(Math.random() * 60)) : null;
+        // Generate random entry date in hh:mm dd/mm/yyyy format (Range: 2025 - Mar 2026)
+        const isToday = i <= 10; // First 10 items are for "today"
+        const is2026 = Math.random() > 0.6 || isToday;
+        const todayDate = new Date(2026, 2, 9); // current date: 2026-03-09
+
+        let randomDate;
+        if (invStatus === "Có hàng") {
+            if (isToday) {
+                // Today: 2026-03-09 with random time
+                randomDate = new Date(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate(), 
+                                      Math.floor(Math.random() * 8) + 8, // 08:xx to 15:xx
+                                      Math.floor(Math.random() * 60));
+            } else {
+                const yr = is2026 ? 2026 : 2025;
+                const mo = is2026 ? Math.floor(Math.random() * 2) : Math.floor(Math.random() * 12); // Jan-Feb if 2026
+                const dy = Math.floor(Math.random() * 28) + 1;
+                randomDate = new Date(yr, mo, dy, Math.floor(Math.random() * 24), Math.floor(Math.random() * 60));
+            }
+        } else {
+            randomDate = null;
+        }
+
         const pad = (num) => String(num).padStart(2, '0');
         const entryDate = randomDate ? `${pad(randomDate.getHours())}:${pad(randomDate.getMinutes())} ${pad(randomDate.getDate())}/${pad(randomDate.getMonth() + 1)}/${randomDate.getFullYear()}` : "-";
 
@@ -99,7 +113,6 @@
     const itemsPerPage = 20;
     let currentPage = 1;
     let currentSearch = "";
-    let currentFilterStatus = "";
     let currentFilterInventoryAuto = ""; // Match ID in HTML
     // currentFilterUsage removed
     let filteredData = [...pallets];
@@ -119,8 +132,13 @@
     function getDOMElements() {
         return {
             tableBody: document.getElementById('tableBody'),
-            paginationInfo: document.querySelector('.pagination-info'),
-            paginationControls: document.getElementById('paginationControls'),
+            // Pagination
+            paginationBar: document.querySelector('.pagination-bar'),
+            showingRange: document.getElementById('showing-range'),
+            totalItems: document.getElementById('total-items'),
+            paginationNumbers: document.getElementById('pagination-numbers'),
+            btnPrev: document.getElementById('btn-prev'),
+            btnNext: document.getElementById('btn-next'),
             pageInput: document.getElementById('pageInput'),
             searchInput: document.getElementById('searchInput'),
             statusFilter: document.getElementById('statusFilter'),
@@ -128,9 +146,7 @@
             inventoryStatusFilter: document.getElementById('inventoryStatusFilter'),
 
             // Toolbar Dropdowns
-            statusDropdown: document.getElementById('statusDropdown'),
-            statusSelected: document.getElementById('statusSelected'),
-            statusList: document.getElementById('statusList'),
+
             inventoryStatusDropdown: document.getElementById('inventoryStatusDropdown'),
             inventoryStatusSelected: document.getElementById('inventoryStatusSelected'),
             inventoryStatusList: document.getElementById('inventoryStatusList'),
@@ -177,7 +193,6 @@
     // --- 4. FILTER FUNCTION ---
     function filterData() {
         filteredData = pallets.filter(item => {
-            if (currentFilterStatus && item.status !== currentFilterStatus) return false;
             if (currentFilterInventoryAuto && item.inventoryStatus !== currentFilterInventoryAuto) return false;
             // Usage filter removed
             if (currentSearch) {
@@ -259,12 +274,10 @@
             </tr>
         `;
             if (paginationContainer) paginationContainer.style.display = 'none';
-            if (tableContainer) tableContainer.style.minHeight = 'auto';
             return;
         }
 
         if (paginationContainer) paginationContainer.style.display = 'flex';
-        if (tableContainer) tableContainer.style.minHeight = '300px';
 
         const start = (page - 1) * itemsPerPage;
         const end = start + itemsPerPage;
@@ -307,34 +320,28 @@
             const row = `
             <tr class="">
 
-                <td>${stt}</td>
-                <td>
-                    <b>${pallet.code}</b>
-                </td>
-
-                <td style="font-size: 0.95em;">${inboundInfo}</td>
-                <td style="font-size: 0.95em;">${materialInfo}</td>
-
+                <td style="text-align: center;">${stt}</td>
+                <td style="text-align: center;"><b>${pallet.code}</b></td>
+                <td style="text-align: left; padding-left: 12px; font-size: 0.95em;">${inboundInfo}</td>
+                <td style="text-align: left; padding-left: 16px; font-size: 0.95em;">${materialInfo}</td>
                 <td style="text-align: center; color: #64748b;">${pallet.entryDate}</td>
                 <td style="text-align: center;">
                     <span class="status-badge ${invStatusClass}">${pallet.inventoryStatus}</span>
                 </td>
                 <td style="text-align: center;">
-                    <span class="status-badge ${statusClass}">${pallet.status}</span>
-                </td>
-                <td style="text-align: center;">
-                       <div style="font-weight: bold; color: #333;" title="${pallet.locationDetail}">${pallet.locationCode}</div>
+                    <div style="font-weight: bold; color: #333;" title="${pallet.locationDetail}">${pallet.locationCode}</div>
                 </td>
             </tr>`;
             dom.tableBody.insertAdjacentHTML('beforeend', row);
         });
 
         // Update Counts Text: "Hiển thị start-end trên tổng total"
-        if (dom.paginationInfo) {
+        if (dom.showingRange && dom.totalItems) {
             const total = filteredData.length;
             const startItem = total > 0 ? start + 1 : 0;
             const endItem = Math.min(start + itemsPerPage, total);
-            dom.paginationInfo.innerHTML = `Hiển thị <span style="font-weight:regular">${startItem} - ${endItem}</span> trong <span style="font-weight:regular">${total}</span>`;
+            dom.showingRange.textContent = `${startItem}-${endItem}`;
+            dom.totalItems.textContent = total;
         }
 
 
@@ -349,39 +356,29 @@
     // --- 6. RENDER PAGINATION ---
     function renderPagination(page) {
         const dom = getDOMElements();
-        if (!dom.paginationControls) {
-            console.warn('paginationControls not found');
+        if (!dom.paginationNumbers) return;
+
+        const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+        dom.paginationNumbers.innerHTML = '';
+
+        if (totalPages === 0) {
+            if (dom.paginationBar) dom.paginationBar.style.display = 'none';
             return;
         }
+        
+        if (dom.paginationBar) dom.paginationBar.style.display = 'flex';
 
-        dom.paginationControls.innerHTML = '';
-        const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-        if (totalPages === 0) return;
-
-        // Previous
-        const prevBtn = document.createElement('button');
-        prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
-        prevBtn.className = 'page-btn';
-        prevBtn.disabled = page === 1;
-        prevBtn.onclick = () => changePage(page - 1);
-        dom.paginationControls.appendChild(prevBtn);
-
+        // Render Page Numbers
         for (let i = 1; i <= totalPages; i++) {
             const btn = document.createElement('button');
+            btn.className = `btn-page ${i === page ? 'active' : ''}`;
             btn.textContent = i;
-            btn.className = `page-btn ${i === page ? 'active' : ''}`;
             btn.onclick = () => changePage(i);
-            dom.paginationControls.appendChild(btn);
+            dom.paginationNumbers.appendChild(btn);
         }
 
-        // Next
-        const nextBtn = document.createElement('button');
-        nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
-        nextBtn.className = 'page-btn';
-        nextBtn.disabled = page === totalPages;
-        nextBtn.onclick = () => changePage(page + 1);
-        dom.paginationControls.appendChild(nextBtn);
+        if (dom.btnPrev) dom.btnPrev.disabled = page === 1;
+        if (dom.btnNext) dom.btnNext.disabled = page === totalPages || totalPages === 0;
     }
 
     // --- 7. CHANGE PAGE ---
@@ -431,20 +428,7 @@
 
     // --- INIT COMBOBOXES ---
     function initComboboxes() {
-        // 1. Status Filter
-        // Logic from original: ["Đang đứng yên", "Đang di chuyển", "Đang chờ lệnh", "Hoàn thành"]
-        const statusOptions = [
-            { value: '', text: 'Tất cả trạng thái' },
-            { value: 'Đang đứng yên', text: 'Đang đứng yên' },
-            { value: 'Đang di chuyển', text: 'Đang di chuyển' },
-            { value: 'Đang chờ lệnh', text: 'Đang chờ lệnh' },
-            { value: 'Hoàn thành', text: 'Hoàn thành' }
-        ];
 
-        setupCombobox('statusCombobox', statusOptions, 'Tất cả trạng thái', (val) => {
-            currentFilterStatus = val;
-            filterData();
-        }, '');
 
         // 2. Inventory Status Filter
         const invOptions = [
@@ -598,10 +582,8 @@
             };
         };
 
-        const statuses = ["Tất cả trạng thái", ...["Đang đứng yên", "Đang di chuyển", "Đang chờ lệnh", "Hoàn thành"]];
         const invStatuses = ["Tất cả tình trạng", "Có hàng", "Trống"];
 
-        setup(dom.statusDropdown, dom.statusList, dom.statusSelected, statuses, "Tất cả trạng thái", (v) => currentFilterStatus = v);
         setup(dom.inventoryStatusDropdown, dom.inventoryStatusList, dom.inventoryStatusSelected, invStatuses, "Tất cả tình trạng", (v) => currentFilterInventoryAuto = v);
 
 
@@ -700,6 +682,36 @@
         dom.sidebarItems.forEach(i => i.classList.remove('active'));
         renderCalendars();
         filterData();
+    }
+
+    // --- 8.5 INITIAL DATE RANGE ---
+    function initDefaultDateRange() {
+        const today = new Date(); // 2026-03-09
+        activeStartDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        activeEndDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
+        selectedStartDate = new Date(activeStartDate);
+        selectedEndDate = new Date(activeEndDate);
+
+        const format = function (d) {
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const yyyy = d.getFullYear();
+            return dd + '/' + mm + '/' + yyyy;
+        };
+
+        const dom = getDOMElements();
+        if (dom.dateRangeDisplay) {
+            dom.dateRangeDisplay.textContent = format(activeStartDate) + ' - ' + format(activeEndDate);
+        }
+
+        // Set sidebar item "Hôm nay" to active
+        setTimeout(() => {
+            const rangeItems = document.querySelectorAll('.sidebar-item[data-range]');
+            rangeItems.forEach(i => {
+                if (i.getAttribute('data-range') === 'today') i.classList.add('active');
+                else i.classList.remove('active');
+            });
+        }, 100);
     }
 
     // Global Toggle Function (Outside setupPicker to be safe)
@@ -846,6 +858,13 @@
             });
         }
 
+        if (dom.btnPrev) {
+            dom.btnPrev.onclick = () => changePage(currentPage - 1);
+        }
+        if (dom.btnNext) {
+            dom.btnNext.onclick = () => changePage(currentPage + 1);
+        }
+
         setupPicker();
     }
 
@@ -857,13 +876,14 @@
 
         // Check if required elements exist, if not retry
         // Also checking for 'analyticsPicker' to ensure the date picker structure is loaded
-        if (!dom.tableBody || !dom.paginationControls || !dom.analyticsPicker) {
+        if (!dom.tableBody || !dom.paginationNumbers || !dom.analyticsPicker) {
             console.log('Waiting for DOM elements...');
             setTimeout(init, 100);
             return;
         }
 
         console.log('Initializing pallet list...');
+        initDefaultDateRange(); // Set default date to today
         setupEventListeners();
         setupExtraListeners(); // Moved inside init
         filterData();

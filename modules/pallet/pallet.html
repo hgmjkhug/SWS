@@ -8,7 +8,7 @@
 </head>
 
 <body>
-  <div class="container">
+  <div id="main-view">
     <div class="toolbar-section" style="align-items: flex-end;">
       <div class="filter-group">
         <!-- <label class="filter-label">Tìm kiếm</label> -->
@@ -18,19 +18,7 @@
         </div>
       </div>
 
-      <div class="filter-group">
-        <label class="filter-label">Trạng thái</label>
-        <div class="filter-box">
-          <div class="custom-dropdown" id="statusDropdown">
-            <div class="dropdown-selected" id="statusSelected">
-              Tất cả trạng thái
-            </div>
-            <div class="dropdown-list" id="statusList">
-              <!-- JS Populated -->
-            </div>
-          </div>
-        </div>
-      </div>
+
 
       <div class="filter-group">
         <label class="filter-label">Tình trạng</label>
@@ -157,12 +145,11 @@
           <thead>
             <tr>
               <th style="width:50px;  min-width:50px;  text-align:center">STT</th>
-              <th style="width:130px; min-width:130px">Mã Pallet</th>
-              <th style="width:300px; min-width:300px">Mã lệnh nhập</th>
-              <th style="min-width:200px">Vật tư</th>
+              <th style="width:130px; min-width:130px; text-align:center">Mã Pallet</th>
+              <th style="width:300px; min-width:300px; text-align:left">Mã lệnh nhập</th>
+              <th style="min-width:200px; text-align:left">Vật tư</th>
               <th style="width:130px; min-width:130px; text-align:center">Ngày nhập</th>
               <th style="width:150px; min-width:150px; text-align:center">Tình trạng</th>
-              <th style="width:160px; min-width:160px; text-align:center">Trạng thái</th>
               <th style="width:130px; min-width:130px; text-align:center">Vị trí</th>
             </tr>
           </thead>
@@ -176,22 +163,28 @@
       </div>
     </div>
 
-    <div class="pagination-container">
+    <div class="pagination-bar">
       <div class="pagination-info">
-        Hiển thị <span id="currentCount">0</span> trong tổng
-        <span id="totalCount">0</span>
+        Hiển thị <span id="showing-range">0-0</span> trên tổng <span id="total-items">0</span>
       </div>
 
-      <div class="pagination-controls" id="paginationControls"></div>
-
-      <div class="pagination-goto">
-        <span>Đến</span>
-        <input type="number" id="pageInput" min="1" />
-        <span>Trang</span>
+      <div class="pagination-controls">
+        <button class="btn-page" id="btn-prev">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div id="pagination-numbers" class="pages-numbers">
+          <!-- Page numbers rendered by JS -->
+        </div>
+        <button class="btn-page" id="btn-next">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        
+        <div class="pagination-goto">
+          <span>Trang</span>
+          <input type="number" id="pageInput" min="1" />
+        </div>
       </div>
     </div>
-
-
   </div>
 
   <script src="pallet.js"></script>
@@ -207,5 +200,4 @@
     });
   </script>
 </body>
-
 </html>

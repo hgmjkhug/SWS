@@ -112,15 +112,22 @@
 }
 
 .child-indent {
-  padding-left: 24px;
+  padding-left: 12px;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
+.parent-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .toggle-icon {
   transition: transform 0.2s ease;
   color: #64748b;
+  cursor: pointer;
 }
 
 .parent-row.expanded .toggle-icon {
@@ -289,7 +296,11 @@
     cursor: move;
     color: #94a3b8;
     font-size: 14px;
-    display: none;
+    display: inline-block;
+}
+
+.parent-row:hover .drag-handle {
+    display: inline-block;
 }
 
 .child-row:hover .drag-handle {

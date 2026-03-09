@@ -417,11 +417,9 @@ function renderTable() {
             <td>${d.time}</td>
             <td style="font-weight:600">${d.code}</td>
             <td>${d.name}</td>
-            <td><span class="badge ${d.type}">${d.type === 'in' ? 'Nhập' : 'Xuất'}</span></td>
-            <td style="text-align:right; font-weight:700">${d.qty}</td>
+            <td style="text-align:center;"><span class="badge ${d.type}">${d.type === 'in' ? 'Nhập' : 'Xuất'}</span></td>
+            <td style="text-align:center; font-weight:700">${d.qty}</td>
             <td>${d.unit}</td>
-            <td>${d.wh}</td>
-            <td><span class="badge success">${d.status}</span></td>
         </tr>
     `).join('');
 }
@@ -471,11 +469,9 @@ async function exportReport() {
             { header: 'Thời gian', key: 'time', width: 20 },
             { header: 'Mã vật tư', key: 'code', width: 15 },
             { header: 'Tên sản phẩm', key: 'name', width: 30 },
-            { header: 'Loại', key: 'type', width: 10 },
+            { header: 'Loại', key: 'type', width: 12 },
             { header: 'Số lượng', key: 'qty', width: 12 },
             { header: 'Đơn vị', key: 'unit', width: 10 },
-            { header: 'Kho', key: 'wh', width: 10 },
-            { header: 'Trạng thái', key: 'status', width: 15 },
         ];
 
         STAT_DATA.details.forEach(item => {

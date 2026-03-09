@@ -291,6 +291,21 @@
   color: var(--text-main);
 }
 
+/* Specific alignments and widths for Statistics Table */
+.global-table th:nth-child(1) { width: 160px; }
+.global-table th:nth-child(2) { width: 120px; }
+.global-table th:nth-child(4), .global-table td:nth-child(4) { 
+    text-align: center !important; 
+    width: 140px;
+}
+.global-table th:nth-child(5), .global-table td:nth-child(5) { 
+    text-align: center !important; 
+    width: 120px;
+}
+.global-table th:nth-child(6), .global-table td:nth-child(6) { 
+    width: 100px;
+}
+
 .badge {
   padding: 4px 8px;
   border-radius: 4px;

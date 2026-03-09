@@ -7,7 +7,8 @@ var permissionData = [
         name: 'Theo dõi & Giám sát',
         children: [
             { id: 101, name: 'Dashboard tổng quan' },
-            { id: 102, name: 'Dashboard chi tiết' }
+            { id: 102, name: 'Dashboard chi tiết' },
+            { id: 103, name: 'Giám sát hoạt động' }
         ]
     },
     {
@@ -15,18 +16,16 @@ var permissionData = [
         name: 'Quản lý Kho',
         children: [
             { id: 201, name: 'Quản lý Kho' },
-            { id: 202, name: 'Quản lý vật chứa' },
-            { id: 203, name: 'Quản lý thiết bị' },
-            { id: 204, name: 'Lịch bảo trì thiết bị' }
+            { id: 202, name: 'Quy cách sản phẩm' },
+            { id: 203, name: 'Quản lý vật chứa' },
+            { id: 204, name: 'Quản lý bảo trì' }
         ]
     },
     {
         id: 3,
         name: 'Quản lý điều phối WCS',
         children: [
-            { id: 301, name: 'Kanban WCS' },
-            { id: 302, name: 'Quản lý Lệnh' },
-            { id: 303, name: 'Giám sát Thiết bị' }
+            { id: 301, name: 'Kanban WCS' }
         ]
     },
     {
@@ -58,19 +57,27 @@ var permissionData = [
             { id: 702, name: 'Thiết bị' },
             { id: 703, name: 'Nhóm sản phẩm' },
             { id: 704, name: 'Sản phẩm' },
-            { id: 705, name: 'Vật chứa' },
-            { id: 706, name: 'Đơn vị tính' },
-            { id: 707, name: 'Loại vị trí' }
+            { id: 705, name: 'Quy cách' },
+            { id: 706, name: 'Vật chứa' },
+            { id: 707, name: 'Đơn vị tính' },
+            { id: 708, name: 'Loại khu vực' }
         ]
     },
     {
         id: 8,
+        name: 'Báo cáo thống kê',
+        children: [
+            { id: 801, name: 'Báo cáo Nhập/Xuất' }
+        ]
+    },
+    {
+        id: 9,
         name: 'Hệ thống',
         children: [
-            { id: 801, name: 'Tài khoản' },
-            { id: 802, name: 'Vai trò' },
-            { id: 803, name: 'Chức năng' },
-            { id: 804, name: 'Tài nguyên' }
+            { id: 901, name: 'Tài khoản' },
+            { id: 902, name: 'Vai trò' },
+            { id: 903, name: 'Chức năng' },
+            { id: 904, name: 'Tài nguyên' }
         ]
     }
 ];

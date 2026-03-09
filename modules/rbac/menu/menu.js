@@ -7,7 +7,8 @@
     // Shared Modules Data (In a real app, this would come from an API)
     // We use this for the "Parent" selection and for grouping.
     // Updated to match module.js order and paths
-    const modules = [
+    // Initial Data
+    const defaultModules = [
         { id: 1, code: 'DASHBOARD', name: 'Theo dõi & Giám sát', icon: 'fas fa-chart-line', path: 'modules/dashboard', order: 1 },
         { id: 2, code: 'WAREHOUSE', name: 'Quản lý Kho', icon: 'fas fa-map', path: 'modules/warehouse', order: 2 },
         { id: 3, code: 'WCS', name: 'Quản lý điều phối WCS', icon: 'fas fa-microchip', path: 'modules/wcs', order: 3 },
@@ -15,25 +16,24 @@
         { id: 5, code: 'OUTBOUND', name: 'Xuất kho', icon: 'fas fa-file-export', path: 'modules/outbound', order: 5 },
         { id: 6, code: 'WORKFLOW', name: 'Quản lý bước và quy trình', icon: 'fas fa-project-diagram', path: 'modules/workflow', order: 6 },
         { id: 7, code: 'MASTER_DATA', name: 'Danh mục chung', icon: 'fas fa-database', path: 'modules/master-data', order: 7 },
-        { id: 8, code: 'SYSTEM', name: 'Hệ thống', icon: 'fas fa-cogs', path: 'modules/rbac', order: 8 }
+        { id: 8, code: 'STATISTIC', name: 'Báo cáo thống kê', icon: 'fas fa-chart-bar', path: 'modules/statistic', order: 8 },
+        { id: 9, code: 'SYSTEM', name: 'Hệ thống', icon: 'fas fa-cogs', path: 'modules/rbac', order: 9 }
     ];
 
-    // Mock Data for Functions (Children)
-    let functions = [
+    const defaultFunctions = [
         // DASHBOARD (id: 1)
         { id: 101, moduleId: 1, code: 'DASHBOARD_OVERVIEW', name: 'Dashboard tổng quan', icon: 'fas fa-chart-pie', path: 'modules/dashboard/general-dashboard/general', resource: 'DASHBOARDTONGQUAN', order: 1 },
         { id: 102, moduleId: 1, code: 'DASHBOARD_DETAIL', name: 'Dashboard chi tiết', icon: 'fas fa-chart-area', path: 'modules/dashboard/detail-dashboard/detail', resource: 'DASHBOARDCHITIET', order: 2 },
+        { id: 103, moduleId: 1, code: 'DASHBOARD_MONITOR', name: 'Giám sát hoạt động', icon: 'fa-solid fa-chalkboard-user', path: 'modules/dashboard/monitor', resource: 'GIAMSATHOATDONG', order: 3 },
 
         // WAREHOUSE (id: 2)
         { id: 201, moduleId: 2, code: 'WAREHOUSE_LIST', name: 'Quản lý Kho', icon: 'fas fa-warehouse', path: 'modules/warehouse/warehouse', resource: 'QUANLYKHO', order: 1 },
-        { id: 202, moduleId: 2, code: 'CONTAINER_MGMT', name: 'Quản lý vật chứa', icon: 'fas fa-pallet', path: 'modules/pallet/pallet', resource: 'QUANLYVATCHUA', order: 2 },
-        { id: 203, moduleId: 2, code: 'DEVICE_MGMT', name: 'Quản lý thiết bị', icon: 'fas fa-mobile-alt', path: 'modules/master-data/device/device', resource: 'QUANLYTHIETBI', order: 3 },
-        { id: 204, moduleId: 2, code: 'MAINTENANCE', name: 'Lịch bảo trì thiết bị', icon: 'fas fa-calendar-alt', path: 'modules/wcs/maintenance', resource: 'LICHBAOTRI', order: 4 },
+        { id: 202, moduleId: 2, code: 'PRODUCT_METHOD', name: 'Quy cách sản phẩm', icon: 'fa-solid fa-box-open', path: 'modules/product-method/product-method', resource: 'QUYCACHSANPHAM', order: 2 },
+        { id: 203, moduleId: 2, code: 'CONTAINER_MGMT', name: 'Quản lý vật chứa', icon: 'fas fa-pallet', path: 'modules/pallet/pallet', resource: 'QUANLYVATCHUA', order: 3 },
+        { id: 204, moduleId: 2, code: 'MAINTENANCE', name: 'Quản lý bảo trì', icon: 'fa-solid fa-toolbox', path: 'modules/maintenance/maintenance', resource: 'QUANLYBAOTRI', order: 4 },
 
         // WCS (id: 3)
         { id: 301, moduleId: 3, code: 'WCS_KANBAN', name: 'Kanban WCS', icon: 'fas fa-columns', path: 'modules/kanbanWCS/kanban', resource: 'KANBANWCS', order: 1 },
-        { id: 302, moduleId: 3, code: 'WCS_ORDER', name: 'Quản lý Lệnh', icon: 'fas fa-clipboard-list', path: 'modules/wcs/job/job', resource: 'QUANLYLENH', order: 2 },
-        { id: 303, moduleId: 3, code: 'WCS_MONITOR', name: 'Giám sát Thiết bị', icon: 'fas fa-desktop', path: 'modules/wcs/device', resource: 'GIAMSATTHIETBI', order: 3 },
 
         // INBOUND (id: 4)
         { id: 401, moduleId: 4, code: 'INBOUND_ORDER', name: 'Lệnh nhập kho', icon: 'fas fa-file-import', path: 'modules/inbound/inbound', resource: 'LENHNHAPKHO', order: 1 },
@@ -49,16 +49,23 @@
         { id: 702, moduleId: 7, code: 'DEVICE_LIST', name: 'Thiết bị', icon: 'fas fa-mobile-alt', path: 'modules/master-data/device-list/device-list', resource: 'THIETBI', order: 2 },
         { id: 703, moduleId: 7, code: 'PRODUCT_GROUP', name: 'Nhóm sản phẩm', icon: 'fas fa-cubes', path: 'modules/master-data/category/category', resource: 'NHOMSANPHAM', order: 3 },
         { id: 704, moduleId: 7, code: 'PRODUCT_LIST', name: 'Sản phẩm', icon: 'fas fa-box', path: 'modules/master-data/product/product', resource: 'SANPHAM', order: 4 },
-        { id: 705, moduleId: 7, code: 'PALLET_LIST', name: 'Vật chứa', icon: 'fas fa-pallet', path: 'modules/master-data/pallet-list/container', resource: 'VATCHUA', order: 5 },
-        { id: 706, moduleId: 7, code: 'UNIT_OF_MEASURE', name: 'Đơn vị tính', icon: 'fas fa-ruler', path: 'modules/master-data/unit-of-measure/unit', resource: 'DONVITINH', order: 6 },
-        { id: 707, moduleId: 7, code: 'LOCATION_TYPE', name: 'Loại vị trí', icon: 'fas fa-map-marker-alt', path: 'modules/master-data/node-type/node-type', resource: 'LOAIVITRI', order: 7 },
+        { id: 705, moduleId: 7, code: 'METHOD', name: 'Quy cách', icon: 'fa-solid fa-route', path: 'modules/master-data/method/method', resource: 'QUYCACH', order: 5 },
+        { id: 706, moduleId: 7, code: 'PALLET_LIST', name: 'Vật chứa', icon: 'fas fa-pallet', path: 'modules/master-data/pallet-list/container', resource: 'VATCHUA', order: 6 },
+        { id: 707, moduleId: 7, code: 'UNIT_OF_MEASURE', name: 'Đơn vị tính', icon: 'fas fa-ruler', path: 'modules/master-data/unit-of-measure/unit', resource: 'DONVITINH', order: 7 },
+        { id: 708, moduleId: 7, code: 'LOCATION_TYPE', name: 'Loại khu vực', icon: 'fas fa-map-marker-alt', path: 'modules/master-data/node-type/node-type', resource: 'LOAIKHUVUC', order: 8 },
 
-        // SYSTEM (id: 8)
-        { id: 801, moduleId: 8, code: 'ACCOUNT', name: 'Tài khoản', icon: 'fas fa-user', path: 'modules/rbac/account/account', resource: 'TAIKHOAN', order: 1 },
-        { id: 802, moduleId: 8, code: 'ROLE', name: 'Vai trò', icon: 'fas fa-user-tag', path: 'modules/rbac/role/role', resource: 'VAITRO', order: 2 },
-        { id: 803, moduleId: 8, code: 'MENU', name: 'Chức năng', icon: 'fas fa-list', path: 'modules/rbac/menu/menu', resource: 'CHUCNANG', order: 3 },
-        { id: 804, moduleId: 8, code: 'RESOURCE', name: 'Tài nguyên', icon: 'fas fa-folder-open', path: 'modules/rbac/resource/resource', resource: 'TAINGUYEN', order: 4 },
+        // STATISTIC (id: 8)
+        { id: 801, moduleId: 8, code: 'STATISTIC_REPORT', name: 'Báo cáo Nhập/Xuất', icon: 'fa-solid fa-arrow-up-right-dots', path: 'modules/statistic/statistic', resource: 'BAOCAONHAPXUAT', order: 1 },
+
+        // SYSTEM (id: 9)
+        { id: 901, moduleId: 9, code: 'ACCOUNT', name: 'Tài khoản', icon: 'fas fa-user', path: 'modules/rbac/account/account', resource: 'TAIKHOAN', order: 1 },
+        { id: 902, moduleId: 9, code: 'ROLE', name: 'Vai trò', icon: 'fas fa-user-tag', path: 'modules/rbac/role/role', resource: 'VAITRO', order: 2 },
+        { id: 903, moduleId: 9, code: 'MENU', name: 'Chức năng', icon: 'fas fa-list', path: 'modules/rbac/menu/menu', resource: 'CHUCNANG', order: 3 },
+        { id: 904, moduleId: 9, code: 'RESOURCE', name: 'Tài nguyên', icon: 'fas fa-folder-open', path: 'modules/rbac/resource/resource', resource: 'TAINGUYEN', order: 4 },
     ];
+
+    let modules = [];
+    let functions = [];
 
     let isEditing = false;
     let currentId = null;
@@ -69,10 +76,51 @@
 
     // Initialize
     function init() {
+        loadFromStorage();
         renderTable();
         setupEventListeners();
         populateModuleSelect();
         populateResourceSelect();
+    }
+
+    const MENU_DATA_VERSION = '1.2'; // Increment to force reset
+
+    function loadFromStorage() {
+        try {
+            const storedVersion = localStorage.getItem('menu_data_version');
+            const storedModules = localStorage.getItem('menu_modules_data');
+            const storedFunctions = localStorage.getItem('menu_functions_data');
+            
+            if (storedVersion === MENU_DATA_VERSION && storedModules && storedFunctions) {
+                modules = JSON.parse(storedModules);
+                functions = JSON.parse(storedFunctions);
+            } else {
+                // Version mismatch or no data - Load defaults
+                console.log("Loading default menu data (Version " + MENU_DATA_VERSION + ")");
+                modules = [...defaultModules];
+                functions = [...defaultFunctions];
+                localStorage.setItem('menu_data_version', MENU_DATA_VERSION);
+                saveDataToStorage(); // Initial save
+            }
+        } catch (e) {
+            console.error("Failed to load menu data from storage", e);
+            modules = [...defaultModules];
+            functions = [...defaultFunctions];
+        }
+    }
+
+    function saveDataToStorage() {
+        try {
+            localStorage.setItem('menu_modules_data', JSON.stringify(modules));
+            localStorage.setItem('menu_functions_data', JSON.stringify(functions));
+            
+            // Sync Sidebar
+            if (window.parent && window.parent.refreshSidebarOrder) {
+                window.parent.refreshSidebarOrder(modules.map(m => m.code));
+            }
+        } catch (e) {
+            console.error("Failed to save menu data to storage", e);
+        }
     }
 
     // --- Custom Dropdown Logic ---
@@ -475,6 +523,14 @@
             trParent.dataset.id = module.id;
             trParent.dataset.type = 'module';
 
+            trParent.setAttribute('draggable', 'true');
+            trParent.classList.add('editable-row');
+            trParent.ondragstart = handleDragStart;
+            trParent.ondragover = handleDragOver;
+            trParent.ondrop = handleDrop;
+            trParent.ondragenter = handleDragEnter;
+            trParent.ondragleave = handleDragLeave;
+
             // Allow selecting parent row
             trParent.onclick = (e) => {
                 // Prevent toggle if clicking on delete button
@@ -495,11 +551,14 @@
 
             trParent.innerHTML = `
                 <td class="col-expand">
-                    <i class="fas fa-chevron-right toggle-icon"></i>
+                    <i class="fas fa-grip-vertical drag-handle parent-drag" title="Kéo để thay đổi thứ tự phân hệ"></i>
                 </td>
                 <td class="col-stt">${mIndex + 1}</td>
                 <td class="col-name">
-                    <span ${contentEditable} class="${editClass}" onblur="updateField(${module.id}, 'name', this.innerText, 'module')" onkeydown="checkEnter(event, this)" onclick="event.stopPropagation();">${module.name}</span>
+                    <div class="parent-name-wrapper">
+                        <i class="fas fa-chevron-right toggle-icon" style="font-size: 11px; width: 12px;"></i>
+                        <span ${contentEditable} class="${editClass}" onblur="updateField(${module.id}, 'name', this.innerText, 'module')" onkeydown="checkEnter(event, this)" onclick="event.stopPropagation();">${module.name}</span>
+                    </div>
                 </td>
                 <td class="col-icon">
                     <div class="module-icon-display">
@@ -526,22 +585,18 @@
                 const isSelected = selectedId === func.id;
                 trChild.className = `child-row module-${module.id} ${isExpanded ? 'show' : ''} ${isSelected ? 'selected' : ''}`;
 
-                if (isBatchEditing) {
-                    trChild.setAttribute('draggable', 'true');
-                    trChild.classList.add('editable-row');
-                }
+                trChild.setAttribute('draggable', 'true');
+                trChild.classList.add('editable-row');
 
                 trChild.dataset.id = func.id;
                 trChild.dataset.moduleId = module.id;
 
                 // Drag Events
-                if (isBatchEditing) {
-                    trChild.ondragstart = handleDragStart;
-                    trChild.ondragover = handleDragOver;
-                    trChild.ondrop = handleDrop;
-                    trChild.ondragenter = handleDragEnter;
-                    trChild.ondragleave = handleDragLeave;
-                }
+                trChild.ondragstart = handleDragStart;
+                trChild.ondragover = handleDragOver;
+                trChild.ondrop = handleDrop;
+                trChild.ondragenter = handleDragEnter;
+                trChild.ondragleave = handleDragLeave;
 
                 // Edit helpers
                 // const contentEditable = isBatchEditing ? 'contenteditable="true"' : ''; // Defined above
@@ -552,7 +607,7 @@
 
                 trChild.innerHTML = `
                     <td class="col-expand" style="vertical-align: middle; text-align: center;">
-                        ${isBatchEditing ? '<i class="fas fa-grip-vertical drag-handle" title="Kéo để thay đổi thứ tự chức năng"></i>' : ''}
+                        <i class="fas fa-grip-vertical drag-handle" title="Kéo để thay đổi thứ tự chức năng"></i>
                     </td>
                     <td class="col-stt"></td>
                     <td class="col-name">
@@ -638,6 +693,7 @@
             if (field === 'icon' || field === 'resource') {
                 renderTable(document.getElementById('menu-search').value);
             }
+            saveDataToStorage();
         }
     }
 
@@ -682,29 +738,53 @@
             // Only allow reordering within same module for simplicity now, or handle move
             // Request implies reordering: "dashboard overview 1, detail 2" -> swap
 
-            if (srcModuleId !== targetModuleId) {
-                alert("Chỉ có thể sắp xếp thứ tự trong cùng một phân hệ.");
+            // Reorder
+            if (dragSrcEl.dataset.type === 'module' && this.dataset.type === 'module') {
+                const srcIndex = modules.findIndex(m => m.id === srcId);
+                const targetIndex = modules.findIndex(m => m.id === targetId);
+
+                if (srcIndex !== -1 && targetIndex !== -1) {
+                    const [movedItem] = modules.splice(srcIndex, 1);
+                    modules.splice(targetIndex, 0, movedItem);
+
+                    // Update orders
+                    modules.forEach((m, index) => m.order = index + 1);
+
+                    // Sync Sidebar
+                    if (window.refreshSidebarOrder) {
+                        window.refreshSidebarOrder(modules.map(m => m.code));
+                    }
+                    
+                    // Show success toast for reordering
+                    if (window.showToast) {
+                        window.showToast('Cập nhật danh sách chức năng thành công', 'success');
+                    }
+                }
+            } else if (srcModuleId === targetModuleId) {
+                const moduleFunctions = functions.filter(f => f.moduleId === srcModuleId).sort((a, b) => a.order - b.order);
+                const srcIndex = moduleFunctions.findIndex(f => f.id === srcId);
+                const targetIndex = moduleFunctions.findIndex(f => f.id === targetId);
+
+                if (srcIndex !== -1 && targetIndex !== -1) {
+                    const [movedItem] = moduleFunctions.splice(srcIndex, 1);
+                    moduleFunctions.splice(targetIndex, 0, movedItem);
+
+                    moduleFunctions.forEach((f, index) => {
+                        f.order = index + 1;
+                        const mainIndex = functions.findIndex(func => func.id === f.id);
+                        if (mainIndex !== -1) functions[mainIndex].order = f.order;
+                    });
+                }
+            } else {
+                if (window.showToast) {
+                    window.showToast('Chỉ có thể sắp xếp thứ tự trong cùng một phân hệ.', 'warning');
+                } else {
+                    alert("Chỉ có thể sắp xếp thứ tự trong cùng một phân hệ.");
+                }
                 return false;
             }
 
-            // Reorder
-            const moduleFunctions = functions.filter(f => f.moduleId === srcModuleId).sort((a, b) => a.order - b.order);
-            const srcIndex = moduleFunctions.findIndex(f => f.id === srcId);
-            const targetIndex = moduleFunctions.findIndex(f => f.id === targetId);
-
-            // Remove src from array
-            const [movedItem] = moduleFunctions.splice(srcIndex, 1);
-            // Insert at target
-            moduleFunctions.splice(targetIndex, 0, movedItem);
-
-            // Update order based on new index
-            moduleFunctions.forEach((f, index) => {
-                f.order = index + 1;
-                // Update main functions array
-                const mainIndex = functions.findIndex(func => func.id === f.id);
-                if (mainIndex !== -1) functions[mainIndex].order = f.order;
-            });
-
+            saveDataToStorage();
             renderTable(document.getElementById('menu-search').value);
         }
 
@@ -905,6 +985,7 @@
         }
 
         renderTable(document.getElementById('menu-search').value);
+        saveDataToStorage();
         closeMenuModal();
     };
 
@@ -960,6 +1041,7 @@
             }
 
             renderTable(document.getElementById('menu-search').value);
+            saveDataToStorage();
             closeDeleteConfirm();
         }
     };
