@@ -887,7 +887,7 @@ document.addEventListener('DOMContentLoaded', function () {
             loadPage(lastPage);
         } else {
             // Default page if none
-            loadPage('Dashboard Tổng quan');
+            loadPage('Kanban WCS');
         }
     } catch (e) {
         console.error("Restoration error:", e);

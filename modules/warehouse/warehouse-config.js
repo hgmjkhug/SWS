@@ -624,7 +624,7 @@
         
         // Save to parent warehouse store
         if (currentWarehouseId) {
-            const stored = localStorage.getItem('wms_warehouses_v5');
+            const stored = localStorage.getItem('wms_warehouses_v6');
             if (stored) {
                 let list = JSON.parse(stored);
                 const idx = list.findIndex(w => w.id === currentWarehouseId);
@@ -634,7 +634,7 @@
                     // Ideally we should save floorConfigs in the warehouse object to restore selection on reload
                     list[idx].configData = floorConfigs; 
                     
-                    localStorage.setItem('wms_warehouses_v5', JSON.stringify(list));
+                    localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
                     alert(`Đã lưu cấu hình kho thành công!\nTổng vị trí: ${totalLocs.toLocaleString()}`);
                 }
             }
@@ -814,7 +814,7 @@
         }
         currentWarehouseId = parseInt(idStr);
         
-        const stored = localStorage.getItem('wms_warehouses_v5');
+        const stored = localStorage.getItem('wms_warehouses_v6');
         if (stored) {
             const list = JSON.parse(stored);
             currentWarehouse = list.find(w => w.id === currentWarehouseId);
@@ -1473,10 +1473,12 @@
 
     function populateInitTab() {
         if (!currentWarehouse) return;
+        var codeEl = document.getElementById('initWarehouseCode');
         var nameEl = document.getElementById('initWarehouseName');
         var floorsEl = document.getElementById('initWarehouseFloors');
         var lengthEl = document.getElementById('initWarehouseLength');
         var widthEl = document.getElementById('initWarehouseWidth');
+        if (codeEl) codeEl.value = currentWarehouse.code || '';
         if (nameEl) nameEl.value = currentWarehouse.name || '';
         if (floorsEl) floorsEl.value = currentWarehouse.floors || '';
         // Use floorConfigs as source of truth for dimensions (synced with grid)

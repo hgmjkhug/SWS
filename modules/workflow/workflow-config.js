@@ -86,7 +86,8 @@ function initWorkflowConfig(workflowId, workflowName) {
         { id: 2, code: 'CRANE-STACK', name: 'Cần trục Stacker Crane' },
         { id: 3, code: 'CONVEYOR-BELT', name: 'Băng tải dây' },
         { id: 4, code: 'LIFTER-VERT', name: 'Thang máy nâng hàng' },
-        { id: 5, code: 'SCANNER-GATE', name: 'Cổng Scan RFID' }
+        { id: 5, code: 'SCANNER-GATE', name: 'Cổng Scan RFID' },
+        { id: 6, code: 'SHUTTLE', name: 'Shuttle đi theo ray' }
     ];
 
     const stepTemplates = [];
@@ -432,7 +433,7 @@ function initWorkflowConfig(workflowId, workflowName) {
         if (totalAvailableStepsSpan) totalAvailableStepsSpan.textContent = availableSteps.length;
 
         if (availableSteps.length === 0) {
-            stepList.innerHTML = '<div class="step-list-empty"><i class="fas fa-inbox"></i><br>Chưa có bước nào. Hãy tạo bước mới ở trên.</div>';
+            stepList.innerHTML = '<div class="step-list-empty"><i class="fas fa-inbox"></i><br>Chưa có bước nào. Hãy tạo bước mới để thiết lập quy trình.</div>';
             return;
         }
 

@@ -241,14 +241,15 @@
 }
 
 /* Explicit width for alignment */
-.warehouse-table th:nth-child(1), .warehouse-table td:nth-child(1) { width: 4%; text-align: center; } /* Checkbox */
-.warehouse-table th:nth-child(2), .warehouse-table td:nth-child(2) { width: 5%; text-align: center; } /* STT */
-.warehouse-table th:nth-child(3), .warehouse-table td:nth-child(3) { width: 26%; } /* Tên kho */
-.warehouse-table th:nth-child(4), .warehouse-table td:nth-child(4) { width: 15%; text-align: center; } /* Loại kho */
-.warehouse-table th:nth-child(5), .warehouse-table td:nth-child(5) { width: 10%; text-align: center; } /* Số tầng */
-.warehouse-table th:nth-child(6), .warehouse-table td:nth-child(6) { width: 15%; text-align: center; } /* Tổng vị trí */
-.warehouse-table th:nth-child(7), .warehouse-table td:nth-child(7) { width: 15%; text-align: center; } /* Trạng thái */
-.warehouse-table th:nth-child(8), .warehouse-table td:nth-child(8) { width: 10%; text-align: center; } /* Thao tác */
+.warehouse-table th:nth-child(1), .warehouse-table td:nth-child(1) { width: 3%; text-align: center; } /* Checkbox */
+.warehouse-table th:nth-child(2), .warehouse-table td:nth-child(2) { width: 4%; text-align: center; } /* STT */
+.warehouse-table th:nth-child(3), .warehouse-table td:nth-child(3) { width: 9%; text-align: center; } /* Mã kho */
+.warehouse-table th:nth-child(4), .warehouse-table td:nth-child(4) { width: 22%; } /* Tên kho */
+.warehouse-table th:nth-child(5), .warehouse-table td:nth-child(5) { width: 13%; text-align: center; } /* Loại kho */
+.warehouse-table th:nth-child(6), .warehouse-table td:nth-child(6) { width: 7%; text-align: center; } /* Số tầng */
+.warehouse-table th:nth-child(7), .warehouse-table td:nth-child(7) { width: 10%; text-align: center; } /* Tổng vị trí */
+.warehouse-table th:nth-child(8), .warehouse-table td:nth-child(8) { width: 12%; text-align: center; } /* Trạng thái */
+.warehouse-table th:nth-child(9), .warehouse-table td:nth-child(9) { width: 10%; text-align: center; } /* Thao tác */
 
 /* Style cho các cell TH và TD */
 .warehouse-table th,
