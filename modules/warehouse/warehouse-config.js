@@ -120,6 +120,29 @@
                 }
             }
         });
+
+        // Floor Tab Dropdowns
+        var floorTabDds = ['floorTabSelectDropdown', 'floorCustomDropdown'];
+        floorTabDds.forEach(function(id) {
+            var dd = document.getElementById(id);
+            if (dd) {
+                var menu = dd.querySelector('.floor-custom-menu');
+                if (menu && menu.classList.contains('show') && !dd.contains(e.target)) {
+                    menu.classList.remove('show');
+                }
+            }
+        });
+
+        // New floor equipment search combobox
+        var floorEqWrapper = document.getElementById('floorEqSearchWrapper');
+        var floorEqMenu = document.getElementById('floorEquipmentMenu');
+        if (floorEqWrapper && floorEqMenu && floorEqMenu.style.display === 'block') {
+            if (!floorEqWrapper.contains(e.target)) {
+                floorEqMenu.style.display = 'none';
+                var chevron = document.getElementById('floorEqChevron');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+        }
     });
 
     function initGrid() {
@@ -291,6 +314,43 @@
             btnPos.classList.remove('active');
             btnGoods.classList.add('active');
         }
+    }
+
+    // Resizer Logic
+    var isResizing = false;
+    var resizer = document.getElementById('configResizer');
+    var leftPanel = document.querySelector('.config-left-panel');
+    var lastDownX = 0;
+
+    if (resizer && leftPanel) {
+        resizer.addEventListener('mousedown', function(e) {
+            isResizing = true;
+            lastDownX = e.clientX;
+            resizer.classList.add('is-resizing');
+            document.body.style.cursor = 'col-resize';
+            // Prevent text selection during drag
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isResizing) return;
+            var offsetRight = document.body.offsetWidth - (e.clientX - document.body.offsetLeft);
+            var newWidth = e.clientX;
+            // Min and Max width constraints
+            if (newWidth < 400) newWidth = 400;
+            if (newWidth > 800) newWidth = 800;
+            
+            leftPanel.style.minWidth = newWidth + 'px';
+            leftPanel.style.maxWidth = newWidth + 'px';
+        });
+
+        document.addEventListener('mouseup', function(e) {
+            if (isResizing) {
+                isResizing = false;
+                resizer.classList.remove('is-resizing');
+                document.body.style.cursor = '';
+            }
+        });
     }
 
     // Drag handlers
@@ -1000,13 +1060,44 @@
         }
 
         // Set initial tab state
+        var savedTabId = localStorage.getItem('warehouse_config_active_tab');
         var activeBtn = document.querySelector('.segment-btn.active');
-        if (activeBtn) {
+        
+        // Hide config content briefly to prevent flash
+        var configContent = document.querySelector('.config-content');
+        if (configContent) {
+           configContent.style.visibility = 'hidden';
+        }
+        
+        if (savedTabId) {
+            // Restore from saved state
+            var targetBtn = null;
+            var buttons = document.querySelectorAll('.segment-btn');
+            for (var i = 0; i < buttons.length; i++) {
+                var btnOnClick = buttons[i].getAttribute('onclick') || '';
+                if (btnOnClick.includes("setConfigTab('" + savedTabId + "'")) {
+                    targetBtn = buttons[i];
+                    break;
+                }
+            }
+            setConfigTab(savedTabId, targetBtn || activeBtn);
+        } else if (activeBtn) {
+            // Default logic if no saved state
             var tabId = 'init'; // Default
-            if (activeBtn.innerText.includes('Khu vực')) tabId = 'area';
-            else if (activeBtn.innerText.includes('Vị trí')) tabId = 'location';
-            else if (activeBtn.innerText.includes('Loại vị trí')) tabId = 'floor';
+            var defaultOnClick = activeBtn.getAttribute('onclick') || '';
+            if (defaultOnClick.includes("('area'")) tabId = 'area';
+            else if (defaultOnClick.includes("('location'")) tabId = 'location';
             setConfigTab(tabId, activeBtn);
+        } else {
+            // Fallback if no DOM button found yet
+            setConfigTab('init', null);
+        }
+        
+        if (configContent) {
+            // Unhide after the correct DOM tab displays
+            setTimeout(function() {
+                configContent.style.visibility = 'visible';
+            }, 50);
         }
 
         // Initialize Resizer
@@ -1241,12 +1332,15 @@
      * @param {HTMLElement} btn - The clicked button element
      */
     function setConfigTab(tab, btn) {
+        // Save to localStorage
+        localStorage.setItem('warehouse_config_active_tab', tab);
+
         // Update button UI
         var buttons = document.querySelectorAll('.segment-btn');
         for (var i = 0; i < buttons.length; i++) {
             buttons[i].classList.remove('active');
         }
-        btn.classList.add('active');
+        if (btn) btn.classList.add('active');
         
         // Hide all tab contents
         var tabContents = document.querySelectorAll('.tab-content');
@@ -1265,6 +1359,16 @@
                 configContent.classList.add('grid-hidden');
             } else {
                 configContent.classList.remove('grid-hidden');
+            }
+        }
+        
+        // Toggle header actions visibility based on tab (only show on area and location)
+        var headerActions = document.querySelector('.header-actions');
+        if (headerActions) {
+            if (tab === 'init' || tab === 'floor') {
+                headerActions.style.display = 'none';
+            } else {
+                headerActions.style.display = 'flex';
             }
         }
 
@@ -1286,7 +1390,9 @@
         } else if (tab === 'floor') {
             var floorTab = document.getElementById('tabContentFloor');
             if (floorTab) floorTab.classList.add('active');
-            renderFloorTypeCards();
+            if (typeof populateFloorTabFields === 'function') {
+                populateFloorTabFields();
+            }
         }
         
         // Refresh grid visualization to show all assigned areas/locations
@@ -1700,8 +1806,17 @@
     }
 
     function toggleFloorTabDropdown() {
-        const menu = document.getElementById('floorTabDropdownMenu');
-        if (menu) menu.classList.toggle('show');
+        var menu = document.getElementById('floorTabMenu');
+        if (menu) {
+            if (menu.classList.contains('show')) {
+                menu.classList.remove('show');
+            } else {
+                if (typeof window.populateFloorTabFields === 'function') {
+                    window.populateFloorTabFields();
+                }
+                menu.classList.add('show');
+            }
+        }
     }
 
     function updateFloorField(field, value) {
@@ -2557,22 +2672,45 @@
             });
             html += '</div></div></div></div>';
 
+            // Positions Selection container
+            html += '<div class="location-field area-position" style="margin-bottom: none;">';
+            html += '<span class="location-field-label">Vị trí<span style="color: red;">*</span></span>';
+            html += '<div class="location-field-value">';
+            html += '<label style="font-size: 13px; display: block; margin-bottom: 5px;">Đã chọn: <strong style="color: #076eb8">' + (loc.positions ? loc.positions.length : 0) + '</strong> vị trí</label>';
+            html += '<div class="area-tags" style="overflow-y: auto; max-height: 120px; margin-bottom: 0;">';
+            if (loc.positions && loc.positions.length > 0) {
+                for (var posIdx = 0; posIdx < loc.positions.length; posIdx++) {
+                    var pos = loc.positions[posIdx];
+                    html += '<span class="tag-item">' + pos + '<span class="tag-remove" onclick="' + (isReadonly ? '' : 'removeLocationTag(' + loc.id + ', \'' + pos + '\')') + '">&times;</span></span>';
+                }
+            } else {
+                html += '<span style="color: #9cb3c9; font-size: 13px; font-style: italic; display: inline-block; padding: 5px;">Chưa chọn vị trí nào</span>';
+            }
+            html += '</div></div></div>';
+
             // QR Code (Dynamic)
             var qrCodes = loc.qrCodes || [''];
             if (qrCodes.length === 0) qrCodes = ['']; // At least one input
-            
+
+            var currentPosCount = loc.positions ? loc.positions.length : 0;
+            if (activeLocationId === loc.id) {
+                var config = floorConfigs[currentFloor];
+                if (config && config.selected) {
+                    currentPosCount = Object.keys(config.selected).length;
+                }
+            }
+            var isMultiPos = currentPosCount > 1;
+
             html += '<div class="location-field" style="align-items: flex-start;">';
             html += '<span class="location-field-label" style="padding-top: 10px;">QR Code <span style="color: red;">*</span></span>';
             html += '<div class="location-qr-container" style="flex: 1; display: flex; flex-direction: column; gap: 8px;">';
             
             for (var j = 0; j < qrCodes.length; j++) {
                 html += '<div class="location-qr-input-group" style="display: flex; align-items: center; gap: 8px;">';
-                html += '<input type="text" value="' + (qrCodes[j] || '') + '" onchange="updateLocationQRCode(' + loc.id + ', ' + j + ', this.value)" placeholder="Nhập mã QR..." style="flex: 1; height: 36px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;">';
-                if (qrCodes.length > 1) {
-                    html += '<button class="area-action-btn delete" onclick="removeLocationQRCode(' + loc.id + ', ' + j + ')" style="width: 32px; height: 32px; flex-shrink: 0;" title="Xóa mã QR"><i class="fas fa-times"></i></button>';
-                }
-                if (j === qrCodes.length - 1) {
-                    html += '<button class="area-action-btn" onclick="addLocationQRCode(' + loc.id + ')" style="width: 32px; height: 32px; flex-shrink: 0; background: #f0f9ff; color: #076eb8; border-color: #dbeafe;" title="Thêm mã QR"><i class="fas fa-plus"></i></button>';
+                if (isMultiPos) {
+                    html += '<input type="text" value="' + (qrCodes[j] || '') + '" onchange="updateLocationQRCode(' + loc.id + ', ' + j + ', this.value)" placeholder="Nhập mã QR..." style="flex: 1; height: 36px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; cursor: not-allowed;" disabled title="Chỉ có thể thiết lập mã QR cho 1 vị trí">';
+                } else {
+                    html += '<input type="text" value="' + (qrCodes[j] || '') + '" onchange="updateLocationQRCode(' + loc.id + ', ' + j + ', this.value)" placeholder="Nhập mã QR..." style="flex: 1; height: 36px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;">';
                 }
                 html += '</div>';
             }
@@ -2611,22 +2749,6 @@
             html += '<div class="location-icon-preview-container" title="' + dirLabel + '">';
             html += getLocationIconSVG(locDirs);
             html += '</div></div>';
-
-            // Positions Selection container
-            html += '<div class="location-field area-position" style="margin-bottom: 5px;">';
-            html += '<span class="location-field-label">Vị trí<span style="color: red;">*</span></span>';
-            html += '<div class="location-field-value">';
-            html += '<label style="font-size: 13px; display: block; margin-bottom: 5px;">Đã chọn: <strong style="color: #076eb8">' + (loc.positions ? loc.positions.length : 0) + '</strong> vị trí</label>';
-            html += '<div class="area-tags" style="overflow-y: auto; max-height: 120px; margin-bottom: 16px;">';
-            if (loc.positions && loc.positions.length > 0) {
-                for (var posIdx = 0; posIdx < loc.positions.length; posIdx++) {
-                    var pos = loc.positions[posIdx];
-                    html += '<span class="tag-item">' + pos + '<span class="tag-remove" onclick="' + (isReadonly ? '' : 'removeLocationTag(' + loc.id + ', \'' + pos + '\')') + '">&times;</span></span>';
-                }
-            } else {
-                html += '<span style="color: #9cb3c9; font-size: 13px; font-style: italic; display: inline-block; padding: 5px;">Chưa chọn vị trí nào</span>';
-            }
-            html += '</div></div></div>';
 
             html += '</div>'; // end location-card-body
             
@@ -3020,6 +3142,228 @@
             alert('Đã lưu cấu hình vị trí thành công!');
         }
     }
+
+    // ===== FLOOR TAB UI LOGIC =====
+    window.toggleFloorTabDropdown = function() {
+        var menu = document.getElementById('floorTabMenu');
+        if (menu) {
+            if (menu.classList.contains('show')) {
+                menu.classList.remove('show');
+            } else {
+                if (typeof window.populateFloorTabFields === 'function') {
+                    window.populateFloorTabFields();
+                }
+                menu.classList.add('show');
+            }
+        }
+    };
+
+    window.selectFloorTabDropdown = function(floorNum) {
+        var menu = document.getElementById('floorTabMenu');
+        if (menu) menu.classList.remove('show');
+        currentFloor = floorNum;
+        initGrid();
+        renderFloorMenu();
+        window.populateFloorTabFields();
+    };
+
+    window.updateFloorName = function(val) {
+        if (floorConfigs[currentFloor]) {
+            floorConfigs[currentFloor].name = val;
+        }
+    };
+
+    // ----- Floor Equipment Accordion -----
+    var floorEqFilterText = '';
+
+    window.openFloorEqDropdown = function() {
+        var menu = document.getElementById('floorEquipmentMenu');
+        var chevron = document.getElementById('floorEqChevron');
+        if (menu) {
+            menu.style.display = 'block';
+            if (chevron) chevron.style.transform = 'rotate(180deg)';
+            renderFloorEqAccordion();
+        }
+    };
+
+    window.closeFloorEqDropdown = function() {
+        var menu = document.getElementById('floorEquipmentMenu');
+        var chevron = document.getElementById('floorEqChevron');
+        if (menu) {
+            menu.style.display = 'none';
+            if (chevron) chevron.style.transform = 'rotate(0deg)';
+        }
+    };
+
+    window.toggleFloorEquipmentDropdown = function() {
+        var menu = document.getElementById('floorEquipmentMenu');
+        var chevron = document.getElementById('floorEqChevron');
+        if (menu) {
+            if (menu.style.display === 'none' || menu.style.display === '') {
+                menu.style.display = 'block';
+                if (chevron) chevron.style.transform = 'rotate(180deg)';
+                renderFloorEqAccordion();
+            } else {
+                menu.style.display = 'none';
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+    };
+
+    window.filterFloorEqList = function() {
+        var input = document.getElementById('floorEqSearchInput');
+        floorEqFilterText = input ? input.value.toLowerCase().trim() : '';
+        var menu = document.getElementById('floorEquipmentMenu');
+        var chevron = document.getElementById('floorEqChevron');
+        if (menu && menu.style.display !== 'block') {
+            menu.style.display = 'block';
+            if (chevron) chevron.style.transform = 'rotate(180deg)';
+        }
+        renderFloorEqAccordion();
+    };
+
+    window.toggleFloorEqGroup = function(groupIndex) {
+        var content = document.getElementById('floorEqGroupContent-' + groupIndex);
+        var icon = document.getElementById('floorEqGroupIcon-' + groupIndex);
+        if (content) {
+            if (content.style.display === 'none') {
+                content.style.display = 'flex';
+                if (icon) icon.className = 'fas fa-chevron-up';
+            } else {
+                content.style.display = 'none';
+                if (icon) icon.className = 'fas fa-chevron-down';
+            }
+        }
+    };
+
+    function renderFloorEqAccordion() {
+        var container = document.getElementById('floorEqAccordion');
+        if (!container) return;
+        var html = '';
+        var hasVisibleMatch = false;
+
+        if (floorConfigs[currentFloor] && !floorConfigs[currentFloor].equipments) {
+            floorConfigs[currentFloor].equipments = [];
+        }
+        var selectedEqs = floorConfigs[currentFloor] ? (floorConfigs[currentFloor].equipments || []) : [];
+
+        for (var i = 0; i < equipmentData.length; i++) {
+            var group = equipmentData[i];
+            var visibleItems = group.items.filter(function(item) {
+                return !floorEqFilterText || item.toLowerCase().indexOf(floorEqFilterText) > -1;
+            });
+            
+            if (visibleItems.length === 0) continue;
+            hasVisibleMatch = true;
+
+            html += '<div>';
+            html += '<div class="floor-eq-group-header" onclick="toggleFloorEqGroup(' + i + ')">';
+            html += '<span>' + group.group + ' <span style="font-weight:400;color:#94a3b8;">(' + visibleItems.length + ')</span></span>';
+            html += '<i id="floorEqGroupIcon-' + i + '" class="fas fa-chevron-up" style="color:#94a3b8;font-size:11px;"></i>';
+            html += '</div>';
+
+            html += '<div id="floorEqGroupContent-' + i + '" class="floor-eq-group-items">';
+            visibleItems.forEach(function(item) {
+                var isSelected = selectedEqs.indexOf(item) > -1;
+                var cls = 'floor-eq-item' + (isSelected ? ' selected' : '');
+                html += '<div class="' + cls + '" onclick="assignFloorEq(\'' + item + '\', event)">';
+                if (isSelected) {
+                    html += '<i class="fas fa-check" style="font-size:10px;margin-right:5px;"></i>';
+                }
+                html += item + '</div>';
+            });
+            html += '</div></div>';
+        }
+        
+        if (!hasVisibleMatch) {
+            html = '<div style="padding:16px;color:#94a3b8;font-size:13px;text-align:center;">Không tìm thấy thiết bị</div>';
+        }
+        
+        container.innerHTML = html;
+        renderFloorSelectedEqTags();
+    }
+
+    window.assignFloorEq = function(itemCode, event) {
+        if (event) {
+            event.stopPropagation();
+        }
+        if (!floorConfigs[currentFloor]) return;
+        var eqs = floorConfigs[currentFloor].equipments || [];
+        var idx = eqs.indexOf(itemCode);
+        if (idx > -1) {
+            eqs.splice(idx, 1);
+        } else {
+            eqs.push(itemCode);
+        }
+        floorConfigs[currentFloor].equipments = eqs;
+        renderFloorEqAccordion();
+    };
+
+    function renderFloorSelectedEqTags() {
+        var container = document.getElementById('floorSelectedEqTags');
+        if (!container) return;
+        
+        if (!floorConfigs[currentFloor] || !floorConfigs[currentFloor].equipments || floorConfigs[currentFloor].equipments.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+        
+        var eqs = floorConfigs[currentFloor].equipments;
+        
+        var html = '';
+        eqs.forEach(function(code) {
+            html += '<div style="display:inline-flex; align-items:center; background:#eff6ff; border:1px solid #bfdbfe; border-radius:20px; padding:3px 10px 3px 12px; font-size:12px; color:#1d4ed8; gap:6px;">';
+            html += '<span>' + code + '</span>';
+            html += '<span onclick="event.stopPropagation(); assignFloorEq(\'' + code + '\', event)" style="cursor:pointer; color:#93c5fd; line-height:1; font-size:14px; font-weight:500;">&times;</span>';
+            html += '</div>';
+        });
+        container.innerHTML = html;
+    }
+
+    window.populateFloorTabFields = function() {
+        if (!floorConfigs[currentFloor]) return;
+        
+        var display = document.getElementById('currentFloorTabDisplay');
+        if (display) display.innerText = 'Tầng ' + currentFloor;
+        
+        var menu = document.getElementById('floorTabMenu');
+        if (menu) {
+            menu.innerHTML = '';
+            var floors = 1;
+            if (currentWarehouse && currentWarehouse.floors) {
+                floors = parseInt(currentWarehouse.floors);
+            } else if (Object.keys(floorConfigs).length > 0) {
+                floors = Math.max(...Object.keys(floorConfigs).map(Number));
+            }
+            for (var i = 1; i <= floors; i++) {
+                var item = document.createElement('div');
+                item.className = 'floor-custom-item' + (i === currentFloor ? ' active' : '');
+                item.innerText = 'Tầng ' + i;
+                (function(floorNum) {
+                    item.onclick = function(e) {
+                        e.stopPropagation();
+                        selectFloorTabDropdown(floorNum);
+                    };
+                })(i);
+                menu.appendChild(item);
+            }
+        }
+        
+        var nameInput = document.getElementById('floorNameInput');
+        if (nameInput) {
+            nameInput.value = floorConfigs[currentFloor].name || '';
+        }
+        
+        if (!floorConfigs[currentFloor].equipments) {
+            floorConfigs[currentFloor].equipments = [];
+        }
+        
+        renderFloorEqAccordion();
+    };
+
+    window.saveFloorTab = function() {
+        saveGridConfig();
+    };
 
     // Expose functions globally
     window.saveGridConfig = saveGridConfig;

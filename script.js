@@ -7,15 +7,21 @@ function toggleSidebar() {
     } catch (e) { }
 }
 
-// Restore sidebar state on page load
+// Restore sidebar state immediately to prevent flash
+try {
+    const isCollapsed = localStorage.getItem('sidebar_collapsed');
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar && isCollapsed === 'true') {
+        sidebar.classList.add('collapsed');
+    }
+    // Remove the blocking style from <head> if it exists
+    const preStyle = document.getElementById('pre-collapse');
+    if (preStyle) preStyle.remove();
+} catch (e) { }
+
+// Handle DOMContentLoaded for other late-init tasks if needed
 document.addEventListener('DOMContentLoaded', function () {
-    try {
-        const isCollapsed = localStorage.getItem('sidebar_collapsed');
-        if (isCollapsed === 'true') {
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar) sidebar.classList.add('collapsed');
-        }
-    } catch (e) { }
+    // Keep this empty or use for things that truly need the full DOM
 });
 
 function toggleSubmenu(element) {

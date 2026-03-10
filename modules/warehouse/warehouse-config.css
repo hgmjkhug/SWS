@@ -160,8 +160,8 @@
 
 /* Left Panel */
 .config-left-panel {
-    width: 500px; /* Default width, will be overridden by JS */
-    min-width: 300px;
+    width: 550px; /* Default width, will be overridden by JS */
+    min-width: 550px;
     max-width: 800px;
     border-right: none; /* Border handled by resizer */
     padding: 20px;
@@ -609,8 +609,8 @@
 .location-add-wrapper {
     display: flex;
     justify-content: center;
-    margin-top: 10px;
-    margin-bottom: 20px;
+    margin-top: none;
+    margin-bottom: none;
 }
 
 .btn-add-location {
@@ -978,8 +978,8 @@
 
 
 .config-left-panel {
-    min-width: 500px;
-    max-width: 500px;
+    min-width: 550px;
+    max-width: 800px;
     border-right: 1px solid #eee;
     padding: 20px;
     overflow: hidden;
@@ -988,7 +988,23 @@
     gap: 16px;
     background: #fff;
     flex-shrink: 0;
-    transition: min-width 0.3s ease, max-width 0.3s ease;
+    transition: none; /* Removed transition for smooth dragging */
+}
+
+/* Config Resizer */
+.config-resizer {
+    width: 6px;
+    background-color: #f1f5f9;
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    cursor: col-resize;
+    position: relative;
+    z-index: 10;
+    transition: background-color 0.2s;
+}
+
+.config-resizer:hover, .config-resizer.is-resizing {
+    background-color: #bae6fd;
 }
 
 /* Grid Area */
@@ -2432,4 +2448,92 @@
     color: #1e293b;
     font-weight: 600;
     margin-right: 8px;
+}
+/* ===== Floor Tab: Integrated Search Combobox for Equipment ===== */
+.floor-eq-search-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.floor-eq-input-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 7px 10px;
+    background: #fff;
+    cursor: text;
+    transition: border-color 0.15s;
+}
+
+.floor-eq-input-box:focus-within {
+    border-color: #076EB8;
+    box-shadow: 0 0 0 2px rgba(7, 110, 184, 0.1);
+}
+
+.floor-eq-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 200;
+    padding: 6px 0;
+}
+
+.floor-eq-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    color: #374151;
+    user-select: none;
+    background: #f8fafc;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.floor-eq-group-header:hover {
+    background: #f1f5f9;
+}
+
+.floor-eq-group-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 12px 10px 12px;
+}
+
+.floor-eq-item {
+    border: 1px solid #d1d5db;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s;
+    background: #f8fafc;
+    color: #374151;
+    white-space: nowrap;
+}
+
+.floor-eq-item:hover {
+    border-color: #076EB8;
+    color: #076EB8;
+    background: #eff6ff;
+}
+
+.floor-eq-item.selected {
+    background: #076EB8;
+    color: #fff;
+    border-color: #076EB8;
+    font-weight: 500;
 }

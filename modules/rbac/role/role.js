@@ -260,15 +260,15 @@
     const resourceGroups = [
         {
             group: 'Theo dõi & Giám sát',
-            resources: ['Dashboard Tổng quan', 'Dashboard Chi tiết']
+            resources: ['Dashboard tổng quan', 'Dashboard chi tiết', 'Giám sát hoạt động']
         },
         {
             group: 'Quản lý Kho',
-            resources: ['Danh sách Kho', 'Nhóm thiết bị', 'Thiết bị']
+            resources: ['Quản lý Kho', 'Quy cách sản phẩm', 'Quản lý vật chứa', 'Quản lý bảo trì']
         },
         {
             group: 'Quản lý điều phối WCS',
-            resources: ['Kanban WCS', 'Quản lý Lệnh', 'Quản lý Thiết bị', 'Lịch bảo trì thiết bị', 'Giám sát Thiết bị', 'Truy vết nhập xuất']
+            resources: ['Kanban WCS']
         },
         {
             group: 'Nhập kho',
@@ -279,16 +279,12 @@
             resources: ['Lệnh xuất kho']
         },
         {
-            group: 'Theo dõi tồn kho',
-            resources: ['Theo dõi tồn kho']
+            group: 'Quản lý quy trình',
+            resources: ['Quản lý quy trình']
         },
         {
-            group: 'Quản lý luồng và quy trình',
-            resources: ['Quản lý bước', 'Quản lý Quy trình']
-        },
-        {
-            group: 'Master data',
-            resources: ['Nhóm Vật tư', 'Danh mục Vật tư', 'Đơn vị tính', 'Danh mục Pallet']
+            group: 'Danh mục chung',
+            resources: ['Nhóm thiết bị', 'Thiết bị', 'Nhóm sản phẩm', 'Sản phẩm', 'Quy cách', 'Vật chứa', 'Đơn vị tính', 'Loại khu vực']
         },
         {
             group: 'Báo cáo thống kê',
@@ -296,7 +292,7 @@
         },
         {
             group: 'Hệ thống',
-            resources: ['Tài khoản', 'Vai trò', 'Chức năng']
+            resources: ['Tài khoản', 'Vai trò', 'Chức năng', 'Tài nguyên']
         }
     ];
 

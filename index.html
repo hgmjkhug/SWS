@@ -33,6 +33,16 @@
       type="text/css"
       href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css"
     />
+    
+    <script>
+      // Apply sidebar state immediately before HTML renders
+      try {
+        if (localStorage.getItem('sidebar_collapsed') === 'true') {
+          // Temporarily embed CSS for the collapsed state
+          document.write('<style id="pre-collapse">.sidebar { width: 70px !important; transition: none !important; } .brand-logo, .brand-text, .link-text, .arrow-icon, .submenu { display: none !important; visibility: hidden !important; }</style>');
+        }
+      } catch (e) {}
+    </script>
   </head>
 
   <body>
