@@ -604,6 +604,7 @@
     flex-direction: column;
     gap: 12px;
     padding-bottom: 120px; /* Space for dropdown menus */
+    overflow: visible;
 }
 
 .location-add-wrapper {
@@ -641,6 +642,7 @@
     position: relative;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     transition: border-color 0.2s, background-color 0.2s;
+    overflow: visible;
 }
 
 .location-card.active {
@@ -666,6 +668,11 @@
     background-color: #f8fafc;
     border-color: #e2e8f0;
     color: #94a3b8;
+}
+
+/* Enable pointer events on tooltip so it works in readonly state */
+.location-card.readonly .mode-info-tooltip {
+    pointer-events: auto;
 }
 
 .location-card.active.readonly {
@@ -982,7 +989,7 @@
     max-width: 800px;
     border-right: 1px solid #eee;
     padding: 20px;
-    overflow: hidden;
+    overflow: visible;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -1097,8 +1104,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
     background: var(--node-dot-color, #677594); /* Updated to support dynamic color */
     border-radius: 50%;
     pointer-events: none;
@@ -1248,8 +1255,8 @@
     border-radius: 4px;
     padding: 6px 10px;
     position: absolute;
-    z-index: 1001;
-    bottom: 125%;
+    z-index: 99999;
+    bottom: 150%;
     left: 50%;
     transform: translateX(-50%);
     opacity: 0;
@@ -1258,6 +1265,7 @@
     line-height: 1.4;
     font-weight: normal;
     pointer-events: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 .mode-info-tooltip .tooltip-text::after {
@@ -1265,7 +1273,7 @@
     position: absolute;
     top: 100%;
     left: 50%;
-    margin-left: -5px;
+    transform: translateX(-50%);
     border-width: 5px;
     border-style: solid;
     border-color: #334155 transparent transparent transparent;
@@ -2537,3 +2545,14 @@
     border-color: #076EB8;
     font-weight: 500;
 }
+
+.node-direction {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+

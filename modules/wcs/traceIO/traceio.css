@@ -1,0 +1,219 @@
+/* Container Frame 482421 */
+.warehouse-map-container {
+    box-sizing: border-box;
+    position: absolute;
+    width: 990px;
+    height: 595px;
+    left: 505px;
+    top: 88px;
+    background: #FFFFFF;
+    border: 0.5px solid #0367CC;
+    box-shadow: 0px 4px 4px rgba(3, 103, 204, 0.15);
+    border-radius: 10px;
+    
+    /* Center the internal grid */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Inner Grid Frame 482313 */
+.warehouse-map-grid {
+    display: grid;
+    /* 23 cols * 40px = 920px */
+    grid-template-columns: repeat(23, 40px); 
+    /* 14 rows * 40px = 560px */
+    grid-template-rows: repeat(14, 40px); 
+    width: 920px;
+    height: 560px;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+/* Common Cell properties */
+.map-cell {
+    width: 40px;
+    height: 40px;
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Empty Path Cell (Vector 330/331/332/333 style) */
+.map-cell.empty {
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* Removed empty cell cross-lines to match config styling */
+
+/* The node dot in the center */
+.map-cell .node-dot {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #677594;
+    border-radius: 50%;
+    top: calc(50% - 2px);
+    left: calc(50% - 2px);
+    z-index: 2;
+}
+
+/* Wall Cell (#677594 background) */
+.map-cell.wall {
+    background: #677594;
+    outline: 1px solid rgba(124, 141, 181, 0.7);
+    outline-offset: -1px;
+}
+
+/* Shelf/Container Cell */
+.map-cell.shelf {
+    background-color: rgba(164, 211, 254, 0.4);
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* Removed shelf cell inward edge lines to match config styling */
+
+/* Drawing the crossed lines for shelf center (Group 481919) */
+.map-cell.shelf .shelf-decor {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+}
+
+/* Charging Station Cell */
+.map-cell.charging {
+    background: rgba(164, 211, 254, 0.4); 
+}
+
+.map-cell.charging .charging-icon {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 4;
+}
+
+/* Row and Col Labels */
+.label-col {
+    position: absolute;
+    top: -16px; /* 17.5px top margin + border adjustment */
+    transform: translateX(-50%);
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    width: 30px;
+    text-align: center;
+}
+
+.label-row {
+    position: absolute;
+    left: -20px; /* 35px left margin -> need left edge of text to be near border */
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    width: 30px;
+    text-align: right;
+}
+
+/* Shuttle Styles (Frame 482265) */
+.shuttle {
+    position: absolute;
+    width: 40px;
+    height: 30px;
+    background: #396BE0;
+    box-shadow: inset 0px 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 10px 8px 8px 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    /* Positioned relative to the 40x40 map-cell */
+    top: 5px;
+    left: 0;
+    pointer-events: none; /* Allow interaction with the cell underneath if needed */
+}
+
+/* Group 481932 + Ellipse 153 */
+.shuttle-inner {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    background: #FFFFFF;
+    border: 0.5px solid #076EB8;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+/* vuesax/bold/box icon style */
+.shuttle-icon {
+    width: 12px;
+    height: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.shuttle-icon svg {
+    width: 12px;
+    height: 12px;
+}
+
+/* Rail Styles (Vector 331 style) */
+.rail-segment {
+    position: absolute;
+    background: #677594;
+    z-index: 1;
+    box-sizing: border-box;
+    pointer-events: none;
+}
+
+/* Horizontal rail: 2px tall, vertically centered on the dot (dot center = 20px) */
+.rail-segment.h {
+    height: 2px;
+    top: 19px; /* 20px center - 1px half-height = 19px */
+}
+
+/* Vertical rail: 2px wide, horizontally centered on the dot */
+.rail-segment.v {
+    width: 2px;
+    left: 19px; /* 20px center - 1px half-width = 19px */
+}
+
+.rail-segment.h-left {
+    left: 0;
+    width: 21px; /* 0 → 21px covers left edge to just past center */
+}
+
+.rail-segment.h-right {
+    left: 19px; /* start at center */
+    width: 21px; /* 19 → 40px covers center to right edge */
+}
+
+.rail-segment.v-up {
+    top: 0;
+    height: 21px; /* 0 → 21px covers top edge to just past center */
+}
+
+.rail-segment.v-down {
+    top: 19px; /* start at center */
+    height: 21px; /* 19 → 40px covers center to bottom edge */
+}

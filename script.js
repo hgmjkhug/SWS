@@ -148,6 +148,7 @@ function loadPage(title) {
         'Quy cách': 'modules/master-data/method/method.html',
         'Quy cách sản phẩm': 'modules/product-method/product-method.html',
         'Báo cáo Nhập/Xuất': 'modules/statistic/statistic.html',
+        'Giám sát hoạt động': 'modules/wcs/traceIO/traceio.html',
         // add more mappings here as modules are created
     };
 

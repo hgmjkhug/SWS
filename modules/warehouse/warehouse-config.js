@@ -247,7 +247,7 @@
                         <path d="M14.6235 23.1088C14.3336 23.3987 13.8528 23.3987 13.5629 23.1088L10.7344 20.2803C10.4445 19.9904 10.4445 19.5096 10.7344 19.2197L13.5629 16.3912C13.8528 16.1013 14.3336 16.1013 14.6235 16.3912C14.9134 16.6812 14.9134 17.162 14.6235 17.4519L12.3254 19.75L14.6235 22.0481C14.9134 22.338 14.9134 22.8188 14.6235 23.1088Z" fill="#076EB8"/>
                         <path d="M28.7654 20.2803L25.937 23.1088C25.6471 23.3987 25.1662 23.3987 24.8763 23.1088C24.5864 22.8188 24.5864 22.338 24.8763 22.0481L27.1744 19.75L24.8763 17.4519C24.5864 17.162 24.5864 16.6812 24.8763 16.3912C25.1662 16.1013 25.6471 16.1013 25.937 16.3912L28.7654 19.2197C29.0553 19.5096 29.0553 19.9904 28.7654 20.2803Z" fill="#076EB8"/>
                     </svg>`;
-                node.innerHTML = '<div class="node-dot"></div><div class="node-diamond">' + diamondSvg + '</div>' + goodsSvg;
+                node.innerHTML = '<div class="node-dot"></div><div class="node-diamond">' + diamondSvg + '</div><div class="node-direction" style="display:none;"></div>' + goodsSvg;
                 
                 var id = row + '-' + col;
                 
@@ -522,9 +522,12 @@
     }
     
     var allLocPositions = {};
+    var locDirectionMap = {};
     for (var l = 0; l < locationData.length; l++) {
         for (var lp = 0; lp < locationData[l].positions.length; lp++) {
-            allLocPositions[locationData[l].positions[lp]] = true;
+            var pos = locationData[l].positions[lp];
+            allLocPositions[pos] = true;
+            locDirectionMap[pos] = locationData[l].directions || (locationData[l].direction ? [locationData[l].direction] : []);
         }
     }
 
@@ -565,10 +568,24 @@
         }
 
         // 3. Check Assigned Location (Any location type) - match both formats for compatibility
+        var locDirs = locDirectionMap[posLabelWithFloor] || locDirectionMap[posLabel];
+        var directionWrapper = node.querySelector('.node-direction');
+
         if (allLocPositions[posLabelWithFloor] || allLocPositions[posLabel]) {
             node.classList.add('is-location');
+            if (directionWrapper) {
+                if (locDirs && locDirs.length > 0) {
+                    directionWrapper.innerHTML = getLocationIconSVG(locDirs, true);
+                    directionWrapper.style.display = 'block';
+                } else {
+                    directionWrapper.style.display = 'none';
+                }
+            }
         } else {
             node.classList.remove('is-location');
+            if (directionWrapper) {
+                directionWrapper.style.display = 'none';
+            }
         }
 
         // 3.5. Area Visualization (Override generic dot color)
@@ -1372,6 +1389,8 @@
             }
         }
 
+        // No inline display modifications here to avoid breaking grid-hidden logic
+
         if (tab === 'init') {
             var initTab = document.getElementById('tabContentInit');
             if (initTab) initTab.classList.add('active');
@@ -1380,12 +1399,12 @@
         } else if (tab === 'area') {
             var areaTab = document.getElementById('tabContentArea');
             if (areaTab) areaTab.classList.add('active');
-            document.querySelector('.grid-area').style.display = 'flex'; // Show grid
+            // Remove inline display modification: document.querySelector('.grid-area').style.display = 'flex';
             renderAreaCards();
         } else if (tab === 'location') {
             var locTab = document.getElementById('tabContentLocation');
             if (locTab) locTab.classList.add('active');
-            document.querySelector('.grid-area').style.display = 'flex'; // Show grid
+            // Remove inline display modification: document.querySelector('.grid-area').style.display = 'flex';
             renderLocationCards();
         } else if (tab === 'floor') {
             var floorTab = document.getElementById('tabContentFloor');
@@ -1867,20 +1886,20 @@
         currentWarehouse.configData = floorConfigs;
         currentWarehouse.floorTypes = JSON.parse(JSON.stringify(floorTypeData));
 
-        const stored = localStorage.getItem('wms_warehouses_v5');
+        const stored = localStorage.getItem('wms_warehouses_v6');
         if (stored) {
             const list = JSON.parse(stored);
             const idx = list.findIndex(w => w.id === currentWarehouseId);
             if (idx !== -1) {
                 list[idx] = currentWarehouse;
-                localStorage.setItem('wms_warehouses_v5', JSON.stringify(list));
+                localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
             }
         }
 
         if (window.showToast) {
-            window.showToast('Đã lưu loại vị trí thành công!', 'success');
+            window.showToast('Đã lưu thông tin tầng thành công!', 'success');
         } else {
-            alert('Đã lưu loại vị trí thành công!');
+            alert('Đã lưu thông tin tầng thành công!');
         }
     }
 
@@ -1909,13 +1928,13 @@
         currentWarehouse.configData = floorConfigs; // Save grid config
 
         // Save to localStorage
-        var stored = localStorage.getItem('wms_warehouses_v5');
+        var stored = localStorage.getItem('wms_warehouses_v6');
         if (stored) {
             var list = JSON.parse(stored);
             var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
             if (idx !== -1) {
                 list[idx] = currentWarehouse;
-                localStorage.setItem('wms_warehouses_v5', JSON.stringify(list));
+                localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
             }
         }
 
@@ -2588,14 +2607,14 @@
         currentWarehouse.areas = JSON.parse(JSON.stringify(areaData));
 
         // Save to localStorage
-        var stored = localStorage.getItem('wms_warehouses_v5');
+        var stored = localStorage.getItem('wms_warehouses_v6');
         // ...
         if (stored) {
             var list = JSON.parse(stored);
             var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
             if (idx !== -1) {
                 list[idx] = currentWarehouse;
-                localStorage.setItem('wms_warehouses_v5', JSON.stringify(list));
+                localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
             }
         }
 
@@ -3044,41 +3063,41 @@
         }
     }
 
-    function getLocationIconSVG(directions) {
+    function getLocationIconSVG(directions, isForGrid) {
         // Handle both single string (legacy) and array
         var dirs = Array.isArray(directions) ? directions : [directions];
         
         var bgColor = 'rgba(223, 240, 255, 0.5)';
         var borderColor = 'rgba(216, 216, 216, 0.2)';
-        var vectorColor = '#677594';
-        var activeVectorColor = '#677594'; // Can differentiate if needed
-        var borderStroke = 'rgba(124, 141, 181, 0.7)';
+        var vectorColor = '#7C8DB5';
+        var baseDotColor = '#677594';
 
-        var html = '<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="border: 0.5px solid ' + borderColor + '; background: ' + bgColor + '; box-sizing: border-box;">';
+        var svgStyle = isForGrid ? 'width: 40px; height: 40px;' : 'border: 0.5px solid ' + borderColor + '; background: ' + bgColor + '; box-sizing: border-box; width: 40px; height: 40px;';
+        var html = '<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="' + svgStyle + '">';
         
         // Define paths for each direction (clockwise: Trên, Phải, Dưới, Trái)
         // Up (Trên)
         if (dirs.indexOf('Trên') !== -1) {
-            html += '<path d="M20 20L20 0" stroke="' + vectorColor + '" stroke-width="2" stroke-linecap="round"/>';
+            html += '<path d="M20 0V19.7531" stroke="' + vectorColor + '" stroke-opacity="0.7"/>';
         }
         
         // Right (Phải)
         if (dirs.indexOf('Phải') !== -1) {
-            html += '<path d="M20 20L40 20" stroke="' + vectorColor + '" stroke-width="2" stroke-linecap="round"/>';
+            html += '<path d="M20 20H40" stroke="' + vectorColor + '" stroke-opacity="0.7"/>';
         }
         
         // Down (Dưới)
         if (dirs.indexOf('Dưới') !== -1) {
-            html += '<path d="M20 20L20 40" stroke="' + vectorColor + '" stroke-width="2" stroke-linecap="round"/>';
+            html += '<path d="M20 19.7529V39.9998" stroke="' + vectorColor + '" stroke-opacity="0.7"/>';
         }
         
         // Left (Trái)
         if (dirs.indexOf('Trái') !== -1) {
-            html += '<path d="M20 20L0 20" stroke="' + vectorColor + '" stroke-width="2" stroke-linecap="round"/>';
+            html += '<path d="M0 20H20" stroke="' + vectorColor + '" stroke-opacity="0.7"/>';
         }
         
         // Base point
-        html += '<circle cx="20" cy="20" r="3" fill="' + vectorColor + '"/>';
+        html += '<ellipse cx="20" cy="20" rx="2" ry="2" fill="' + baseDotColor + '"/>';
         
         html += '</svg>';
         return html;
@@ -3119,13 +3138,13 @@
             }
         }
 
-        var stored = localStorage.getItem('wms_warehouses_v5');
+        var stored = localStorage.getItem('wms_warehouses_v6');
         if (stored) {
             var list = JSON.parse(stored);
             var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
             if (idx !== -1) {
                 list[idx] = currentWarehouse;
-                localStorage.setItem('wms_warehouses_v5', JSON.stringify(list));
+                localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
             }
         }
 
