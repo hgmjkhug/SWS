@@ -1,34 +1,39 @@
 /* Container Frame 482421 */
 .warehouse-map-container {
     box-sizing: border-box;
-    position: absolute;
-    width: 990px;
-    height: 595px;
-    left: 505px;
-    top: 88px;
+    position: relative;
+    width: 1032px;
+    height: 624px;
     background: #FFFFFF;
     border: 0.5px solid #0367CC;
     box-shadow: 0px 4px 4px rgba(3, 103, 204, 0.15);
     border-radius: 10px;
     
-    /* Center the internal grid */
+    /* Layout for labels and grid */
+    padding: 0; /* Padding handled by map-grid-wrapper margins */
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+}
+
+.map-grid-wrapper {
+    position: relative;
+    margin-left: 56px; /* 16px gap + 24px label + 16px gap */
+    margin-top: 48px;  /* 16px gap + 16px label + 16px gap */
 }
 
 /* Inner Grid Frame 482313 */
-.warehouse-map-grid {
+#map-main-grid {
     display: grid;
-    /* 23 cols * 40px = 920px */
-    grid-template-columns: repeat(23, 40px); 
+    /* 24 cols (a + A-W) * 40px = 960px */
+    grid-template-columns: repeat(24, 40px); 
     /* 14 rows * 40px = 560px */
     grid-template-rows: repeat(14, 40px); 
-    width: 920px;
+    width: 960px;
     height: 560px;
     padding: 0;
     margin: 0;
     position: relative;
+    background: transparent;
 }
 
 /* Common Cell properties */
@@ -57,9 +62,9 @@
     height: 4px;
     background: #677594;
     border-radius: 50%;
-    top: calc(50% - 2px);
+    top: calc(50% - 1.975px);
     left: calc(50% - 2px);
-    z-index: 2;
+    z-index: 3;
 }
 
 /* Wall Cell (#677594 background) */
@@ -88,7 +93,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2;
+    z-index: 3;
 }
 
 /* Charging Station Cell */
@@ -136,17 +141,17 @@
     position: absolute;
     width: 40px;
     height: 30px;
-    background: #396BE0;
-    box-shadow: inset 0px 4px 15px rgba(0, 0, 0, 0.1);
-    border-radius: 10px 8px 8px 10px;
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 10;
-    /* Positioned relative to the 40x40 map-cell */
-    top: 5px;
+    /* Rotation and movement via JS transitions */
+    /* Centered absolutely via JS using (r*40+20) and (c*40+20) */
+    top: 0;
     left: 0;
     pointer-events: none; /* Allow interaction with the cell underneath if needed */
+    transition: all 0.6s linear;
+    transform-origin: center;
 }
 
 /* Group 481932 + Ellipse 153 */
@@ -177,43 +182,408 @@
     height: 12px;
 }
 
-/* Rail Styles (Vector 331 style) */
+/* Rail Styles — matches Figma Vector 330/331/332/333 spec */
 .rail-segment {
     position: absolute;
-    background: #677594;
-    z-index: 1;
+    background: transparent;
     box-sizing: border-box;
     pointer-events: none;
+    z-index: 1;
 }
 
-/* Horizontal rail: 2px tall, vertically centered on the dot (dot center = 20px) */
-.rail-segment.h {
-    height: 2px;
-    top: 19px; /* 20px center - 1px half-height = 19px */
-}
-
-/* Vertical rail: 2px wide, horizontally centered on the dot */
-.rail-segment.v {
-    width: 2px;
-    left: 19px; /* 20px center - 1px half-width = 19px */
-}
-
+/* Vector 330: left half horizontal */
 .rail-segment.h-left {
-    left: 0;
-    width: 21px; /* 0 → 21px covers left edge to just past center */
+    height: 0px;
+    border-top: 1px solid rgba(124, 141, 181, 0.7);
+    top: 50%;
+    left: 0px;
+    width: 20px;
+    background: #677594;
 }
 
+/* Vector 331: right half horizontal */
 .rail-segment.h-right {
-    left: 19px; /* start at center */
-    width: 21px; /* 19 → 40px covers center to right edge */
+    height: 0px;
+    border-top: 1px solid rgba(124, 141, 181, 0.7);
+    top: 50%;
+    left: 20px;
+    width: 20px;
 }
 
+/* Vector 332: top half vertical, 19.75px */
 .rail-segment.v-up {
-    top: 0;
-    height: 21px; /* 0 → 21px covers top edge to just past center */
+    width: 0px;
+    border-left: 1px solid rgba(124, 141, 181, 0.7);
+    left: 50%;
+    top: 0px;
+    height: 19.75px;
 }
 
+/* Vector 333: bottom half vertical, 20.25px */
 .rail-segment.v-down {
-    top: 19px; /* start at center */
-    height: 21px; /* 19 → 40px covers center to bottom edge */
+    width: 0px;
+    border-left: 1px solid rgba(124, 141, 181, 0.7);
+    left: 50%;
+    top: 19.75px;
+    height: 20.25px;
+}
+
+/* ── Labels ── */
+.label-col {
+    position: absolute;
+    top: -32px; /* 16px border space + 16px gap */
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #677594;
+    font-weight: 500;
+    width: 40px;
+    text-align: center;
+}
+
+.label-row {
+    position: absolute;
+    left: -40px; /* matches margin-left */
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: #677594;
+    font-weight: 500;
+    text-align: right;
+    width: 24px;
+}
+
+/* ═══════════════════════════════════════════════════
+   PAGE LAYOUT — map + side panels
+═══════════════════════════════════════════════════ */
+body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+    display: flex;
+    align-items: flex-start;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.page-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+    padding: 0;
+}
+
+/* ── Side panel column ── */
+.side-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+/* ── Override map container: remove absolute positioning ── */
+.warehouse-map-container {
+    position: relative !important;
+    left: unset !important;
+    top: unset !important;
+    flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════
+   SHARED PANEL CARD SHELL
+═══════════════════════════════════════════════════ */
+.panel-card {
+    background: #ffffff;
+    border: 0.5px solid #0367CC;
+    box-shadow: 0px 4px 4px rgba(3, 103, 204, 0.15);
+    border-radius: 10px;
+    min-width: 500px;
+    max-width: 500px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.panel-header {
+    padding: 13px 16px 11px;
+    border-bottom: 1px solid rgba(3, 103, 204, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.panel-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0367CC;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.panel-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: #396BE0;
+    background: rgba(164, 211, 254, 0.4);
+    padding: 2px 9px;
+    border-radius: 20px;
+    border: 1px solid rgba(3, 103, 204, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════
+   CARD 1 — LỆNH THỰC HIỆN
+═══════════════════════════════════════════════════ */
+.cmd-list {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    max-height: 380px;
+    overflow-y: auto;
+}
+
+.cmd-list::-webkit-scrollbar { width: 4px; }
+.cmd-list::-webkit-scrollbar-track { background: transparent; }
+.cmd-list::-webkit-scrollbar-thumb { background: rgba(3,103,204,0.2); border-radius: 4px; }
+
+.cmd-item {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 9px 11px;
+    display: grid;
+    grid-template-columns: 8px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+
+.cmd-item.status-wait {
+    background: #f9fafb;
+    border-color: #e5e7eb;
+}
+
+.cmd-item.status-active {
+    background: rgba(3, 103, 204, 0.04);
+    border-color: rgba(3, 103, 204, 0.3);
+    animation: activeBorder 2s ease-in-out infinite;
+}
+
+@keyframes activeBorder {
+    0%, 100% { border-color: rgba(3, 103, 204, 0.3); }
+    50%       { border-color: rgba(3, 103, 204, 0.7); }
+}
+
+/* Status indicator dot */
+.cmd-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.status-wait  .cmd-status-dot {
+    background: #9ca3af;
+}
+
+.status-active .cmd-status-dot {
+    background: #0367CC;
+    box-shadow: 0 0 0 3px rgba(3, 103, 204, 0.18);
+    animation: dotPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(3, 103, 204, 0.18); }
+    50%       { box-shadow: 0 0 0 5px rgba(3, 103, 204, 0.07); }
+}
+
+.cmd-body { min-width: 0; }
+
+.cmd-top-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 4px;
+}
+
+.cmd-type-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 1px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.tag-in  { background: rgba(16,185,129,0.1); color: #059669; border: 1px solid rgba(16,185,129,0.25); }
+.tag-out { background: rgba(245,158,11,0.1);  color: #d97706; border: 1px solid rgba(245,158,11,0.25); }
+
+.cmd-code {
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: #0367CC;
+}
+
+.cmd-product {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a2742;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cmd-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+}
+
+.cmd-sku {
+    font-size: 10.5px;
+    color: #677594;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.cmd-pallet {
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 10px;
+    color: #a0aec0;
+    background: #f3f4f6;
+    padding: 3px 7px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    align-self: flex-start;
+    letter-spacing: 0.02em;
+}
+
+.status-active .cmd-pallet {
+    background: rgba(3, 103, 204, 0.07);
+    color: #396BE0;
+}
+
+/* ═══════════════════════════════════════════════════
+   CARD 2 — LOG HỆ THỐNG
+═══════════════════════════════════════════════════ */
+.log-list {
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    max-height: 240px;
+    overflow-y: auto;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+}
+
+.log-list::-webkit-scrollbar { width: 4px; }
+.log-list::-webkit-scrollbar-track { background: transparent; }
+.log-list::-webkit-scrollbar-thumb { background: rgba(3,103,204,0.2); border-radius: 4px; }
+
+.log-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 5px 4px;
+    border-radius: 4px;
+    font-size: 11px;
+    line-height: 1.5;
+    opacity: 0;
+    animation: fadeInLog 0.25s ease forwards;
+}
+
+.log-row:hover { background: rgba(3, 103, 204, 0.04); }
+
+@keyframes fadeInLog {
+    from { opacity: 0; transform: translateY(3px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.log-time {
+    color: #a0aec0;
+    flex-shrink: 0;
+    font-size: 10.5px;
+    letter-spacing: 0.02em;
+    min-width: 60px;
+}
+
+.log-icon {
+    flex-shrink: 0;
+    width: 13px;
+    height: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+}
+
+.log-amr  .log-icon { color: #7c3aed; }
+.log-lift .log-icon { color: #0891b2; }
+.log-shut .log-icon { color: #0367CC; }
+.log-ok   .log-icon { color: #059669; }
+
+.log-msg {
+    color: #1a2742;
+    font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+    font-size: 11.5px;
+    flex: 1;
+    min-width: 0;
+}
+
+.log-msg .loc {
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #0367CC;
+    background: rgba(3, 103, 204, 0.08);
+    padding: 0 4px;
+    border-radius: 3px;
+}
+
+.log-msg .device {
+    font-weight: 600;
+    color: #1a2742;
+}
+
+.log-divider {
+    height: 1px;
+    background: rgba(3, 103, 204, 0.08);
+    margin: 4px 0;
+    flex-shrink: 0;
+}
+/* ═══════════════════════════════════════════════════
+   INBOUND LIFTER HEARTBEAT — A14
+═══════════════════════════════════════════════════ */
+
+/* Lifter bar — rises from bottom to top inside the cell */
+.lifter-bar {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    height: 3px;
+    background: linear-gradient(90deg, #076EB8, #38A0F0, #076EB8);
+    border-radius: 2px;
+    z-index: 6;
+    pointer-events: none;
+    box-shadow: 0 0 6px rgba(3, 103, 204, 0.8);
+    animation: lifterRise 2.4s ease-in-out infinite;
+}
+
+@keyframes lifterRise {
+    0%   { bottom: 4px;  opacity: 0;   }
+    10%  { bottom: 4px;  opacity: 1;   }
+    80%  { bottom: 32px; opacity: 1;   }
+    95%  { bottom: 34px; opacity: 0;   }
+    100% { bottom: 4px;  opacity: 0;   }
+}
+
+/* Subtle glow on the cell itself */
+.map-cell.inbound {
+    animation: inboundGlow 2.4s ease-in-out infinite;
+}
+
+@keyframes inboundGlow {
+    0%,100% { box-shadow: none; }
+    40%      { box-shadow: 0 0 10px 2px rgba(3, 103, 204, 0.35); }
 }

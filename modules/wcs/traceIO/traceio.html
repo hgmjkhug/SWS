@@ -1,15 +1,38 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="traceio.css">
-</head>
 <body>
-    <div class="warehouse-map-container">
-        <div class="warehouse-map-grid" id="mapGrid"></div>
+    <div class="page-layout">
+
+        <!-- Left: 2 panel cards -->
+        <div class="side-panels">
+
+            <!-- Card 1: Danh sách lệnh -->
+            <div class="panel-card">
+                <div class="panel-header">
+                    <span class="panel-title">Danh sách lệnh thực hiện</span>
+                    <span class="panel-badge" id="cmdBadge">0 lệnh</span>
+                </div>
+                <div class="cmd-list" id="cmdList"></div>
+            </div>
+
+            <!-- Card 2: Log hệ thống -->
+            <div class="panel-card">
+                <div class="panel-header">
+                    <span class="panel-title">Log hệ thống</span>
+                    <span class="panel-badge" id="logBadge">0 sự kiện</span>
+                </div>
+                <div class="log-list" id="logList"></div>
+            </div>
+
+        </div>
+
+        <!-- Right: Warehouse map -->
+        <div class="warehouse-map-container">
+            <div class="warehouse-map-grid" id="mapGrid"></div>
+        </div>
+
     </div>
 
     <script src="traceio.js"></script>
+    <link rel="stylesheet" href="traceio.css">
+
 </body>
 </html>
