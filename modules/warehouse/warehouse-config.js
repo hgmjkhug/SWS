@@ -6,6 +6,17 @@
 (function() {
     'use strict';
 
+    // ---- Security: HTML escape utility ----
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     // Configuration
     var currentFloor = 1;
     var step = 40;
@@ -144,6 +155,9 @@
             }
         }
     });
+
+    // Performance: cache grid nodes after each initGrid call
+    var cachedGridNodes = [];
 
     function initGrid() {
         if (!floorConfigs[currentFloor]) {
@@ -295,6 +309,9 @@
         };
         wrapper.appendChild(btnRow);
 
+        // Cache nodes for performance (avoids querySelectorAll on every mouse event)
+        cachedGridNodes = wrapper.querySelectorAll('.node-hitbox');
+
         // Update selection list
         renderSelectionList();
     }
@@ -316,45 +333,10 @@
         }
     }
 
-    // Resizer Logic
-    var isResizing = false;
-    var resizer = document.getElementById('configResizer');
-    var leftPanel = document.querySelector('.config-left-panel');
-    var lastDownX = 0;
-
-    if (resizer && leftPanel) {
-        resizer.addEventListener('mousedown', function(e) {
-            isResizing = true;
-            lastDownX = e.clientX;
-            resizer.classList.add('is-resizing');
-            document.body.style.cursor = 'col-resize';
-            // Prevent text selection during drag
-            e.preventDefault();
-        });
-
-        document.addEventListener('mousemove', function(e) {
-            if (!isResizing) return;
-            var offsetRight = document.body.offsetWidth - (e.clientX - document.body.offsetLeft);
-            var newWidth = e.clientX;
-            // Min and Max width constraints
-            if (newWidth < 400) newWidth = 400;
-            if (newWidth > 800) newWidth = 800;
-            
-            leftPanel.style.minWidth = newWidth + 'px';
-            leftPanel.style.maxWidth = newWidth + 'px';
-        });
-
-        document.addEventListener('mouseup', function(e) {
-            if (isResizing) {
-                isResizing = false;
-                resizer.classList.remove('is-resizing');
-                document.body.style.cursor = '';
-            }
-        });
-    }
+    // Resizer is initialized in initResizer() called from init()
 
     // Drag handlers
-    var lastR, lastC; // Global variables to store the last coordinates during a drag
+    var lastR, lastC; // Last coordinates during a drag
     function handleMouseUp() {
         if (!isDragging) return;
         isDragging = false;
@@ -363,9 +345,6 @@
             updateSelection(lastR, lastC, true);
         }
     }
-
-    // Global variables to store the last coordinates during a drag
-    var lastR, lastC;
 
     function updateSelection(currentR, currentC, isFinal) {
         var config = floorConfigs[currentFloor];
@@ -422,22 +401,6 @@
         // During drag (mousemove), we only refresh visuals and selection list (for bottom grid area).
         // Full card re-rendering (Expensive) is only done on mouseup (isFinal = true).
         if (!isFinal) return;
-
-                    // Sync back to Location tab if we have an active location
-        if (activeLocationId !== null) {
-            for (var i = 0; i < locationData.length; i++) {
-                if (locationData[i].id === activeLocationId) {
-                    // Restriction: Only 1 position for location tab
-                    var selectedKeys = getSelectionKeys(config.selected);
-                    locationData[i].positions = selectedKeys.map(function(key) {
-                        var parts = key.split('-').map(Number);
-                        return currentFloor + '-' + getColName(parts[1]) + (parts[0] + 1);
-                    });
-                    break;
-                }
-            }
-            renderLocationCards();
-        }
 
         // Sync back to Area tab if we have an active area
         if (activeAreaId !== null) {
@@ -511,13 +474,14 @@
 
     function refreshVisuals() {
     var config = floorConfigs[currentFloor];
-    var nodes = document.querySelectorAll('.node-hitbox');
+    // Use cached nodes for performance; fallback to live query if cache is stale
+    var nodes = cachedGridNodes.length > 0 ? cachedGridNodes : document.querySelectorAll('.node-hitbox');
     
-    // Build maps of all assigned positions for areas and locations
-    var allAreaPositions = {};
+    // Build lookup maps up-front (O(n)) to avoid O(n*m) indexOf inside loop
+    var areaPositionSet = {};
     for (var a = 0; a < areaData.length; a++) {
         for (var p = 0; p < areaData[a].positions.length; p++) {
-            allAreaPositions[areaData[a].positions[p]] = true;
+            areaPositionSet[areaData[a].positions[p]] = true;
         }
     }
     
@@ -547,15 +511,8 @@
             node.classList.remove('active');
         }
         
-        // 2. Check Assigned Area (Any area) - match both formats for compatibility
-        var isAreaAssigned = false;
-        for (var a = 0; a < areaData.length; a++) {
-            if (areaData[a].positions.indexOf(posLabelWithFloor) > -1 ||
-                areaData[a].positions.indexOf(posLabel) > -1) {
-                isAreaAssigned = true;
-                break;
-            }
-        }
+        // 2. Check Assigned Area (O(1) lookup via map)
+        var isAreaAssigned = areaPositionSet[posLabelWithFloor] || areaPositionSet[posLabel] || false;
 
         if (isAreaAssigned) {
             node.classList.add('is-area');
@@ -692,8 +649,8 @@
     // Save configuration
     function saveGridConfig() {
         // Calculate totals across all floors
-        let totalLocs = 0;
-        for (let f in floorConfigs) {
+        var totalLocs = 0;
+        for (var f in floorConfigs) {
             if (floorConfigs[f].selected) {
                 totalLocs += Object.keys(floorConfigs[f].selected).length;
             }
@@ -701,22 +658,23 @@
         
         // Save to parent warehouse store
         if (currentWarehouseId) {
-            const stored = localStorage.getItem('wms_warehouses_v6');
-            if (stored) {
-                let list = JSON.parse(stored);
-                const idx = list.findIndex(w => w.id === currentWarehouseId);
-                if (idx !== -1) {
-                    list[idx].totalLocations = totalLocs;
-                    // Persist floorConfigs too if needed, for simplicity we trust totalLocations IS the visual config
-                    // Ideally we should save floorConfigs in the warehouse object to restore selection on reload
-                    list[idx].configData = floorConfigs; 
-                    
-                    localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
-                    alert(`Đã lưu cấu hình kho thành công!\nTổng vị trí: ${totalLocs.toLocaleString()}`);
+            try {
+                var stored = localStorage.getItem('wms_warehouses_v6');
+                if (stored) {
+                    var list = JSON.parse(stored);
+                    var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
+                    if (idx !== -1) {
+                        list[idx].totalLocations = totalLocs;
+                        list[idx].configData = floorConfigs; 
+                        localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
+                        alert('Đã lưu cấu hình kho thành công!\nTổng vị trí: ' + totalLocs.toLocaleString());
+                    }
                 }
+            } catch (e) {
+                alert('Lỗi lưu cấu hình: ' + e.message);
             }
         } else {
-             alert('Chưa chọn kho để cấu hình!');
+            alert('Chưa chọn kho để cấu hình!');
         }
     }
 
@@ -759,9 +717,9 @@
         }
 
         var html = '';
-        html += '<div class="popover-title">' + product.code + ' - ' + product.name + '</div>';
+        html += '<div class="popover-title">' + escapeHtml(product.code) + ' - ' + escapeHtml(product.name) + '</div>';
         html += '<div class="popover-row"><strong>Số lượng:</strong> 150 cái</div>';
-        html += '<div class="popover-row"><strong>Quy cách:</strong> ' + (product.quyTac || 'FIFO/FEFO') + '</div>';
+        html += '<div class="popover-row"><strong>Quy cách:</strong> ' + escapeHtml(product.quyTac || 'FIFO/FEFO') + '</div>';
         html += '<div class="popover-row"><strong>Ngày nhập:</strong> 08:30:27 15/02/2026</div>';
         html += '<div class="popover-row"><strong>Ngày hết hạn:</strong> 15/02/2027</div>';
 
@@ -817,7 +775,7 @@
     }
 
     // Custom Confirm Modal Logic
-    let confirmCallback = null;
+    var confirmCallback = null;
 
     window.showCustomConfirm = function(title, message, callback) {
         document.getElementById('customConfirmTitle').innerText = title;
@@ -842,7 +800,7 @@
     window.resetCurrentFloor = function() {
         if (!floorConfigs[currentFloor]) return;
         
-        const message = `Bạn có chắc chắn muốn khôi phục mặc định cho Tầng ${currentFloor}?\nToàn bộ cấu hình vị trí và hàng hóa tại tầng này sẽ bị xóa.`;
+        var message = 'Bạn có chắc chắn muốn khôi phục mặc định cho Tầng ' + currentFloor + '?\nToàn bộ cấu hình vị trí và hàng hóa tại tầng này sẽ bị xóa.';
         
         window.showCustomConfirm('Xác nhận khôi phục', message, function() {
             floorConfigs[currentFloor].selected = {};
@@ -850,7 +808,7 @@
             initGrid();
             
             if (window.showToast) {
-                window.showToast(`Đã khôi phục mặc định cho Tầng ${currentFloor}`, 'success');
+                window.showToast('Đã khôi phục mặc định cho Tầng ' + currentFloor, 'success');
             }
         });
     };
@@ -859,12 +817,12 @@
     window.syncAllFloors = function() {
         if (!floorConfigs[currentFloor]) return;
         
-        const message = 'Bạn có chắc chắn muốn đồng bộ cấu hình của tầng hiện tại cho TẤT CẢ các tầng khác?\nThao tác này sẽ ghi đè cấu hình hiện có ở các tầng khác.';
+        var message = 'Bạn có chắc chắn muốn đồng bộ cấu hình của tầng hiện tại cho TẤT CẢ các tầng khác?\nThao tác này sẽ ghi đè cấu hình hiện có ở các tầng khác.';
         
         window.showCustomConfirm('Xác nhận đồng bộ', message, function() {
-            const source = floorConfigs[currentFloor];
+            var source = floorConfigs[currentFloor];
             
-            for (let f in floorConfigs) {
+            for (var f in floorConfigs) {
                 if (parseInt(f) === currentFloor) continue;
                 
                 floorConfigs[f].rows = source.rows;
@@ -884,23 +842,27 @@
     
     // Load Warehouse from ID
     function loadContext() {
-        const idStr = localStorage.getItem('config_warehouse_id');
+        var idStr = localStorage.getItem('config_warehouse_id');
         if (!idStr) {
             alert("Không tìm thấy thông tin kho cần cấu hình. Vui lòng quay lại danh sách kho.");
             return;
         }
         currentWarehouseId = parseInt(idStr);
         
-        const stored = localStorage.getItem('wms_warehouses_v6');
-        if (stored) {
-            const list = JSON.parse(stored);
-            currentWarehouse = list.find(w => w.id === currentWarehouseId);
+        try {
+            var stored = localStorage.getItem('wms_warehouses_v6');
+            if (stored) {
+                var list = JSON.parse(stored);
+                currentWarehouse = list.find(function(w) { return w.id === currentWarehouseId; }) || null;
+            }
+        } catch (e) {
+            currentWarehouse = null;
         }
         
         // Populate Title or Header if needed (optional)
-        const header = document.querySelector('.config-header h3');
+        var header = document.querySelector('.config-header h3');
         if (header && currentWarehouse) {
-            header.innerText = `Thiết lập cấu hình Kho: ${currentWarehouse.name}`;
+            header.innerText = 'Thiết lập cấu hình Kho: ' + currentWarehouse.name;
             renderFloorMenu();
         }
         
@@ -908,19 +870,19 @@
         if (currentWarehouse && currentWarehouse.configData) {
             floorConfigs = currentWarehouse.configData;
             // Ensure goods and metadata structure exists
-            for (let f in floorConfigs) {
-                if (!floorConfigs[f].goods) floorConfigs[f].goods = {};
+            for (var fg in floorConfigs) {
+                if (!floorConfigs[fg].goods) floorConfigs[fg].goods = {};
             }
             // Restore savedGoodsData so hover popovers work after page reload
-            for (var f in floorConfigs) {
-                if (floorConfigs[f].goods && Object.keys(floorConfigs[f].goods).length > 0) {
-                    savedGoodsData[f] = JSON.parse(JSON.stringify(floorConfigs[f].goods));
+            for (var fg2 in floorConfigs) {
+                if (floorConfigs[fg2].goods && Object.keys(floorConfigs[fg2].goods).length > 0) {
+                    savedGoodsData[fg2] = JSON.parse(JSON.stringify(floorConfigs[fg2].goods));
                 }
             }
         } else if (currentWarehouse) {
             // Initialize defaults based on floor count
-            for (let i = 1; i <= currentWarehouse.floors; i++) {
-                if (!floorConfigs[i]) floorConfigs[i] = { rows: 18, cols: 27, selected: {}, goods: {} };
+            for (var fi = 1; fi <= currentWarehouse.floors; fi++) {
+                if (!floorConfigs[fi]) floorConfigs[fi] = { rows: 18, cols: 27, selected: {}, goods: {} };
             }
         }
 
@@ -1068,7 +1030,7 @@
                 if (currentWarehouse) {
                     currentWarehouse.floors = val;
                     // Also update floorConfigs for new floors if they don't exist
-                    for (let i = 1; i <= val; i++) {
+                    for (var i = 1; i <= val; i++) {
                         if (!floorConfigs[i]) floorConfigs[i] = { rows: 18, cols: 27, selected: {}, goods: {}, name: '', height: '' };
                     }
                     renderFloorMenu();
@@ -1122,31 +1084,36 @@
     }
 
     function renderFloorMenu() {
-        const headerMenu = document.getElementById('floorCustomMenu');
+        var headerMenu = document.getElementById('floorCustomMenu');
         
         // Populate header dropdown with floor names
         if (headerMenu) {
             headerMenu.innerHTML = '';
-            let floors = 1;
+            var floors = 1;
             if (currentWarehouse && currentWarehouse.floors) {
                 floors = parseInt(currentWarehouse.floors);
-            } else if (Object.keys(floorConfigs).length > 0) {
-                floors = Math.max(...Object.keys(floorConfigs).map(Number));
+            } else {
+                var fcKeys = Object.keys(floorConfigs);
+                if (fcKeys.length > 0) {
+                    floors = Math.max.apply(null, fcKeys.map(Number));
+                }
             }
-            for (let i = 1; i <= floors; i++) {
-                const item = document.createElement('div');
+            for (var i = 1; i <= floors; i++) {
+                var item = document.createElement('div');
                 item.className = 'floor-custom-item' + (i === currentFloor ? ' active' : '');
-                item.innerText = `Tầng ${i}`;
-                item.onclick = function(e) {
-                    e.stopPropagation();
-                    selectFloor(i);
-                };
+                item.innerText = 'Tầng ' + i;
+                (function(floorNum) {
+                    item.onclick = function(e) {
+                        e.stopPropagation();
+                        selectFloor(floorNum);
+                    };
+                })(i);
                 headerMenu.appendChild(item);
             }
         }
         
-        const headerDisplay = document.getElementById('currentFloorDisplay');
-        if (headerDisplay) headerDisplay.innerText = `Tầng ${currentFloor}`;
+        var headerDisplay = document.getElementById('currentFloorDisplay');
+        if (headerDisplay) headerDisplay.innerText = 'Tầng ' + currentFloor;
     }
 
     // ===== RESIZER LOGIC =====
@@ -1214,7 +1181,7 @@
             html += '<div class="location-field">';
             html += '<span class="location-field-label">Tên loại vị trí <span style="color: red;">*</span></span>';
             html += '<div class="location-field-value">';
-            html += '<input type="text" value="' + (ft.name || '') + '" oninput="updateFloorTypeField(' + ft.id + ', \'name\', this.value)" placeholder="Ví dụ: Vị trí thường...">';
+            html += '<input type="text" value="' + escapeHtml(ft.name || '') + '" oninput="updateFloorTypeField(' + ft.id + ', \'name\', this.value)" placeholder="Ví dụ: Vị trí thường...">';
             html += '</div></div>';
 
             // Hình ảnh
@@ -1556,6 +1523,8 @@
     function renderEquipmentAccordion(s) {}
     function toggleAccordionGroup(idx, s) {}
 
+    var warehouseType = 'Kho Tower';
+
     var productData = [
         { 
             group: 'Kim khí & Sản phẩm phụ', 
@@ -1592,9 +1561,6 @@
             ] 
         }
     ];
-    var selectedEquipments = [];
-    var selectedEquipments2 = [];
-    var warehouseType = 'Kho Tower';
 
     function populateInitTab() {
         if (!currentWarehouse) return;
@@ -1803,10 +1769,10 @@
         currentFloor = floorNum;
         
         // Sync displays
-        const headerDisplay = document.getElementById('currentFloorDisplay');
-        if (headerDisplay) headerDisplay.innerText = `Tầng ${floorNum}`;
+        var headerDisplay = document.getElementById('currentFloorDisplay');
+        if (headerDisplay) headerDisplay.innerText = 'Tầng ' + floorNum;
 
-        const headerMenu = document.getElementById('floorCustomMenu');
+        var headerMenu = document.getElementById('floorCustomMenu');
         if (headerMenu) headerMenu.classList.remove('show');
 
         renderFloorMenu(); // Update active state in menu
@@ -1814,13 +1780,13 @@
     }
 
     function populateFloorTabFields() {
-        const config = floorConfigs[currentFloor];
+        var config = floorConfigs[currentFloor];
         if (!config) return;
         
-        const nameInput = document.getElementById('floorNameInput');
+        var nameInput = document.getElementById('floorNameInput');
         if (nameInput) nameInput.value = config.name || '';
         
-        const heightInput = document.getElementById('floorHeightInput');
+        var heightInput = document.getElementById('floorHeightInput');
         if (heightInput) heightInput.value = config.height || '';
     }
 
@@ -1886,14 +1852,19 @@
         currentWarehouse.configData = floorConfigs;
         currentWarehouse.floorTypes = JSON.parse(JSON.stringify(floorTypeData));
 
-        const stored = localStorage.getItem('wms_warehouses_v6');
-        if (stored) {
-            const list = JSON.parse(stored);
-            const idx = list.findIndex(w => w.id === currentWarehouseId);
-            if (idx !== -1) {
-                list[idx] = currentWarehouse;
-                localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
+        try {
+            var stored = localStorage.getItem('wms_warehouses_v6');
+            if (stored) {
+                var list = JSON.parse(stored);
+                var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
+                if (idx !== -1) {
+                    list[idx] = currentWarehouse;
+                    localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
+                }
             }
+        } catch (e) {
+            alert('Lỗi lưu dữ liệu tầng: ' + e.message);
+            return;
         }
 
         if (window.showToast) {
@@ -1928,14 +1899,19 @@
         currentWarehouse.configData = floorConfigs; // Save grid config
 
         // Save to localStorage
-        var stored = localStorage.getItem('wms_warehouses_v6');
-        if (stored) {
-            var list = JSON.parse(stored);
-            var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
-            if (idx !== -1) {
-                list[idx] = currentWarehouse;
-                localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
+        try {
+            var stored = localStorage.getItem('wms_warehouses_v6');
+            if (stored) {
+                var list = JSON.parse(stored);
+                var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
+                if (idx !== -1) {
+                    list[idx] = currentWarehouse;
+                    localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
+                }
             }
+        } catch (e) {
+            alert('Lỗi lưu khai báo: ' + e.message);
+            return;
         }
 
         // Update header
@@ -2011,14 +1987,14 @@
             html += '<div class="area-field area-code" style="margin-bottom: 8px;">';
             html += '<span class="area-field-label">Mã khu vực</span>';
             html += '<div class="area-field-value">';
-            html += '<input type="text" value="' + (area.code || '') + '" onchange="updateAreaField(' + area.id + ', \'code\', this.value)" placeholder="Nhập mã khu vực..." ' + (isReadonly ? 'disabled' : '') + '>';
+            html += '<input type="text" value="' + escapeHtml(area.code || '') + '" onchange="updateAreaField(' + area.id + ', \'code\', this.value)" placeholder="Nhập mã khu vực..." ' + (isReadonly ? 'disabled' : '') + '>';
             html += '</div></div>';
             
             // Tên khu vực
             html += '<div class="area-field" style="margin-bottom: 8px;">';
             html += '<span class="area-field-label">Tên khu vực<span style="color: red;">*</span></span>';
             html += '<div class="area-field-value">';
-            html += '<input type="text" value="' + (area.name || '') + '" onchange="updateAreaField(' + area.id + ', \'name\', this.value)" placeholder="Nhập tên khu vực..." ' + (isReadonly ? 'disabled' : '') + '>';
+            html += '<input type="text" value="' + escapeHtml(area.name || '') + '" onchange="updateAreaField(' + area.id + ', \'name\', this.value)" placeholder="Nhập tên khu vực..." ' + (isReadonly ? 'disabled' : '') + '>';
             html += '</div></div>';
             
             // Màu sắc (Compact Edition)
@@ -2607,15 +2583,20 @@
         currentWarehouse.areas = JSON.parse(JSON.stringify(areaData));
 
         // Save to localStorage
-        var stored = localStorage.getItem('wms_warehouses_v6');
-        // ...
-        if (stored) {
-            var list = JSON.parse(stored);
-            var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
-            if (idx !== -1) {
-                list[idx] = currentWarehouse;
-                localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
+        try {
+            var stored = localStorage.getItem('wms_warehouses_v6');
+            // ...
+            if (stored) {
+                var list = JSON.parse(stored);
+                var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
+                if (idx !== -1) {
+                    list[idx] = currentWarehouse;
+                    localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
+                }
             }
+        } catch (e) {
+            alert('Lỗi lưu khu vực: ' + e.message);
+            return;
         }
 
         // Reset active state and clear grid selection to return to display mode
@@ -2665,7 +2646,7 @@
             html += '<div class="location-field">';
             html += '<span class="location-field-label">Tên vị trí <span style="color: red;">*</span></span>';
             html += '<div class="location-field-value">';
-            html += '<input type="text" value="' + (loc.name || '') + '" oninput="updateLocationField(' + loc.id + ', \'name\', this.value)" placeholder="Nhập tên vị trí...">';
+            html += '<input type="text" value="' + escapeHtml(loc.name || '') + '" oninput="updateLocationField(' + loc.id + ', \'name\', this.value)" placeholder="Nhập tên vị trí...">';
             html += '</div></div>';
 
             // Loại vị trí
@@ -3138,14 +3119,19 @@
             }
         }
 
-        var stored = localStorage.getItem('wms_warehouses_v6');
-        if (stored) {
-            var list = JSON.parse(stored);
-            var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
-            if (idx !== -1) {
-                list[idx] = currentWarehouse;
-                localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
+        try {
+            var stored = localStorage.getItem('wms_warehouses_v6');
+            if (stored) {
+                var list = JSON.parse(stored);
+                var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
+                if (idx !== -1) {
+                    list[idx] = currentWarehouse;
+                    localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
+                }
             }
+        } catch (e) {
+            alert('Lỗi lưu vị trí: ' + e.message);
+            return;
         }
 
         // Reset active location and clear grid selection after save
@@ -3332,8 +3318,8 @@
         var html = '';
         eqs.forEach(function(code) {
             html += '<div style="display:inline-flex; align-items:center; background:#eff6ff; border:1px solid #bfdbfe; border-radius:20px; padding:3px 10px 3px 12px; font-size:12px; color:#1d4ed8; gap:6px;">';
-            html += '<span>' + code + '</span>';
-            html += '<span onclick="event.stopPropagation(); assignFloorEq(\'' + code + '\', event)" style="cursor:pointer; color:#93c5fd; line-height:1; font-size:14px; font-weight:500;">&times;</span>';
+            html += '<span>' + escapeHtml(code) + '</span>';
+            html += '<span onclick="event.stopPropagation(); assignFloorEq(\'' + escapeHtml(code) + '\', event)" style="cursor:pointer; color:#93c5fd; line-height:1; font-size:14px; font-weight:500;">&times;</span>';
             html += '</div>';
         });
         container.innerHTML = html;
@@ -3351,8 +3337,11 @@
             var floors = 1;
             if (currentWarehouse && currentWarehouse.floors) {
                 floors = parseInt(currentWarehouse.floors);
-            } else if (Object.keys(floorConfigs).length > 0) {
-                floors = Math.max(...Object.keys(floorConfigs).map(Number));
+            } else {
+                var fcKeys2 = Object.keys(floorConfigs);
+                if (fcKeys2.length > 0) {
+                    floors = Math.max.apply(null, fcKeys2.map(Number));
+                }
             }
             for (var i = 1; i <= floors; i++) {
                 var item = document.createElement('div');
@@ -3430,10 +3419,6 @@
     window.removeEquipment = removeEquipment;
     window.toggleAccordionGroup = toggleAccordionGroup;
     // New inline-assignment equipment system
-    window.assignEqType = assignEqType;
-    window.setEqFilter = setEqFilter;
-    window.filterEqList = filterEqList;
-    window.toggleEqSumGroup = toggleEqSumGroup;
     window.assignEqType = assignEqType;
     window.setEqFilter = setEqFilter;
     window.filterEqList = filterEqList;

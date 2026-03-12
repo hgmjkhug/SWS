@@ -231,228 +231,258 @@ ${innerContent}
     mainGrid.appendChild(shuttleEl);
 
 
-    function startShuttleAnimation(shuttle) {
-        // Each mission: array of waypoints { r, c, action? }
-        // angle is computed automatically: horizontal segment = 0, vertical = 90
-        // Rotation only happens at intersections (angle change point)
 
-        // Delivery targets for 3 work missions then 1 charge mission
+    // ─── Lifter bar at A14 (row 13, col 0) ───────────────────────────────────
+    let lifterBar;
+    let lifterTimeout1, lifterTimeout2;
+    (function () {
+        const cell = mainGrid.children[13 * cols + 0];
+        if (!cell) return;
+        lifterBar = document.createElement('div');
+        lifterBar.className = 'lifter-bar';
+        // starts hidden, icon injected dynamically
+        cell.appendChild(lifterBar);
+    })();
+
+    // 'up'    → bar rises WITH pallet icon (lifter has cargo)
+    // 'taken' → shuttle took cargo: remove icon, bar stays up 2 s then descends empty
+  function setLifterPosition(state) {
+    if (!lifterBar) return;
+
+    // Clear any pending timeouts to avoid race conditions
+    clearTimeout(lifterTimeout1);
+    clearTimeout(lifterTimeout2);
+
+    if (state === 'up') {
+        // lifter nâng lên cùng pallet
+        lifterBar.innerHTML =
+        '<i class="fa-solid fa-pallet-box lifter-pallet"></i>';
+
+        lifterBar.classList.add('active', 'up');
+    }
+
+    else if (state === 'taken') {
+        // shuttle đã lấy pallet
+        lifterBar.innerHTML = '';
+
+        // Đảm bảo vẫn ở trạng thái 'up' khi vừa lấy xong
+        lifterBar.classList.add('up', 'active');
+
+        // đứng im 2s rồi hạ xuống
+        lifterTimeout1 = setTimeout(() => {
+            // hạ xuống (xóa class up)
+            lifterBar.classList.remove('up');
+
+            // Sau khi hạ xong (1.2s transition), mới ẩn hẳn (xóa class active)
+            lifterTimeout2 = setTimeout(() => {
+                lifterBar.classList.remove('active');
+            }, 1200); 
+        }, 2000);
+    }
+}
+
+
+    // ─── Shuttle animation ────────────────────────────────────────────────────
+    (function startShuttleAnimation() {
         const missions = [
-            // Mission 1: load from A14, deliver to C10 (r=9,c=2)
-            { deliverR: 9,  deliverC: 2  },
-            // Mission 2: load from A14, deliver to E5 (r=4,c=4)
-            { deliverR: 4,  deliverC: 4  },
-            // Mission 3: load from A14, deliver to K9 (r=8,c=10)
-            { deliverR: 8,  deliverC: 10 },
-            // Mission 4 (charge): load from A14, deliver to F14 charging (r=13,c=6), then go charge at X7 (r=6,c=23)
-            { deliverR: 13, deliverC: 6, charge: true },
+            { deliverR: 9,  deliverC: 2  },               // C10
+            { deliverR: 4,  deliverC: 3  },               // D5
+            { deliverR: 8,  deliverC: 10 },               // K9
+            { deliverR: 11, deliverC: 10, goCharge: true }, // K12 → then charge
         ];
 
-        // Intersections (rail col x rail row or special vertices) — shuttle xoay tại đây
-        // Rail cols: 0(A), 1(B), 4(E), 9(J), 15(P), 19(T), 22(W), 23(X)
-        // Rail rows: 7(row8 index), 12(row13 index)
         const railColSet = new Set([0, 1, 4, 9, 15, 19, 22, 23]);
-        const railRowSet = new Set([7, 12]);
 
-        function isIntersection(r, c) {
-            return railColSet.has(c) && railRowSet.has(r);
-        }
-
-        // Build a path segment between two waypoints, interpolating step by step
-        // angle is determined by direction of movement at each step
-        function buildSegment(r1, c1, r2, c2, actionOnArrival) {
+        function seg(r1, c1, r2, c2, act, currentAngle) {
             const steps = [];
-            // Move vertically first if needed, then horizontally (or vice versa via waypoints)
-            // Since paths are always axis-aligned, compute direction
             if (r1 !== r2 && c1 === c2) {
-                // Vertical movement
-                const dir = r2 > r1 ? 1 : -1;
-                const angle = dir > 0 ? 90 : 270;
-                for (let r = r1 + dir; r !== r2 + dir; r += dir) {
-                    const isLast = r === r2;
-                    steps.push({ r, c: c1, angle, action: isLast ? actionOnArrival : null });
+                const dir = r2 > r1 ? 1 : -1, targetAngle = dir > 0 ? 90 : 270;
+                // Rotate first if arriving at intersection or starting
+                if (currentAngle !== undefined && currentAngle !== targetAngle) {
+                    steps.push({ r: r1, c: c1, angle: targetAngle });
                 }
+                for (let r = r1 + dir; r !== r2 + dir; r += dir)
+                    steps.push({ r, c: c1, angle: targetAngle, action: r === r2 ? act : null });
+                return { steps, lastAngle: targetAngle };
             } else if (c1 !== c2 && r1 === r2) {
-                // Horizontal movement
-                const dir = c2 > c1 ? 1 : -1;
-                const angle = 0; // shuttle always faces right visually when horizontal
-                for (let c = c1 + dir; c !== c2 + dir; c += dir) {
-                    const isLast = c === c2;
-                    steps.push({ r: r1, c, angle, action: isLast ? actionOnArrival : null });
+                const dir = c2 > c1 ? 1 : -1, targetAngle = 0;
+                // Rotate first if arriving at intersection or starting
+                if (currentAngle !== undefined && currentAngle !== targetAngle) {
+                    steps.push({ r: r1, c: c1, angle: targetAngle });
                 }
+                for (let c = c1 + dir; c !== c2 + dir; c += dir)
+                    steps.push({ r: r1, c, angle: targetAngle, action: c === c2 ? act : null });
+                return { steps, lastAngle: targetAngle };
             }
-            return steps;
+            return { steps: [], lastAngle: currentAngle };
         }
 
-        // Build full path for one work mission
-        // Start position: parking X7 = r=6, c=23 (or A8 = r=7,c=0 for first)
-        function buildMissionPath(startR, startC, deliverR, deliverC, isCharge) {
+        function missionPath(startR, startC, deliverR, deliverC, goCharge) {
             const path = [];
+            let currentAngle = (startC === 23) ? 270 : 0; // Assume 270 if at X7, otherwise 0
 
-            // 1. From start → A8 (r=7, c=0) via rail
-            // Go to rail row 7 (row index 7) on current col, then left to col 0
-            if (startC !== 0 || startR !== 7) {
-                // First go to nearest rail row
-                const targetRow = 7;
-                if (startR !== targetRow) {
-                    path.push(...buildSegment(startR, startC, targetRow, startC, null));
+            // 1. Go to A8 (r=7, c=0)
+            if (startR !== 7 || startC !== 0) {
+                if (startR !== 7) {
+                    const res = seg(startR, startC, 7, startC, null, currentAngle);
+                    path.push(...res.steps);
+                    currentAngle = res.lastAngle;
                 }
                 if (startC !== 0) {
-                    path.push(...buildSegment(targetRow, startC, targetRow, 0, null));
+                    const res = seg(7, startC, 7, 0, null, currentAngle);
+                    path.push(...res.steps);
+                    currentAngle = res.lastAngle;
                 }
             }
 
-            // 2. A8 → A14 (down col 0 from r=7 to r=13)
-            path.push(...buildSegment(7, 0, 13, 0, null));
+            // 2. Descend A8 → A14; first step (r=8) triggers lifter UP WITH pallet
+            const down = seg(7, 0, 13, 0, null, currentAngle);
+            if (down.steps.length) down.steps[0].lifterUp = true;   // ← set on first step going down
+            path.push(...down.steps);
+            currentAngle = down.lastAngle;
 
-            // 3. Load pause at A14
-            for (let i = 0; i < 3; i++) path.push({ r: 13, c: 0, angle: 90, action: i === 0 ? 'load' : null });
+            // 3. Load at A14 (3 ticks, first triggers 'load')
+            for (let i = 0; i < 3; i++)
+                path.push({ r: 13, c: 0, angle: currentAngle, action: i === 0 ? 'load' : null });
 
-            // 4. A14 → A8 (up)
-            path.push(...buildSegment(13, 0, 7, 0, null));
+            // 4. Return A14 → A8
+            const up = seg(13, 0, 7, 0, null, currentAngle);
+            path.push(...up.steps);
+            currentAngle = up.lastAngle;
 
-            // 5. Navigate from A8 to delivery cell
-            // Route: A8 → nearest rail col on row 7, then go vertical to deliverR, then horizontal to deliverC
-            if (isCharge && deliverR === 13 && deliverC === 6) {
-                // Deliver to charging station: go down col 0 to r=12, then right to col 6, then down to r=13
-                path.push(...buildSegment(7, 0, 12, 0, null));
-                path.push(...buildSegment(12, 0, 12, 6, null));
-                path.push(...buildSegment(12, 6, 13, 6, null));
-                for (let i = 0; i < 3; i++) path.push({ r: 13, c: 6, angle: 90, action: i === 0 ? 'unload' : null });
-                // Then go to charging: back to row 12, across to col 23, up to X7
-                path.push(...buildSegment(13, 6, 12, 6, null));
-                path.push(...buildSegment(12, 6, 12, 0, null));
-                path.push(...buildSegment(12, 0, 7, 0, null));
-                path.push(...buildSegment(7, 0, 7, 23, null));
-                path.push(...buildSegment(7, 23, 6, 23, null));
-                for (let i = 0; i < 3; i++) path.push({ r: 6, c: 23, angle: 270, action: i === 0 ? 'charge' : null });
-            } else {
-                // Normal delivery: find a rail col near deliverC
-                // Strategy: go right on row 7 to col 1 (B), then down to target row via col 1 spur,
-                // or use nearest rail col
-                const nearestRailC = [...railColSet].filter(c => c >= 1).sort((a,b) => Math.abs(a-deliverC)-Math.abs(b-deliverC))[0];
-                // Go right on row 7 to nearestRailC
-                path.push(...buildSegment(7, 0, 7, nearestRailC, null));
-                // Go vertical to deliverR
-                if (deliverR !== 7) {
-                    path.push(...buildSegment(7, nearestRailC, deliverR, nearestRailC, null));
-                }
-                // Go horizontal to deliverC
-                if (deliverC !== nearestRailC) {
-                    path.push(...buildSegment(deliverR, nearestRailC, deliverR, deliverC, null));
-                }
-                // Unload pause
-                for (let i = 0; i < 3; i++) path.push({ r: deliverR, c: deliverC, angle: 0, action: i === 0 ? 'unload' : null });
-                // Return: go back to nearestRailC
-                if (deliverC !== nearestRailC) {
-                    path.push(...buildSegment(deliverR, deliverC, deliverR, nearestRailC, null));
-                }
-                if (deliverR !== 7) {
-                    path.push(...buildSegment(deliverR, nearestRailC, 7, nearestRailC, null));
-                }
-                // Return to A8
-                path.push(...buildSegment(7, nearestRailC, 7, 0, null));
+            // 5. Deliver to shelf (NEVER a charging station)
+            const rc = [...railColSet].filter(c => c >= 1)
+                .sort((a, b) => Math.abs(a - deliverC) - Math.abs(b - deliverC))[0];
+            
+            const toRailSub = seg(7, 0, 7, rc, null, currentAngle);
+            path.push(...toRailSub.steps);
+            currentAngle = toRailSub.lastAngle;
+
+            if (deliverR !== 7) {
+                const toRow = seg(7, rc, deliverR, rc, null, currentAngle);
+                path.push(...toRow.steps);
+                currentAngle = toRow.lastAngle;
+            }
+            if (deliverC !== rc) {
+                const toCell = seg(deliverR, rc, deliverR, deliverC, null, currentAngle);
+                path.push(...toCell.steps);
+                currentAngle = toCell.lastAngle;
+            }
+
+            // 6. Unload at shelf (3 ticks)
+            for (let i = 0; i < 3; i++)
+                path.push({ r: deliverR, c: deliverC, angle: currentAngle, action: i === 0 ? 'unload' : null });
+
+            // 7. Return to A8
+            if (deliverC !== rc) {
+                const backToRail = seg(deliverR, deliverC, deliverR, rc, null, currentAngle);
+                path.push(...backToRail.steps);
+                currentAngle = backToRail.lastAngle;
+            }
+            if (deliverR !== 7) {
+                const backToMainRail = seg(deliverR, rc, 7, rc, null, currentAngle);
+                path.push(...backToMainRail.steps);
+                currentAngle = backToMainRail.lastAngle;
+            }
+            const backToStart = seg(7, rc, 7, 0, null, currentAngle);
+            path.push(...backToStart.steps);
+            currentAngle = backToStart.lastAngle;
+
+            // 8. If charge mission: go to X7 EMPTY (cargo already delivered)
+            if (goCharge) {
+                const toX7Rail = seg(7, 0, 7, 23, null, currentAngle);
+                path.push(...toX7Rail.steps);
+                currentAngle = toX7Rail.lastAngle;
+
+                const toCharge = seg(7, 23, 6, 23, null, currentAngle);
+                path.push(...toCharge.steps);
+                currentAngle = toCharge.lastAngle;
+
+                for (let i = 0; i < 4; i++)
+                    path.push({ r: 6, c: 23, angle: currentAngle, action: i === 0 ? 'charge' : null });
             }
 
             return path;
         }
 
-        // Build complete sequence: 3 work missions → park at X7, then 1 work mission → charge at X7
         let fullPath = [];
 
-        // Missions 0,1,2: work, return to A8 each time, park at X7 after mission 2
+        let lastAngle = 270;
+        // Missions 0-2: work then return to A8
         for (let m = 0; m < 3; m++) {
-            const startR = m === 0 ? 6 : 7;
-            const startC = m === 0 ? 23 : 0;
-            fullPath.push(...buildMissionPath(startR, startC, missions[m].deliverR, missions[m].deliverC, false));
+            const mPath = missionPath(
+                m === 0 ? 6 : 7,
+                m === 0 ? 23 : 0,
+                missions[m].deliverR, missions[m].deliverC, false
+            );
+            fullPath.push(...mPath);
+            if (mPath.length > 0) lastAngle = mPath[mPath.length-1].angle;
         }
-        // After 3 missions: go to parking X7
-        fullPath.push(...buildSegment(7, 0, 7, 23, null));
-        fullPath.push(...buildSegment(7, 23, 6, 23, null));
-        for (let i = 0; i < 4; i++) fullPath.push({ r: 6, c: 23, angle: 270, action: i === 0 ? 'park' : null });
 
-        // Mission 4: from parking X7, go do charge mission
-        fullPath.push(...buildMissionPath(6, 23, missions[3].deliverR, missions[3].deliverC, true));
+        // Park at X7 after missions 0-2
+        const toParkRail = seg(7, 0, 7, 23, null, lastAngle);
+        fullPath.push(...toParkRail.steps);
+        lastAngle = toParkRail.lastAngle;
 
-        // After charging: wake up and restart from X7
-        fullPath.push({ r: 6, c: 23, angle: 270 }); // loop back
+        const toPark = seg(7, 23, 6, 23, null, lastAngle);
+        fullPath.push(...toPark.steps);
+        lastAngle = toPark.lastAngle;
 
-        let currentIndex = 0;
-        const stepTime = 500;
-        shuttle.style.transition = `all ${stepTime}ms linear`;
-        let isLoaded = false;
+        for (let i = 0; i < 4; i++)
+            fullPath.push({ r: 6, c: 23, angle: lastAngle, action: i === 0 ? 'park' : null });
 
-        const PALLET_SVG = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clip-path="url(#clip0_4025_17404)">
-<rect width="40" height="40" fill="#A4D3FE" fill-opacity="0.4"/>
-<g filter="url(#filter0_d_4025_17404)">
-<path d="M22.037 8.01953L9.26853 9.9016C8.82754 9.9666 8.6856 10.5325 9.04371 10.7979L15.0409 15.243C15.1556 15.328 15.3011 15.3599 15.4409 15.3307L30.3319 12.2195C30.8174 12.1181 30.8749 11.4479 30.4138 11.2652L22.2941 8.04932C22.2125 8.01701 22.1238 8.00674 22.037 8.01953Z" fill="#38A0F0"/>
-<path d="M14.7693 15.5729L8.80567 11.0371C8.47594 10.7863 8.00176 11.0223 8.00298 11.4365L8.03598 22.6538C8.0363 22.7633 8.07256 22.8696 8.13918 22.9565L14.0698 30.6919C14.3605 31.0711 14.9666 30.8655 14.9666 30.3876V15.9709C14.9666 15.8147 14.8936 15.6675 14.7693 15.5729Z" fill="#1D8ADF"/>
-<path d="M31.3891 12.4606L15.7934 15.8453C15.5634 15.8952 15.3994 16.0987 15.3994 16.334V31.2908C15.3994 31.6365 15.7419 31.8779 16.0675 31.7617L31.6632 26.1965C31.8623 26.1254 31.9952 25.9369 31.9952 25.7256V12.9493C31.9952 12.6304 31.7007 12.393 31.3891 12.4606Z" fill="#0F6EB8" stroke="#0F6EB8" stroke-width="0.1"/>
-</g>
-</g>
-<rect x="0.25" y="0.25" width="39.5" height="39.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
-<defs>
-<filter id="filter0_d_4025_17404" x="4.00293" y="8.01416" width="32.042" height="31.8271" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset dy="4"/>
-<feGaussianBlur stdDeviation="2"/>
-<feComposite in2="hardAlpha" operator="out"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"/>
-<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_4025_17404"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_4025_17404" result="shape"/>
-</filter>
-<clipPath id="clip0_4025_17404">
-<rect width="40" height="40" fill="white"/>
-</clipPath>
-</defs>
-</svg>`;
+        // Mission 3: deliver to shelf → then charge (empty)
+        fullPath.push(...missionPath(6, 23,
+            missions[3].deliverR, missions[3].deliverC, missions[3].goCharge));
 
-        function updateCellToPallet(r, c) {
-            const index = r * cols + c;
-            const targetCell = mainGrid.children[index];
-            if (!targetCell || targetCell.classList.contains('pallet-pos')) return;
-            targetCell.className = 'map-cell pallet-pos';
-            targetCell.innerHTML = PALLET_SVG;
+        // Loop sentinel
+        fullPath.push({ r: 6, c: 23, angle: 270 });
+
+        // ── pallet SVG dropped on shelf cells ──
+        const PALLET_SVG = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#pc)"><rect width="40" height="40" fill="#A4D3FE" fill-opacity="0.4"/><g filter="url(#pd)"><path d="M22.037 8.02L9.269 9.9c-.441.065-.583.631-.241.896l5.997 4.445c.115.085.26.117.4.088l14.891-3.111c.486-.101.543-.771.082-.954L22.294 8.05a.47.47 0 0 0-.257-.03z" fill="#38A0F0"/><path d="M14.769 15.573L8.806 11.037c-.33-.25-.804-.014-.803.4l.033 11.217c0 .11.036.216.102.303l5.931 7.735c.29.38.897.174.897-.304V15.971a.47.47 0 0 0-.197-.398z" fill="#1D8ADF"/><path d="M31.389 12.461L15.793 15.845a.47.47 0 0 0-.394.49v14.957c0 .345.343.587.668.47l15.596-5.565a.47.47 0 0 0 .333-.471V12.949c0-.319-.295-.556-.607-.488z" fill="#0F6EB8" stroke="#0F6EB8" stroke-width="0.1"/></g></g><rect x=".25" y=".25" width="39.5" height="39.5" stroke="#D8D8D8" stroke-opacity=".2" stroke-width=".5"/><defs><filter id="pd" x="4" y="8" width="32" height="32" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="b"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="h"/><feOffset dy="4"/><feGaussianBlur stdDeviation="2"/><feComposite in2="h" operator="out"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .1 0"/><feBlend in2="b" result="s"/><feBlend in="SourceGraphic" in2="s" result="shape"/></filter><clipPath id="pc"><rect width="40" height="40" fill="white"/></clipPath></defs></svg>`;
+
+        function dropPallet(r, c) {
+            // shuttle chỉ có thể bỏ hàng vào ô vị trí (Shelf = 2)
+            if (mapMatrix[r][c] !== 2) return;
+
+            const cell = mainGrid.children[r * cols + c];
+            if (!cell || cell.classList.contains('pallet-pos')) return;
+            cell.className = 'map-cell pallet-pos';
+            cell.innerHTML = PALLET_SVG;
         }
+
+        const shuttle = shuttleEl;
+        let idx = 0, isLoaded = false;
+        const STEP = 500;
+        shuttle.style.transition = `all ${STEP}ms linear`;
 
         function move() {
-            if (currentIndex >= fullPath.length) {
-                currentIndex = 0; // loop
+            if (idx >= fullPath.length) idx = 0;
+            const p = fullPath[idx];
+
+            shuttle.style.top       = (p.r * 40 + 5) + 'px';
+            shuttle.style.left      = (p.c * 40) + 'px';
+            shuttle.style.transform = `rotate(${p.angle}deg)`;
+
+            const color = (p.action === 'park' || p.action === 'charge') ? '#F9F1E2' : '#076EB8';
+
+            // ── Lifter: rises WITH pallet icon on first step down toward A14 ──
+            if (p.lifterUp) setLifterPosition('up');
+
+            if (p.action === 'load') {
+                isLoaded = true;
+                setLifterPosition('taken');   // icon gone, bar stays up 2 s then descends
             }
-            const pos = fullPath[currentIndex];
-
-            shuttle.style.top  = (pos.r * 40 + 5) + 'px';
-            shuttle.style.left = (pos.c * 40) + 'px';
-            shuttle.style.transform = `rotate(${pos.angle}deg)`;
-
-            let color = '#076EB8';
-            if (pos.action === 'park' || pos.action === 'charge') color = '#F9F1E2';
-
-            if (pos.action === 'load')    isLoaded = true;
-            if (pos.action === 'unload') {
+            if (p.action === 'unload') {
                 isLoaded = false;
-                updateCellToPallet(pos.r, pos.c);
+                dropPallet(p.r, p.c);
             }
 
             shuttle.innerHTML = getShuttleSVG(isLoaded, color);
-
-            currentIndex++;
-            setTimeout(move, stepTime);
+            idx++;
+            setTimeout(move, STEP);
         }
         move();
-    }
-    startShuttleAnimation(shuttleEl);
-
-    // --- Inbound lifter heartbeat at A14 (row 13, col 0) ---
-    (function addLifterEffect() {
-        const inboundIndex = 13 * cols + 0;
-        const inboundCell = mainGrid.children[inboundIndex];
-        if (!inboundCell) return;
-        const bar = document.createElement('div');
-        bar.className = 'lifter-bar';
-        inboundCell.appendChild(bar);
     })();
 
     // --- Rail implementation ---
@@ -471,47 +501,33 @@ ${innerContent}
             const index = r * cols + c;
             const cell = mainGrid.children[index];
             if (!cell) continue;
-
-            // ── Horizontal rails on rail rows (row 8 and row 13, index 7 and 12) ──
             if (railRows.includes(r)) {
                 if (c > 0)  addRailSegment(cell, 'h-left');
                 if (c < cols - 1) addRailSegment(cell, 'h-right');
             }
-
-            // ── Vertical rails on rail cols ──
             if (railCols.includes(c)) {
-                // Col 0 (A): full vertical A1→A13 + spur to A14
                 if (c === 0) {
                     if (r >= 1 && r <= 12) {
                         if (r > 1)  addRailSegment(cell, 'v-up');
                         if (r < 12) addRailSegment(cell, 'v-down');
                     }
-                    // spur A13→A14
                     if (r === 12) addRailSegment(cell, 'v-down');
                     if (r === 13) addRailSegment(cell, 'v-up');
-                }
-                // Col 1 (B): full vertical B8→B13 (index r=7 to r=12)
-                else if (c === 1) {
+                } else if (c === 1) {
                     if (r >= 7 && r <= 12) {
                         if (r > 7)  addRailSegment(cell, 'v-up');
                         if (r < 12) addRailSegment(cell, 'v-down');
                     }
-                }
-                // Col 23 (X): X8→X7 only (r=7 down to r=6) — no X3
-                else if (c === 23) {
+                } else if (c === 23) {
                     if (r === 6) addRailSegment(cell, 'v-down');
                     if (r === 7) addRailSegment(cell, 'v-up');
-                }
-                // All other rail cols: full vertical r=1 to r=12
-                else {
+                } else {
                     if (r >= 1 && r <= 12) {
                         if (r > 1)  addRailSegment(cell, 'v-up');
                         if (r < 12) addRailSegment(cell, 'v-down');
                     }
                 }
             }
-
-            // ── Charging station spurs (row 12→13 and row 13 up) ──
             const spurCols = [6, 7, 8, 9, 13, 14];
             if (spurCols.includes(c)) {
                 if (r === 12) addRailSegment(cell, 'v-down');
