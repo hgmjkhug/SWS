@@ -1,5 +1,4 @@
-<body>
-    <div class="page-layout">
+<div class="page-layout">
 
         <!-- Left: 2 panel cards -->
         <div class="side-panels">
@@ -17,7 +16,7 @@
             <div class="panel-card">
                 <div class="panel-header">
                     <span class="panel-title">Log hệ thống</span>
-                    <span class="panel-badge" id="logBadge">0 sự kiện</span>
+                    <span class="panel-badge"  id="logBadge">0 sự kiện</span>
                 </div>
                 <div class="log-list" id="logList"></div>
             </div>
@@ -29,10 +28,31 @@
             <div class="warehouse-map-grid" id="mapGrid"></div>
         </div>
 
+        <!-- Right Side: Equipment and Stats -->
+        <div class="side-panels">
+
+            <!-- Card 3: Danh sách thiết bị -->
+            <div class="panel-card">
+                <div class="panel-header">
+                    <span class="panel-title">Danh sách thiết bị</span>
+                    <span class="panel-badge" id="deviceBadge">0 TB</span>
+                </div>
+                <div class="device-list" id="deviceList"></div>
+            </div>
+
+            <!-- Card 4: Thống kê loại lệnh -->
+            <div class="panel-card">
+                <div class="panel-header">
+                    <span class="panel-title">Thống kê loại lệnh</span>
+                </div>
+                <div class="stats-card"></div>
+            </div>
+
+        </div>
+
     </div>
 
     <script src="traceio.js"></script>
     <link rel="stylesheet" href="traceio.css">
 
-</body>
 </html>

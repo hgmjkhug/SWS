@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
 /* Container Frame 482421 */
 .warehouse-map-container {
     box-sizing: border-box;
@@ -91,7 +93,7 @@
 
 /* Shelf/Container Cell */
 .map-cell.shelf {
-    background-color: rgba(164, 211, 254, 0.4);
+    background-color: #EDF6FF;
     position: relative;
     box-sizing: border-box;
 }
@@ -113,19 +115,39 @@
 
 /* Charging Station Cell */
 .map-cell.charging {
-    background: rgba(164, 211, 254, 0.4); 
+    background: #EDF6FF; 
 }
 
-.map-cell.charging .charging-icon {
+/* All special icon cells: position absolutely to fill cell perfectly */
+.map-cell.charging .charging-icon,
+.map-cell.inbound .inbound-icon,
+.map-cell.outbound .outbound-icon,
+.map-cell.parking-pos .parking-icon,
+.map-cell.pallet-pos .pallet-icon {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    width: 40px;
+    height: 40px;
     left: 0;
     top: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 4;
+}
+
+/* SVG inside icon cells: fill exactly the 40x40 cell */
+.map-cell.inbound .inbound-icon svg,
+.map-cell.outbound .outbound-icon svg,
+.map-cell.parking-pos .parking-icon svg,
+.map-cell.pallet-pos .pallet-icon svg,
+.map-cell.charging .charging-icon svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    display: block;
+    overflow: visible;
 }
 
 /* Row and Col Labels */
@@ -169,6 +191,24 @@
     transform-origin: center;
 }
 
+.shuttle.charging-active {
+    /* Subtle glow can remain or be removed as per preference, the request emphasized the icon */
+    filter: drop-shadow(0 0 8px #0D6EB8);
+}
+
+.charging-bolt {
+    position: absolute;
+    font-size: 14px;
+    color: #0D6EB8;
+    z-index: 11;
+    pointer-events: none;
+}
+
+@keyframes chargingPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
 /* Group 481932 + Ellipse 153 */
 .shuttle-inner {
     position: relative;
@@ -208,39 +248,42 @@
 
 /* Vector 330: left half horizontal */
 .rail-segment.h-left {
-    height: 0px;
-    border-top: 1px solid rgba(124, 141, 181, 0.7);
+    height: 1px;
+    background: rgba(124, 141, 181, 0.7);
     top: 50%;
+    transform: translateY(-50%);
     left: 0px;
     width: 20px;
-    background: #677594;
 }
 
 /* Vector 331: right half horizontal */
 .rail-segment.h-right {
-    height: 0px;
-    border-top: 1px solid rgba(124, 141, 181, 0.7);
+    height: 1px;
+    background: rgba(124, 141, 181, 0.7);
     top: 50%;
+    transform: translateY(-50%);
     left: 20px;
     width: 20px;
 }
 
 /* Vector 332: top half vertical, 19.75px */
 .rail-segment.v-up {
-    width: 0px;
-    border-left: 1px solid rgba(124, 141, 181, 0.7);
+    width: 1px;
+    background: rgba(124, 141, 181, 0.7);
     left: 50%;
+    transform: translateX(-50%);
     top: 0px;
-    height: 19.75px;
+    height: 20px;
 }
 
 /* Vector 333: bottom half vertical, 20.25px */
 .rail-segment.v-down {
-    width: 0px;
-    border-left: 1px solid rgba(124, 141, 181, 0.7);
+    width: 1px;
+    background: rgba(124, 141, 181, 0.7);
     left: 50%;
-    top: 19.75px;
-    height: 20.25px;
+    transform: translateX(-50%);
+    top: 20px;
+    height: 20px;
 }
 
 /* ── Labels ── */
@@ -269,23 +312,18 @@
 /* ═══════════════════════════════════════════════════
    PAGE LAYOUT — map + side panels
 ═══════════════════════════════════════════════════ */
-body {
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
-    display: flex;
-    align-items: flex-start;
-    min-height: 100vh;
-    box-sizing: border-box;
-}
-
+/* Page Layout Reset */
 .page-layout {
     display: flex;
+    flex-direction: row;
     flex-wrap: wrap;
     align-items: flex-start;
-    gap: 24px;
+    justify-content: flex-start;
+    gap: 20px;
     width: 100%;
+    /* Removed padding: 20px to avoid double padding if parent has it, 
+       but keeping for now if user wants it. Actually, user complained about sidebar being cut off.
+       Let's use margin-top/bottom or just flex-grow. */
     padding: 20px;
     box-sizing: border-box;
     animation: fadeInPage 0.6s ease-out;
@@ -301,9 +339,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    flex: 1 1 480px;
-    max-width: 600px;
-    min-width: 320px;
+    flex: 1 1 320px; /* Allow panels to grow and shrink */
+    max-width: 500px; /* Increased max-width for better flex */
 }
 
 /* ── Override map container: remove absolute positioning ── */
@@ -311,7 +348,9 @@ body {
     position: relative !important;
     left: unset !important;
     top: unset !important;
-    flex-shrink: 0;
+    flex: 3 1 800px; /* Map takes more space but is also flexible */
+    min-width: 400px;
+    overflow-x: auto;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -583,6 +622,220 @@ body {
     flex-shrink: 0;
 }
 /* ═══════════════════════════════════════════════════
+   CARD 3 — DANH SÁCH THIẾT BỊ
+═══════════════════════════════════════════════════ */
+.device-list {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.device-item {
+    background: #f8fafc;
+    border: 0.5px solid rgba(3, 103, 204, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.device-item:hover {
+    background: #ffffff;
+    box-shadow: 0 4px 8px rgba(3, 103, 204, 0.08);
+}
+
+.device-info-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.device-meta {
+    display: flex;
+    flex-direction: column;
+}
+
+.device-code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: #0367CC;
+}
+
+.device-name {
+    font-size: 10.5px;
+    color: #64748b;
+}
+
+.device-battery-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.device-mission {
+    font-size: 11px;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.device-mission i {
+    font-size: 10px;
+    color: #396BE0;
+}
+
+/* Battery Progress Bar */
+.battery-container {
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.battery-bar {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1s ease-in-out;
+}
+
+.battery-bar.high { background: linear-gradient(90deg, #10b981, #34d399); }
+.battery-bar.mid  { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.battery-bar.low  { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+/* ═══════════════════════════════════════════════════
+   CARD 4 — THỐNG KÊ CHI TIẾT
+═══════════════════════════════════════════════════ */
+.stats-card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.stats-chart-container {
+    position: relative;
+    width: 140px;
+    height: 140px;
+}
+
+.pie-chart {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    /* background: conic-gradient(#0367CC 0% 65%, #10b981 65% 100%); -- dynamic via JS */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(3, 103, 204, 0.15);
+    position: relative;
+}
+
+.pie-chart::after {
+    content: "";
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    background: #ffffff;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.stats-legend {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11.5px;
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.legend-dot.color-in  { background: #0367CC; }
+.legend-dot.color-out { background: #10b981; }
+
+.legend-label {
+    flex: 1;
+    color: #64748b;
+}
+
+.legend-value {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.device-status-tag {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+.status-online { background: #dcfce7; color: #166534; }
+.status-offline { background: #fee2e2; color: #991b1b; }
+
+.device-details {
+    display: flex;
+    gap: 12px;
+    font-size: 10px;
+    color: #64748b;
+    border-top: 1px solid rgba(3, 103, 204, 0.05);
+    padding-top: 6px;
+}
+
+.device-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Detailed Stats styling */
+.stats-summary {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 10px;
+    border-top: 1px solid rgba(3, 103, 204, 0.1);
+    padding-top: 15px;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.summary-label {
+    font-size: 10px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.summary-val {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0367CC;
+}
+/* ═══════════════════════════════════════════════════
    INBOUND LIFTER HEARTBEAT — A14
 ═══════════════════════════════════════════════════ */
 
@@ -724,4 +977,377 @@ body {
         grid-column: 1 / -1;
         margin-left: 18px;
     }
+}/* ═══════════════════════════════════════════════════
+   CARD 3 — DANH SÁCH THIẾT BỊ (REDESIGN)
+═══════════════════════════════════════════════════ */
+.device-list {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 340px;
+    overflow-y: auto;
+}
+
+.device-list::-webkit-scrollbar { width: 4px; }
+.device-list::-webkit-scrollbar-track { background: transparent; }
+.device-list::-webkit-scrollbar-thumb { background: rgba(3,103,204,0.2); border-radius: 4px; }
+
+/* ── Device row card ── */
+.device-item {
+    background: #f8fafd;
+    border: 1px solid rgba(3, 103, 204, 0.10);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    transition: all 0.22s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.device-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 10px 0 0 10px;
+    background: #cbd5e1;
+    transition: background 0.22s ease;
+}
+
+.device-item.type-in::before   { background: linear-gradient(180deg, #059669, #34d399); }
+.device-item.type-out::before  { background: linear-gradient(180deg, #d97706, #fbbf24); }
+.device-item.type-none::before { background: linear-gradient(180deg, #6366f1, #a5b4fc); }
+
+.device-item:hover {
+    background: #ffffff;
+    border-color: rgba(3, 103, 204, 0.22);
+    box-shadow: 0 3px 10px rgba(3, 103, 204, 0.09);
+    transform: translateY(-1px);
+}
+
+/* ── Row 1: ID + Name + Status tag ── */
+.device-row-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.device-id-badge {
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #0367CC;
+    background: rgba(3, 103, 204, 0.08);
+    padding: 2px 7px;
+    border-radius: 5px;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+}
+
+.device-name-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a2742;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.device-status-tag {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+}
+
+.status-online  { background: #dcfce7; color: #166534; border: 1px solid rgba(22,101,52,0.15); }
+.status-offline { background: #fee2e2; color: #991b1b; border: 1px solid rgba(153,27,27,0.15); }
+.status-charging{ background: rgba(99,102,241,0.1); color: #4338ca; border: 1px solid rgba(99,102,241,0.2); }
+
+/* ── Row 2: Mission badge ── */
+.device-mission-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mission-type-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.chip-in   { background: rgba(5,150,105,0.10); color: #059669; border: 1px solid rgba(5,150,105,0.22); }
+.chip-out  { background: rgba(217,119,6,0.10);  color: #d97706; border: 1px solid rgba(217,119,6,0.22); }
+.chip-none { background: rgba(99,102,241,0.10); color: #6366f1; border: 1px solid rgba(99,102,241,0.22); }
+
+.mission-cmd-text {
+    font-size: 11px;
+    color: #475569;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+}
+
+/* ── Row 3: Battery ── */
+.device-battery-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.battery-icon-wrap {
+    display: flex;
+    align-items: center;
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.battery-track {
+    flex: 1;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.battery-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1s ease-in-out;
+    position: relative;
+}
+
+.battery-fill.high { background: linear-gradient(90deg, #059669, #34d399); }
+.battery-fill.mid  { background: linear-gradient(90deg, #d97706, #fbbf24); }
+.battery-fill.low  { background: linear-gradient(90deg, #dc2626, #f87171); }
+
+.battery-fill.low::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 40%, rgba(255,255,255,0.35) 60%, transparent 80%);
+    animation: batteryPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes batteryPulse {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+.battery-pct {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    min-width: 32px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.battery-pct.high { color: #059669; }
+.battery-pct.mid  { color: #d97706; }
+.battery-pct.low  { color: #dc2626; }
+
+
+/* ═══════════════════════════════════════════════════
+   CARD 4 — THỐNG KÊ LOẠI LỆNH (REDESIGN)
+═══════════════════════════════════════════════════ */
+.stats-card {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── Donut Chart ── */
+.stats-donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.donut-chart-container {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    flex-shrink: 0;
+}
+
+.donut-svg {
+    width: 110px;
+    height: 110px;
+    transform: rotate(-90deg);
+}
+
+.donut-track {
+    fill: none;
+    stroke: #e8f0fb;
+    stroke-width: 14;
+}
+
+.donut-seg-in {
+    fill: none;
+    stroke: #0367CC;
+    stroke-width: 14;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+.donut-seg-out {
+    fill: none;
+    stroke: #10b981;
+    stroke-width: 14;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Center label */
+.donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.donut-total-num {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+}
+
+.donut-total-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+}
+
+/* ── Legend (right of donut) ── */
+.donut-legend {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.legend-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.legend-top {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.swatch-in  { background: #0367CC; }
+.swatch-out { background: #10b981; }
+
+.legend-name {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #1a2742;
+    flex: 1;
+}
+
+.legend-pct {
+    font-size: 12px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.legend-mini-bar-track {
+    height: 4px;
+    background: #e8f0fb;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-left: 17px;
+}
+
+.legend-mini-bar {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+.mini-bar-in  { background: #0367CC; }
+.mini-bar-out { background: #10b981; }
+
+/* ── Count chips ── */
+.legend-count {
+    font-size: 10px;
+    font-weight: 600;
+    color: #64748b;
+    margin-left: 17px;
+}
+
+/* ── Summary grid ── */
+.stats-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    border-top: 1px solid rgba(3, 103, 204, 0.09);
+    padding-top: 12px;
+}
+
+.summary-tile {
+    background: #f8fafd;
+    border: 1px solid rgba(3, 103, 204, 0.09);
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.summary-tile-label {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.summary-tile-val {
+    font-size: 16px;
+    font-weight: 800;
+    color: #0367CC;
+    line-height: 1;
+}
+
+.summary-tile-sub {
+    font-size: 9.5px;
+    color: #94a3b8;
 }
