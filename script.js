@@ -10,7 +10,7 @@
     // 2. Auth Guard: Redirect to login if not authenticated
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     if (isLoggedIn !== 'true') {
-        window.location.href = 'modules/login/login.html';
+        window.location.href = 'modules/login/';
     }
 })();
 
@@ -35,13 +35,22 @@ try {
     if (preStyle) preStyle.remove();
 } catch (e) { }
 
-// Handle DOMContentLoaded for other late-init tasks if needed
+// Handle DOMContentLoaded for global tasks
 document.addEventListener('DOMContentLoaded', function () {
-    // Add transition overlay
-    const overlay = document.createElement('div');
-    overlay.id = 'page-transition-overlay';
-    overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:#fff; z-index:9999; pointer-events:none; opacity:1; transition:opacity 0.5s ease-in-out;';
-    document.body.appendChild(overlay);
+    // Handle transition overlay
+    const overlay = document.getElementById('page-transition-overlay');
+    if (overlay && overlay.classList.contains('active')) {
+        setTimeout(() => {
+            overlay.classList.add('fade-out');
+            // Remove pointer events after transition to allow interaction
+            setTimeout(() => {
+                overlay.classList.remove('active', 'fade-out');
+                overlay.style.display = 'none';
+            }, 500);
+        }, 100);
+    } else if (overlay) {
+        overlay.style.display = 'none';
+    }
 
     // Display current user
     const currentUser = localStorage.getItem('currentUser') || 'Minh Hưng';
@@ -53,10 +62,6 @@ document.addEventListener('DOMContentLoaded', function () {
             el.innerText = currentUser;
         }
     });
-
-    setTimeout(() => {
-        overlay.style.opacity = '0';
-    }, 100);
 });
 
 function toggleSubmenu(element) {
@@ -525,19 +530,16 @@ function closeLogoutModal() {
 function confirmLogout() {
     closeLogoutModal();
     
-    // Trigger transition
-    const overlay = document.getElementById('page-transition-overlay');
-    if (overlay) {
-        overlay.style.pointerEvents = 'all';
-        overlay.style.opacity = '1';
-    }
-    
-    setTimeout(() => {
+    // Trigger Sakura transition for logout
+    createSakuraTransition(() => {
+        // Set transition flag for the next page load
+        sessionStorage.setItem('sakura_transitioning', 'true');
+        
         // Clear session data
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('currentUser');
-        window.location.href = 'modules/login/login.html';
-    }, 500);
+        window.location.href = 'modules/login/';
+    });
 }
 
 /* Change Password Logic */
@@ -987,4 +989,77 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error("Restoration error:", e);
     }
 });
+
+/**
+ * Global Sakura Transition Orchestrator
+ * @param {Function} callback - Function to execute after the burst animation and flash.
+ */
+function createSakuraTransition(callback) {
+    const container = document.createElement('div');
+    container.className = 'sakura-transition-container active';
+    document.body.appendChild(container);
+
+    const flash = document.createElement('div');
+    flash.className = 'sakura-flash';
+    document.body.appendChild(flash);
+
+    const petalCount = 150;
+    const petals = [];
+
+    // Jump straight to Vortex (Tornado)
+    for (let i = 0; i < petalCount; i++) {
+        const petal = document.createElement('div');
+        const petalType = Math.floor(Math.random() * 8) + 1;
+        petal.className = `transition-petal petal-${petalType} vortex`;
+        
+        // Random orbit properties
+        const radius = 20 + Math.random() * 40; 
+        const angle = Math.random() * 360;
+        
+        petal.style.setProperty('--radius', `${radius}vw`);
+        petal.style.setProperty('--angle', `${angle}deg`);
+        petal.style.animationDelay = `${i * 0.01}s`;
+        
+        container.appendChild(petal);
+        petals.push(petal);
+    }
+
+    // Phase 2: After duration of Tornado, Gather to Center
+    setTimeout(() => {
+        petals.forEach(petal => {
+            petal.classList.remove('vortex');
+            petal.style.setProperty('--current-angle', petal.style.getPropertyValue('--angle'));
+            
+            void petal.offsetWidth;
+            petal.classList.add('gathering');
+            petal.style.animationDelay = '0s';
+        });
+
+        // Phase 3: Burst and Redirect
+        setTimeout(() => {
+            petals.forEach(petal => {
+                petal.classList.remove('gathering');
+                
+                const burstAngle = Math.random() * Math.PI * 2;
+                const distance = 120 + Math.random() * 100;
+                const endX = Math.cos(burstAngle) * distance;
+                const endY = Math.sin(burstAngle) * distance;
+                
+                petal.style.setProperty('--end-x', `${endX}vw`);
+                petal.style.setProperty('--end-y', `${endY}vh`);
+                
+                void petal.offsetWidth;
+                petal.classList.add('bursting');
+            });
+
+            flash.classList.add('active');
+
+            setTimeout(() => {
+                if (callback) callback();
+            }, 450);
+
+        }, 1100); // Gather duration
+
+    }, 3200); // Tornado duration
+}
 

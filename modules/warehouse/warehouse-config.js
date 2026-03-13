@@ -38,6 +38,9 @@
     var floorTypeIdCounter = 1;
     var activeAreaId = null; // Track which area is being configured on the grid
     var activeLocationId = null; // Track which location type is being configured on the grid
+    var selectedEqCodes = {}; // Track selected equipment for bulk assignment
+    var currentAssignFloor = 'all'; // 'all' or floor number
+
 
     // Initialize selected as empty objects (using object instead of Set for ES5 compatibility)
     function createSelectedSet() {
@@ -132,17 +135,27 @@
             }
         });
 
-        // Floor Tab Dropdowns
-        var floorTabDds = ['floorTabSelectDropdown', 'floorCustomDropdown'];
-        floorTabDds.forEach(function(id) {
-            var dd = document.getElementById(id);
-            if (dd) {
-                var menu = dd.querySelector('.floor-custom-menu');
-                if (menu && menu.classList.contains('show') && !dd.contains(e.target)) {
-                    menu.classList.remove('show');
-                }
+        // Floor Tab Dropdowns (Removed)
+        // var floorTabDds = ['floorTabSelectDropdown', 'floorCustomDropdown'];
+        // floorTabDds.forEach(function(id) {
+        //     var dd = document.getElementById(id);
+        //     if (dd) {
+        //         var menu = dd.querySelector('.floor-custom-menu');
+        //         if (menu && menu.classList.contains('show') && !dd.contains(e.target)) {
+        //             menu.classList.remove('show');
+        //         }
+        //     }
+        // });
+
+        // New floor assignment dropdown
+        var floorAssignDd = document.getElementById('floorAssignDropdown');
+        if (floorAssignDd) {
+            var menu = floorAssignDd.querySelector('.init-dropdown-menu');
+            if (menu && menu.classList.contains('show') && !floorAssignDd.contains(e.target)) {
+                menu.classList.remove('show');
             }
-        });
+        }
+
 
         // New floor equipment search combobox
         var floorEqWrapper = document.getElementById('floorEqSearchWrapper');
@@ -1017,8 +1030,9 @@
         // Populate Khai báo tab
         populateInitTab();
         
-        // Populate Floor tab fields
-        populateFloorTabFields();
+        // Populate Khai báo tab
+        populateInitTab();
+
         
         // Ensure floor menu is rendered
         renderFloorMenu();
@@ -1048,7 +1062,7 @@
            configContent.style.visibility = 'hidden';
         }
         
-        if (savedTabId) {
+        if (savedTabId && savedTabId !== 'floor') {
             // Restore from saved state
             var targetBtn = null;
             var buttons = document.querySelectorAll('.segment-btn');
@@ -1071,6 +1085,7 @@
             // Fallback if no DOM button found yet
             setConfigTab('init', null);
         }
+
         
         if (configContent) {
             // Unhide after the correct DOM tab displays
@@ -1339,22 +1354,24 @@
         // Show the matching tab content
         var configContent = document.querySelector('.config-content');
         if (configContent) {
-            if (tab === 'init' || tab === 'floor') {
+            if (tab === 'init') {
                 configContent.classList.add('grid-hidden');
             } else {
                 configContent.classList.remove('grid-hidden');
             }
         }
+
         
         // Toggle header actions visibility based on tab (only show on area and location)
         var headerActions = document.querySelector('.header-actions');
         if (headerActions) {
-            if (tab === 'init' || tab === 'floor') {
+            if (tab === 'init') {
                 headerActions.style.display = 'none';
             } else {
                 headerActions.style.display = 'flex';
             }
         }
+
 
         // No inline display modifications here to avoid breaking grid-hidden logic
 
@@ -1373,16 +1390,10 @@
             if (locTab) locTab.classList.add('active');
             // Remove inline display modification: document.querySelector('.grid-area').style.display = 'flex';
             renderLocationCards();
-        } else if (tab === 'floor') {
-            var floorTab = document.getElementById('tabContentFloor');
-            if (floorTab) floorTab.classList.add('active');
-            if (typeof populateFloorTabFields === 'function') {
-                populateFloorTabFields();
-            }
         }
         
         // Refresh grid visualization to show all assigned areas/locations
-        if (tab === 'area' || tab === 'location' || tab === 'floor') {
+        if (tab === 'area' || tab === 'location') {
             initGrid(); // Ensure grid is rendered
             refreshVisuals();
         }
@@ -1443,7 +1454,13 @@
         var searchTerm = searchEl ? searchEl.value.toLowerCase().trim() : '';
         var html = '';
 
-        equipmentData.forEach(function(group) {
+        // Check if all items in a group are selected
+        function isGroupSelected(groupItems) {
+            if (groupItems.length === 0) return false;
+            return groupItems.every(function(item) { return selectedEqCodes[item]; });
+        }
+
+        equipmentData.forEach(function(group, groupIdx) {
             var filteredItems = group.items.filter(function(item) {
                 if (searchTerm && item.toLowerCase().indexOf(searchTerm) === -1) return false;
                 var assigned = equipmentAssignment[item] || null;
@@ -1453,11 +1470,17 @@
             });
             if (filteredItems.length === 0) return;
 
-            html += '<div class="eq-group-header">' + group.group + ' <span class="eq-group-count">' + filteredItems.length + '</span></div>';
+            var groupChecked = isGroupSelected(filteredItems);
+            html += '<div class="eq-group-header">';
+            html += '<input type="checkbox" class="eq-group-checkbox" ' + (groupChecked ? 'checked' : '') + ' onclick="toggleEqGroupSelection(' + groupIdx + ', this.checked)">';
+            html += group.group + ' <span class="eq-group-count">' + filteredItems.length + '</span></div>';
+            
             filteredItems.forEach(function(item) {
                 var assigned = equipmentAssignment[item] || null;
+                var isChecked = selectedEqCodes[item] ? 'checked' : '';
                 html += '<div class="eq-device-row">';
-                html += '<span class="eq-device-code">' + item + '</span>';
+                html += '<input type="checkbox" class="eq-device-checkbox" ' + isChecked + ' onclick="toggleEqSelection(\'' + item + '\', this.checked)">';
+                html += '<span class="eq-device-code" style="flex: 1;">' + item + '</span>';
                 html += '<div class="eq-type-pills">';
                 ['nhap', 'xuat', 'danang'].forEach(function(type) {
                     var isActive = assigned === type;
@@ -1470,6 +1493,110 @@
         if (!html) html = '<div class="eq-empty">Không tìm thấy thiết bị phù hợp</div>';
         container.innerHTML = html;
     }
+
+    window.toggleEqSelection = function(code, checked) {
+        if (checked) selectedEqCodes[code] = true;
+        else delete selectedEqCodes[code];
+        renderEqDeviceList();
+    };
+
+    window.toggleEqGroupSelection = function(groupIdx, checked) {
+        var group = equipmentData[groupIdx];
+        if (group) {
+            group.items.forEach(function(item) {
+                if (checked) selectedEqCodes[item] = true;
+                else delete selectedEqCodes[item];
+            });
+        }
+        renderEqDeviceList();
+    };
+
+    // ---- Floor Assignment Logic ----
+    window.toggleFloorAssignDropdown = function() {
+        var menu = document.getElementById('floorAssignMenu');
+        if (menu) menu.classList.toggle('show');
+    };
+
+    window.selectFloorAssign = function(val, text) {
+        currentAssignFloor = val;
+        var display = document.getElementById('floorAssignDisplay');
+        if (display) display.innerText = text;
+        var menu = document.getElementById('floorAssignMenu');
+        if (menu) menu.classList.remove('show');
+    };
+
+    function populateFloorAssignDropdown() {
+        var menu = document.getElementById('floorAssignMenu');
+        if (!menu) return;
+        
+        var floors = (currentWarehouse && currentWarehouse.floors) ? parseInt(currentWarehouse.floors) : 1;
+        var html = '<div class="init-dropdown-item' + (currentAssignFloor === 'all' ? ' active' : '') + '" onclick="selectFloorAssign(\'all\', \'Toàn kho\')">Toàn kho</div>';
+        
+        for (var i = 1; i <= floors; i++) {
+            html += '<div class="init-dropdown-item' + (currentAssignFloor == i ? ' active' : '') + '" onclick="selectFloorAssign(' + i + ', \'Tầng ' + i + '\')">Tầng ' + i + '</div>';
+        }
+        menu.innerHTML = html;
+    }
+
+    window.bulkAssignFloor = function() {
+        var codes = Object.keys(selectedEqCodes);
+        if (codes.length === 0) {
+            alert('Vui lòng chọn thiết bị để gán!');
+            return;
+        }
+
+        if (currentAssignFloor === 'all') {
+            for (var f in floorConfigs) {
+                if (!floorConfigs[f].equipments) floorConfigs[f].equipments = [];
+                codes.forEach(function(c) {
+                    if (floorConfigs[f].equipments.indexOf(c) === -1) {
+                        floorConfigs[f].equipments.push(c);
+                    }
+                });
+            }
+        } else {
+            var f = currentAssignFloor;
+            if (!floorConfigs[f]) floorConfigs[f] = { rows: 18, cols: 27, selected: {}, goods: {}, equipments: [] };
+            if (!floorConfigs[f].equipments) floorConfigs[f].equipments = [];
+            codes.forEach(function(c) {
+                if (floorConfigs[f].equipments.indexOf(c) === -1) {
+                    floorConfigs[f].equipments.push(c);
+                }
+            });
+        }
+
+        if (window.showToast) window.showToast('Đã gán thiết bị thành công!', 'success');
+        else alert('Đã gán thiết bị thành công!');
+    };
+
+    window.bulkUnassignFloor = function() {
+        var codes = Object.keys(selectedEqCodes);
+        if (codes.length === 0) {
+            alert('Vui lòng chọn thiết bị để bỏ gán!');
+            return;
+        }
+
+        if (currentAssignFloor === 'all') {
+            for (var f in floorConfigs) {
+                if (floorConfigs[f].equipments) {
+                    floorConfigs[f].equipments = floorConfigs[f].equipments.filter(function(c) {
+                        return codes.indexOf(c) === -1;
+                    });
+                }
+            }
+        } else {
+            var f = currentAssignFloor;
+            if (floorConfigs[f] && floorConfigs[f].equipments) {
+                floorConfigs[f].equipments = floorConfigs[f].equipments.filter(function(c) {
+                    return codes.indexOf(c) === -1;
+                });
+            }
+        }
+
+        if (window.showToast) window.showToast('Đã bỏ gán thiết bị thành công!', 'success');
+        else alert('Đã bỏ gán thiết bị thành công!');
+    };
+
 
     // ---- Render summary accordion ----
     function renderEqSummaryAccordion() {
@@ -1597,7 +1724,9 @@
         loadEqAssignmentFromStorage();
         renderEqDeviceList();
         renderEqSummaryAccordion();
+        populateFloorAssignDropdown();
     }
+
 
     function toggleInitTypeDropdown() {
         var toggle = document.querySelector('#initWarehouseTypeDropdown .init-dropdown-toggle');
@@ -1779,100 +1908,6 @@
         initGrid();
     }
 
-    function populateFloorTabFields() {
-        var config = floorConfigs[currentFloor];
-        if (!config) return;
-        
-        var nameInput = document.getElementById('floorNameInput');
-        if (nameInput) nameInput.value = config.name || '';
-        
-        var heightInput = document.getElementById('floorHeightInput');
-        if (heightInput) heightInput.value = config.height || '';
-    }
-
-    function toggleFloorTabDropdown() {
-        var menu = document.getElementById('floorTabMenu');
-        if (menu) {
-            if (menu.classList.contains('show')) {
-                menu.classList.remove('show');
-            } else {
-                if (typeof window.populateFloorTabFields === 'function') {
-                    window.populateFloorTabFields();
-                }
-                menu.classList.add('show');
-            }
-        }
-    }
-
-    function updateFloorField(field, value) {
-        if (!floorConfigs[currentFloor]) return;
-        if (field === 'height') {
-            var val = parseFloat(value);
-            if (isNaN(val) || val < 0) {
-                // Keep the raw value if it's empty, otherwise reset or ignore invalid
-                if (value === '') {
-                    floorConfigs[currentFloor][field] = '';
-                }
-                return; 
-            }
-        }
-        floorConfigs[currentFloor][field] = value;
-    }
-
-    function triggerFloorImageUpload() {
-        var input = document.getElementById('floorImageInput');
-        if (input) input.click();
-    }
-
-    function handleFloorImageUpload(event) {
-        var file = event.target.files[0];
-        if (!file) return;
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var preview = document.getElementById('floorImagePreview');
-            var icon = document.getElementById('floorImageIcon');
-            if (preview) {
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-            }
-            if (icon) icon.style.display = 'none';
-            if (floorConfigs[currentFloor]) {
-                floorConfigs[currentFloor].image = e.target.result;
-            }
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function saveFloorTab() {
-        if (!currentWarehouse) {
-            alert('Chưa chọn kho để lưu!');
-            return;
-        }
-
-        currentWarehouse.configData = floorConfigs;
-        currentWarehouse.floorTypes = JSON.parse(JSON.stringify(floorTypeData));
-
-        try {
-            var stored = localStorage.getItem('wms_warehouses_v6');
-            if (stored) {
-                var list = JSON.parse(stored);
-                var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
-                if (idx !== -1) {
-                    list[idx] = currentWarehouse;
-                    localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
-                }
-            }
-        } catch (e) {
-            alert('Lỗi lưu dữ liệu tầng: ' + e.message);
-            return;
-        }
-
-        if (window.showToast) {
-            window.showToast('Đã lưu thông tin tầng thành công!', 'success');
-        } else {
-            alert('Đã lưu thông tin tầng thành công!');
-        }
-    }
 
     // Save Khai báo tab data
     function saveInitTab() {
@@ -3164,13 +3199,11 @@
     };
 
     window.selectFloorTabDropdown = function(floorNum) {
-        var menu = document.getElementById('floorTabMenu');
-        if (menu) menu.classList.remove('show');
         currentFloor = floorNum;
         initGrid();
         renderFloorMenu();
-        window.populateFloorTabFields();
     };
+
 
     window.updateFloorName = function(val) {
         if (floorConfigs[currentFloor]) {
@@ -3200,178 +3233,6 @@
         }
     };
 
-    window.toggleFloorEquipmentDropdown = function() {
-        var menu = document.getElementById('floorEquipmentMenu');
-        var chevron = document.getElementById('floorEqChevron');
-        if (menu) {
-            if (menu.style.display === 'none' || menu.style.display === '') {
-                menu.style.display = 'block';
-                if (chevron) chevron.style.transform = 'rotate(180deg)';
-                renderFloorEqAccordion();
-            } else {
-                menu.style.display = 'none';
-                if (chevron) chevron.style.transform = 'rotate(0deg)';
-            }
-        }
-    };
-
-    window.filterFloorEqList = function() {
-        var input = document.getElementById('floorEqSearchInput');
-        floorEqFilterText = input ? input.value.toLowerCase().trim() : '';
-        var menu = document.getElementById('floorEquipmentMenu');
-        var chevron = document.getElementById('floorEqChevron');
-        if (menu && menu.style.display !== 'block') {
-            menu.style.display = 'block';
-            if (chevron) chevron.style.transform = 'rotate(180deg)';
-        }
-        renderFloorEqAccordion();
-    };
-
-    window.toggleFloorEqGroup = function(groupIndex) {
-        var content = document.getElementById('floorEqGroupContent-' + groupIndex);
-        var icon = document.getElementById('floorEqGroupIcon-' + groupIndex);
-        if (content) {
-            if (content.style.display === 'none') {
-                content.style.display = 'flex';
-                if (icon) icon.className = 'fas fa-chevron-up';
-            } else {
-                content.style.display = 'none';
-                if (icon) icon.className = 'fas fa-chevron-down';
-            }
-        }
-    };
-
-    function renderFloorEqAccordion() {
-        var container = document.getElementById('floorEqAccordion');
-        if (!container) return;
-        var html = '';
-        var hasVisibleMatch = false;
-
-        if (floorConfigs[currentFloor] && !floorConfigs[currentFloor].equipments) {
-            floorConfigs[currentFloor].equipments = [];
-        }
-        var selectedEqs = floorConfigs[currentFloor] ? (floorConfigs[currentFloor].equipments || []) : [];
-
-        for (var i = 0; i < equipmentData.length; i++) {
-            var group = equipmentData[i];
-            var visibleItems = group.items.filter(function(item) {
-                return !floorEqFilterText || item.toLowerCase().indexOf(floorEqFilterText) > -1;
-            });
-            
-            if (visibleItems.length === 0) continue;
-            hasVisibleMatch = true;
-
-            html += '<div>';
-            html += '<div class="floor-eq-group-header" onclick="toggleFloorEqGroup(' + i + ')">';
-            html += '<span>' + group.group + ' <span style="font-weight:400;color:#94a3b8;">(' + visibleItems.length + ')</span></span>';
-            html += '<i id="floorEqGroupIcon-' + i + '" class="fas fa-chevron-up" style="color:#94a3b8;font-size:11px;"></i>';
-            html += '</div>';
-
-            html += '<div id="floorEqGroupContent-' + i + '" class="floor-eq-group-items">';
-            visibleItems.forEach(function(item) {
-                var isSelected = selectedEqs.indexOf(item) > -1;
-                var cls = 'floor-eq-item' + (isSelected ? ' selected' : '');
-                html += '<div class="' + cls + '" onclick="assignFloorEq(\'' + item + '\', event)">';
-                if (isSelected) {
-                    html += '<i class="fas fa-check" style="font-size:10px;margin-right:5px;"></i>';
-                }
-                html += item + '</div>';
-            });
-            html += '</div></div>';
-        }
-        
-        if (!hasVisibleMatch) {
-            html = '<div style="padding:16px;color:#94a3b8;font-size:13px;text-align:center;">Không tìm thấy thiết bị</div>';
-        }
-        
-        container.innerHTML = html;
-        renderFloorSelectedEqTags();
-    }
-
-    window.assignFloorEq = function(itemCode, event) {
-        if (event) {
-            event.stopPropagation();
-        }
-        if (!floorConfigs[currentFloor]) return;
-        var eqs = floorConfigs[currentFloor].equipments || [];
-        var idx = eqs.indexOf(itemCode);
-        if (idx > -1) {
-            eqs.splice(idx, 1);
-        } else {
-            eqs.push(itemCode);
-        }
-        floorConfigs[currentFloor].equipments = eqs;
-        renderFloorEqAccordion();
-    };
-
-    function renderFloorSelectedEqTags() {
-        var container = document.getElementById('floorSelectedEqTags');
-        if (!container) return;
-        
-        if (!floorConfigs[currentFloor] || !floorConfigs[currentFloor].equipments || floorConfigs[currentFloor].equipments.length === 0) {
-            container.innerHTML = '';
-            return;
-        }
-        
-        var eqs = floorConfigs[currentFloor].equipments;
-        
-        var html = '';
-        eqs.forEach(function(code) {
-            html += '<div style="display:inline-flex; align-items:center; background:#eff6ff; border:1px solid #bfdbfe; border-radius:20px; padding:3px 10px 3px 12px; font-size:12px; color:#1d4ed8; gap:6px;">';
-            html += '<span>' + escapeHtml(code) + '</span>';
-            html += '<span onclick="event.stopPropagation(); assignFloorEq(\'' + escapeHtml(code) + '\', event)" style="cursor:pointer; color:#93c5fd; line-height:1; font-size:14px; font-weight:500;">&times;</span>';
-            html += '</div>';
-        });
-        container.innerHTML = html;
-    }
-
-    window.populateFloorTabFields = function() {
-        if (!floorConfigs[currentFloor]) return;
-        
-        var display = document.getElementById('currentFloorTabDisplay');
-        if (display) display.innerText = 'Tầng ' + currentFloor;
-        
-        var menu = document.getElementById('floorTabMenu');
-        if (menu) {
-            menu.innerHTML = '';
-            var floors = 1;
-            if (currentWarehouse && currentWarehouse.floors) {
-                floors = parseInt(currentWarehouse.floors);
-            } else {
-                var fcKeys2 = Object.keys(floorConfigs);
-                if (fcKeys2.length > 0) {
-                    floors = Math.max.apply(null, fcKeys2.map(Number));
-                }
-            }
-            for (var i = 1; i <= floors; i++) {
-                var item = document.createElement('div');
-                item.className = 'floor-custom-item' + (i === currentFloor ? ' active' : '');
-                item.innerText = 'Tầng ' + i;
-                (function(floorNum) {
-                    item.onclick = function(e) {
-                        e.stopPropagation();
-                        selectFloorTabDropdown(floorNum);
-                    };
-                })(i);
-                menu.appendChild(item);
-            }
-        }
-        
-        var nameInput = document.getElementById('floorNameInput');
-        if (nameInput) {
-            nameInput.value = floorConfigs[currentFloor].name || '';
-        }
-        
-        if (!floorConfigs[currentFloor].equipments) {
-            floorConfigs[currentFloor].equipments = [];
-        }
-        
-        renderFloorEqAccordion();
-    };
-
-    window.saveFloorTab = function() {
-        saveGridConfig();
-    };
 
     // Expose functions globally
     window.saveGridConfig = saveGridConfig;
@@ -3386,7 +3247,7 @@
     window.selectInitType = selectInitType;
     window.toggleFloorDropdown = toggleFloorDropdown;
     window.selectFloor = selectFloor;
-    window.saveFloorTab = saveFloorTab;
+
     
     window.addFloorType = addFloorType;
     window.deleteFloorType = deleteFloorType;
@@ -3431,6 +3292,12 @@
     window.toggleLocationTypeDropdown = toggleLocationTypeDropdown;
     window.selectLocationType = selectLocationType;
     
+    // Floor Assignment Exports
+    window.toggleFloorAssignDropdown = toggleFloorAssignDropdown;
+    window.selectFloorAssign = selectFloorAssign;
+    window.bulkAssignFloor = bulkAssignFloor;
+    window.bulkUnassignFloor = bulkUnassignFloor;
+
     window.addArea = addArea;
     window.deleteArea = deleteArea;
     window.removeAreaTag = removeAreaTag;

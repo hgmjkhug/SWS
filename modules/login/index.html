@@ -10,8 +10,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="../../falling.css">
+    <link rel="stylesheet" href="../../global-transition.css">
 </head>
 <body>
+    <div class="page-transition-overlay" id="page-transition-overlay"></div>
+    <script>
+        (function() {
+            const overlay = document.getElementById('page-transition-overlay');
+            if (sessionStorage.getItem('sakura_transitioning') === 'true') {
+                overlay.classList.add('active');
+                sessionStorage.removeItem('sakura_transitioning');
+            }
+        })();
+    </script>
     <div class="login-container">
         <!-- Left Panel: Branding -->
         <div class="login-left">

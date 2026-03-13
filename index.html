@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KHO THÔNG MINH | THACO</title>
+    <title>KHO THÔNG MINH | THACO INDUSTRIES</title>
     <link
       rel="icon"
       type="image/svg+xml"
@@ -53,6 +53,7 @@
     <link rel="stylesheet" href="sidebar.css" />
     <link rel="stylesheet" href="global-table.css" />
     <link rel="stylesheet" href="falling.css" />
+    <link rel="stylesheet" href="global-transition.css" />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
@@ -75,6 +76,16 @@
   </head>
 
   <body>
+    <div class="page-transition-overlay" id="page-transition-overlay"></div>
+    <script>
+      (function() {
+        const overlay = document.getElementById('page-transition-overlay');
+        if (sessionStorage.getItem('sakura_transitioning') === 'true') {
+          overlay.classList.add('active');
+          sessionStorage.removeItem('sakura_transitioning');
+        }
+      })();
+    </script>
     <nav class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="brand-logo">

@@ -32,9 +32,7 @@
         <button class="segment-btn active" onclick="setConfigTab('init', this)">
           Khai báo
         </button>
-        <button class="segment-btn" onclick="setConfigTab('floor', this)">
-          Tầng
-        </button>
+
         <button class="segment-btn" onclick="setConfigTab('area', this)">
           Khu vực
         </button>
@@ -106,6 +104,27 @@
                 <button class="eq-filter-btn" onclick="setEqFilter('unset', this)">Chưa gán</button>
               </div>
 
+              <!-- Floor assignment section -->
+              <div class="floor-assignment-container">
+                <div class="floor-assign-row">
+                  <label class="assign-label">Gán tầng:</label>
+                  <div class="floor-assign-controls">
+                    <div class="init-dropdown" id="floorAssignDropdown" style="width: 140px; margin-right: 10px;">
+                      <div class="init-dropdown-toggle" onclick="toggleFloorAssignDropdown()">
+                        <span id="floorAssignDisplay">Toàn kho</span>
+                        <i class="fas fa-chevron-down" style="font-size: 10px; color: #8c8c8c"></i>
+                      </div>
+                      <div class="init-dropdown-menu" id="floorAssignMenu">
+                        <!-- Populated by JS -->
+                      </div>
+                    </div>
+                    <button class="btn-assign" onclick="bulkAssignFloor()">Gán</button>
+                    <button class="btn-unassign" onclick="bulkUnassignFloor()">Bỏ gán</button>
+                  </div>
+                </div>
+              </div>
+
+
               <!-- Device list (always visible, scrollable internally) -->
               <div class="eq-device-list" id="eqDeviceList"></div>
 
@@ -124,59 +143,7 @@
 
       </div><!-- end #tabContentInit -->
 
-      <!-- Tab Content: Tầng -->
-      <div id="tabContentFloor" class="tab-content" style="height: 100%;">
-        <div class="init-info-form">
-          <div class="init-info-row">
-            <label class="init-label">Chọn tầng<span class="required-star">*</span></label>
-            <div class="floor-custom-dropdown" id="floorTabSelectDropdown" style="width: 100%;">
-              <div class="floor-custom-toggle" onclick="toggleFloorTabDropdown()">
-                <span id="currentFloorTabDisplay">Tầng 1</span>
-                <i class="fas fa-chevron-down" style="font-size: 12px"></i>
-              </div>
-              <div class="floor-custom-menu" id="floorTabMenu">
-                <!-- Dropdown populated by JS -->
-              </div>
-            </div>
-          </div>
-          
-          <div class="init-info-row">
-            <label class="init-label">Tên tầng</label>
-            <input type="text" class="init-value-box" id="floorNameInput" placeholder="Nhập tên tầng..." oninput="updateFloorName(this.value)" />
-          </div>
 
-          <div class="init-info-row" style="align-items: flex-start;">
-            <label class="init-label" style="padding-top: 10px;">Thiết bị<span class="required-star">*</span></label>
-            <div class="floor-eq-search-wrapper" id="floorEqSearchWrapper">
-              <!-- Integrated search input -->
-              <div class="floor-eq-input-box" id="floorEqInputBox" onclick="openFloorEqDropdown()">
-                <i class="fas fa-search" style="color:#94a3b8; font-size:12px; flex-shrink:0;"></i>
-                <input 
-                  type="text" 
-                  id="floorEqSearchInput" 
-                  placeholder="Tìm thiết bị..." 
-                  oninput="filterFloorEqList()"
-                  onfocus="openFloorEqDropdown()"
-                  autocomplete="off"
-                  style="border:none; outline:none; background:transparent; font-size:13px; flex:1; min-width:0;"
-                />
-                <i class="fas fa-chevron-down" id="floorEqChevron" style="color:#94a3b8; font-size:11px; flex-shrink:0; transition: transform 0.2s;"></i>
-              </div>
-              <!-- Selected tags shown below input -->
-              <div id="floorSelectedEqTags" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;"></div>
-              <!-- Dropdown accordion -->
-              <div class="floor-eq-dropdown" id="floorEquipmentMenu" style="display:none;">
-                <div id="floorEqAccordion"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="init-action-buttons" style="border-top: 1px solid #f1f5f9; background: #fff;">
-          <button class="init-btn-back" onclick="window.history.back()">Quay về</button>
-          <button class="init-btn-save" onclick="saveFloorTab()">Lưu</button>
-        </div>
-      </div>
 
       <!-- Tab Content: Vị trí (grid layout) -->
       <div id="tabContentLocation" class="tab-content" style="height: 100%;">

@@ -207,6 +207,82 @@
     pointer-events: none;
 }
 
+    /* ---- Floor Assignment Styles ---- */
+    .floor-assignment-container {
+        padding: 4px 0;
+        margin: 6px 0;
+    }
+
+    .floor-assign-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .assign-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        white-space: nowrap;
+    }
+
+    .floor-assign-controls {
+        display: flex;
+        align-items: center;
+        flex: 1;
+    }
+
+    .btn-assign, .btn-unassign {
+        height: 30px;
+        padding: 0 16px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+    }
+
+    .btn-assign {
+        background: #076EB8;
+        color: white;
+        margin-right: 8px;
+    }
+
+    .btn-assign:hover {
+        background: #065a9e;
+    }
+
+    .btn-unassign {
+        background: #fff;
+        color: #ef4444;
+        border: 1px solid #ef4444;
+    }
+
+    .btn-unassign:hover {
+        background: #fef2f2;
+    }
+
+    /* Equipment checkbox styles */
+    .eq-device-checkbox {
+        width: 16px;
+        height: 16px;
+        margin-right: 12px;
+        cursor: pointer;
+        accent-color: #076EB8;
+    }
+
+    .eq-group-checkbox {
+        width: 14px;
+        height: 14px;
+        margin-right: 8px;
+        cursor: pointer;
+        vertical-align: middle;
+        accent-color: #076EB8;
+    }
+
+    /* ---- end Floor Assignment Styles ---- */
+
 /* Config Segment Control */
 .config-segment-control {
     display: flex;
