@@ -120,13 +120,13 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Dashboard tổng quan')"
+            <a href="#" onclick="loadPage('Dashboard tổng quan')" data-code="DASHBOARD_OVERVIEW"
               ><i class="fas fa-chart-pie"></i>Dashboard tổng quan</a
             >
-            <a href="#" onclick="loadPage('Dashboard chi tiết')"
+            <a href="#" onclick="loadPage('Dashboard chi tiết')" data-code="DASHBOARD_DETAIL"
               ><i class="fas fa-chart-area"></i>Dashboard chi tiết</a
             >
-             <a href="#" onclick="loadPage('Giám sát hoạt động')"
+             <a href="#" onclick="loadPage('Giám sát hoạt động')" data-code="DASHBOARD_MONITOR"
               ><i class="fa-solid fa-chalkboard-user"></i>Giám sát hoạt động</a
             >
           </div>
@@ -142,11 +142,11 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Quản lý Kho')"><i class="fas fa-warehouse"></i>Quản lý Kho</a>
+            <a href="#" onclick="loadPage('Quản lý Kho')" data-code="WAREHOUSE_LIST"><i class="fas fa-warehouse"></i>Danh sách Kho</a>
             <!-- <a href="#" onclick="loadPage('Quản lý thiết bị')"><i class="fas fa-mobile-alt"></i>Quản lý thiết bị</a> -->
-            <a href="#" onclick="loadPage('Quy cách sản phẩm')"><i class="fa-regular fa-box-isometric-tape"></i>Quy cách sản phẩm</a>
-            <a href="#" onclick="loadPage('Quản lý vật chứa')"><i class="fa-regular fa-pallet-box"></i>Quản lý vật chứa</a>
-             <a href="#" onclick="loadPage('Quản lý bảo trì')"
+            <a href="#" onclick="loadPage('Quy cách sản phẩm')" data-code="PRODUCT_METHOD"><i class="fa-regular fa-box-isometric-tape"></i>Quy cách sản phẩm</a>
+            <a href="#" onclick="loadPage('Quản lý vật chứa')" data-code="CONTAINER_MGMT"><i class="fa-regular fa-pallet-box"></i>Quản lý vật chứa</a>
+             <a href="#" onclick="loadPage('Quản lý bảo trì')" data-code="MAINTENANCE"
               ><i class="fa-solid fa-toolbox"></i>Quản lý bảo trì</a
             >
           </div>
@@ -163,7 +163,7 @@
           </div>
           <div class="submenu">
             <!-- <a href="#" onclick="loadPage('Quản lý Lệnh')"><i class="fas fa-clipboard-list"></i>Quản lý Lệnh</a> -->
-            <a href="#" onclick="loadPage('Kanban WCS')"><i class="fa-regular fa-chart-kanban"></i>Kanban WCS</a>
+            <a href="#" onclick="loadPage('Kanban WCS')" data-code="WCS_KANBAN"><i class="fa-regular fa-chart-kanban"></i>Kanban WCS</a>
             <!-- <a href="#" onclick="loadPage('Quản lý Thiết bị')"
               >Quản lý Thiết bị</a
             > -->
@@ -186,7 +186,7 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Lệnh nhập kho')"><i class="fas fa-file-import"></i>Lệnh nhập kho</a>
+            <a href="#" onclick="loadPage('Lệnh nhập kho')" data-code="INBOUND_ORDER"><i class="fas fa-file-import"></i>Lệnh nhập kho</a>
           </div>
         </div>
 
@@ -200,7 +200,7 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Lệnh xuất kho')"><i class="fas fa-file-export"></i>Lệnh xuất kho</a>
+            <a href="#" onclick="loadPage('Lệnh xuất kho')" data-code="OUTBOUND_ORDER"><i class="fas fa-file-export"></i>Lệnh xuất kho</a>
           </div>
         </div>
 
@@ -215,7 +215,7 @@
           </div>
           <div class="submenu">
             <!-- <a href="#" onclick="loadPage('Quản lý bước')">Quản lý bước</a> -->
-            <a href="#" onclick="loadPage('Danh sách Quy trình')"
+            <a href="#" onclick="loadPage('Danh sách Quy trình')" data-code="WORKFLOW_PROCESS"
               ><i class="fa-light fa-arrow-progress"></i>Quản lý quy trình</a
             >
           </div>
@@ -231,14 +231,14 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Nhóm thiết bị')"><i class="fas fa-layer-group"></i>Nhóm thiết bị</a>
-            <a href="#" onclick="loadPage('Thiết bị')"><i class="fas fa-robot"></i>Thiết bị</a>
-            <a href="#" onclick="loadPage('Nhóm sản phẩm')"><i class="fas fa-cubes"></i>Nhóm sản phẩm</a>
-            <a href="#" onclick="loadPage('Sản phẩm')"><i class="fas fa-box"></i>Sản phẩm</a>
-            <a href="#" onclick="loadPage('Quy cách')"><i class="fa-solid fa-route"></i>Quy cách</a>
-            <a href="#" onclick="loadPage('Vật chứa')"><i class="fa-light fa-pallet-box"></i>Vật chứa</a>
-            <a href="#" onclick="loadPage('Đơn vị tính')"><i class="fas fa-ruler"></i>Đơn vị tính</a>
-            <a href="#" onclick="loadPage('Loại khu vực')"><i class="fas fa-map-marker-alt"></i>Loại khu vực</a>
+            <a href="#" onclick="loadPage('Nhóm thiết bị')" data-code="DEVICE_TYPE"><i class="fas fa-layer-group"></i>Nhóm thiết bị</a>
+            <a href="#" onclick="loadPage('Thiết bị')" data-code="DEVICE_LIST"><i class="fas fa-robot"></i>Thiết bị</a>
+            <a href="#" onclick="loadPage('Nhóm sản phẩm')" data-code="PRODUCT_GROUP"><i class="fas fa-cubes"></i>Nhóm sản phẩm</a>
+            <a href="#" onclick="loadPage('Sản phẩm')" data-code="PRODUCT_LIST"><i class="fas fa-box"></i>Sản phẩm</a>
+            <a href="#" onclick="loadPage('Quy cách')" data-code="METHOD"><i class="fa-solid fa-route"></i>Quy cách</a>
+            <a href="#" onclick="loadPage('Vật chứa')" data-code="PALLET_LIST"><i class="fa-light fa-pallet-box"></i>Vật chứa</a>
+            <a href="#" onclick="loadPage('Đơn vị tính')" data-code="UNIT_OF_MEASURE"><i class="fas fa-ruler"></i>Đơn vị tính</a>
+            <a href="#" onclick="loadPage('Loại khu vực')" data-code="LOCATION_TYPE"><i class="fas fa-map-marker-alt"></i>Loại khu vực</a>
           </div>
         </div>
 
@@ -252,7 +252,7 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Báo cáo Nhập/Xuất')"
+            <a href="#" onclick="loadPage('Báo cáo Nhập/Xuất')" data-code="STATISTIC_REPORT"
               ><i class="fa-solid fa-arrow-up-right-dots"></i>Báo cáo Nhập/Xuất</a
             >
           </div>
@@ -273,10 +273,10 @@
             <i class="fas fa-chevron-right arrow-icon"></i>
           </div>
           <div class="submenu">
-            <a href="#" onclick="loadPage('Tài khoản')"><i class="fas fa-user"></i>Tài khoản</a>
-            <a href="#" onclick="loadPage('Vai trò')"><i class="fas fa-user-tag"></i>Vai trò</a>
-            <a href="#" onclick="loadPage('Chức năng')"><i class="fas fa-list"></i>Chức năng</a>
-            <a href="#" onclick="loadPage('Tài nguyên')"><i class="fas fa-folder-open"></i>Tài nguyên</a>
+            <a href="#" onclick="loadPage('Tài khoản')" data-code="ACCOUNT"><i class="fas fa-user"></i>Tài khoản</a>
+            <a href="#" onclick="loadPage('Vai trò')" data-code="ROLE"><i class="fas fa-user-tag"></i>Vai trò</a>
+            <a href="#" onclick="loadPage('Chức năng')" data-code="MENU"><i class="fas fa-list"></i>Chức năng</a>
+            <a href="#" onclick="loadPage('Tài nguyên')" data-code="RESOURCE"><i class="fas fa-folder-open"></i>Tài nguyên</a>
           </div>
         </div>
       </div>

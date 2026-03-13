@@ -571,6 +571,12 @@
                 </td>
                 <td class="col-resource"></td>
                 <td class="col-order" style="text-align: center;">${module.order}</td>
+                <td class="col-usage">
+                    <label class="switch" onclick="event.stopPropagation();">
+                        <input type="checkbox" id="toggle-mod-${module.id}" ${getMenuStatus(module.code) !== false ? 'checked' : ''} onchange="toggleMenuStatus(${module.id}, 0, this.checked); event.stopPropagation();">
+                        <span class="slider"></span>
+                    </label>
+                </td>
                  <td class="col-action">
                     <button class="action-btn delete-btn" onclick="requestDeleteModule(${module.id}); event.stopPropagation();">
                         <i class="fas fa-trash-alt"></i>
@@ -640,6 +646,12 @@
                         `}
                     </td>
                     <td class="col-order" style="text-align: center;">${func.order}</td>
+                    <td class="col-usage">
+                        <label class="switch" onclick="event.stopPropagation();">
+                            <input type="checkbox" id="toggle-func-${func.id}" ${getMenuStatus(func.code) !== false ? 'checked' : ''} onchange="toggleMenuStatus(${func.id}, 1, this.checked); event.stopPropagation();">
+                            <span class="slider"></span>
+                        </label>
+                    </td>
                     <td class="col-action">
                         <button class="action-btn delete-btn" onclick="requestDeleteMenu(${func.id}); event.stopPropagation();">
                             <i class="fas fa-trash-alt"></i>
@@ -676,6 +688,73 @@
             initInlineResourceDropdowns();
         }
     }
+
+    function getMenuStatus(code) {
+        try {
+            const status = JSON.parse(localStorage.getItem('wms_module_status') || '{}');
+            return status[code];
+        } catch (e) { return true; }
+    }
+
+    window.toggleMenuStatus = function (id, level, checked) {
+        let item = null;
+        let parentModule = null;
+
+        if (level === 0) {
+            item = modules.find(m => m.id === id);
+        } else {
+            functions.forEach(f => {
+                if (f.id === id) {
+                    item = f;
+                    parentModule = modules.find(m => m.id === f.moduleId);
+                }
+            });
+        }
+
+        if (!item) return;
+
+        try {
+            const status = JSON.parse(localStorage.getItem('wms_module_status') || '{}');
+            status[item.code] = checked;
+
+            // Constraint: Parent OFF -> Children OFF
+            if (level === 0 && !checked) {
+                functions.filter(f => f.moduleId === id).forEach(child => {
+                    status[child.code] = false;
+                });
+            }
+
+            // Constraint: Child ON -> Parent ON
+            if (level === 1 && checked && parentModule) {
+                status[parentModule.code] = true;
+            }
+
+            localStorage.setItem('wms_module_status', JSON.stringify(status));
+            
+            // Show toast notification
+            const message = checked 
+                ? "Chức năng đã được kích hoạt thành công" 
+                : "Chức năng đã được ngưng sử dụng thành công";
+            
+            if (window.parent && window.parent.showToast) {
+                window.parent.showToast(message, 'success');
+            } else if (window.showToast) {
+                window.showToast(message, 'success');
+            }
+
+            // Re-render table to update toggles visually
+            renderTable(document.getElementById('menu-search').value);
+            
+            // Trigger sidebar refresh
+            if (window.parent && window.parent.updateSidebarVisibility) {
+                window.parent.updateSidebarVisibility();
+            } else if (window.updateSidebarVisibility) {
+                window.updateSidebarVisibility();
+            }
+        } catch (e) {
+            console.error('Failed to update menu status', e);
+        }
+    };
 
     // --- Inline Editing Logic ---
     window.checkEnter = function (e, element) {

@@ -144,7 +144,7 @@ input, button, select, textarea {
 /* Scrollbar only for table body (starts below header) */
 
 .data-table {
-    width: 1300px; /* Fixed width for alignment */
+    width: 1350px; /* Revised for harmony */
     table-layout: fixed;
     border-collapse: collapse;
     font-size: 13px;
@@ -171,20 +171,12 @@ input, button, select, textarea {
 }/* Columns */
 .data-table th:nth-child(1), .data-table td:nth-child(1) { width: 50px; text-align: center; } /* STT */
 .data-table th:nth-child(2), .data-table td:nth-child(2) { width: 230px; } /* Mã lệnh xuất */
-.data-table th:nth-child(3), .data-table td:nth-child(3) { 
-    width: 300px; 
-    min-width: 300px; 
-    max-width: 350px; 
-} /* Sản phẩm */
-.data-table th:nth-child(4), .data-table td:nth-child(4) { 
-    width: 150px; 
-    text-align: center; 
-    padding-left: 0; 
-    padding-right: 0; 
-} /* Loại xuất kho */
-.data-table th:nth-child(5), .data-table td:nth-child(5) { width: 150px; text-align: center; } /* Trạng thái */
-.data-table th:nth-child(6), .data-table td:nth-child(6) { width: 320px; text-align: left; } /* Thông tin tạo */
-.data-table th:nth-child(7), .data-table td:nth-child(7) { width: 100px; text-align: center; } /* Thao tác */
+.data-table th:nth-child(3), .data-table td:nth-child(3) { width: 300px; } /* Sản phẩm */
+.data-table th:nth-child(4), .data-table td:nth-child(4) { width: 150px; text-align: center; } /* Loại xuất */
+.data-table th:nth-child(5), .data-table td:nth-child(5) { width: 120px; text-align: center; } /* Trạng thái */
+.data-table th:nth-child(6), .data-table td:nth-child(6) { width: 100px; text-align: center; } /* Ưu tiên */
+.data-table th:nth-child(7), .data-table td:nth-child(7) { width: 320px; text-align: left; } /* Thông tin tạo */
+.data-table th:nth-child(8), .data-table td:nth-child(8) { width: 80px; text-align: center; } /* Thao tác */
 
 /* Status Badges */
 .status-badge {
@@ -1798,4 +1790,48 @@ button:disabled {
     border: none;
     width: fit-content; 
     margin-bottom: 0; 
+}
+
+/* Priority Toggle Switch */
+.priority-toggle-switch {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    width: 48px;
+    height: 26px;
+    cursor: not-allowed;
+}
+.priority-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.priority-toggle-slider {
+    position: absolute;
+    cursor: not-allowed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #d1d5db;
+    border-radius: 26px;
+    transition: 0.3s;
+}
+.priority-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.priority-toggle-switch input:checked + .priority-toggle-slider {
+    background-color: #22C55E;
+}
+.priority-toggle-switch input:checked + .priority-toggle-slider:before {
+    transform: translateX(22px);
+}
+.priority-toggle-switch input:disabled + .priority-toggle-slider {
+    opacity: 0.8;
 }

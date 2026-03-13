@@ -238,9 +238,8 @@
             <div class="analytics-date-picker" id="analyticsPicker">
               <div class="picker-sidebar">
                 <div class="sidebar-item" data-range="today">Hôm nay</div>
-                <div class="sidebar-item" data-range="last3">
-                  3 ngày gần đây
-                </div>
+                <div class="sidebar-item" data-range="last3">3 ngày gần đây</div>
+                <div class="sidebar-item" data-range="thisweek">Tuần này</div>
                 <div class="sidebar-item" data-range="last7">
                   7 ngày gần đây
                 </div>
@@ -371,10 +370,11 @@
               <col style="width: 250px">
               <col style="width: 250px">
               <col style="width: 180px">
-              <col style="width: 150px">
-              <col style="width: 140px">
+              <col style="width: 130px">
+              <col style="width: 120px">
+              <col style="width: 80px">
               <col style="width: 240px">
-              <col style="width: 90px">
+              <col style="width: 100px">
             </colgroup>
             <thead>
               <tr>
@@ -384,6 +384,7 @@
                 <th style="text-align: left">Thông tin lưu</th>
                 <th style="text-align: center">Loại lệnh nhập</th>
                 <th class="text-center">Trạng thái</th>
+                <th class="text-center">Ưu tiên</th>
                 <th style="text-align: left; cursor: pointer; user-select: none;" onclick="toggleTimeSort()" title="Sắp xếp theo thời gian tạo">
                   Thông tin tạo <i id="time-sort-icon" class="fas fa-sort" style="color: #cbd5e1; margin-left: 4px;"></i>
                 </th>
@@ -401,10 +402,11 @@
               <col style="width: 250px">
               <col style="width: 250px">
               <col style="width: 180px">
-              <col style="width: 150px">
-              <col style="width: 140px">
+              <col style="width: 130px">
+              <col style="width: 120px">
+              <col style="width: 80px">
               <col style="width: 240px">
-              <col style="width: 90px">
+              <col style="width: 100px">
             </colgroup>
             <tbody id="inbound-table-body"></tbody>
           </table>
@@ -981,246 +983,6 @@
       </div>
     </div>
 
-    <!-- Step 3: Confirmation Modal -->
-    <div id="modal-step3-confirm" class="modal-overlay" style="display: none">
-      <div
-        class="modal-box modal-large"
-        onclick="event.stopPropagation()"
-        style="max-width: 1000px; position: relative"
-      >
-        <!-- Close button -->
-        <button
-          onclick="closeStep3Modal()"
-          style="
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 20px;
-            color: #64748b;
-            z-index: 10;
-          "
-        >
-          <i class="fas fa-times"></i>
-        </button>
-
-        <!-- Step Indicator - Step 3 Active -->
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px 40px 10px;
-            border-bottom: 1px solid #e2e8f0;
-          "
-        >
-          <!-- Step 1 - Completed -->
-          <div
-            style="
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              min-width: 120px;
-            "
-          >
-            <div
-              style="
-                width: 36px;
-                height: 36px;
-                border-radius: 50%;
-                background: #0d6bb9;
-                color: white;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: 600;
-                font-size: 14px;
-              "
-            >
-              ✓
-            </div>
-            <span
-              style="
-                margin-top: 8px;
-                font-size: 12px;
-                color: #0d6bb9;
-                font-weight: 500;
-              "
-              >Nhập thông tin lệnh</span
-            >
-          </div>
-          <div
-            style="
-              flex: 1;
-              max-width: 100px;
-              height: 3px;
-              background: #0d6bb9;
-              margin: 0 12px;
-            "
-          ></div>
-          <!-- Step 2 - Completed -->
-          <div
-            style="
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              min-width: 120px;
-            "
-          >
-            <div
-              style="
-                width: 36px;
-                height: 36px;
-                border-radius: 50%;
-                background: #0d6bb9;
-                color: white;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: 600;
-                font-size: 14px;
-              "
-            >
-              ✓
-            </div>
-            <span
-              style="
-                margin-top: 8px;
-                font-size: 12px;
-                color: #0d6bb9;
-                font-weight: 600;
-              "
-              >Chọn vật tư</span
-            >
-          </div>
-          <div
-            style="
-              flex: 1;
-              max-width: 100px;
-              height: 3px;
-              background: #0d6bb9;
-              margin: 0 12px;
-            "
-          ></div>
-          <!-- Step 3 - Active -->
-          <div
-            style="
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              min-width: 120px;
-            "
-          >
-            <div
-              style="
-                width: 36px;
-                height: 36px;
-                border-radius: 50%;
-                background: #0d6bb9;
-                color: white;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: 600;
-                font-size: 14px;
-              "
-            >
-              3
-            </div>
-            <span
-              style="
-                margin-top: 8px;
-                font-size: 12px;
-                color: #0d6bb9;
-                font-weight: 600;
-              "
-              >Xác nhận & Hoàn thành</span
-            >
-          </div>
-        </div>
-
-        <div class="modal-header" style="border-top: none">
-          <div class="modal-title">Xác nhận thông tin lệnh nhập</div>
-        </div>
-
-        <div class="modal-body" style="max-height: 60vh; overflow-y: auto">
-          <!-- Receipt Info Summary -->
-          <div
-            style="
-              background: #f8fafc;
-              padding: 16px;
-              border-radius: 8px;
-              margin-bottom: 16px;
-            "
-          >
-            <h4 style="margin: 0 0 12px 0; color: #1e293b; font-size: 14px">
-              <i
-                class="fas fa-file-alt"
-                style="color: #0d6bb9; margin-right: 6px"
-              ></i>
-              Thông tin lệnh
-            </h4>
-            <div
-              id="step3-receipt-info"
-              style="
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr;
-                gap: 12px;
-                font-size: 13px;
-              "
-            >
-              <!-- Filled by JS -->
-            </div>
-          </div>
-
-          <!-- Selected Materials Summary -->
-          <div style="background: #f8fafc; padding: 16px; border-radius: 8px">
-            <h4 style="margin: 0 0 12px 0; color: #1e293b; font-size: 14px">
-              <i
-                class="fas fa-boxes"
-                style="color: #0d6bb9; margin-right: 6px"
-              ></i>
-              Danh sách vật tư đã chọn (<span id="step3-material-count">0</span>
-              vật tư)
-            </h4>
-            <div
-              style="
-                max-height: 250px;
-                overflow-y: auto;
-                border: 1px solid #e2e8f0;
-                border-radius: 6px;
-              "
-            >
-              <table class="material-table" style="margin: 0">
-                <thead>
-                  <tr>
-                    <th style="width: 40px">STT</th>
-                    <th style="width: 100px">Mã vật tư</th>
-                    <th>Tên vật tư</th>
-                    <th style="width: 100px">Số lượng</th>
-                    <th>Quy cách</th>
-                  </tr>
-                </thead>
-                <tbody id="step3-materials-body">
-                  <!-- Filled by JS -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button class="btn-secondary" onclick="backToStep2()">
-            <i class="fas fa-arrow-left"></i> Quay lại
-          </button>
-          <button class="btn-primary" onclick="finalSaveInbound()">
-            <i class="fas fa-check"></i> Hoàn thành & Lưu lệnh
-          </button>
-        </div>
-      </div>
-    </div>
 
     <!-- Custom confirm modal -->
     <div
@@ -1334,236 +1096,6 @@
       </div>
     </div>
 
-    <!-- Sync Modal -->
-    <div
-      id="modal-sync"
-      class="modal-overlay"
-      onclick="closeSyncModal()"
-      style="display: none"
-    >
-      <div
-        class="modal-box modal-large"
-        onclick="event.stopPropagation()"
-        style="max-width: 1200px"
-      >
-        <div class="modal-header">
-          <div class="modal-title">Đồng bộ lệnh Nhập Kho</div>
-          <i class="fas fa-times close-modal" onclick="closeSyncModal()"></i>
-        </div>
-        <div class="modal-body">
-          <!-- Search and Filters Row -->
-          <div
-            style="
-              display: flex;
-              gap: 16px;
-              align-items: flex-end;
-              margin-bottom: 16px;
-              flex-wrap: wrap;
-            "
-          >
-            <!-- Search -->
-            <div>
-              <input
-                type="text"
-                id="sync-search"
-                class="search-input"
-                placeholder="🔍 Tìm theo mã lệnh nhập hoặc tên vật tư"
-                onkeyup="renderSyncTable()"
-                style="width: 220px"
-              />
-            </div>
-
-            <!-- Date Range -->
-            <div style="display: flex; flex-direction: column; gap: 4px">
-              <label style="font-size: 12px; font-weight: 600; color: #334155"
-                >Ngày tạo</label
-              >
-              <div
-                style="
-                  display: flex;
-                  align-items: center;
-                  gap: 0;
-                  background: #fff;
-                  border: 1px solid #e2e8f0;
-                  border-radius: 6px;
-                  overflow: hidden;
-                "
-              >
-                <input
-                  type="date"
-                  id="sync-date-from"
-                  class="date-range-input"
-                  onchange="renderSyncTable()"
-                  style="
-                    border: none;
-                    padding: 8px 10px;
-                    font-size: 13px;
-                    outline: none;
-                    width: 130px;
-                  "
-                />
-                <span style="color: #64748b; padding: 0 6px">→</span>
-                <input
-                  type="date"
-                  id="sync-date-to"
-                  class="date-range-input"
-                  onchange="renderSyncTable()"
-                  style="
-                    border: none;
-                    padding: 8px 10px;
-                    font-size: 13px;
-                    outline: none;
-                    width: 130px;
-                  "
-                />
-                <button
-                  type="button"
-                  onclick="clearSyncDateFilter()"
-                  style="
-                    border: none;
-                    background: transparent;
-                    padding: 8px 10px;
-                    cursor: pointer;
-                    color: #64748b;
-                  "
-                >
-                  <i class="fas fa-calendar-alt"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Status Filter -->
-            <div style="display: flex; flex-direction: column; gap: 4px">
-              <label style="font-size: 12px; font-weight: 600; color: #334155"
-                >Trạng thái đồng bộ</label
-              >
-              <select
-                id="sync-status-filter"
-                class="filter-select"
-                style="
-                  min-width: 160px;
-                  padding: 8px 12px;
-                  border: 1px solid #e2e8f0;
-                  border-radius: 6px;
-                "
-                onchange="renderSyncTable()"
-              >
-                <option value="ALL">Tất cả</option>
-                <option value="NOT_SYNCED">Chưa đồng bộ</option>
-                <option value="SYNCED">Đã đồng bộ</option>
-              </select>
-            </div>
-
-            <!-- Spacer to push button to right -->
-            <div style="flex: 1"></div>
-
-            <!-- Bulk Sync Button -->
-            <button
-              id="btn-bulk-sync"
-              class="btn-primary"
-              onclick="bulkSyncOrders()"
-              disabled
-              style="
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                padding: 8px 16px;
-                height: 38px;
-                background: #0d6bb9;
-              "
-            >
-              <i class="fas fa-sync-alt"></i> Đồng bộ
-              <span id="sync-selected-count">0</span> lệnh
-            </button>
-          </div>
-
-          <!-- Table -->
-          <div
-            class="material-table-container"
-            style="max-height: 400px; overflow-y: auto"
-          >
-            <table class="material-table" id="sync-table">
-              <thead>
-                <tr>
-                  <th style="width: 40px">
-                    <input
-                      type="checkbox"
-                      id="sync-select-all"
-                      onchange="toggleSyncSelectAll(this)"
-                    />
-                  </th>
-                  <th style="width: 50px">STT</th>
-                  <th style="width: 160px">Mã lệnh</th>
-                  <th style="width: 180px">Vật tư</th>
-                  <th style="width: 220px">Thông tin vật tư</th>
-                  <th style="width: 140px">Thời gian tạo</th>
-                  <th style="width: 130px">Trạng thái</th>
-                  <th style="width: 90px">Hành động</th>
-                </tr>
-              </thead>
-              <tbody id="sync-table-body"></tbody>
-            </table>
-          </div>
-
-          <!-- Pagination -->
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-top: 16px;
-              padding-top: 12px;
-              border-top: 1px solid #e2e8f0;
-            "
-          >
-            <div id="sync-info" style="color: #64748b; font-size: 13px">
-              Hiển thị 0 trong tổng 0
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px">
-              <div
-                id="sync-pagination"
-                class="page-numbers"
-                style="display: flex; gap: 4px"
-              ></div>
-              <div
-                style="
-                  display: flex;
-                  align-items: center;
-                  gap: 6px;
-                  color: #64748b;
-                  font-size: 13px;
-                "
-              >
-                Đến
-                <input
-                  type="number"
-                  id="sync-go-page"
-                  style="
-                    width: 50px;
-                    padding: 6px 8px;
-                    border: 1px solid #e2e8f0;
-                    border-radius: 6px;
-                    text-align: center;
-                  "
-                  min="1"
-                />
-                Trang
-                <button
-                  class="btn-page"
-                  onclick="goToSyncPageFromInput()"
-                  style="padding: 6px 10px"
-                >
-                  OK
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- <div class="modal-footer">
-          <button class="btn-secondary" onclick="closeSyncModal()">Đóng</button>
-        </div> -->
-      </div>
-    </div>
 
     <!-- QR Scanner Overlay -->
     <div id="qr-scanner-overlay">

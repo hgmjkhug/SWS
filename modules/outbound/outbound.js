@@ -896,7 +896,6 @@
                 <td style="text-align:center">${start + index + 1}</td>
                 <td>
                     <div class="code-container" style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #475569;">
-                        ${item.priority ? '<i class="fas fa-star priority-star" title="Lệnh ưu tiên"></i>' : ''}
                         <span class="code-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">${item.code}</span>
                         <span class="copy-icon" onclick="copyCode('${item.code}', this, event)" title="Sao chép">
                             <i class="far fa-copy"></i>
@@ -928,6 +927,12 @@
                 <td style="text-align:center">
                     <span class="status-badge ${statusInfo.class}">${statusInfo.label}</span>
                 </td>
+                <td style="text-align:center">
+                    <label class="priority-toggle-switch">
+                        <input type="checkbox" ${item.priority ? 'checked' : ''} disabled>
+                        <span class="priority-toggle-slider"></span>
+                    </label>
+                </td>
                 <td style="text-align: left;">
                     <div class="product-item" style="border-bottom:none; min-height: fit-content; padding-left: 18px;">
                         <div style="font-size: 13px; color: #334155;">
@@ -939,9 +944,14 @@
                     </div>
                 </td>
                 <td style="text-align:center">
-                    <button class="btn-icon btn-delete" title="${deleteTitle}" onclick="deleteOutboundItem(${item.id})" ${deleteDisabled}>
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                        <button class="btn-icon btn-view" title="Xem chi tiết" onclick="event.stopPropagation(); window.showOutboundDetail('${item.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-icon btn-delete" title="${deleteTitle}" onclick="deleteOutboundItem(${item.id})" ${deleteDisabled}>
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
                 </td>
             `;
         tbody.appendChild(tr);
@@ -1637,6 +1647,13 @@
           start.setDate(today.getDate() - 3);
           tempRange.start = start;
           tempRange.end = today;
+        } else if (range === "thisweek") {
+          const currentDayOfWeek = today.getDay();
+          const daysSinceMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+          const start = new Date(today);
+          start.setDate(today.getDate() - daysSinceMonday);
+          tempRange.start = start;
+          tempRange.end = today;
         } else if (range === "last7") {
           const start = new Date();
           start.setDate(today.getDate() - 7);
@@ -1944,10 +1961,30 @@
     }
   }
 
+    function showOutboundDetail(id) {
+        // Reuse existing sub-table logic or show a specific toast/modal
+        // For consistency with clicking the row, we toggle the sub-table if MATERIAL
+        const item = outboundData.find(d => d.id == id);
+        if (!item) return;
+
+        if (item.outboundType === 'MATERIAL') {
+            const trs = document.querySelectorAll('#table-body tr.clickable-row');
+            for (let tr of trs) {
+                // Approximate ID finding if not stored in dataset
+                if (tr.innerText.includes(item.code)) {
+                    window.toggleOutboundSubTable(item.id, tr);
+                    break;
+                }
+            }
+        } else {
+             if (window.showToast) window.showToast(`Chi tiết lệnh ${item.code}`, "info");
+             else alert(`Chi tiết lệnh ${item.code}`);
+        }
+    }
+    window.showOutboundDetail = showOutboundDetail;
+
   function viewOutboundItem(id) {
-    if (window.showToast)
-      window.showToast("Chức năng xem chi tiết đang được phát triển", "info");
-    else alert("Chức năng xem chi tiết đang được phát triển");
+    showOutboundDetail(id);
   }
 
   // Run init immediately if DOM is ready

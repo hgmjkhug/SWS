@@ -262,6 +262,46 @@ function loadPage(title) {
     try { localStorage.setItem('wms_last_page', title); } catch (e) { /* ignore */ }
 }
 
+/**
+ * Updates sidebar visibility based on module status in localStorage
+ */
+function updateSidebarVisibility() {
+    try {
+        const statusRaw = localStorage.getItem('wms_module_status');
+        if (!statusRaw) return;
+        
+        const status = JSON.parse(statusRaw);
+        
+        // Update top-level menu items
+        document.querySelectorAll('.menu-item[data-module]').forEach(item => {
+            const moduleCode = item.getAttribute('data-module');
+            if (status[moduleCode] === false) {
+                item.style.display = 'none';
+            } else {
+                item.style.display = '';
+            }
+        });
+        
+        // Update submenus
+        document.querySelectorAll('.submenu a').forEach(link => {
+            const code = link.getAttribute('data-code');
+            if (!code) return;
+
+            if (status[code] === false) {
+                link.style.display = 'none';
+            } else {
+                link.style.display = '';
+            }
+        });
+    } catch (e) {
+        console.warn('Failed to update sidebar visibility', e);
+    }
+}
+
+// Initial update
+document.addEventListener('DOMContentLoaded', updateSidebarVisibility);
+window.updateSidebarVisibility = updateSidebarVisibility;
+
 // Load a module HTML (with its CSS/JS) into #main-view
 async function loadModule(path) {
     const mainView = document.getElementById('main-view');
@@ -894,7 +934,7 @@ document.addEventListener('DOMContentLoaded', function () {
             loadPage(lastPage);
         } else {
             // Default page if none
-            loadPage('Kanban WCS');
+            loadPage('Giám sát hoạt động');
         }
     } catch (e) {
         console.error("Restoration error:", e);

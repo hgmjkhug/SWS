@@ -658,7 +658,6 @@ function renderTableBody() {
                 <td class="text-center">${startIdx + i + 1}</td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        ${o.priority ? `<i class="fas fa-star" style="color: #f59e0b; font-size: 14px; margin-right: 2px;" title="Lệnh này là lệnh ưu tiên"></i>` : ''}
                         <a href="javascript:void(0)" class="text-link code-link-truncate" title="${o.code}" onclick="openOrderDetailModal('${o.id}')">${o.code}</a>
                         <i class="fas fa-copy btn-copy" onclick="copyToClipboard('${o.code}', this)" title="Sao chép"></i>
                     </div>
@@ -696,6 +695,12 @@ function renderTableBody() {
                     ${getEntryTypeBadge(o.type)}
                 </td>
                 <td style="text-align:center;">${getStatusBadge(o.status)}</td>
+                <td class="text-center">
+                    <label class="priority-toggle-switch">
+                        <input type="checkbox" ${o.priority ? 'checked' : ''} disabled>
+                        <span class="priority-toggle-slider"></span>
+                    </label>
+                </td>
                 <td style="text-align: left;">
                     <div class="product-item" style="border-bottom:none; min-height: fit-content; padding-left: 18px;">
                         <div style="font-size: 13px; color: #334155;">
@@ -710,12 +715,17 @@ function renderTableBody() {
                     </div>
                 </td>
                 <td class="text-center">
-                    <button class="btn-icon btn-delete" 
-                        ${o.status === 'PENDING' ? '' : 'disabled style="opacity:0.3; cursor:not-allowed"'} 
-                        onclick="deleteInboundOrder('${o.id}')" 
-                        title="${o.status === 'PENDING' ? 'Xóa' : 'Chỉ có thể xóa lệnh đang chờ'}">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <button class="btn-icon btn-view" onclick="openOrderDetailModal('${o.id}')" title="Xem chi tiết">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-icon btn-delete" 
+                            ${o.status === 'PENDING' ? '' : 'disabled style="opacity:0.3; cursor:not-allowed"'} 
+                            onclick="deleteInboundOrder('${o.id}')" 
+                            title="${o.status === 'PENDING' ? 'Xóa' : 'Chỉ có thể xóa lệnh đang chờ'}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `).join('');
@@ -729,6 +739,14 @@ function renderTableBody() {
     
     // Render pagination
     renderMainPagination(totalPages, filtered.length);
+}
+
+function toggleOrderPriority(id, checked) {
+    const order = MOCK_INBOUND_ORDERS.find(o => o.id == id || o.code === id);
+    if (order) {
+        order.priority = checked;
+        showToast(`Đã ${checked ? 'bật' : 'tắt'} ưu tiên cho lệnh ${order.code}`, 'success');
+    }
 }
 
 function deleteInboundOrder(id) {
@@ -1999,26 +2017,6 @@ function initButtonListeners() {
     } else {
         console.warn('initButtonListeners: btn-open-create not found');
     }
-    
-    // Bind "Đồng bộ" button
-    var btnSync = document.getElementById('btn-open-sync');
-    if(btnSync) {
-        btnSync.onclick = function() {
-            console.log('btn-open-sync clicked');
-            openSyncModal();
-        };
-        console.log('initButtonListeners: btn-open-sync bound');
-    } else {
-        console.warn('initButtonListeners: btn-open-sync not found');
-    }
-    
-    // Bind "Refresh" button
-    var btnRefresh = document.getElementById('btn-refresh');
-    if(btnRefresh) {
-        btnRefresh.onclick = function() {
-            refreshData();
-        };
-    }
 }
 
 // Init when file loads
@@ -2039,311 +2037,6 @@ setTimeout(function() {
     initButtonListeners();
 }, 500);
 
-// ========== SYNC MODAL FUNCTIONS ==========
-
-// Add syncStatus to mock data (simulate some already synced) - NO QR CODE
-const SYNC_DATA = MOCK_INBOUND_ORDERS.map((order, idx) => ({
-    ...order,
-    syncStatus: idx % 3 === 0 ? 'SYNCED' : 'NOT_SYNCED', // simulate some already synced
-    // Add more material details for sync view
-    materialsDetail: order.materials.map(m => ({
-        ...m,
-        weight: Math.floor(Math.random() * 100) + 10, // random weight kg
-        expDate: idx % 4 === 0 ? null : new Date(Date.now() + Math.random() * 365 * 24 * 60 * 60 * 1000), // random exp date, some null
-        specs: MASTER_MATERIALS.find(mm => mm.code === m.code)?.specs || 'Quy cách tiêu chuẩn'
-    }))
-}));
-
-// Sync pagination
-let syncCurrentPage = 1;
-const syncPageSize = 20;
-
-function openSyncModal() {
-    console.log('openSyncModal called');
-    var modal = document.getElementById('modal-sync');
-    if(!modal) { 
-        console.error('modal-sync element not found in DOM'); 
-        return; 
-    }
-    // Add 'show' class and set opacity for compatibility with sidebar.css
-    modal.classList.add('show');
-    modal.style.display = 'flex';
-    modal.style.opacity = '1';
-    // Reset filters
-    var syncSearch = document.getElementById('sync-search');
-    var syncDateFrom = document.getElementById('sync-date-from');
-    var syncDateTo = document.getElementById('sync-date-to');
-    var syncStatusFilter = document.getElementById('sync-status-filter');
-    if(syncSearch) syncSearch.value = '';
-    if(syncDateFrom) syncDateFrom.value = '';
-    if(syncDateTo) syncDateTo.value = '';
-    if(syncStatusFilter) syncStatusFilter.value = 'ALL';
-    syncCurrentPage = 1;
-    renderSyncTable();
-}
-
-function closeSyncModal() {
-    var modal = document.getElementById('modal-sync');
-    if(modal) {
-        modal.classList.remove('show');
-        modal.style.display = 'none';
-    }
-}
-
-function clearSyncDateFilter() {
-    document.getElementById('sync-date-from').value = '';
-    document.getElementById('sync-date-to').value = '';
-    syncCurrentPage = 1;
-    renderSyncTable();
-}
-
-function formatSyncDateTime(date) {
-    const h = String(date.getHours()).padStart(2, '0');
-    const m = String(date.getMinutes()).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    const mo = String(date.getMonth() + 1).padStart(2, '0');
-    return `${h}:${m} ${d}/${mo}/${date.getFullYear()}`;
-}
-
-function formatExpDate(date) {
-    if (!date) return '-';
-    const d = String(date.getDate()).padStart(2, '0');
-    const mo = String(date.getMonth() + 1).padStart(2, '0');
-    return `${d}/${mo}/${date.getFullYear()}`;
-}
-
-function getFilteredSyncData() {
-    const searchQuery = (document.getElementById('sync-search')?.value || '').toLowerCase();
-    const dateFrom = document.getElementById('sync-date-from')?.value;
-    const dateTo = document.getElementById('sync-date-to')?.value;
-    const statusFilter = document.getElementById('sync-status-filter')?.value || 'ALL';
-
-    return SYNC_DATA.filter(order => {
-        // Search filter
-        if (searchQuery && !order.code.toLowerCase().includes(searchQuery)) return false;
-        // Date filter
-        if (dateFrom) {
-            const from = new Date(dateFrom);
-            from.setHours(0, 0, 0, 0);
-            if (order.createdAt < from) return false;
-        }
-        if (dateTo) {
-            const to = new Date(dateTo);
-            to.setHours(23, 59, 59, 999);
-            if (order.createdAt > to) return false;
-        }
-        // Status filter
-        if (statusFilter !== 'ALL' && order.syncStatus !== statusFilter) return false;
-        return true;
-    });
-}
-
-function renderSyncTable() {
-    const tbody = document.getElementById('sync-table-body');
-    if (!tbody) return;
-
-    const filtered = getFilteredSyncData();
-    const totalPages = Math.max(1, Math.ceil(filtered.length / syncPageSize));
-    
-    // Ensure current page is valid
-    if (syncCurrentPage > totalPages) syncCurrentPage = totalPages;
-    if (syncCurrentPage < 1) syncCurrentPage = 1;
-    
-    const startIdx = (syncCurrentPage - 1) * syncPageSize;
-    const pageItems = filtered.slice(startIdx, startIdx + syncPageSize);
-
-    if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#64748b;padding:30px;">Không có Lệnh nhập nào phù hợp</td></tr>`;
-    } else {
-        // Helper to format sync material info (separate from material name)
-        const getSyncMaterialInfo = (m) => {
-            const specs = m.specs || '-';
-            const weight = m.weight || 0;
-            let expStr = '-';
-            if (m.expDate) {
-                expStr = formatExpDate(m.expDate);
-            }
-            return `<div style="font-size:11px;color:#64748b;line-height:1.4;">
-                <div>Quy cách: ${specs}</div>
-                <div>HSD: ${expStr}</div>
-                <div>KL: ${weight}kg | Số lượng: ${m.qty} ${m.unit}</div>
-            </div>`;
-        };
-
-        tbody.innerHTML = pageItems.map((order, i) => `
-            <tr data-order-id="${order.id}">
-                <td class="text-center">
-                    <input type="checkbox" class="sync-checkbox" data-id="${order.id}" onchange="updateSyncSelection()" ${order.syncStatus === 'SYNCED' ? 'disabled' : ''}>
-                </td>
-                <td class="text-center">${startIdx + i + 1}</td>
-                <td><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;">${order.code}</code></td>
-                <td>
-                    <div class="product-list">
-                        ${order.materialsDetail.map(m => `<div class="product-item"><span class="prod-code">${m.code}</span> ${m.name}</div>`).join('')}
-                    </div>
-                </td>
-                <td>
-                    ${order.materialsDetail.map(m => getSyncMaterialInfo(m)).join('')}
-                </td>
-                <td style="font-size:12px;">${formatSyncDateTime(order.createdAt)}</td>
-                <td class="text-center">
-                    ${order.syncStatus === 'SYNCED' 
-                        ? '<span style="background:#dcfce7;color:#166534;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;">Đã đồng bộ</span>'
-                        : '<span style="background:#fef3c7;color:#92400e;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;">Chưa đồng bộ</span>'
-                    }
-                </td>
-                <td class="text-center">
-                    <button class="btn-icon btn-view" onclick="syncSingleOrder(${order.id})" title="Đồng bộ" ${order.syncStatus === 'SYNCED' ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>
-                        <i class="fas fa-sync-alt" style="color:${order.syncStatus === 'SYNCED' ? '#94a3b8' : '#0D6BB9'}"></i>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    // Update info
-    const showingCount = pageItems.length;
-    document.getElementById('sync-info').innerText = `Hiển thị ${showingCount} trong tổng ${filtered.length}`;
-    
-    // Render pagination
-    renderSyncPagination(totalPages, filtered.length);
-    
-    // Reset select all checkbox
-    const selectAll = document.getElementById('sync-select-all');
-    if (selectAll) selectAll.checked = false;
-    
-    updateSyncSelection();
-}
-
-function renderSyncPagination(totalPages, totalItems) {
-    const container = document.getElementById('sync-pagination');
-    if (!container) return;
-    
-    if (totalItems === 0) {
-        container.innerHTML = '';
-        return;
-    }
-    
-    let html = '';
-    
-    // Previous button
-    html += `<button class="btn-page" ${syncCurrentPage === 1 ? 'disabled' : ''} onclick="goToSyncPage(${syncCurrentPage - 1})" style="padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer;"><i class="fas fa-chevron-left"></i></button>`;
-    
-    // Page numbers
-    for (let i = 1; i <= totalPages; i++) {
-        if (i <= 2 || i > totalPages - 2 || (i >= syncCurrentPage - 1 && i <= syncCurrentPage + 1)) {
-            const isActive = i === syncCurrentPage;
-            html += `<button class="btn-page ${isActive ? 'active' : ''}" onclick="goToSyncPage(${i})" style="padding:6px 12px;border:1px solid ${isActive ? '#0D6BB9' : '#e2e8f0'};border-radius:6px;background:#fff;color:${isActive ? '#0D6BB9' : '#334155'};cursor:pointer;font-weight:${isActive ? '600' : '400'};">${i}</button>`;
-        } else if (i === 3 && syncCurrentPage > 4) {
-            html += `<span style="padding:0 6px;color:#64748b;">...</span>`;
-        } else if (i === totalPages - 2 && syncCurrentPage < totalPages - 3) {
-            html += `<span style="padding:0 6px;color:#64748b;">...</span>`;
-        }
-    }
-    
-    // Next button
-    html += `<button class="btn-page" ${syncCurrentPage === totalPages ? 'disabled' : ''} onclick="goToSyncPage(${syncCurrentPage + 1})" style="padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer;"><i class="fas fa-chevron-right"></i></button>`;
-    
-    container.innerHTML = html;
-    
-    // Clear go-to-page input
-    const goPageInput = document.getElementById('sync-go-page');
-    if (goPageInput) goPageInput.value = '';
-}
-
-function goToSyncPage(page) {
-    const filtered = getFilteredSyncData();
-    const totalPages = Math.max(1, Math.ceil(filtered.length / syncPageSize));
-    if (page < 1 || page > totalPages) return;
-    syncCurrentPage = page;
-    renderSyncTable();
-}
-
-function goToSyncPageFromInput() {
-    const input = document.getElementById('sync-go-page');
-    const page = parseInt(input?.value);
-    if (!page || isNaN(page)) return;
-    goToSyncPage(page);
-}
-
-function toggleSyncSelectAll(master) {
-    const checkboxes = document.querySelectorAll('.sync-checkbox:not(:disabled)');
-    checkboxes.forEach(cb => cb.checked = master.checked);
-    updateSyncSelection();
-}
-
-function updateSyncSelection() {
-    const checkboxes = Array.from(document.querySelectorAll('.sync-checkbox:not(:disabled)'));
-    const checked = checkboxes.filter(cb => cb.checked).length;
-    
-    const btn = document.getElementById('btn-bulk-sync');
-    const countSpan = document.getElementById('sync-selected-count');
-    
-    if (btn) btn.disabled = checked === 0;
-    if (countSpan) countSpan.innerText = checked;
-    
-    // Update select all checkbox state
-    const selectAll = document.getElementById('sync-select-all');
-    if (selectAll && checkboxes.length > 0) {
-        selectAll.checked = checkboxes.every(cb => cb.checked);
-        selectAll.indeterminate = checked > 0 && checked < checkboxes.length;
-    }
-}
-
-function syncSingleOrder(orderId) {
-    const order = SYNC_DATA.find(o => o.id === orderId);
-    if (!order || order.syncStatus === 'SYNCED') return;
-    
-    showCustomConfirm(`Xác nhận đồng bộ Lệnh ${order.code}?`, () => {
-        // Simulate sync
-        order.syncStatus = 'SYNCED';
-        renderSyncTable();
-        updateLastSyncTime();
-        alert(`Đã đồng bộ Lệnh ${order.code} thành công!`);
-    });
-}
-
-function bulkSyncOrders() {
-    const checkboxes = Array.from(document.querySelectorAll('.sync-checkbox:checked'));
-    const ids = checkboxes.map(cb => parseInt(cb.getAttribute('data-id'))).filter(id => !isNaN(id));
-    
-    if (ids.length === 0) return alert('Chưa chọn Lệnh nào');
-    
-    const orders = SYNC_DATA.filter(o => ids.includes(o.id) && o.syncStatus !== 'SYNCED');
-    if (orders.length === 0) return alert('Các Lệnh đã chọn đều đã được đồng bộ');
-    
-    showCustomConfirm(`Xác nhận đồng bộ ${orders.length} Lệnh đã chọn?`, () => {
-        // Simulate bulk sync
-        orders.forEach(o => o.syncStatus = 'SYNCED');
-        renderSyncTable();
-        updateLastSyncTime();
-        alert(`Đã đồng bộ ${orders.length} Lệnh thành công!`);
-    });
-}
-
-// Refresh data and update timestamp
-function refreshData() {
-    // Re-render the table
-    renderTableBody();
-    // Update last sync timestamp
-    updateLastSyncTime();
-}
-
-// Update the last sync time display
-function updateLastSyncTime() {
-    const now = new Date();
-    const h = String(now.getHours()).padStart(2, '0');
-    const m = String(now.getMinutes()).padStart(2, '0');
-    const s = String(now.getSeconds()).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    const mo = String(now.getMonth() + 1).padStart(2, '0');
-    
-    const timestamp = `${h}:${m}:${s} ${d}/${mo}`;
-    const el = document.getElementById('last-sync-time');
-    if (el) {
-        el.textContent = `Đồng bộ lần cuối: ${timestamp}`;
-    }
-}
 
 // --- DATE RANGE PICKER FUNCTIONS ---
 function toggleTimeSort() {
@@ -2508,6 +2201,11 @@ function initDatePicker() {
             switch(range) {
                 case 'today': start = today; end = today; break;
                 case 'last3': start.setDate(today.getDate() - 3); break;
+                case 'thisweek': 
+                    var currentDayOfWeek = today.getDay();
+                    var daysSinceMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+                    start.setDate(today.getDate() - daysSinceMonday);
+                    break;
                 case 'last7': start.setDate(today.getDate() - 7); break;
                 case 'last30': start.setDate(today.getDate() - 30); break;
                 case 'last3mo': start.setMonth(today.getMonth() - 3); break;

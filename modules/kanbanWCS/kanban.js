@@ -41,11 +41,8 @@
 
     // Date Range Picker State
     const today = new Date();
-    // Default to from Monday of current week to today
-    const currentDayOfWeek = today.getDay(); // 0 is Sunday, 1 is Monday
-    const daysSinceMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+    // Default to today
     let startDate = new Date(today);
-    startDate.setDate(today.getDate() - daysSinceMonday);
     startDate.setHours(0,0,0,0);
     let endDate = new Date(today);
     endDate.setHours(23,59,59,999);
@@ -54,16 +51,15 @@
     let selectedRange = { start: new Date(startDate), end: new Date(endDate) };
     
     let currentLeftDate = new Date(startDate);
-    let currentRightDate = new Date(endDate);
-    if (currentLeftDate.getMonth() === currentRightDate.getMonth() && currentLeftDate.getFullYear() === currentRightDate.getFullYear()) {
-        currentRightDate.setMonth(currentRightDate.getMonth() + 1);
-    }
+    currentLeftDate.setDate(1); // Set to first of month
+    let currentRightDate = new Date(currentLeftDate);
+    currentRightDate.setMonth(currentRightDate.getMonth() + 1);
 
     // Initialize Dates for Mock Data
     mockTasks.forEach((t, index) => {
         const date = new Date(today);
-        // distribute within the last 7 days to show up in the default filter
-        date.setDate(date.getDate() - Math.floor(Math.random() * 5)); 
+        // distribute mostly today and yesterday to show up in the default filter
+        date.setDate(date.getDate() - Math.floor(Math.random() * 2)); 
         date.setHours(Math.floor(Math.random() * 24));
         date.setMinutes(Math.floor(Math.random() * 60));
         
