@@ -226,8 +226,8 @@ function loadPage(title) {
         // Special mapping for Layout Kho to keep Danh sách Kho active
         if (title === 'Layout Kho' && text === 'Danh sách Kho') return true;
 
-        // Special mapping for Cấu hình Kho to keep Quản lý Kho active
-        if (title === 'Cấu hình Kho' && text === 'Quản lý Kho') return true;
+        // Special mapping for Cấu hình Kho to keep Danh sách Kho active
+        if (title === 'Cấu hình Kho' && text === 'Danh sách Kho') return true;
 
         const onclick = el.getAttribute('onclick') || '';
         if (onclick.includes(`loadPage('${title}')`)) return true; // Exact match including quotes
@@ -254,10 +254,27 @@ function loadPage(title) {
                 if (linkText) parentText = linkText.innerText.trim();
             }
         }
+
+        // Use the menu item's text for child breadcrumb by default
+        childText = match.innerText.trim();
+
         // If the title is "Phân quyền", force parent to "HỆ THỐNG / VAI TRÒ"
         if (title === 'Phân quyền') {
             parentText = 'Hệ thống / VAI TRÒ';
         }
+
+        // Special Breadcrumb for Cấu hình Kho
+        if (title === 'Cấu hình Kho') {
+            parentText = 'Danh sách Kho';
+            childText = 'Cấu hình Kho';
+        }
+
+        // Special Breadcrumb for Layout Kho
+        if (title === 'Layout Kho') {
+            parentText = 'Danh sách Kho';
+            childText = 'Layout Kho';
+        }
+
     } else {
         // fallback: try to match a top-level menu link text
         const topMatch = Array.from(document.querySelectorAll('.menu-link .link-text')).find(span => span.innerText.trim() === title);

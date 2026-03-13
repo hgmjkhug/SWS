@@ -1567,6 +1567,7 @@
 
         if (window.showToast) window.showToast('Đã gán thiết bị thành công!', 'success');
         else alert('Đã gán thiết bị thành công!');
+        renderEqSummaryAccordion();
     };
 
     window.bulkUnassignFloor = function() {
@@ -1595,35 +1596,60 @@
 
         if (window.showToast) window.showToast('Đã bỏ gán thiết bị thành công!', 'success');
         else alert('Đã bỏ gán thiết bị thành công!');
+        renderEqSummaryAccordion();
     };
+
 
 
     // ---- Render summary accordion ----
     function renderEqSummaryAccordion() {
         var container = document.getElementById('eqSummaryAccordion');
         if (!container) return;
-        var types = ['nhap', 'xuat', 'danang'];
-        var hasAny = types.some(function(t) {
-            return Object.keys(equipmentAssignment).some(function(k) { return equipmentAssignment[k] === t; });
-        });
-        if (!hasAny) { container.innerHTML = ''; return; }
+        
+        // Find floors that actually have equipment
+        var floorsWithEq = [];
+        for (var f in floorConfigs) {
+            if (floorConfigs[f].equipments && floorConfigs[f].equipments.length > 0) {
+                floorsWithEq.push(f);
+            }
+        }
+        
+        // Sort floors numerically
+        floorsWithEq.sort(function(a, b) { return parseInt(a) - parseInt(b); });
 
-        var html = '<div class="eq-summary-title">Danh sách đã cấu hình</div>';
-        types.forEach(function(type) {
-            var items = Object.keys(equipmentAssignment).filter(function(k) { return equipmentAssignment[k] === type; });
-            if (items.length === 0) return;
+        if (floorsWithEq.length === 0) { 
+            container.innerHTML = ''; 
+            return; 
+        }
+
+        var html = '<div class="eq-summary-title">DANH SÁCH THIẾT BỊ THEO TẦNG</div>';
+        
+        floorsWithEq.forEach(function(f) {
+            var floorItems = floorConfigs[f].equipments;
+            var floorLabel = (f === 'all' || f === 'Toàn kho') ? 'Toàn kho' : 'Tầng ' + f;
+            
             html += '<div class="eq-sum-group">';
-            html += '<div class="eq-sum-header" onclick="toggleEqSumGroup(\'' + type + '\')">';
+            html += '<div class="eq-sum-header" onclick="toggleEqSumGroup(\'' + f + '\')">';
             html += '<div class="eq-sum-header-left">';
-            html += '<i class="fas fa-chevron-down eq-sum-chevron" id="eq-sum-chev-' + type + '"></i>';
-            html += '<span class="eq-sum-label eq-sum-label-' + type + '">' + EQ_FULL_LABELS[type] + '</span>';
-            html += '<span class="eq-sum-count">' + items.length + '</span>';
+            html += '<i class="fas fa-chevron-down eq-sum-chevron" id="eq-sum-chev-' + f + '"></i>';
+            html += '<span class="eq-sum-label">' + floorLabel + '</span>';
+            html += '<span class="eq-sum-count">' + floorItems.length + '</span>';
             html += '</div></div>';
-            html += '<div class="eq-sum-items" id="eq-sum-items-' + type + '">';
-            items.forEach(function(item) {
-                html += '<div class="eq-sum-item"><span class="eq-sum-bullet"></span>';
-                html += '<span class="eq-sum-item-name">' + item + '</span>';
-                html += '<button class="eq-sum-remove" onclick="assignEqType(\'' + item + '\', \'' + type + '\')" title="Bỏ gán"><i class="fas fa-times"></i></button>';
+            
+            html += '<div class="eq-sum-items" id="eq-sum-items-' + f + '">';
+            floorItems.forEach(function(item) {
+                var type = equipmentAssignment[item] || 'unset';
+                var typeLabel = EQ_LABELS[type] || 'Chưa gán';
+                
+                html += '<div class="eq-sum-item" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px;">';
+                html += '  <div style="display: flex; align-items: center; gap: 8px;">';
+                html += '    <span class="eq-sum-bullet"></span>';
+                html += '    <span class="eq-sum-item-name" style="font-weight: 500;">' + item + '</span>';
+                if (type !== 'unset') {
+                    html += '    <span class="eq-badge eq-badge-' + type + '" style="font-size: 10px; padding: 2px 6px; border-radius: 4px; background: ' + (type === 'nhap' ? '#fff7ed' : type === 'xuat' ? '#f0fdf4' : '#eff6ff') + '; color: ' + (type === 'nhap' ? '#c2410c' : type === 'xuat' ? '#15803d' : '#1d4ed8') + '; border: 1px solid currentColor;">' + typeLabel + '</span>';
+                }
+                html += '  </div>';
+                html += '  <button class="eq-sum-remove" onclick="unassignEqFromFloor(\'' + f + '\', \'' + item + '\')" title="Bỏ gán" style="background: none; border: none; color: #94a3b8; cursor: pointer;"><i class="fas fa-times"></i></button>';
                 html += '</div>';
             });
             html += '</div></div>';
@@ -1631,12 +1657,24 @@
         container.innerHTML = html;
     }
 
-    function toggleEqSumGroup(type) {
-        var items = document.getElementById('eq-sum-items-' + type);
-        var chev = document.getElementById('eq-sum-chev-' + type);
+
+    function toggleEqSumGroup(id) {
+        var items = document.getElementById('eq-sum-items-' + id);
+        var chev = document.getElementById('eq-sum-chev-' + id);
         if (items) items.classList.toggle('collapsed');
         if (chev) chev.classList.toggle('rotated');
     }
+
+    window.unassignEqFromFloor = function(floor, item) {
+        if (floorConfigs[floor] && floorConfigs[floor].equipments) {
+            floorConfigs[floor].equipments = floorConfigs[floor].equipments.filter(function(c) { return c !== item; });
+            renderEqSummaryAccordion();
+            if (window.showToast) window.showToast('Đã gán thiết bị khỏi tầng!', 'success');
+        }
+    };
+
+    window.toggleEqSumGroup = toggleEqSumGroup;
+
 
     // ---- backward-compat shims ----
     var selectedEquipments = [];
