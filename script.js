@@ -1,3 +1,19 @@
+// Auth Guard & URL Cleaner
+(function() {
+    // 1. Clean URL: Remove 'index.html' from address bar
+    const path = window.location.pathname;
+    if (path.endsWith('index.html')) {
+        const cleanPath = path.substring(0, path.lastIndexOf('/') + 1);
+        window.history.replaceState(null, '', cleanPath + window.location.search);
+    }
+
+    // 2. Auth Guard: Redirect to login if not authenticated
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (isLoggedIn !== 'true') {
+        window.location.href = 'modules/login/login.html';
+    }
+})();
+
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     sidebar.classList.toggle('collapsed');
@@ -21,7 +37,26 @@ try {
 
 // Handle DOMContentLoaded for other late-init tasks if needed
 document.addEventListener('DOMContentLoaded', function () {
-    // Keep this empty or use for things that truly need the full DOM
+    // Add transition overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'page-transition-overlay';
+    overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:#fff; z-index:9999; pointer-events:none; opacity:1; transition:opacity 0.5s ease-in-out;';
+    document.body.appendChild(overlay);
+
+    // Display current user
+    const currentUser = localStorage.getItem('currentUser') || 'Minh Hưng';
+    const profileNames = document.querySelectorAll('.user-info span, .header-name');
+    profileNames.forEach(el => {
+        if (el.classList.contains('header-name')) {
+            el.innerText = currentUser;
+        } else if (el.tagName === 'SPAN') {
+            el.innerText = currentUser;
+        }
+    });
+
+    setTimeout(() => {
+        overlay.style.opacity = '0';
+    }, 100);
 });
 
 function toggleSubmenu(element) {
@@ -489,8 +524,20 @@ function closeLogoutModal() {
 
 function confirmLogout() {
     closeLogoutModal();
-    // Dummy logout success
-    showToast('Đăng xuất thành công!', 'success');
+    
+    // Trigger transition
+    const overlay = document.getElementById('page-transition-overlay');
+    if (overlay) {
+        overlay.style.pointerEvents = 'all';
+        overlay.style.opacity = '1';
+    }
+    
+    setTimeout(() => {
+        // Clear session data
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('currentUser');
+        window.location.href = 'modules/login/login.html';
+    }, 500);
 }
 
 /* Change Password Logic */
