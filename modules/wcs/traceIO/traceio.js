@@ -390,14 +390,22 @@ ${cargoSVG}
     function seg(r1, c1, r2, c2, act, currentAngle) {
         const steps = [];
         if (r1 !== r2 && c1 === c2) {
-            const dir = r2 > r1 ? 1 : -1, targetAngle = dir > 0 ? 90 : 270;
-            if (currentAngle !== undefined && currentAngle !== targetAngle) steps.push({ r: r1, c: c1, angle: targetAngle });
+            const targetAngle = 90; // Vertical Orientation
+            if (currentAngle !== undefined && currentAngle !== targetAngle) {
+                // Should only be a 90-degree turn from 0 to 90
+                steps.push({ r: r1, c: c1, angle: targetAngle, duration: 1250, rotateOnly: true });
+            }
+            const dir = r2 > r1 ? 1 : -1;
             for (let r = r1 + dir; r !== r2 + dir; r += dir)
                 steps.push({ r, c: c1, angle: targetAngle, action: r === r2 ? act : null });
             return { steps, lastAngle: targetAngle };
         } else if (c1 !== c2 && r1 === r2) {
-            const dir = c2 > c1 ? 1 : -1, targetAngle = dir > 0 ? 0 : 180;
-            if (currentAngle !== undefined && currentAngle !== targetAngle) steps.push({ r: r1, c: c1, angle: targetAngle });
+            const targetAngle = 0; // Horizontal Orientation
+            if (currentAngle !== undefined && currentAngle !== targetAngle) {
+                // Should only be a 90-degree turn from 90 to 0
+                steps.push({ r: r1, c: c1, angle: targetAngle, duration: 1250, rotateOnly: true });
+            }
+            const dir = c2 > c1 ? 1 : -1;
             for (let c = c1 + dir; c !== c2 + dir; c += dir)
                 steps.push({ r: r1, c, angle: targetAngle, action: c === c2 ? act : null });
             return { steps, lastAngle: targetAngle };
@@ -421,7 +429,7 @@ ${cargoSVG}
     const railColSet = new Set([1, 4, 9, 15, 19, 22]); // Vertically full rails
     const shuttleStates = {}; // Global state to track all shuttle positions
 
-    function missionPath(startR, startC, deliverR, deliverC, currentAngle = 270) {
+    function missionPath(startR, startC, deliverR, deliverC, currentAngle = 0) {
         const path = [];
         const target = findFreeShelfNear(deliverR, deliverC);
         if (!target) return { steps: path, lastR: startR, lastC: startC, lastAngle: currentAngle };
@@ -529,7 +537,7 @@ ${cargoSVG}
 
     function animateShuttle(shuttleEl, totalMissions, startPos, shuttleId, startDelay = 0) {
         let fullPath = [];
-        let currR = startPos.r, currC = startPos.c, currAngle = 270;
+        let currR = startPos.r, currC = startPos.c, currAngle = 0;
         let missionsCompleted = 0;
         let idx = 0, isLoaded = false;
         const STEP = 500;
@@ -646,7 +654,8 @@ ${cargoSVG}
             }
 
             shuttleStates[shuttleId] = { r: p.r, c: p.c };
-            shuttleEl.style.transition = `all ${STEP}ms linear`;
+            const duration = p.duration || STEP;
+            shuttleEl.style.transition = `all ${duration}ms linear`;
             shuttleEl.style.top = (p.r * 40 + 5) + 'px';
             shuttleEl.style.left = (p.c * 40) + 'px';
             shuttleEl.style.transform = `rotate(${p.angle}deg)`;
@@ -658,7 +667,7 @@ ${cargoSVG}
             const color = (p.action === 'park' || p.action === 'charge') ? '#F9F1E2' : '#076EB8';
             shuttleEl.innerHTML = getShuttleSVG(isLoaded, p.action === 'charge', color);
             idx++;
-            setTimeout(move, p.action === 'charge' ? 30000 : STEP);
+            setTimeout(move, p.action === 'charge' ? 30000 : duration);
         }
         
         setTimeout(move, startDelay);
