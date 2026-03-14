@@ -751,10 +751,10 @@ ${cargoSVG}
                         }
                     }
                 } else {
-                    if (r >= 1 && r <= 12) {
+                    if (r >= 0 && r <= 12) {
                         if (!isIconCell) {
-                            if (r > 1)  addRailSegment(cell, 'v-up');
-                            if (r < 12) addRailSegment(cell, 'v-down');
+                            if (r >= 1)  addRailSegment(cell, 'v-up');
+                            if (r < 12 || (r === 12 && c === 22)) addRailSegment(cell, 'v-down');
                         }
                     }
                     
@@ -772,7 +772,7 @@ ${cargoSVG}
             }
 
             // Connect W to X for Parking and Outbound (X3, X4, X7)
-            if ([2, 3, 6].includes(r)) {
+            if ([2, 6].includes(r)) {
                 if (c === 22 && !isIconCell) addRailSegment(cell, 'h-right');
             }
 
