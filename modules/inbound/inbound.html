@@ -355,6 +355,9 @@
           class="toolbar-right"
           style="display: flex; gap: 12px; align-items: center"
         >
+          <button id="btn-import-open" class="btn-cancel-custom" style="height: 36px; color: #22C55E; border-color: #22C55E; background: white;" onclick="openImportModal()">
+            <i class="fas fa-file-import" style="color: #22C55E;"></i> Import
+          </button>
           <button id="btn-open-create" class="btn-add" style="height: 36px">
             <i class="fas fa-plus"></i> Thêm mới
           </button>
@@ -564,7 +567,7 @@
                     </button>
                   </div>
                   <!-- Material weight info -->
-                  <div id="material-weight-info" style="display:none; margin-top: 6px; padding: 6px 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; font-size: 12px; color: #15803d;">
+                  <div id="material-weight-info" style="display:none; margin-top: 6px; padding: 6px 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; font-size: 12px; color: #22C55E;">
                     <i class="fas fa-weight-hanging" style="margin-right: 5px;"></i>
                     Khối lượng/đơn vị: <strong id="material-weight-text">0 kg</strong>
                   </div>
@@ -1250,6 +1253,62 @@
       </div>
     </div>
 
+    <!-- Import Modal -->
+    <div id="modal-import" class="modal-overlay">
+      <div class="modal-box" style="max-width: 800px; width: 800px; padding: 0;">
+        <div class="modal-header">
+          <div class="modal-title">
+            <i class="fas fa-file-import" style="color: #22C55E; margin-right: 8px;"></i>
+            Import Lệnh Nhập Kho
+          </div>
+          <div class="close-modal" onclick="closeImportModal()">
+            <i class="fas fa-times"></i>
+          </div>
+        </div>
+        <div class="modal-body" style="padding: 24px;">
+          <div id="import-drop-zone" style="margin-bottom: 24px; padding: 40px 20px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s;" onclick="document.getElementById('import-file-input').click()">
+            <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #22C55E; margin-bottom: 16px;"></i>
+            <h4 style="margin: 0 0 8px; color: #1e293b;">Kéo & Thả file Excel vào đây</h4>
+            <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">Hoặc Click để chọn từ máy tính (.xlsx, .xls)</p>
+            <input type="file" id="import-file-input" accept=".xlsx, .xls" style="display: none;" onchange="handleImportFile(this)">
+            <button class="btn-add" style="margin: 0 auto; background-color: #22C55E;">
+              <i class="fas fa-plus"></i> Chọn file dữ liệu
+            </button>
+          </div>
+          
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+            <p style="font-size: 14px; color: #475569; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-info-circle" style="color: #3b82f6;"></i> Hướng dẫn & Quy tắc:
+            </p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <ul style="font-size: 13px; color: #64748b; padding-left: 20px; list-style-type: disc; margin: 0;">
+                <li><b>Trường bắt buộc:</b> Mã pallet, Vật tư, Số lượng, <b>Ưu tiên</b>.</li>
+                <li><b>Ưu tiên:</b> Nhập <b>1</b> (Ưu tiên) hoặc <b>0</b> (Không ưu tiên).</li>
+                <li><b>Định dạng ngày:</b> dd/mm/yyyy.</li>
+              </ul>
+              <ul style="font-size: 13px; color: #64748b; padding-left: 20px; list-style-type: disc; margin: 0;">
+                <li><b>Loại Nhập mới/Nhập lại:</b> Điền <b>Ngày hết hạn</b>.</li>
+                <li><b>Loại Nhập chuyền:</b> Điền <b>Vị trí đích</b>.</li>
+                <li><b>Ngày nhập:</b> Nếu để trống sẽ lấy ngày hiện tại.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border-radius: 0 0 12px 12px;">
+          <button class="btn-cancel-custom" onclick="downloadSampleImport()" style="border: 1px solid #22C55E; background: white; color: #22C55E; padding: 8px 16px; border-radius: 6px; font-weight: 600;">
+            <i class="fas fa-download"></i> Tải file mẫu (.xlsx)
+          </button>
+          <button class="btn-cancel-custom" onclick="closeImportModal()">Đóng</button>
+        </div>
+      </div>
+    </div>
+    
+    <style>
+      #import-drop-zone:hover { border-color: #22C55E; background-color: #f0fdf4; }
+      #import-drop-zone.dragover { border-color: #22C55E; background-color: #f0fdf4; transform: scale(1.02); }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="inbound.js"></script>
   </body>

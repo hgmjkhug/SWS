@@ -634,6 +634,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
+    <!-- Dùng qua ExcelJS CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="script.js"></script>
@@ -641,7 +643,7 @@
     <!-- Global Falling Effect (Snow & Blossoms) -->
     <div class="falling-container" id="fallingContainer"></div>
     <script>
-      let blossomsActive = false;
+      let blossomsActive = localStorage.getItem('blossomsActive') === 'true';
       let particleInterval = null;
 
       function createParticles() {
@@ -669,10 +671,9 @@
         }
       }
 
-      function toggleBlossom() {
-        blossomsActive = !blossomsActive;
-        const container = document.getElementById('fallingContainer');
+      function updateBlossomUI() {
         const btn = document.getElementById('btn-cherry');
+        const container = document.getElementById('fallingContainer');
         if (blossomsActive) {
           createParticles();
           if (btn) {
@@ -692,8 +693,14 @@
         }
       }
 
+      function toggleBlossom() {
+        blossomsActive = !blossomsActive;
+        localStorage.setItem('blossomsActive', blossomsActive);
+        updateBlossomUI();
+      }
+
       document.addEventListener('DOMContentLoaded', () => {
-        if (blossomsActive) createParticles();
+        updateBlossomUI();
       });
     </script>
   </body>

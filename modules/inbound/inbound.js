@@ -20,6 +20,35 @@ let activeDateFilterType = 'all'; // 'all', 'createdAt', or 'expiryDate'
 let filterPriorityOnly = false;
 let timeSortOrder = null; // null, 'asc', 'desc'
 
+// --- DATA PERSISTENCE HELPERS ---
+const STORAGE_KEY = 'SWS_INBOUND_ORDERS';
+
+function saveInboundOrders() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_INBOUND_ORDERS));
+    } catch (e) {
+        console.error('Error saving to localStorage:', e);
+    }
+}
+
+function loadInboundOrders() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            // Convert date strings back to Date objects
+            return parsed.map(o => {
+                if (o.createdAt) o.createdAt = new Date(o.createdAt);
+                if (o.completedAt) o.completedAt = new Date(o.completedAt);
+                return o;
+            });
+        }
+    } catch (e) {
+        console.error('Error loading from localStorage:', e);
+    }
+    return null;
+}
+
 const MASTER_MATERIALS = Array.from({ length: 35 }, (_, i) => ({
     code: `MAT-${String(i + 1).padStart(3, '0')}`,
     name: [
@@ -78,7 +107,11 @@ const MOCK_DESTINATIONS = [
 let selectedDestinationId = '';
 let currentTabMode = 'normal';
 
-const MOCK_INBOUND_ORDERS = [
+let MOCK_INBOUND_ORDERS = loadInboundOrders();
+let isFirstTime = !MOCK_INBOUND_ORDERS;
+
+if (isFirstTime) {
+    MOCK_INBOUND_ORDERS = [
   // --- Tháng 10/2025 ---
   { 
     id: 1, code: 'P-A01-L3_MAT-001_500_25102025', 
@@ -326,6 +359,9 @@ MOCK_INBOUND_ORDERS.forEach((o, i) => {
         o.completedDisplay = `${addMinutes} phút ${addSeconds} giây`;
     }
 });
+    // Save initial data after processing
+    saveInboundOrders();
+}
 
 const MOCK_USER_DATA = {
     'US01': { username: 'user001', fullname: 'Nguyễn Văn An' },
@@ -628,7 +664,7 @@ function renderTableBody() {
     // Status badge helper
     const getStatusBadge = (status) => {
         const statusConfig = {
-            'COMPLETED': { label: 'Hoàn thành', color: '#166534' },
+            'COMPLETED': { label: 'Hoàn thành', color: '#22C55E' },
             'PROCESSING': { label: 'Đang xử lý', color: '#1c92e1ff' },
             'PENDING': { label: 'Đang chờ', color: '#64748b' },
             'CANCELLED': { label: 'Lỗi', color: '#991b1b' },
@@ -745,6 +781,7 @@ function toggleOrderPriority(id, checked) {
     const order = MOCK_INBOUND_ORDERS.find(o => o.id == id || o.code === id);
     if (order) {
         order.priority = checked;
+        saveInboundOrders();
         showToast(`Đã ${checked ? 'bật' : 'tắt'} ưu tiên cho lệnh ${order.code}`, 'success');
     }
 }
@@ -759,6 +796,7 @@ function deleteInboundOrder(id) {
                 return;
             }
             MOCK_INBOUND_ORDERS.splice(idx, 1);
+            saveInboundOrders();
             renderTableBody(); // Re-render table
             showToast('Đã xóa Lệnh nhập thành công!', 'success');
         }
@@ -1273,7 +1311,7 @@ function updateTotalWeightDisplay() {
     } else {
         totalWeightInfo.style.background = '#f0fdf4';
         totalWeightInfo.style.border = '1px solid #bbf7d0';
-        totalWeightInfo.style.color = '#15803d';
+        totalWeightInfo.style.color = '#22C55E';
         if (soLuongInput) soLuongInput.style.borderColor = '';
     }
 }
@@ -1649,6 +1687,7 @@ function finalSaveInbound() {
     };
     
     MOCK_INBOUND_ORDERS.unshift(newOrder);
+    saveInboundOrders();
     mainCurrentPage = 1;
     renderTableBody();
     
@@ -3214,6 +3253,7 @@ function generateReceipt() {
     
     // Add to shared data
     MOCK_INBOUND_ORDERS.unshift(newOrder);
+    saveInboundOrders();
     
     console.log('New PDA order added:', newOrder);
     
@@ -3474,7 +3514,7 @@ function openOrderDetailModal(orderId) {
 
     const getStatusLabel = (status) => {
         const map = {
-            'COMPLETED': '<span style="color: #166534; background: #f0fdf4; padding: 2px 8px; border-radius: 4px; font-weight: 500;">Hoàn thành</span>',
+            'COMPLETED': '<span style="color: #22C55E; background: #f0fdf4; padding: 2px 8px; border-radius: 4px; font-weight: 500;">Hoàn thành</span>',
             'PROCESSING': '<span style="color: #0369a1; background: #e0f2fe; padding: 2px 8px; border-radius: 4px; font-weight: 500;">Đang xử lý</span>',
             'PENDING': '<span style="color: #475569; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-weight: 500;">Đang chờ</span>',
             'CANCELLED': '<span style="color: #9f1239; background: #ffe4e6; padding: 2px 8px; border-radius: 4px; font-weight: 500;">Lỗi</span>',
@@ -3567,4 +3607,197 @@ function closeOrderDetailModal() {
     }
 }
 window.openOrderDetailModal = openOrderDetailModal;
+window.closeOrderDetailModal = closeOrderDetailModal;
+
+// --- IMPORT FEATURE LOGIC ---
+function openImportModal() {
+    const modal = document.getElementById('modal-import');
+    if (modal) {
+        modal.classList.add('show');
+        modal.style.display = 'flex';
+        initImportDragAndDrop();
+    }
+}
+
+function initImportDragAndDrop() {
+    const dropZone = document.getElementById('import-drop-zone');
+    if (!dropZone) return;
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+    });
+
+    dropZone.addEventListener('drop', e => {
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+            const input = document.getElementById('import-file-input');
+            if (input) {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(files[0]);
+                input.files = dataTransfer.files;
+                handleImportFile(input);
+            }
+        }
+    }, false);
+}
+
+function closeImportModal() {
+    const modal = document.getElementById('modal-import');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => modal.style.display = 'none', 300);
+    }
+    const fileInput = document.getElementById('import-file-input');
+    if (fileInput) fileInput.value = '';
+}
+
+function downloadSampleImport() {
+    // Download static file from icons/files directory
+    const filePath = '../../icons/files/sample_import_inboundOrder.xlsx';
+    const link = document.createElement('a');
+    link.href = filePath;
+    link.download = 'sample_import_inboundOrder.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function handleImportFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            processImportData(jsonData.slice(3));
+        } catch (err) {
+            console.error('Error reading Excel:', err);
+            showToast("Có lỗi khi đọc file Excel!", "error");
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function processImportData(rows) {
+    if (!rows || rows.length === 0) {
+        showToast("File không có dữ liệu từ dòng 4!", "error");
+        return;
+    }
+
+    const newOrders = [];
+    const errors = [];
+    const now = new Date();
+
+    rows.forEach((row, index) => {
+        const pallet = String(row[1] || "").trim();
+        const matCode = String(row[2] || "").trim();
+        const qty = row[3];
+        const unit = String(row[4] || "Cái").trim();
+        const arrivalDateStr = String(row[5] || "").trim();
+        const expiryDateStr = String(row[6] || "").trim();
+        const destPos = String(row[7] || "").trim();
+        const priorityVal = row[8];
+
+        const rowNum = index + 4; // Data starts from row 4
+
+        if (!pallet || !matCode || qty === undefined || qty === null || qty === "" || priorityVal === undefined || priorityVal === null || priorityVal === "") {
+            errors.push(`Dòng ${rowNum}: Thiếu thông tin bắt buộc (Pallet, Vật tư, Số lượng, Ưu tiên)`);
+            return;
+        }
+
+        const quantity = parseFloat(qty);
+        if (isNaN(quantity) || quantity <= 0) {
+            errors.push(`Dòng ${rowNum}: Số lượng không hợp lệ`);
+            return;
+        }
+
+        const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+        let arrivalDate = now;
+        if (arrivalDateStr && arrivalDateStr !== "undefined") {
+            const match = arrivalDateStr.match(dateRegex);
+            if (!match) {
+                errors.push(`Dòng ${rowNum}: Ngày nhập sai định dạng (dd/mm/yyyy)`);
+                return;
+            }
+            arrivalDate = new Date(match[3], match[2] - 1, match[1]);
+        }
+
+        let expiryDate = null;
+        if (expiryDateStr && expiryDateStr !== "undefined") {
+            const match = expiryDateStr.match(dateRegex);
+            if (!match) {
+                errors.push(`Dòng ${rowNum}: Ngày hết hạn sai định dạng (dd/mm/yyyy)`);
+                return;
+            }
+            expiryDate = `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`;
+        }
+
+        let type = "NEW";
+        if (destPos) type = "TRANSFER";
+
+        const isPriority = (priorityVal === 1 || priorityVal === "1" || priorityVal === true || String(priorityVal).toLowerCase() === "true");
+        const masterMat = MASTER_MATERIALS.find(m => m.code === matCode);
+        const matName = masterMat ? masterMat.name : `Vật tư ${matCode}`;
+        const codeSuffix = now.getTime().toString().slice(-6);
+
+        newOrders.push({
+            id: Date.now() + index,
+            code: `${pallet}_${matCode}_${quantity}_${codeSuffix}`,
+            materials: [{ code: matCode, name: matName, qty: quantity, unit: unit, expiryDate: expiryDate }],
+            pallets: [pallet],
+            bin: destPos || '',
+            status: 'PENDING',
+            priority: isPriority,
+            type: type,
+            creator: { id: 'US_IMPORT', name: 'Import System' },
+            createdAt: arrivalDate,
+            process: 'Quy trình Nhập - Kho Phụ Tùng'
+        });
+    });
+
+    if (errors.length > 0) {
+        // Show first error or join them? Request asked for "toast"
+        showToast(errors[0], "error");
+        console.error("Import errors:", errors);
+        return;
+    }
+
+    if (newOrders.length > 0) {
+        // Update shared data
+        MOCK_INBOUND_ORDERS.unshift(...newOrders);
+        saveInboundOrders();
+        
+        // Refresh UI
+        if (typeof renderTableBody === 'function') {
+            mainCurrentPage = 1;
+            renderTableBody();
+        }
+        
+        showToast(`Đã import thành công ${newOrders.length} lệnh nhập kho!`, "success");
+        closeImportModal();
+    }
+}
+
+// Global exposure
+window.openImportModal = openImportModal;
+window.closeImportModal = closeImportModal;
+window.downloadSampleImport = downloadSampleImport;
+window.handleImportFile = handleImportFile;
+
 window.closeOrderDetailModal = closeOrderDetailModal;

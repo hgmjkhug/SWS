@@ -368,7 +368,7 @@ async function loadModule(path) {
     document.querySelectorAll('[data-module-asset]').forEach(n => n.remove());
 
     try {
-        const res = await fetch(path);
+        const res = await fetch(`${path}?_v=${Date.now()}`);
         if (!res.ok) throw new Error('Failed to fetch module');
         const text = await res.text();
         const parser = new DOMParser();
@@ -1012,6 +1012,14 @@ document.addEventListener('DOMContentLoaded', function () {
  * @param {Function} callback - Function to execute after the burst animation and flash.
  */
 function createSakuraTransition(callback) {
+    // Check if blossom effect is active
+    const blossomsActive = localStorage.getItem('blossomsActive') === 'true';
+    
+    if (!blossomsActive) {
+        if (callback) callback();
+        return;
+    }
+
     const container = document.createElement('div');
     container.className = 'sakura-transition-container active';
     document.body.appendChild(container);

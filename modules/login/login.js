@@ -86,6 +86,14 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
 });
 
 function createSakuraTransition(callback) {
+    // Check if blossom effect is active
+    const blossomsActive = localStorage.getItem('blossomsActive') === 'true';
+    
+    if (!blossomsActive) {
+        if (callback) callback();
+        return;
+    }
+
     const container = document.createElement('div');
     container.className = 'sakura-transition-container active';
     document.body.appendChild(container);

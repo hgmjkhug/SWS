@@ -1,8 +1,35 @@
 (function () {
-  // Pagination Configuration
   const ITEMS_PER_PAGE = 20;
   let currentPage = 1;
   let filterPriorityOnly = false;
+  
+  // --- DATA PERSISTENCE HELPERS ---
+  const STORAGE_KEY = 'SWS_OUTBOUND_ORDERS';
+
+  function saveOutboundOrders() {
+      try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(outboundData));
+      } catch (e) {
+          console.error('Error saving to localStorage:', e);
+      }
+  }
+
+  function loadOutboundOrders() {
+      try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+              const parsed = JSON.parse(saved);
+              // Convert date strings back to Date objects if needed (rawDate is timestamp or Date)
+              return parsed.map(o => {
+                  if (o.rawDate) o.rawDate = new Date(o.rawDate);
+                  return o;
+              });
+          }
+      } catch (e) {
+          console.error('Error loading from localStorage:', e);
+      }
+      return null;
+  }
 
   // Mock Data Generation
   const MASTER_MATERIALS = [
@@ -129,128 +156,132 @@
   let currentRightDate = new Date();
   currentRightDate.setMonth(currentRightDate.getMonth() + 1);
 
-  // Default to today: 07/03/2026
+  // Default to today
+  const today = new Date();
   let selectedRange = { 
-    start: new Date(2026, 2, 7), 
-    end: new Date(2026, 2, 7) 
+    start: new Date(today.getFullYear(), today.getMonth(), today.getDate()), 
+    end: new Date(today.getFullYear(), today.getMonth(), today.getDate()) 
   };
   let tempRange = { start: null, end: null }; // For internal selection before Apply
 
-  // Generate 50 mock records
-  let outboundData = Array.from({ length: 50 }, (_, i) => {
-    const id = i + 1;
-    const mat =
-      MASTER_MATERIALS[Math.floor(Math.random() * MASTER_MATERIALS.length)];
-    const user = USERS[Math.floor(Math.random() * USERS.length)];
-    const status = STATUS_LIST[Math.floor(Math.random() * STATUS_LIST.length)];
-    const qty = Math.floor(Math.random() * 500) + 10;
-    const outboundType = Math.random() > 0.5 ? "PALLET" : "MATERIAL";
+  let outboundData = loadOutboundOrders();
+  if (!outboundData) {
+      outboundData = Array.from({ length: 50 }, (_, i) => {
+        const id = i + 1;
+        const mat =
+          MASTER_MATERIALS[Math.floor(Math.random() * MASTER_MATERIALS.length)];
+        const user = USERS[Math.floor(Math.random() * USERS.length)];
+        const status = STATUS_LIST[Math.floor(Math.random() * STATUS_LIST.length)];
+        const qty = Math.floor(Math.random() * 500) + 10;
+        const outboundType = Math.random() > 0.5 ? "PALLET" : "MATERIAL";
 
-    // Random Export Workflow
-    const wf =
-      MOCK_EXPORT_WORKFLOWS[
-        Math.floor(Math.random() * MOCK_EXPORT_WORKFLOWS.length)
-      ];
+        // Random Export Workflow
+        const wf =
+          MOCK_EXPORT_WORKFLOWS[
+            Math.floor(Math.random() * MOCK_EXPORT_WORKFLOWS.length)
+          ];
 
-    // Random date logic: First 10 records are for today (07/03/2026)
-    const date = new Date(2026, 2, 7);
-    if (i >= 10) {
-      // Others are random in last 3 months
-      date.setDate(date.getDate() - Math.floor(Math.random() * 90));
-    }
-    date.setHours(Math.floor(Math.random() * 24));
-    date.setMinutes(Math.floor(Math.random() * 60));
+        // All records are for today
+        const date = new Date(today);
+        // Randomize time slightly back for variety
+        date.setMinutes(date.getMinutes() - i * 15);
+        date.setHours(Math.floor(Math.random() * 24));
+        date.setMinutes(Math.floor(Math.random() * 60));
 
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
 
-      const dateStr = `${hours}:${minutes} - ${day}/${month}/${year}`;
-      const dateCode = `${day}${month}${year}`;
-  
-      // Pallet code logic
-      const pallet = `P-A${Math.floor(Math.random() * 10)}-L${Math.floor(Math.random() * 5) + 1}`;
-  
-      // Generate batches for MATERIAL type according to depletion logic (FIFO/LIFO/FEFO)
-      let batches = [];
-      if (outboundType === "MATERIAL") {
-        let remainingQty = qty;
-        
-        // Simulate a pool of available receipts for this material
-        let availableReceipts = [];
-        const poolSize = 10;
-        for (let k = 0; k < poolSize; k++) {
-            const rTotal = Math.floor(Math.random() * 200) + 50;
-            const rDate = new Date(date.getTime() - Math.floor(Math.random() * 5000000000));
-            // Simulated expiry date: 6 months to 2 years after receipt
-            const rExpiry = new Date(rDate.getTime() + (Math.floor(Math.random() * 18) + 6) * 30 * 24 * 60 * 60 * 1000);
-            availableReceipts.push({ total: rTotal, date: rDate, expiry: rExpiry });
-        }
-
-        // Sort pool based on method
-        if (mat.method === "LIFO") {
-            availableReceipts.sort((a, b) => b.date - a.date); // Newest first
-        } else if (mat.method === "FEFO") {
-            availableReceipts.sort((a, b) => a.expiry - b.expiry); // Earliest expiry first
-        } else {
-            availableReceipts.sort((a, b) => a.date - b.date); // Oldest first (FIFO)
-        }
-
-        for (const receipt of availableReceipts) {
-            if (remainingQty <= 0) break;
-
-            const batchQty = Math.min(remainingQty, receipt.total);
-            const bPallet = `PL-${Math.floor(Math.random() * 100).toString().padStart(3, "0")}`;
-            const bLocation = `K${Math.floor(Math.random() * 5)}-${Math.floor(Math.random() * 20)}`;
-            const bDateStr = `${receipt.date.getHours().toString().padStart(2, "0")}:${receipt.date.getMinutes().toString().padStart(2, "0")} - ${receipt.date.getDate().toString().padStart(2, "0")}/${(receipt.date.getMonth() + 1).toString().padStart(2, "0")}/${receipt.date.getFullYear()}`;
+          const dateStr = `${hours}:${minutes} - ${day}/${month}/${year}`;
+          const dateCode = `${day}${month}${year}`;
+      
+          // Pallet code logic
+          const pallet = `P-A${Math.floor(Math.random() * 10)}-L${Math.floor(Math.random() * 5) + 1}`;
+      
+          // Generate batches for MATERIAL type according to depletion logic (FIFO/LIFO/FEFO)
+          let batches = [];
+          if (outboundType === "MATERIAL") {
+            let remainingQty = qty;
             
-            const expDay = String(receipt.expiry.getDate()).padStart(2, "0");
-            const expMonth = String(receipt.expiry.getMonth() + 1).padStart(2, "0");
-            const expYear = receipt.expiry.getFullYear();
-            const bExpiryStr = `${expDay}/${expMonth}/${expYear}`;
+            // Simulate a pool of available receipts for this material
+            let availableReceipts = [];
+            const poolSize = 10;
+            for (let k = 0; k < poolSize; k++) {
+                const rTotal = Math.floor(Math.random() * 200) + 50;
+                const rDate = new Date(date.getTime() - Math.floor(Math.random() * 5000000000));
+                // Simulated expiry date: 6 months to 2 years after receipt
+                const rExpiry = new Date(rDate.getTime() + (Math.floor(Math.random() * 18) + 6) * 30 * 24 * 60 * 60 * 1000);
+                availableReceipts.push({ total: rTotal, date: rDate, expiry: rExpiry });
+            }
 
-            batches.push({
-                inboundCode: `${bPallet}_${mat.code}_${receipt.total}_${receipt.date.toISOString().slice(2,10).replace(/-/g, "")}`,
-                exportedQty: batchQty,
-                totalQty: receipt.total,
-                pallet: bPallet,
-                location: bLocation,
-                date: bDateStr,
-                expiryDate: bExpiryStr
-            });
+            // Sort pool based on method
+            if (mat.method === "LIFO") {
+                availableReceipts.sort((a, b) => b.date - a.date); // Newest first
+            } else if (mat.method === "FEFO") {
+                availableReceipts.sort((a, b) => a.expiry - b.expiry); // Earliest expiry first
+            } else {
+                availableReceipts.sort((a, b) => a.date - b.date); // Oldest first (FIFO)
+            }
 
-            remainingQty -= batchQty;
-        }
+            for (const receipt of availableReceipts) {
+                if (remainingQty <= 0) break;
 
-        // If we still have remainingQty (unlikely with this pool), just grow the last batch
-        if (remainingQty > 0 && batches.length > 0) {
-            batches[batches.length - 1].exportedQty += remainingQty;
-            batches[batches.length - 1].totalQty = Math.max(batches[batches.length - 1].totalQty, batches[batches.length - 1].exportedQty);
-        }
-      }
-  
-      return {
-        id: id,
-        code: `${pallet}_${mat.code}_${qty}_${dateCode}`,
-        materialCode: mat.code,
-        materialName: mat.name,
-        materialMethod: mat.method,
-        quantity: qty,
-        date: dateStr,
-        status: status,
-        creatorId: user.id,
-        creatorName: user.name,
-        outboundType: outboundType,
-        workflow: wf,
-        rawDate: date,
-        batches: batches,
-        priority: Math.random() > 0.8
-      };
-  }).sort((a, b) => b.rawDate - a.rawDate); // Sort by date descending
+                const batchQty = Math.min(remainingQty, receipt.total);
+                const bPallet = `PL-${Math.floor(Math.random() * 100).toString().padStart(3, "0")}`;
+                const bLocation = `K${Math.floor(Math.random() * 5)}-${Math.floor(Math.random() * 20)}`;
+                const bDateStr = `${receipt.date.getHours().toString().padStart(2, "0")}:${receipt.date.getMinutes().toString().padStart(2, "0")} - ${receipt.date.getDate().toString().padStart(2, "0")}/${(receipt.date.getMonth() + 1).toString().padStart(2, "0")}/${receipt.date.getFullYear()}`;
+                
+                const expDay = String(receipt.expiry.getDate()).padStart(2, "0");
+                const expMonth = String(receipt.expiry.getMonth() + 1).padStart(2, "0");
+                const expYear = receipt.expiry.getFullYear();
+                const bExpiryStr = `${expDay}/${expMonth}/${expYear}`;
+
+                batches.push({
+                    inboundCode: `${bPallet}_${mat.code}_${receipt.total}_${receipt.date.toISOString().slice(2,10).replace(/-/g, "")}`,
+                    exportedQty: batchQty,
+                    totalQty: receipt.total,
+                    pallet: bPallet,
+                    location: bLocation,
+                    date: bDateStr,
+                    expiryDate: bExpiryStr
+                });
+
+                remainingQty -= batchQty;
+            }
+
+            // If we still have remainingQty (unlikely with this pool), just grow the last batch
+            if (remainingQty > 0 && batches.length > 0) {
+                batches[batches.length - 1].exportedQty += remainingQty;
+                batches[batches.length - 1].totalQty = Math.max(batches[batches.length - 1].totalQty, batches[batches.length - 1].exportedQty);
+            }
+          }
+      
+          return {
+            id: id,
+            code: `${pallet}_${mat.code}_${qty}_${dateCode}`,
+            materialCode: mat.code,
+            materialName: mat.name,
+            materialMethod: mat.method,
+            quantity: qty,
+            date: dateStr,
+            status: status,
+            creatorId: user.id,
+            creatorName: user.name,
+            outboundType: outboundType,
+            workflow: wf,
+            rawDate: date,
+            batches: batches,
+            priority: Math.random() > 0.8
+          };
+      }).sort((a, b) => b.rawDate - a.rawDate);
+  }
 
   let filteredData = [...outboundData];
+
+  // Pallet Code Counter
+  let palletCounter = 1;
 
   // Mock Inventory Data (Unique per Material)
   const MOCK_INVENTORY = MASTER_MATERIALS.map((mat) => {
@@ -258,9 +289,7 @@
       length: Math.floor(Math.random() * 3) + 1,
     }).map((_, i) => {
       const quantity = Math.floor(Math.random() * 100) + 10;
-      const pallet = `PL-${Math.floor(Math.random() * 100)
-        .toString()
-        .padStart(3, "0")}`;
+      const pallet = `PL-${String(palletCounter++).padStart(3, "0")}`;
       const location = `K${Math.floor(Math.random() * 5)}-${Math.floor(Math.random() * 20)}`;
       const createdDate = new Date(
         Date.now() - Math.floor(Math.random() * 10000000000),
@@ -297,13 +326,11 @@
   });
 
   // Mock Pallet Inventory Data
-  const MOCK_PALLET_INVENTORY = Array.from({ length: 20 }, (_, i) => {
+  const MOCK_PALLET_INVENTORY = Array.from({ length: 50 }, (_, i) => {
     const mat =
       MASTER_MATERIALS[Math.floor(Math.random() * MASTER_MATERIALS.length)];
     const quantity = Math.floor(Math.random() * 100) + 10;
-    const pallet = `PL-${Math.floor(Math.random() * 100)
-      .toString()
-      .padStart(3, "0")}`;
+    const pallet = `PL-${String(i + 1).padStart(3, "0")}`;
     const location = `K${Math.floor(Math.random() * 5)}-${Math.floor(Math.random() * 20)}`;
     const createdDate = new Date(
       Date.now() - Math.floor(Math.random() * 10000000000),
@@ -916,7 +943,7 @@
 
                 <td style="text-align: center">
                     <span class="outbound-type-badge type-${item.outboundType}">
-                        ${item.outboundType === "PALLET" ? "Xuất theo pallet" : "Xuất theo sản phẩm"}
+                        ${item.outboundType === "PALLET" ? "Xuất theo container" : "Xuất theo sản phẩm"}
                     </span>
                 </td>
                 <!-- <td style="text-align: left;">
@@ -1943,6 +1970,7 @@
     };
 
     outboundData.unshift(newOrder);
+    saveOutboundOrders();
 
     if (window.showToast)
       window.showToast("Thêm phiếu xuất thành công!", "success");
@@ -1955,6 +1983,7 @@
   function deleteOutboundItem(id) {
     if (confirm("Bạn có chắc chắn muốn xóa phiếu xuất này?")) {
       outboundData = outboundData.filter((item) => item.id !== id);
+      saveOutboundOrders();
       if (window.showToast)
         window.showToast("Xóa phiếu xuất thành công!", "success");
       renderOutboundTable();
@@ -2125,8 +2154,9 @@
       };
 
       outboundData.unshift(newOrder);
+      saveOutboundOrders();
       renderOutboundTable();
-      closeOutboundModal();
+      closeOutboundModal("add-modal");
 
       // Reset selection
       if (selectedRow) selectedRow.classList.remove("selected");
@@ -2175,8 +2205,9 @@
       };
 
       outboundData.unshift(newOrder);
+      saveOutboundOrders();
       renderOutboundTable();
-      closeOutboundModal();
+      closeOutboundModal("add-modal");
 
       // Reset selection
       selectedRadio.checked = false;
@@ -2200,4 +2231,233 @@
   };
 
   window.togglePriorityFilter = togglePriorityFilter;
+
+  // --- IMPORT EXCEL LOGIC ---
+  function openOutboundImportModal() {
+    const modal = document.getElementById("modal-import-outbound");
+    if (modal) modal.classList.add("open");
+  }
+
+  function closeOutboundImportModal() {
+    const modal = document.getElementById("modal-import-outbound");
+    if (modal) modal.classList.remove("open");
+  }
+
+  function downloadSampleOutboundImport() {
+    const link = document.createElement("a");
+    link.href = "../../icons/files/sample_import_outboundOrder.xlsx";
+    link.download = "sample_import_outboundOrder.xlsx";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function handleOutboundImportFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        processOutboundImportData(jsonData); 
+      } catch (err) {
+        console.error("Error reading Excel:", err);
+        if (window.showToast) window.showToast("Có lỗi khi đọc file Excel!", "error");
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    input.value = ""; // Reset input
+  }
+
+  function processOutboundImportData(allRows) {
+    if (!allRows || allRows.length < 4) {
+      if (window.showToast) window.showToast("File không có dữ liệu từ dòng 4!", "error");
+      return;
+    }
+
+    // Dynamic Column Detection (Scan rows 1-3 for keywords)
+    let palletIdx = 1;
+    let matIdx = 2;
+    let qtyIdx = 3;
+    let dateIdx = 5;
+    let priorityIdx = 8; // Default to inbound pattern
+
+    for (let i = 0; i < 3; i++) {
+        const headerRow = allRows[i];
+        if (!headerRow) continue;
+        headerRow.forEach((cell, idx) => {
+            if (!cell) return;
+            const val = String(cell).toLowerCase().trim();
+            if (val.includes("container") || val.includes("pallet")) palletIdx = idx;
+            if (val.includes("sản phẩm") || val.includes("mã sản phẩm")) matIdx = idx;
+            if (val.includes("số lượng") || val.includes("sl")) qtyIdx = idx;
+            if (val.includes("ngày")) dateIdx = idx;
+            if (val.includes("ưu tiên")) priorityIdx = idx;
+        });
+    }
+
+    const rows = allRows.slice(3);
+    const newOrders = [];
+    const errors = [];
+    const now = new Date();
+
+    rows.forEach((row, index) => {
+      // Small optimization: Skip empty rows
+      if (!row || row.every(cell => cell === null || cell === undefined || String(cell).trim() === "")) return;
+
+      const palletCode = String(row[palletIdx] || "").trim();
+      const matCode = String(row[matIdx] || "").trim();
+      const qtyVal = row[qtyIdx];
+      const outboundDateStr = String(row[dateIdx] || "").trim();
+      const priorityVal = row[priorityIdx];
+
+      const rowNum = index + 4;
+
+      // Rule 1: Priority must exist (0 or 1)
+      if (priorityVal === undefined || priorityVal === null || String(priorityVal).trim() === "") {
+          errors.push(`Dòng ${rowNum}: Thiếu giá trị Ưu tiên (0 or 1)`);
+          return;
+      }
+
+      const pVal = String(priorityVal).trim();
+      const isPriority = (pVal === "1");
+      if (pVal !== "0" && pVal !== "1") {
+          errors.push(`Dòng ${rowNum}: Giá trị Ưu tiên không hợp lệ (phải là 0 hoặc 1)`);
+          return;
+      }
+
+      // Rule: Date handling
+      let finalDate = now;
+      const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+      if (outboundDateStr && outboundDateStr !== "undefined") {
+          const match = outboundDateStr.match(dateRegex);
+          if (match) {
+              finalDate = new Date(match[3], match[2] - 1, match[1]);
+          }
+      }
+
+      const day = String(finalDate.getDate()).padStart(2, "0");
+      const month = String(finalDate.getMonth() + 1).padStart(2, "0");
+      const year = finalDate.getFullYear();
+      const hours = String(finalDate.getHours()).padStart(2, "0");
+      const minutes = String(finalDate.getMinutes()).padStart(2, "0");
+      const dateStr = `${hours}:${minutes} - ${day}/${month}/${year}`;
+      const dateCode = `${day}${month}${year}`;
+
+      let materialCode = "";
+      let materialName = "";
+      let quantity = 0;
+      let outboundType = "";
+      let batches = [];
+
+      if (palletCode) {
+          // Rule: If Container, Material and Qty must be null/empty in Excel
+          if (matCode || (qtyVal !== undefined && qtyVal !== null && qtyVal !== "")) {
+              errors.push(`Dòng ${rowNum}: Nếu nhập Mã container thì Mã sản phẩm và Số lượng phải để trống`);
+              return;
+          }
+
+          // Find pallet in MOCK_PALLET_INVENTORY
+          const palletItem = MOCK_PALLET_INVENTORY.find(p => p.palletCode === palletCode);
+          if (!palletItem) {
+              errors.push(`Dòng ${rowNum}: Không tìm thấy container ${palletCode} trong tồn kho`);
+              return;
+          }
+
+          materialCode = palletItem.materialCode;
+          materialName = palletItem.materialName;
+          quantity = palletItem.quantity;
+          outboundType = "PALLET";
+      } else if (matCode) {
+          // Rule: If Product, Container must be null
+          if (qtyVal === undefined || qtyVal === null || qtyVal === "") {
+              errors.push(`Dòng ${rowNum}: Thiếu số lượng xuất cho sản phẩm ${matCode}`);
+              return;
+          }
+
+          quantity = parseFloat(qtyVal);
+          if (isNaN(quantity) || quantity <= 0) {
+              errors.push(`Dòng ${rowNum}: Số lượng không hợp lệ`);
+              return;
+          }
+
+          // Find material in MOCK_INVENTORY
+          const inventoryItem = MOCK_INVENTORY.find(i => i.code === matCode);
+          if (!inventoryItem) {
+              errors.push(`Dòng ${rowNum}: Không tìm thấy sản phẩm ${matCode} trong danh mục`);
+              return;
+          }
+
+          if (quantity > inventoryItem.quantity) {
+              errors.push(`Dòng ${rowNum}: Số lượng xuất (${quantity}) vượt quá tồn kho hiện có (${inventoryItem.quantity})`);
+              return;
+          }
+
+          materialCode = inventoryItem.code;
+          materialName = inventoryItem.name;
+          outboundType = "MATERIAL";
+
+          // Simulate batching for MATERIAL type (like in mock generator)
+          let rem = quantity;
+          inventoryItem.batches.forEach(b => {
+              if (rem <= 0) return;
+              const take = Math.min(rem, b.quantity);
+              batches.push({
+                  inboundCode: b.inputCode,
+                  exportedQty: take,
+                  totalQty: b.quantity,
+                  pallet: b.pallet,
+                  location: b.location,
+                  date: dateStr,
+                  expiryDate: "-"
+              });
+              rem -= take;
+          });
+      } else {
+          errors.push(`Dòng ${rowNum}: Phải nhập Mã container hoặc Mã sản phẩm`);
+          return;
+      }
+
+      newOrders.push({
+          id: Date.now() + index,
+          code: palletCode ? `${palletCode}_${materialCode}_${quantity}_${dateCode}` : `OUT_${materialCode}_${quantity}_${dateCode}`,
+          materialCode: materialCode,
+          materialName: materialName,
+          quantity: quantity,
+          date: dateStr,
+          status: "PENDING",
+          creatorId: "user-import",
+          creatorName: "Import System",
+          outboundType: outboundType,
+          rawDate: finalDate,
+          priority: isPriority,
+          batches: batches,
+          workflow: MOCK_EXPORT_WORKFLOWS[0]
+      });
+    });
+
+    if (errors.length > 0) {
+      if (window.showToast) window.showToast(errors[0], "error");
+      return;
+    }
+
+    if (newOrders.length > 0) {
+      outboundData.unshift(...newOrders);
+      saveOutboundOrders();
+      renderOutboundTable();
+      if (window.showToast) window.showToast(`Đã import thành công ${newOrders.length} lệnh xuất kho!`, "success");
+      closeOutboundImportModal();
+    }
+  }
+
+  // Exposure
+  window.openOutboundImportModal = openOutboundImportModal;
+  window.closeOutboundImportModal = closeOutboundImportModal;
+  window.downloadSampleOutboundImport = downloadSampleOutboundImport;
+  window.handleOutboundImportFile = handleOutboundImportFile;
 })();
