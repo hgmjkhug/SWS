@@ -224,7 +224,7 @@
     }
 
     // --- Shuttle implementation ---
-    const getShuttleSVG = (loaded, isCharging, color = '#076EB8') => {
+    const getShuttleSVG = (loaded, iconHtml = '', color = '#076EB8') => {
         const cargoSVG = loaded ? `
 <g transform="translate(0, 0)">
     <path d="M14 12 L20 9 L26 12 L20 15 L14 12Z" fill="#0367CC"/>
@@ -232,7 +232,7 @@
     <path d="M20 15 V21 L26 18 V12 L20 15Z" fill="#0367CC"/>
 </g>` : '';
 
-        const chargingIcon = isCharging ? `<i class="fa-sharp fa-regular fa-bolt fa-beat charging-bolt"></i>` : '';
+        const centerIcon = iconHtml ? `<div class="shuttle-center-icon">${iconHtml}</div>` : '';
 
         return `
 <svg width="40" height="30" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -253,13 +253,18 @@ ${cargoSVG}
 <feBlend mode="normal" in2="shape" result="effect1_innerShadow_4025_17341"/>
 </filter>
 </defs>
-</svg>${chargingIcon}`;
+</svg>${centerIcon}`;
     };
 
     function createShuttle() {
         const shuttle = document.createElement('div');
         shuttle.className = 'shuttle';
-        shuttle.innerHTML = getShuttleSVG(false, false, '#F9F1E2'); // Start with parked color
+        shuttle.innerHTML = `
+            <div class="shuttle-info-popup"></div>
+            <div class="shuttle-body">
+                ${getShuttleSVG(false, '', '#F9F1E2')}
+            </div>
+        `;
         return shuttle;
     }
 
@@ -271,54 +276,64 @@ ${cargoSVG}
 
 
 
-    // ─── Lifter bar at A14 (row 13, col 0) ───────────────────────────────────
-    let lifterBar;
-    let lifterTimeout1, lifterTimeout2;
-    (function () {
-        const cell = mainGrid.children[13 * cols + 0];
-        if (!cell) return;
-        lifterBar = document.createElement('div');
-        lifterBar.className = 'lifter-bar';
-        // starts hidden, icon injected dynamically
-        cell.appendChild(lifterBar);
+    // ─── Lifters initialization ───────────────────────────────────
+    let inboundLifter, outboundLifter;
+    let inboundLifterTimer, outboundLifterTimer;
+
+    (function initLifters() {
+        // Inbound Lifter at A14 (row 13, col 0)
+        const cellA14 = mainGrid.children[13 * cols + 0];
+        if (cellA14) {
+            inboundLifter = document.createElement('div');
+            inboundLifter.className = 'lifter-bar';
+            cellA14.appendChild(inboundLifter);
+        }
+
+        // Outbound Lifter at W14 (row 13, col 22)
+        const cellW14 = mainGrid.children[13 * cols + 22];
+        if (cellW14) {
+            outboundLifter = document.createElement('div');
+            outboundLifter.className = 'lifter-bar';
+            cellW14.appendChild(outboundLifter);
+        }
     })();
 
-    // 'up'    → bar rises WITH pallet icon (lifter has cargo)
-    // 'taken' → shuttle took cargo: remove icon, bar stays up 2 s then descends empty
-  function setLifterPosition(state) {
-    if (!lifterBar) return;
-
-    // Clear any pending timeouts to avoid race conditions
-    clearTimeout(lifterTimeout1);
-    clearTimeout(lifterTimeout2);
-
-    if (state === 'up') {
-        // lifter nâng lên cùng pallet
-        lifterBar.innerHTML =
-        '<i class="fa-solid fa-pallet-box lifter-pallet"></i>';
-
-        lifterBar.classList.add('active', 'up');
+    // Inbound: Up (Pallet + Bar) -> Taken (Bar only) -> Down after delay
+    function setInboundLifterState(state) {
+        if (!inboundLifter) return;
+        clearTimeout(inboundLifterTimer);
+        if (state === 'up') {
+            inboundLifter.innerHTML = '<i class="fa-solid fa-pallet-box lifter-pallet"></i>';
+            inboundLifter.classList.add('active', 'up');
+        } else if (state === 'taken') {
+            inboundLifter.innerHTML = '';
+            inboundLifter.classList.add('up', 'active');
+            inboundLifterTimer = setTimeout(() => {
+                inboundLifter.classList.remove('up');
+                setTimeout(() => inboundLifter.classList.remove('active'), 1200);
+            }, 2000);
+        }
     }
 
-    else if (state === 'taken') {
-        // shuttle đã lấy pallet
-        lifterBar.innerHTML = '';
-
-        // Đảm bảo vẫn ở trạng thái 'up' khi vừa lấy xong
-        lifterBar.classList.add('up', 'active');
-
-        // đứng im 2s rồi hạ xuống
-        lifterTimeout1 = setTimeout(() => {
-            // hạ xuống (xóa class up)
-            lifterBar.classList.remove('up');
-
-            // Sau khi hạ xong (1.2s transition), mới ẩn hẳn (xóa class active)
-            lifterTimeout2 = setTimeout(() => {
-                lifterBar.classList.remove('active');
-            }, 1200); 
-        }, 2000);
+    // Outbound: Up (Bar only) -> Dropped (Pallet + Bar) -> Down after delay
+    function setOutboundLifterState(state) {
+        if (!outboundLifter) return;
+        clearTimeout(outboundLifterTimer);
+        if (state === 'up') {
+            outboundLifter.innerHTML = ''; // Start with bar only
+            outboundLifter.classList.add('active', 'up');
+        } else if (state === 'dropped') {
+            outboundLifter.innerHTML = '<i class="fa-solid fa-pallet-box lifter-pallet"></i>';
+            outboundLifter.classList.add('up', 'active');
+            outboundLifterTimer = setTimeout(() => {
+                outboundLifter.classList.remove('up');
+                setTimeout(() => {
+                    outboundLifter.classList.remove('active');
+                    outboundLifter.innerHTML = ''; // Clear for next mission
+                }, 1200);
+            }, 2000);
+        }
     }
-}
 
 
     // Track which shelf cells already have a pallet (occupied set)
@@ -364,6 +379,44 @@ ${cargoSVG}
 </defs>
 </svg>`;
         cell.appendChild(icon);
+    }
+
+    function pickupPallet(r, c) {
+        const key = `${r},${c}`;
+        if (!occupiedCells.has(key)) return;
+        const cell = mainGrid.children[r * cols + c];
+        if (!cell) return;
+        
+        occupiedCells.delete(key);
+        renderedCells.delete(key);
+        
+        cell.classList.remove('pallet-pos');
+        cell.classList.add('shelf');
+        
+        const icon = cell.querySelector('.pallet-icon');
+        if (icon) icon.remove();
+        
+        // Restore decoration
+        const decor = document.createElement('div');
+        decor.className = 'shelf-decor';
+        decor.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_4025_16985)">
+<rect width="40" height="40" fill="#EDF6FF"/>
+<path d="M0 20H12" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M40 20H28" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M23.4821 14.6838C23.1815 14.9844 22.6828 14.9844 22.3822 14.6838L19.9989 12.3005L17.6157 14.6838C17.3151 14.9844 16.8164 14.9844 16.5158 14.6838C16.2151 14.3831 16.2151 13.8845 16.5158 13.5838L19.449 10.6506C19.7496 10.35 20.2483 10.35 20.5489 10.6506L23.4821 13.5838C23.7828 13.8845 23.7828 14.3336 23.4821 14.6838Z" fill="#076EB8"/>
+<path d="M23.4821 26.4162L20.5489 29.3494C20.2483 29.65 19.7496 29.65 19.449 29.3494L16.5158 26.4162C16.2151 26.1155 16.2151 25.6169 16.5158 25.3162C16.8164 25.0156 17.3151 25.0156 17.6157 25.3162L19.9989 27.6995L22.3822 25.3162C22.6828 25.0156 23.1815 25.0156 23.4821 25.3162C23.7828 25.6169 23.7828 26.1155 23.4821 26.4162Z" fill="#076EB8"/>
+<path d="M14.6817 23.4832C14.3811 23.7838 13.8824 23.7838 13.5818 23.4832L10.6486 20.55C10.348 20.2493 10.348 19.7507 10.6486 19.45L13.5818 16.5168C13.8824 16.2162 14.3811 16.2162 14.6817 16.5168C14.9824 16.8175 14.9824 17.3161 14.6817 17.6168L12.2985 20L14.6817 22.3832C14.9824 22.6839 14.9824 23.1825 14.6817 23.4832Z" fill="#076EB8"/>
+<path d="M29.3454 20.55L26.4122 23.4832C26.1115 23.7838 25.6129 23.7838 25.3123 23.4832C25.0116 23.1825 25.0116 22.6839 25.3123 22.3832L27.6955 20L25.3123 17.6168C25.0116 17.3161 25.0116 16.8175 25.3123 16.5168C25.6129 16.2162 26.1115 16.2162 26.4122 16.5168L29.3454 19.45C29.646 19.7507 29.646 20.2493 29.3454 20.55Z" fill="#076EB8"/>
+</g>
+<rect x="0.25" y="0.25" width="39.5" height="39.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
+<defs>
+<clipPath id="clip0_4025_16985">
+<rect width="40" height="40" fill="white"/>
+</clipPath>
+</defs>
+</svg>`;
+        cell.appendChild(decor);
     }
 
     // 1. Initial Mocking (BEFORE generating paths)
@@ -418,7 +471,21 @@ ${cargoSVG}
         // New logic: Top-to-bottom, Left-to-right priority
         for (let r = 0; r < mapMatrix.length; r++) {
             for (let c = 0; c < mapMatrix[0].length; c++) {
-                if (mapMatrix[r][c] === 2 && !occupiedCells.has(`${r},${c}`)) {
+                if (mapMatrix[r][c] === 2 && !occupiedCells.has(`${r},${c}`) && !reservedShelves.has(`${r}-${c}`)) {
+                    const nearRailC = [...railColSet].sort((a, b) => Math.abs(a - c) - Math.abs(b - c))[0];
+                    return { r, c, nearRailC };
+                }
+            }
+        }
+        return null;
+    }
+
+    function findOccupiedShelfNear(targetR, targetC) {
+        // Similar priority
+        for (let r = 0; r < mapMatrix.length; r++) {
+            for (let c = 0; c < mapMatrix[0].length; c++) {
+                const key = `${r},${c}`;
+                if (mapMatrix[r][c] === 2 && occupiedCells.has(key) && !reservedShelves.has(key)) {
                     const nearRailC = [...railColSet].sort((a, b) => Math.abs(a - c) - Math.abs(b - c))[0];
                     return { r, c, nearRailC };
                 }
@@ -430,12 +497,13 @@ ${cargoSVG}
     const railColSet = new Set([1, 4, 9, 15, 19, 22]); // Vertically full rails
     const shuttleStates = {}; // Global state to track all shuttle positions
 
-    function missionPath(startR, startC, deliverR, deliverC, currentAngle = 0) {
+    function inboundMissionPath(startR, startC, deliverR, deliverC, currentAngle = 0) {
         const path = [];
         const target = findFreeShelfNear(deliverR, deliverC);
         if (!target) return { steps: path, lastR: startR, lastC: startC, lastAngle: currentAngle };
         const actualDeliverR = target.r, actualDeliverC = target.c, rc = target.nearRailC;
-        occupiedCells.add(`${actualDeliverR},${actualDeliverC}`);
+        const shelfKey = `${actualDeliverR}-${actualDeliverC}`;
+        reservedShelves.add(shelfKey);
 
         const nearestRailCol = (c) => [...railColSet].sort((a,b) => Math.abs(a-c) - Math.abs(b-c))[0];
         const startRailC = nearestRailCol(startC);
@@ -485,7 +553,11 @@ ${cargoSVG}
         path.push(...toA12.steps); currentAngle = toA12.lastAngle; curC = 0;
 
         const downToA14 = seg(12, 0, 13, 0, null, currentAngle);
-        if (downToA14.steps.length > 0) downToA14.steps[0].lifterUp = true;
+        if (downToA14.steps.length > 0) {
+            downToA14.steps[0].lifterInUp = true;
+            // Add mission icon when moving to Lifter
+            downToA14.steps.forEach(s => s.missionIcon = '<i class="fa-solid fa-arrow-up-to-bracket fa-rotate-270"></i>');
+        }
         path.push(...downToA14.steps); currentAngle = downToA14.lastAngle; curR = 13;
 
         for (let i = 0; i < 3; i++) path.push({ r: 13, c: 0, angle: currentAngle, action: i === 0 ? 'load' : null });
@@ -519,7 +591,7 @@ ${cargoSVG}
             path.push(...toShelf.steps); currentAngle = toShelf.lastAngle; curC = actualDeliverC;
         }
 
-        for (let i = 0; i < 3; i++) path.push({ r: actualDeliverR, c: actualDeliverC, angle: currentAngle, action: i === 0 ? 'unload' : null });
+        for (let i = 0; i < 3; i++) path.push({ r: actualDeliverR, c: actualDeliverC, angle: currentAngle, action: i === 0 ? 'unload' : null, onComplete: () => reservedShelves.delete(shelfKey) });
 
         if (curC !== rc) {
             const backToRC = seg(actualDeliverR, actualDeliverC, actualDeliverR, rc, null, currentAngle);
@@ -534,9 +606,104 @@ ${cargoSVG}
         return { steps: path, lastR: curR, lastC: curC, lastAngle: currentAngle };
     }
 
-    const reservedShelves = new Set();
+    function outboundMissionPath(startR, startC, currentAngle = 0) {
+        const path = [];
+        const target = findOccupiedShelfNear(startR, startC);
+        if (!target) return { steps: path, lastR: startR, lastC: startC, lastAngle: currentAngle };
+        const actualPickupR = target.r, actualPickupC = target.c, rc = target.nearRailC;
+        const shelfKey = `${actualPickupR}-${actualPickupC}`;
+        reservedShelves.add(shelfKey);
 
-    function animateShuttle(shuttleEl, totalMissions, startPos, shuttleId, startDelay = 0) {
+        const hubR = Math.abs(actualPickupR - 7) <= Math.abs(actualPickupR - 12) ? 7 : 12;
+        let curR = startR, curC = startC;
+
+        // Move to Shelf row and column
+        if (curC !== rc) {
+            const upToRC = seg(curR, curC, curR, rc, null, currentAngle);
+            path.push(...upToRC.steps); currentAngle = upToRC.lastAngle; curC = rc;
+        }
+        if (curR !== actualPickupR) {
+            const upToRow = seg(curR, rc, actualPickupR, rc, null, currentAngle);
+            path.push(...upToRow.steps); currentAngle = upToRow.lastAngle; curR = actualPickupR;
+        }
+        if (curC !== actualPickupC) {
+            const toShelf = seg(actualPickupR, rc, actualPickupR, actualPickupC, null, currentAngle);
+            path.push(...toShelf.steps); currentAngle = toShelf.lastAngle; curC = actualPickupC;
+        }
+
+        // Add Mission Icon
+        const missionIcon = '<i class="fa-regular fa-arrow-right-from-bracket"></i>';
+
+        // Load Pallet
+        for (let i = 0; i < 3; i++) path.push({ r: actualPickupR, c: actualPickupC, angle: currentAngle, action: i === 0 ? 'pickup' : null, missionIcon: missionIcon });
+
+        // Back to Rail
+        if (curC !== rc) {
+            const backToRC = seg(actualPickupR, actualPickupC, actualPickupR, rc, null, currentAngle);
+            backToRC.steps.forEach(s => s.missionIcon = missionIcon);
+            path.push(...backToRC.steps); currentAngle = backToRC.lastAngle; curC = rc;
+        }
+        
+        // Move to Hub
+        if (curR !== 12) {
+            const toHub = seg(curR, rc, 12, rc, null, currentAngle);
+            toHub.steps.forEach(s => s.missionIcon = missionIcon);
+            path.push(...toHub.steps); currentAngle = toHub.lastAngle; curR = 12;
+        }
+
+        // Move to Column W (index 22)
+        if (curC !== 22) {
+            const toW = seg(12, rc, 12, 22, null, currentAngle);
+            toW.steps.forEach(s => s.missionIcon = missionIcon);
+            path.push(...toW.steps); currentAngle = toW.lastAngle; curC = 22;
+        }
+
+        // Move Down to W14 (index 13)
+        const toW14 = seg(12, 22, 13, 22, null, currentAngle);
+        if (toW14.steps.length > 0) toW14.steps[0].lifterOutUp = true;
+        toW14.steps.forEach(s => s.missionIcon = missionIcon);
+        path.push(...toW14.steps); currentAngle = toW14.lastAngle; curR = 13;
+
+        // Unload Pallet
+        for (let i = 0; i < 3; i++) path.push({ r: 13, c: 22, angle: currentAngle, action: i === 0 ? 'drop' : null, missionIcon: missionIcon, onComplete: () => reservedShelves.delete(shelfKey) });
+
+        // Back to W13 (index 12)
+        const backToW13 = seg(13, 22, 12, 22, null, currentAngle);
+        path.push(...backToW13.steps); currentAngle = backToW13.lastAngle; curR = 12;
+
+        return { steps: path, lastR: curR, lastC: curC, lastAngle: currentAngle };
+    }
+
+    const reservedShelves = new Set();
+    const shuttleInfoMap = new Map(); // Track battery and role
+
+    function animateShuttle(shuttleEl, totalMissions, startPos, shuttleId, role, startDelay = 0) {
+        let battery = role === 'inbound' ? 85 : 42;
+        shuttleInfoMap.set(shuttleId, { role, battery });
+
+        const bodyEl = shuttleEl.querySelector('.shuttle-body');
+        const popupEl = shuttleEl.querySelector('.shuttle-info-popup');
+
+        shuttleEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const info = shuttleInfoMap.get(shuttleId);
+            const roleLabel = info.role === 'inbound' ? 'Nhập' : 'Xuất';
+            const roleClass = info.role === 'inbound' ? 'role-inbound' : 'role-outbound';
+
+            popupEl.innerHTML = `
+                <div class="shuttle-info-name"><b>${shuttleId.toUpperCase()}</b></div>
+                <div class="shuttle-info-battery">Pin: <b>${info.battery}%</b></div>
+                <span class="shuttle-role-badge ${roleClass}">${roleLabel}</span>
+            `;
+            
+            popupEl.style.opacity = popupEl.style.opacity === '1' ? '0' : '1';
+        });
+
+        // Close when clicking elsewhere
+        document.addEventListener('click', () => {
+            popupEl.style.opacity = '0';
+        });
+
         let fullPath = [];
         let currR = startPos.r, currC = startPos.c, currAngle = 0;
         let missionsCompleted = 0;
@@ -546,16 +713,16 @@ ${cargoSVG}
         // Sync visual position immediately
         shuttleStates[shuttleId] = { r: currR, c: currC };
         shuttleEl.style.transition = 'none';
+        bodyEl.style.transition = 'none'; // Ensure both are reset
         shuttleEl.style.top = (currR * 40 + 5) + 'px';
         shuttleEl.style.left = (currC * 40) + 'px';
-        shuttleEl.style.transform = `rotate(${currAngle}deg)`;
-        shuttleEl.offsetHeight;
+        bodyEl.style.transform = `rotate(${currAngle}deg)`;
+        shuttleEl.offsetHeight; // Flush
 
         function getNextTaskPath() {
             if (missionsCompleted >= totalMissions) {
                 const pPath = [];
-                const hubR = (currR <= 7) ? 7 : 12;
-                // Move to Column W first if not already there
+                // Move back to Column W (index 22)
                 if (currC !== 22) {
                     const toW = seg(currR, currC, currR, 22, null, currAngle);
                     pPath.push(...toW.steps); currAngle = toW.lastAngle; currC = 22;
@@ -566,13 +733,14 @@ ${cargoSVG}
                     pPath.push(...toRow.steps); currAngle = toRow.lastAngle; currR = startPos.r;
                 }
                 // Finally move from W to X (Parking)
-                const toFinal = seg(currR, 22, curR, 23, 'park', currAngle);
+                const toFinal = seg(currR, 22, currR, 23, 'park', currAngle);
                 pPath.push(...toFinal.steps);
                 return pPath;
             }
 
             if (missionsCompleted > 0 && missionsCompleted % 5 === 0) {
                 const cPath = [];
+                // Charging path logic...
                 if (currR !== 12) {
                     const to12 = seg(currR, currC, 12, currC, null, currAngle);
                     cPath.push(...to12.steps); currAngle = to12.lastAngle;
@@ -592,53 +760,40 @@ ${cargoSVG}
                 cPath.push(...bA.steps); currAngle = bA.lastAngle;
                 currR = 12; currC = 0;
                 missionsCompleted++; 
+                battery = 100; // Refill after charge
+                shuttleInfoMap.set(shuttleId, { role, battery });
                 return cPath;
             }
 
-            // Find free shelf, but EXCLUDE already reserved ones
-            let target = null;
-            for (let r = 0; r < rows; r++) {
-                for (let c = 0; c < cols; c++) {
-                    if (mapMatrix[r][c] === 2 && !occupiedCells.has(`${r}-${c}`) && !reservedShelves.has(`${r}-${c}`)) {
-                        target = { r, c };
-                        break;
-                    }
-                }
-                if (target) break;
+            let mData = null;
+            if (role === 'inbound') {
+                mData = inboundMissionPath(currR, currC, 0, 0, currAngle);
+            } else {
+                mData = outboundMissionPath(currR, currC, currAngle);
             }
 
-            if (!target) return null;
-
-            // Reserve it so the other shuttle doesn't take it
-            const shelfKey = `${target.r}-${target.c}`;
-            reservedShelves.add(shelfKey);
-
-            const mData = missionPath(currR, currC, target.r, target.c, currAngle);
-            if (mData.steps.length) {
-                // Wrap steps to clear reservation upon arrival
-                mData.steps.forEach(s => {
-                    if (s.action === 'unload') s.onComplete = () => reservedShelves.delete(shelfKey);
-                });
+            if (mData && mData.steps.length) {
                 currR = mData.lastR; currC = mData.lastC; currAngle = mData.lastAngle;
                 missionsCompleted++;
                 return mData.steps;
             }
-            reservedShelves.delete(shelfKey); // Cleanup if failed
             return null;
         }
 
         function move() {
             if (idx >= fullPath.length) {
                 const next = getNextTaskPath();
-                if (!next || next.length === 0) return;
+                if (!next || next.length === 0) {
+                    setTimeout(move, 2000); // Retry later if no tasks
+                    return;
+                }
                 fullPath = next; idx = 0;
-                shuttleEl.style.transition = 'none';
             }
 
             const p = fullPath[idx];
             if (!p) return;
 
-            // --- Robust Traffic Coordination ---
+            // Traffic Coordination...
             const lookahead = fullPath.slice(idx, idx + 4); 
             const isBlocked = lookahead.some(step => 
                 Object.entries(shuttleStates).some(([id, s]) => 
@@ -647,8 +802,6 @@ ${cargoSVG}
             );
 
             if (isBlocked && p.action !== 'charge' && p.action !== 'park') {
-                shuttleEl.style.transition = 'none';
-                // SH-001 (Priority) waits less, SH-002 (Secondary) waits more to break deadlocks
                 const baseWait = (shuttleId === 'shuttle-1' ? 400 : 1200);
                 setTimeout(move, baseWait + Math.random() * 400);
                 return;
@@ -656,17 +809,37 @@ ${cargoSVG}
 
             shuttleStates[shuttleId] = { r: p.r, c: p.c };
             const duration = p.duration || STEP;
-            shuttleEl.style.transition = `all ${duration}ms linear`;
+            
+            // Critical: Separate transitions for wrapper (move) and body (rotate)
+            shuttleEl.style.transition = `top ${duration}ms linear, left ${duration}ms linear`;
+            bodyEl.style.transition = `transform ${duration}ms ease-in-out`;
+
             shuttleEl.style.top = (p.r * 40 + 5) + 'px';
             shuttleEl.style.left = (p.c * 40) + 'px';
-            shuttleEl.style.transform = `rotate(${p.angle}deg)`;
+            bodyEl.style.transform = `rotate(${p.angle}deg)`;
 
-            if (p.lifterUp) setLifterPosition('up');
-            if (p.action === 'load') { isLoaded = true; setLifterPosition('taken'); }
+            if (p.lifterInUp) setInboundLifterState('up');
+            if (p.lifterOutUp) setOutboundLifterState('up');
+            if (p.action === 'load') { isLoaded = true; setInboundLifterState('taken'); }
             if (p.action === 'unload') { isLoaded = false; dropPallet(p.r, p.c); if (p.onComplete) p.onComplete(); }
+            if (p.action === 'pickup') { isLoaded = true; pickupPallet(p.r, p.c); }
+            if (p.action === 'drop') { isLoaded = false; setOutboundLifterState('dropped'); if (p.onComplete) p.onComplete(); }
 
             const color = (p.action === 'park' || p.action === 'charge') ? '#F9F1E2' : '#076EB8';
-            shuttleEl.innerHTML = getShuttleSVG(isLoaded, p.action === 'charge', color);
+            const defaultIcon = role === 'inbound' 
+                ? '<i class="fa-solid fa-arrow-up-to-bracket fa-rotate-270"></i>' 
+                : '<i class="fa-regular fa-arrow-right-from-bracket"></i>';
+            const iconHtml = (p.action === 'charge') 
+                ? '<i class="fa-sharp fa-regular fa-bolt fa-beat"></i>' 
+                : (isLoaded ? '' : (p.missionIcon || defaultIcon));
+            bodyEl.innerHTML = getShuttleSVG(isLoaded, iconHtml, color);
+            
+            // Slowly drain battery
+            if (idx % 10 === 0 && battery > 10) {
+                battery -= 0.5;
+                shuttleInfoMap.set(shuttleId, { role, battery: Math.floor(battery) });
+            }
+
             idx++;
             setTimeout(move, p.action === 'charge' ? 30000 : duration);
         }
@@ -674,8 +847,8 @@ ${cargoSVG}
         setTimeout(move, startDelay);
     }
 
-    animateShuttle(shuttleEl1, 10, { r: 6, c: 23 }, 'shuttle-1');
-    animateShuttle(shuttleEl2, 10, { r: 2, c: 23 }, 'shuttle-2', 5000);
+    animateShuttle(shuttleEl1, 10, { r: 6, c: 23 }, 'shuttle-1', 'inbound');
+    animateShuttle(shuttleEl2, 10, { r: 2, c: 23 }, 'shuttle-2', 'outbound', 5000);
 
     // --- Rail implementation ---
     function addRailSegment(cell, type) {
