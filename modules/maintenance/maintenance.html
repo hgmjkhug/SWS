@@ -52,10 +52,53 @@
       </table>
     </div>
 
-    <div class="pagination-bar">
-      <div class="pagination-info" id="pagination-info"></div>
-      <div class="pagination-controls" id="pagination-controls"></div>
-    </div>
+      <!-- Main Table Pagination (Copied from inbound.html) -->
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 16px;
+          padding: 12px 0;
+          border-top: 1px solid #e2e8f0;
+        "
+      >
+        <div id="main-info" style="color: #64748b; font-size: 13px">
+          Hiển thị 0 trong tổng 0
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <div
+            id="main-pagination"
+            class="page-numbers"
+            style="display: flex; gap: 4px"
+          ></div>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              color: #64748b;
+              font-size: 13px;
+            "
+          >
+            Đến
+            <input
+              type="number"
+              id="main-go-page"
+              style="
+                width: 50px;
+                padding: 6px 8px;
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
+                text-align: center;
+              "
+              min="1"
+              onchange="goToMainPageFromInput()"
+            />
+            Trang
+          </div>
+        </div>
+      </div>
   </div>
 
   <!-- Tab: Monitoring -->

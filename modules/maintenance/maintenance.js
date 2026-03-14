@@ -17,8 +17,8 @@
         };
     });
 
-    let currentPage = 1;
-    const pageSize = 20;
+    let mainCurrentPage = 1;
+    const mainPageSize = 20;
     let filteredDevices = [...devices];
     let activeTab = 'list';
     let selectedYear = new Date().getFullYear();
@@ -63,11 +63,11 @@
         );
 
         const total = filteredDevices.length;
-        const totalPages = Math.ceil(total / pageSize);
-        if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+        const totalPages = Math.ceil(total / mainPageSize);
+        if (mainCurrentPage > totalPages && totalPages > 0) mainCurrentPage = totalPages;
 
-        const start = (currentPage - 1) * pageSize;
-        const end = start + pageSize;
+        const start = (mainCurrentPage - 1) * mainPageSize;
+        const end = start + mainPageSize;
         const pageData = filteredDevices.slice(start, end);
 
         // Group devices (only those on the current page)
@@ -134,7 +134,16 @@
         });
 
         tbody.innerHTML = html;
-        updatePagination();
+        
+        // Update pagination info (Exact match with inbound.js)
+        const startIdx = (mainCurrentPage - 1) * mainPageSize;
+        const startRange = total > 0 ? startIdx + 1 : 0;
+        const endRange = Math.min(startIdx + mainPageSize, total);
+        const mainInfo = document.getElementById('main-info');
+        if (mainInfo) mainInfo.innerText = `Hiển thị ${startRange} - ${endRange} trong ${total}`;
+        
+        // Render pagination
+        renderMainPagination(totalPages, total);
         updateBulkButton();
     };
 
@@ -144,7 +153,7 @@
     };
 
     window.filterMaintenanceList = function() {
-        currentPage = 1;
+        mainCurrentPage = 1;
         renderMaintenanceList();
     };
 
@@ -175,49 +184,58 @@
         if (countSpan) countSpan.textContent = selectedCount;
     }
 
-    function updatePagination() {
-        const total = filteredDevices.length;
-        const totalPages = Math.ceil(total / pageSize);
-        const info = document.getElementById('pagination-info');
-        if (info) {
-            const start = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-            const end = Math.min(currentPage * pageSize, total);
-            info.textContent = `Hiển thị ${start} - ${end} trong ${total} thiết bị`;
+    function renderMainPagination(totalPages, totalItems) {
+        const container = document.getElementById('main-pagination');
+        if (!container) return;
+        
+        if (totalItems === 0) {
+            container.innerHTML = '';
+            return;
         }
-
-        const controls = document.getElementById('pagination-controls');
-        if (controls) {
-            if (totalPages <= 1) {
-                controls.innerHTML = '';
-                return;
+        
+        let html = '';
+        
+        // Previous button (Exact match with inbound.js)
+        html += `<button class="btn-page" ${mainCurrentPage === 1 ? 'disabled' : ''} onclick="goToMainPage(${mainCurrentPage - 1})" style="padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer;"><i class="fas fa-chevron-left"></i></button>`;
+        
+        // Page numbers (Exact match with inbound.js)
+        for (let i = 1; i <= totalPages; i++) {
+            if (i <= 2 || i > totalPages - 2 || (i >= mainCurrentPage - 1 && i <= mainCurrentPage + 1)) {
+                const isActive = i === mainCurrentPage;
+                html += `<button class="btn-page ${isActive ? 'active' : ''}" onclick="goToMainPage(${i})" style="padding:6px 12px;border:1px solid ${isActive ? '#0D6BB9' : '#e2e8f0'};border-radius:6px;background:#fff;color:${isActive ? '#0D6BB9' : '#334155'};cursor:pointer;font-weight:${isActive ? '600' : '400'};">${i}</button>`;
+            } else if (i === 3 && mainCurrentPage > 4) {
+                html += `<span style="padding:0 6px;color:#64748b;">...</span>`;
+            } else if (i === totalPages - 2 && mainCurrentPage < totalPages - 3) {
+                html += `<span style="padding:0 6px;color:#64748b;">...</span>`;
             }
-
-            let html = `
-                <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            `;
-
-            for (let i = 1; i <= totalPages; i++) {
-                if (totalPages > 5 && Math.abs(i - currentPage) > 1 && i !== 1 && i !== totalPages) {
-                    if (!html.endsWith('...')) html += '<span style="padding: 0 8px; color: #94a3b8">...</span>';
-                    continue;
-                }
-                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
-            }
-
-            html += `
-                <button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            `;
-            controls.innerHTML = html;
         }
+        
+        // Next button (Exact match with inbound.js)
+        html += `<button class="btn-page" ${mainCurrentPage === totalPages ? 'disabled' : ''} onclick="goToMainPage(${mainCurrentPage + 1})" style="padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer;"><i class="fas fa-chevron-right"></i></button>`;
+        
+        container.innerHTML = html;
+        
+        // Clear go-to-page input
+        const goPageInput = document.getElementById('main-go-page');
+        if (goPageInput) goPageInput.value = '';
     }
 
-    window.goToPage = function(p) {
-        currentPage = p;
+    window.goToMainPage = function(page) {
+        const term = (document.getElementById('device-search')?.value || '').toLowerCase();
+        const filtered = devices.filter(d =>
+            d.code.toLowerCase().includes(term) || d.name.toLowerCase().includes(term)
+        );
+        const totalPages = Math.max(1, Math.ceil(filtered.length / mainPageSize));
+        if (page < 1 || page > totalPages) return;
+        mainCurrentPage = page;
         renderMaintenanceList();
+    };
+
+    window.goToMainPageFromInput = function() {
+        const input = document.getElementById('main-go-page');
+        const page = parseInt(input?.value);
+        if (!page || isNaN(page)) return;
+        goToMainPage(page);
     };
 
     // ── Modals ──────────────────────────────────────────────────────

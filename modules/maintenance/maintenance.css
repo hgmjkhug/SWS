@@ -1,6 +1,6 @@
 /* ========== BASE ========== */
 .maintenance-module {
-    padding: 20px;
+    padding: none;
     background: #f0f4f8;
     min-height: calc(100vh - 80px);
     font-family: 'Roboto', sans-serif;
@@ -247,44 +247,16 @@
 .action-icon.edit:hover { background: #f59e0b; color: #fff; }
 
 /* ========== PAGINATION ========== */
-.pagination-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    background: transparent;
-    border-top: 1px solid #f1f5f9;
-    margin-top: 0;
+.btn-page:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #0d6bb9;
 }
 
-.pagination-info {
-    font-size: 13px;
-    color: #64748b;
-    font-weight: 500;
+.btn-page:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
-
-.pagination-controls { display: flex; gap: 4px; }
-
-.page-btn {
-    min-width: 30px;
-    height: 30px;
-    padding: 0 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #475569;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.page-btn:hover:not(:disabled) { background: #f1f5f9; border-color: #cbd5e1; color: #076EB8; }
-.page-btn.active { background: #076EB8; color: #fff; border-color: #076EB8; }
-.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ========== MONITORING FILTERS ========== */
 .monitoring-filters {

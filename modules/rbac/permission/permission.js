@@ -15,7 +15,7 @@ var permissionData = [
         id: 2,
         name: 'Quản lý Kho',
         children: [
-            { id: 201, name: 'Quản lý Kho' },
+            { id: 201, name: 'Danh sách Kho' },
             { id: 202, name: 'Quy cách sản phẩm' },
             { id: 203, name: 'Quản lý vật chứa' },
             { id: 204, name: 'Quản lý bảo trì' }

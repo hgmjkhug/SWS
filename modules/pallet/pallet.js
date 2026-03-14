@@ -56,15 +56,15 @@
 
             inbound = {
                 code: `${code}_${mat.code}_${quantity}_${dateCode}`,
-                name: `Nhập hàng ${mat.name} T${Math.floor(Math.random() * 12) + 1}`,
+                name: `Nhập hàng ${mat.name} Lô ${Math.floor(Math.random() * 100) + 1}`,
                 date: d.toLocaleDateString('vi-VN')
             };
         }
 
         // Generate random entry date in hh:mm dd/mm/yyyy format (Range: 2025 - Mar 2026)
-        const isToday = i <= 10; // First 10 items are for "today"
+        const isToday = i <= 15; // Increased to 15 items for today
         const is2026 = Math.random() > 0.6 || isToday;
-        const todayDate = new Date(2026, 2, 9); // current date: 2026-03-09
+        const todayDate = new Date(); // Use actual current date
 
         let randomDate;
         if (invStatus === "Có hàng") {
@@ -686,7 +686,7 @@
 
     // --- 8.5 INITIAL DATE RANGE ---
     function initDefaultDateRange() {
-        const today = new Date(); // 2026-03-09
+        const today = new Date(); // 2026-03-14
         activeStartDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         activeEndDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
         selectedStartDate = new Date(activeStartDate);

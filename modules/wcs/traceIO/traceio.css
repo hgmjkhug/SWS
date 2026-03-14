@@ -319,12 +319,11 @@
     flex-wrap: wrap;
     align-items: flex-start;
     justify-content: flex-start;
-    gap: 20px;
+    gap: 16px;
     width: 100%;
     /* Removed padding: 20px to avoid double padding if parent has it, 
        but keeping for now if user wants it. Actually, user complained about sidebar being cut off.
        Let's use margin-top/bottom or just flex-grow. */
-    padding: 20px;
     box-sizing: border-box;
     animation: fadeInPage 0.6s ease-out;
 }

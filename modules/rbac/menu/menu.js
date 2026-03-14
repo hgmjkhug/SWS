@@ -27,13 +27,13 @@
         { id: 103, moduleId: 1, code: 'DASHBOARD_MONITOR', name: 'Giám sát hoạt động', icon: 'fa-solid fa-chalkboard-user', path: 'modules/dashboard/monitor', resource: 'GIAMSATHOATDONG', order: 3 },
 
         // WAREHOUSE (id: 2)
-        { id: 201, moduleId: 2, code: 'WAREHOUSE_LIST', name: 'Quản lý Kho', icon: 'fas fa-warehouse', path: 'modules/warehouse/warehouse', resource: 'QUANLYKHO', order: 1 },
-        { id: 202, moduleId: 2, code: 'PRODUCT_METHOD', name: 'Quy cách sản phẩm', icon: 'fa-solid fa-box-open', path: 'modules/product-method/product-method', resource: 'QUYCACHSANPHAM', order: 2 },
-        { id: 203, moduleId: 2, code: 'CONTAINER_MGMT', name: 'Quản lý vật chứa', icon: 'fas fa-pallet', path: 'modules/pallet/pallet', resource: 'QUANLYVATCHUA', order: 3 },
+        { id: 201, moduleId: 2, code: 'WAREHOUSE_LIST', name: 'Danh sách Kho', icon: 'fas fa-warehouse', path: 'modules/warehouse/warehouse', resource: 'QUANLYKHO', order: 1 },
+        { id: 202, moduleId: 2, code: 'PRODUCT_METHOD', name: 'Quy cách sản phẩm', icon: 'fa-regular fa-box-isometric-tape', path: 'modules/product-method/product-method', resource: 'QUYCACHSANPHAM', order: 2 },
+        { id: 203, moduleId: 2, code: 'CONTAINER_MGMT', name: 'Quản lý vật chứa', icon: 'fa-regular fa-pallet-box', path: 'modules/pallet/pallet', resource: 'QUANLYVATCHUA', order: 3 },
         { id: 204, moduleId: 2, code: 'MAINTENANCE', name: 'Quản lý bảo trì', icon: 'fa-solid fa-toolbox', path: 'modules/maintenance/maintenance', resource: 'QUANLYBAOTRI', order: 4 },
 
         // WCS (id: 3)
-        { id: 301, moduleId: 3, code: 'WCS_KANBAN', name: 'Kanban WCS', icon: 'fas fa-columns', path: 'modules/kanbanWCS/kanban', resource: 'KANBANWCS', order: 1 },
+        { id: 301, moduleId: 3, code: 'WCS_KANBAN', name: 'Kanban WCS', icon: 'fa-regular fa-chart-kanban', path: 'modules/kanbanWCS/kanban', resource: 'KANBANWCS', order: 1 },
 
         // INBOUND (id: 4)
         { id: 401, moduleId: 4, code: 'INBOUND_ORDER', name: 'Lệnh nhập kho', icon: 'fas fa-file-import', path: 'modules/inbound/inbound', resource: 'LENHNHAPKHO', order: 1 },
@@ -42,15 +42,15 @@
         { id: 501, moduleId: 5, code: 'OUTBOUND_ORDER', name: 'Lệnh xuất kho', icon: 'fas fa-file-export', path: 'modules/outbound/outbound', resource: 'LENHXUATKHO', order: 1 },
 
         // WORKFLOW (id: 6)
-        { id: 601, moduleId: 6, code: 'WORKFLOW_PROCESS', name: 'Quản lý quy trình', icon: 'fas fa-random', path: 'modules/workflow/workflow', resource: 'QUANLYQUYTRINH', order: 1 },
+        { id: 601, moduleId: 6, code: 'WORKFLOW_PROCESS', name: 'Quản lý quy trình', icon: 'fa-light fa-arrow-progress', path: 'modules/workflow/workflow', resource: 'QUANLYQUYTRINH', order: 1 },
 
         // MASTER_DATA (id: 7)
         { id: 701, moduleId: 7, code: 'DEVICE_TYPE', name: 'Nhóm thiết bị', icon: 'fas fa-layer-group', path: 'modules/master-data/device-type/device-type', resource: 'NHOMTHIETBI', order: 1 },
-        { id: 702, moduleId: 7, code: 'DEVICE_LIST', name: 'Thiết bị', icon: 'fas fa-mobile-alt', path: 'modules/master-data/device-list/device-list', resource: 'THIETBI', order: 2 },
+        { id: 702, moduleId: 7, code: 'DEVICE_LIST', name: 'Thiết bị', icon: 'fas fa-robot', path: 'modules/master-data/device-list/device-list', resource: 'THIETBI', order: 2 },
         { id: 703, moduleId: 7, code: 'PRODUCT_GROUP', name: 'Nhóm sản phẩm', icon: 'fas fa-cubes', path: 'modules/master-data/category/category', resource: 'NHOMSANPHAM', order: 3 },
         { id: 704, moduleId: 7, code: 'PRODUCT_LIST', name: 'Sản phẩm', icon: 'fas fa-box', path: 'modules/master-data/product/product', resource: 'SANPHAM', order: 4 },
         { id: 705, moduleId: 7, code: 'METHOD', name: 'Quy cách', icon: 'fa-solid fa-route', path: 'modules/master-data/method/method', resource: 'QUYCACH', order: 5 },
-        { id: 706, moduleId: 7, code: 'PALLET_LIST', name: 'Vật chứa', icon: 'fas fa-pallet', path: 'modules/master-data/pallet-list/container', resource: 'VATCHUA', order: 6 },
+        { id: 706, moduleId: 7, code: 'PALLET_LIST', name: 'Vật chứa', icon: 'fa-light fa-pallet-box', path: 'modules/master-data/pallet-list/container', resource: 'VATCHUA', order: 6 },
         { id: 707, moduleId: 7, code: 'UNIT_OF_MEASURE', name: 'Đơn vị tính', icon: 'fas fa-ruler', path: 'modules/master-data/unit-of-measure/unit', resource: 'DONVITINH', order: 7 },
         { id: 708, moduleId: 7, code: 'LOCATION_TYPE', name: 'Loại khu vực', icon: 'fas fa-map-marker-alt', path: 'modules/master-data/node-type/node-type', resource: 'LOAIKHUVUC', order: 8 },
 
@@ -83,7 +83,7 @@
         populateResourceSelect();
     }
 
-    const MENU_DATA_VERSION = '1.2'; // Increment to force reset
+    const MENU_DATA_VERSION = '1.3'; // Increment to force reset
 
     function loadFromStorage() {
         try {

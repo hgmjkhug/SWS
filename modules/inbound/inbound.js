@@ -3736,6 +3736,10 @@ function processImportData(rows) {
                 return;
             }
             arrivalDate = new Date(match[3], match[2] - 1, match[1]);
+            // Merge current time into the imported date
+            arrivalDate.setHours(now.getHours());
+            arrivalDate.setMinutes(now.getMinutes());
+            arrivalDate.setSeconds(now.getSeconds());
         }
 
         let expiryDate = null;

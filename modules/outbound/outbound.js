@@ -2338,6 +2338,10 @@
           const match = outboundDateStr.match(dateRegex);
           if (match) {
               finalDate = new Date(match[3], match[2] - 1, match[1]);
+              // Merge current time into the imported date
+              finalDate.setHours(now.getHours());
+              finalDate.setMinutes(now.getMinutes());
+              finalDate.setSeconds(now.getSeconds());
           }
       }
 
