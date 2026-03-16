@@ -829,22 +829,7 @@ function syncTableScroll() {
 
 
 
-// Initial Render
-// Check if loaded dynamically (DOMContentLoaded already fired) or standalone
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        initDefaultDateRange();
-        initCreatorCombobox();
-        renderTableBody();
-        syncTableScroll();
-    });
-} else {
-    // DOM already ready (dynamic load)
-    initDefaultDateRange();
-    initCreatorCombobox();
-    renderTableBody();
-    syncTableScroll();
-}
+// Initial Render handled at the end of file or during load
 
 function printInboundOrder(orderId) {
     // Use loose equality (==) for id to handle string/number mismatch
@@ -1372,6 +1357,54 @@ function switchInboundTab(el, type) {
 // Expose to window
 window.switchInboundTab = switchInboundTab;
 
+// --- Ensure Today Data ---
+function ensureTodayDataInbound() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const hasTodayData = MOCK_INBOUND_ORDERS.some(o => {
+        const d = new Date(o.createdAt);
+        return d >= today && d < tomorrow;
+    });
+
+    if (!hasTodayData) {
+        console.log("Inbound: No data for today found. Adding mock data...");
+        const todayData = [
+            {
+                id: Date.now() + 1,
+                code: 'P-T01-A1_MAT-001_50_T' + today.getTime().toString().slice(-4),
+                materials: [{ code: 'MAT-001', name: 'Thép ống D60', qty: 50, unit: 'kg', specs: 'Φ60mm x 6m', expiryDate: new Date(today.getFullYear(), today.getMonth() + 6, today.getDate()).toISOString().split('T')[0] }],
+                pallets: ['P-T01-A1'], bin: 'T1-F1-P1-A1', status: 'PENDING', priority: true,
+                type: 'NEW',
+                creator: { id: 'US01', name: 'Nguyễn Văn An' },
+                createdAt: new Date(today.getTime() + 8 * 3600000 + 30 * 60000) // 08:30
+            },
+            {
+                id: Date.now() + 2,
+                code: 'P-T02-B2_MAT-002_120_T' + today.getTime().toString().slice(-4),
+                materials: [{ code: 'MAT-002', name: 'Thép tấm 5mm', qty: 120, unit: 'tấm', specs: '1200x2400mm', expiryDate: new Date(today.getFullYear(), today.getMonth() + 12, today.getDate()).toISOString().split('T')[0] }],
+                pallets: ['P-T02-B2'], bin: 'T2-F3-P1-B2', status: 'PROCESSING', priority: false,
+                type: 'REENTRY',
+                creator: { id: 'US14', name: 'Trịnh Thị Quyên' },
+                createdAt: new Date(today.getTime() + 10 * 3600000 + 15 * 60000) // 10:15
+            },
+            {
+                id: Date.now() + 3,
+                code: 'C-T03-C3_MAT-003_200_T' + today.getTime().toString().slice(-4),
+                materials: [{ code: 'MAT-003', name: 'Bulong M20', qty: 200, unit: 'bộ', specs: 'M20 x 80mm', expiryDate: '' }],
+                pallets: ['C-T03-C3'], bin: 'T1-F5-P2-C1', status: 'COMPLETED', priority: false,
+                type: 'TRANSFER',
+                creator: { id: 'US06', name: 'Bùi Thanh Sơn' },
+                createdAt: new Date(today.getTime() + 14 * 3600000 + 45 * 60000) // 14:45
+            }
+        ];
+        MOCK_INBOUND_ORDERS.unshift(...todayData);
+        saveInboundOrders();
+    }
+}
+
 function saveInboundDraft() {
     // Validate inputs
     const code = document.getElementById('new-code')?.value;
@@ -1408,6 +1441,91 @@ function saveInboundDraft() {
     
     // Show success message (optional)
     // alert('Đã lưu Lệnh nhập thành công');
+}
+
+// Update initialization to call ensureTodayDataInbound
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        ensureTodayDataInbound(); // Ensure data first
+        initDefaultDateRange();
+        initCreatorCombobox();
+        renderTableBody();
+        syncTableScroll();
+    });
+} else {
+    ensureTodayDataInbound(); // Ensure data first
+    initDefaultDateRange();
+    initCreatorCombobox();
+    renderTableBody();
+    syncTableScroll();
+}
+
+// --- Excel Export Dropdown ---
+function toggleInboundExcelDropdown(e) {
+    e.stopPropagation();
+    const container = document.getElementById('excel-dropdown-container');
+    container.classList.toggle('active');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    const container = document.getElementById('excel-dropdown-container');
+    if (container && !container.contains(e.target)) {
+        container.classList.remove('active');
+    }
+});
+
+function exportInboundExcel() {
+    // Hide dropdown
+    document.getElementById('excel-dropdown-container').classList.remove('active');
+
+    // Get filtered data based on current date range
+    const allData = getFilteredMainData();
+    if (allData.length === 0) {
+        showToast('Không có dữ liệu để xuất', 'error');
+        return;
+    }
+
+    // Format data for Excel
+    const dataToExport = allData.map((order, index) => {
+        return {
+            'STT': index + 1,
+            'Mã lệnh nhập': order.code,
+            'Vật tư': order.materials.map(m => `${m.name} (${m.code})`).join(', '),
+            'Số lượng': order.materials.reduce((sum, m) => sum + (m.qty || 0), 0),
+            'Đơn vị': order.materials[0]?.unit || '',
+            'Loại lệnh nhập': order.type === 'NEW' ? 'Nhập mới' : (order.type === 'REENTRY' ? 'Nhập lại' : 'Nhập chuyền thẳng'),
+            'Trạng thái': order.status === 'PENDING' ? 'Đang chờ' : (order.status === 'PROCESSING' ? 'Đang xử lý' : 'Hoàn thành'),
+            'Người tạo': order.creator.name,
+            'Thời gian tạo': formatDateTime(order.createdAt)
+        };
+    });
+
+    // Create workbook and worksheet
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Inbound Orders");
+
+    // Generate filename based on date range
+    let filename = 'Danh_sach_nhap_kho';
+    if (activeStartDate && activeEndDate) {
+        const fmt = (d) => {
+            const date = new Date(d);
+            return `${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}`;
+        };
+        filename += `_${fmt(activeStartDate)}_den_${fmt(activeEndDate)}`;
+    }
+    filename += '.xlsx';
+
+    // Download file
+    XLSX.writeFile(workbook, filename);
+    
+    // Show success toast
+    if (typeof showToast === 'function') {
+        showToast('Xuất file Excel thành công!', 'success');
+    } else {
+        alert('Xuất file Excel thành công!');
+    }
 }
 function handleImportExcel() { document.getElementById('modal-import-excel').style.display = 'flex'; }
 function closeImportModal() { document.getElementById('modal-import-excel').style.display = 'none'; }

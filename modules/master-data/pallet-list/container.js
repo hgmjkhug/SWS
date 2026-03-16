@@ -143,7 +143,9 @@
             selectAll: document.getElementById('selectAll'),
             bulkActions: document.getElementById('bulkActions'),
             bulkDeleteBtn: document.getElementById('bulkDeleteBtn'),
-            bulkPrintBtn: document.getElementById('bulkPrintBtn')
+            bulkPrintBtn: document.getElementById('bulkPrintBtn'),
+            tableScrollBody: document.querySelector('.table-scroll-body'),
+            tableScrollHead: document.querySelector('.table-scroll-head')
         };
     }
 
@@ -202,7 +204,7 @@
 
         // Handle empty state
         const paginationContainer = document.querySelector('.pagination-container');
-        const tableContainer = document.querySelector('.table-container');
+        const tableContainer = document.querySelector('.table-wrapper');
 
         if (filteredData.length === 0) {
             dom.tableBody.innerHTML = `
@@ -839,6 +841,13 @@
             });
         }
 
+        // Horizontal Scroll Synchronization
+        if (dom.tableScrollBody && dom.tableScrollHead) {
+            dom.tableScrollBody.addEventListener('scroll', () => {
+                dom.tableScrollHead.scrollLeft = dom.tableScrollBody.scrollLeft;
+            });
+        }
+
         if (dom.bulkPrintBtn) dom.bulkPrintBtn.onclick = window.bulkPrint;
     }
 
@@ -878,6 +887,8 @@
                     modalTitle.innerText = 'Cập nhật vật chứa';
                     if (codeInput) codeInput.value = p.code;
                     if (typeInput) typeInput.value = p.type;
+                    const activeToggle = document.getElementById('newContainerActive');
+                    if (activeToggle) activeToggle.checked = p.isActive;
                 }
             } else {
                 currentEditId = null;
@@ -886,6 +897,8 @@
                 const nextId = containers.length > 0 ? Math.max(...containers.map(p => p.id)) + 1 : 1;
                 if (codeInput) codeInput.value = `CT-${1000 + nextId}`;
                 if (typeInput) typeInput.value = '';
+                const activeToggle = document.getElementById('newContainerActive');
+                if (activeToggle) activeToggle.checked = true;
             }
             
             initSearchableCombobox();
@@ -939,11 +952,13 @@
     window.saveContainer = function () {
         const typeInput = document.getElementById('newContainerType');
         const codeInput = document.getElementById('newContainerCode');
+        const activeToggle = document.getElementById('newContainerActive');
 
-        if (!typeInput || !codeInput) return;
+        if (!typeInput || !codeInput || !activeToggle) return;
 
         const type = typeInput.value.trim();
         const code = codeInput.value.trim();
+        const isActive = activeToggle.checked;
 
         if (!type || !code) {
             if (window.showToast) window.showToast("Vui lòng nhập đầy đủ thông tin", "error");
@@ -957,6 +972,7 @@
             if (idx !== -1) {
                 containers[idx].code = code;
                 containers[idx].type = type;
+                containers[idx].isActive = isActive;
                 // Optionally update QR URL if code changed
                 containers[idx].qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${code}`;
             }
@@ -979,7 +995,7 @@
                 entryDate: "-",
                 entryTimestamp: null,
                 quantity: "-",
-                isActive: true
+                isActive: isActive
             });
         }
 

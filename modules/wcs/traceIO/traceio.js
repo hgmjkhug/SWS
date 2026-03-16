@@ -956,6 +956,37 @@ ${cargoSVG}
             }
         }
     }
+
+    // --- Floor Selector Logic ---
+    const floorBtn = document.getElementById('floorSelectorBtn');
+    const floorDropdown = document.getElementById('floorDropdown');
+    const floorText = document.getElementById('currentFloorText');
+    const floorItems = document.querySelectorAll('.floor-item');
+
+    if (floorBtn && floorDropdown) {
+        floorBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            floorDropdown.classList.toggle('show');
+            floorBtn.classList.toggle('active');
+        });
+
+        floorItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const selectedFloor = item.getAttribute('data-floor');
+                floorText.textContent = `Tầng ${selectedFloor}`;
+                floorItems.forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                floorDropdown.classList.remove('show');
+                floorBtn.classList.remove('active');
+            });
+        });
+
+        document.addEventListener('click', () => {
+            floorDropdown.classList.remove('show');
+            floorBtn.classList.remove('active');
+        });
+    }
 })();
 
 (function initPanels() {

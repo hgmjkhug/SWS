@@ -56,6 +56,13 @@
                     </div>
                   </div>
                 </div>
+                <div class="form-group usage-form-group">
+                  <label>Sử dụng</label>
+                  <label class="switch">
+                    <input type="checkbox" id="newContainerActive" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
               </form>
             </div>
             <div class="modal-footer">
@@ -126,22 +133,28 @@
       <span>Bạn đang xem các thông tin của danh mục chung thuộc kho <strong><span id="banner-warehouse-name"></span></strong></span>
     </div>
     
-    <div class="table-container">
-      <table id="containerTable" class="data-table">
-        <thead>
-          <tr>
-            <th class="sticky-col first-col" style="width: 40px; text-align: center;">
-              <input type="checkbox" id="selectAll">
-            </th>
-            <th style="text-align: center">STT</th>
-            <th style="width: 150px;">Mã đơn vị chứa hàng</th>
-            <th style="width: 120px;">Loại đơn vị chứa hàng</th>
-            <th style="text-align: center">Sử dụng</th>
-            <th style="text-align: center">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
+    <div class="table-wrapper">
+      <div class="table-scroll-head">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="sticky-col first-col" style="width: 40px; text-align: center;">
+                <input type="checkbox" id="selectAll">
+              </th>
+              <th style="text-align: center">STT</th>
+              <th style="width: 150px;">Mã đơn vị chứa hàng</th>
+              <th style="width: 120px;">Loại đơn vị chứa hàng</th>
+              <th style="text-align: center">Sử dụng</th>
+              <th style="text-align: center">Thao tác</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+      <div class="table-scroll-body">
+        <table id="containerTable" class="data-table">
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
     </div>
 
     <div class="pagination-container">

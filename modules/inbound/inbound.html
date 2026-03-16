@@ -355,9 +355,19 @@
           class="toolbar-right"
           style="display: flex; gap: 12px; align-items: center"
         >
-          <button id="btn-import-open" class="btn-cancel-custom" style="height: 36px; color: #22C55E; border-color: #22C55E; background: white;" onclick="openImportModal()">
-            <i class="fas fa-file-import" style="color: #22C55E;"></i> Import
-          </button>
+          <div class="excel-dropdown" id="excel-dropdown-container">
+            <button class="btn-cancel-custom" style="height: 36px; color: #22C55E; border-color: #22C55E; background: white;" onclick="toggleInboundExcelDropdown(event)">
+              <i class="fas fa-file-excel" style="color: #22C55E;"></i> Nhập/Xuất Excel <i class="fas fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i>
+            </button>
+            <div class="excel-options">
+              <div class="excel-option" onclick="openImportModal()">
+                <i class="fas fa-file-import"></i> Nhập Excel
+              </div>
+              <div class="excel-option" onclick="exportInboundExcel()">
+                <i class="fas fa-file-export"></i> Xuất Excel
+              </div>
+            </div>
+          </div>
           <button id="btn-open-create" class="btn-add" style="height: 36px">
             <i class="fas fa-plus"></i> Thêm mới
           </button>

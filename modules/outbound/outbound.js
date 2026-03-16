@@ -745,7 +745,64 @@
   };
 
   // Initialize
+  // --- Ensure Today Data ---
+  function ensureTodayDataOutbound() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const hasTodayData = outboundData.some(o => {
+        const d = new Date(o.rawDate);
+        return d >= today && d < tomorrow;
+    });
+
+    if (!hasTodayData) {
+        console.log("Outbound: No data for today found. Adding mock data...");
+        const todayData = Array.from({ length: 5 }, (_, i) => {
+            const id = Date.now() + i;
+            const mat = MASTER_MATERIALS[Math.floor(Math.random() * MASTER_MATERIALS.length)];
+            const user = USERS[Math.floor(Math.random() * USERS.length)];
+            const status = STATUS_LIST[Math.floor(Math.random() * STATUS_LIST.length)];
+            const qty = Math.floor(Math.random() * 200) + 10;
+            const outboundType = Math.random() > 0.5 ? "PALLET" : "MATERIAL";
+            const date = new Date(today);
+            date.setHours(8 + i, 30, 0, 0);
+
+            const day = String(date.getDate()).padStart(2, "0");
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, "0");
+            const minutes = String(date.getMinutes()).padStart(2, "0");
+            const dateStr = `${hours}:${minutes} - ${day}/${month}/${year}`;
+            const dateCode = `${day}${month}${year}`;
+            const pallet = `P-T${i}-L${Math.floor(Math.random() * 5) + 1}`;
+
+            return {
+                id: id,
+                code: `${pallet}_${mat.code}_${qty}_${dateCode}`,
+                materialCode: mat.code,
+                materialName: mat.name,
+                materialMethod: mat.method,
+                quantity: qty,
+                date: dateStr,
+                status: status,
+                creatorId: user.id,
+                creatorName: user.name,
+                outboundType: outboundType,
+                workflow: MOCK_EXPORT_WORKFLOWS[0],
+                rawDate: date,
+                batches: [],
+                priority: Math.random() > 0.8
+            };
+        });
+        outboundData.unshift(...todayData);
+        saveOutboundOrders();
+    }
+  }
+
   function initOutbound() {
+    ensureTodayDataOutbound(); // Ensure data for today exists
     renderOutboundTable();
 
     // Close dropdowns when clicking outside
@@ -2042,6 +2099,73 @@
   window.viewOutboundItem = viewOutboundItem;
   window.copyCode = copyCode;
   window.renderOutboundTable = renderOutboundTable;
+
+  // --- Excel Export Dropdown ---
+  window.toggleOutboundExcelDropdown = function(e) {
+      e.stopPropagation();
+      const container = document.getElementById('excel-dropdown-container');
+      container.classList.toggle('active');
+  };
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+      const container = document.getElementById('excel-dropdown-container');
+      if (container && !container.contains(e.target)) {
+          container.classList.remove('active');
+      }
+  });
+
+  window.exportOutboundExcel = function() {
+      // Hide dropdown
+      document.getElementById('excel-dropdown-container').classList.remove('active');
+
+      // Use the filteredData variable which is kept in the closure
+      if (filteredData.length === 0) {
+          if (typeof showToast === 'function') showToast('Không có dữ liệu để xuất', 'error');
+          else alert('Không có dữ liệu để xuất');
+          return;
+      }
+
+      // Format data for Excel
+      const dataToExport = filteredData.map((order, index) => {
+          return {
+              'STT': index + 1,
+              'Mã lệnh xuất': order.code,
+              'Sản phẩm': `${order.materialName} (${order.materialCode})`,
+              'Số lượng': order.quantity,
+              'Loại xuất': order.outboundType === 'PALLET' ? 'Xuất theo container' : 'Xuất theo sản phẩm',
+              'Trạng thái': order.status,
+              'Người tạo': order.creatorName,
+              'Thời gian tạo': order.date
+          };
+      });
+
+      // Create workbook and worksheet
+      const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Outbound Orders");
+
+      // Generate filename based on date range
+      let filename = 'Danh_sach_xuat_kho';
+      if (selectedRange.start && selectedRange.end) {
+          const fmt = (d) => {
+              const date = new Date(d);
+              return `${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}`;
+          };
+          filename += `_${fmt(selectedRange.start)}_den_${fmt(selectedRange.end)}`;
+      }
+      filename += '.xlsx';
+
+      // Download file
+      XLSX.writeFile(workbook, filename);
+      
+      // Show success toast
+      if (typeof showToast === 'function') {
+          showToast('Xuất file Excel thành công!', 'success');
+      } else {
+          alert('Xuất file Excel thành công!');
+      }
+  };
   window.outboundPrevPage = outboundPrevPage;
   window.outboundNextPage = outboundNextPage;
   window.outboundGotoPage = outboundGotoPage;

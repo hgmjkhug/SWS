@@ -184,7 +184,7 @@
 .modal-box {
     background: white;
     border-radius: 16px;
-    width: 500px;
+    width: 1000px;
     max-width: 90%;
     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
     animation: modalSlide 0.3s ease-out;
