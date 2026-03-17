@@ -62,43 +62,35 @@
     border-radius: 8px 8px 0 0;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     max-height: 70vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto; /* Enable vertical scroll */
+    overflow-x: auto; /* Enable horizontal scroll if needed */
     position: relative;
     z-index: 1;
 }
 
-.table-scroll-head {
-    overflow: hidden;
-    flex-shrink: 0;
-    background: #076EB8;
+.data-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #076EB8 !important;
 }
 
-.table-scroll-body {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: auto;
-    min-height: 0;
-    background: white;
-}
-
-/* Scrollbar styling */
-.table-scroll-body::-webkit-scrollbar {
+/* Scrollbar styling for table wrapper */
+.table-wrapper::-webkit-scrollbar {
     width: 7px;
     height: 6px;
 }
 
-.table-scroll-body::-webkit-scrollbar-track {
+.table-wrapper::-webkit-scrollbar-track {
     background: #f1f5f9;
 }
 
-.table-scroll-body::-webkit-scrollbar-thumb {
+.table-wrapper::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 3px;
 }
 
-.table-scroll-body::-webkit-scrollbar-thumb:hover {
+.table-wrapper::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
 
@@ -131,10 +123,19 @@
 /* Columns */
 .data-table th:nth-child(1), .data-table td:nth-child(1) { width: 40px; text-align: center; } /* Checkbox */
 .data-table th:nth-child(2), .data-table td:nth-child(2) { width: 50px; text-align: center; } /* STT */
-.data-table th:nth-child(3), .data-table td:nth-child(3) { width: 150px; font-weight: 600; color: #475569; } /* Mã đơn vị chứa */
-.data-table th:nth-child(4), .data-table td:nth-child(4) { width: 180px; } /* Loại đơn vị chứa */
+.data-table th:nth-child(3), .data-table td:nth-child(3) { width: 150px; font-weight: 600; color: #475569; text-align: center; } /* Mã đơn vị chứa */
+.data-table th:nth-child(4), .data-table td:nth-child(4) { width: 180px; text-align: center; } /* Loại đơn vị chứa */
 .data-table th:nth-child(5), .data-table td:nth-child(5) { width: 80px; text-align: center; } /* Sử dụng */
-.data-table th:nth-child(6), .data-table td:nth-child(6) { width: 80px; text-align: center; } /* Thao tác */
+.data-table th:nth-child(6), .data-table td:nth-child(6) { width: 100px; text-align: center; } /* Thao tác */
+
+/* Checkbox size */
+.data-table input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    vertical-align: middle;
+    margin: 0;
+}
 
 /* Status Badges */
 .status-badge {

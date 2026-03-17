@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="container.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/all.css" />
 </head>
 
 <body>
@@ -134,27 +134,21 @@
     </div>
     
     <div class="table-wrapper">
-      <div class="table-scroll-head">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th class="sticky-col first-col" style="width: 40px; text-align: center;">
-                <input type="checkbox" id="selectAll">
-              </th>
-              <th style="text-align: center">STT</th>
-              <th style="width: 150px;">Mã đơn vị chứa hàng</th>
-              <th style="width: 120px;">Loại đơn vị chứa hàng</th>
-              <th style="text-align: center">Sử dụng</th>
-              <th style="text-align: center">Thao tác</th>
-            </tr>
-          </thead>
-        </table>
-      </div>
-      <div class="table-scroll-body">
-        <table id="containerTable" class="data-table">
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
+      <table id="containerTable" class="data-table">
+        <thead>
+          <tr>
+            <th class="sticky-col first-col" style="text-align: center;">
+              <input type="checkbox" id="selectAll">
+            </th>
+            <th style="text-align: center">STT</th>
+            <th style="text-align: center">Mã đơn vị chứa hàng</th>
+            <th style="text-align: center">Loại đơn vị chứa hàng</th>
+            <th style="text-align: center">Sử dụng</th>
+            <th style="text-align: center">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
     </div>
 
     <div class="pagination-container">

@@ -143,9 +143,7 @@
             selectAll: document.getElementById('selectAll'),
             bulkActions: document.getElementById('bulkActions'),
             bulkDeleteBtn: document.getElementById('bulkDeleteBtn'),
-            bulkPrintBtn: document.getElementById('bulkPrintBtn'),
-            tableScrollBody: document.querySelector('.table-scroll-body'),
-            tableScrollHead: document.querySelector('.table-scroll-head')
+            bulkPrintBtn: document.getElementById('bulkPrintBtn')
         };
     }
 
@@ -838,13 +836,6 @@
                     else selectedIds.delete(id);
                     renderTable(currentPage);
                 }
-            });
-        }
-
-        // Horizontal Scroll Synchronization
-        if (dom.tableScrollBody && dom.tableScrollHead) {
-            dom.tableScrollBody.addEventListener('scroll', () => {
-                dom.tableScrollHead.scrollLeft = dom.tableScrollBody.scrollLeft;
             });
         }
 

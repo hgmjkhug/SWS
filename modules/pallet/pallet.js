@@ -113,8 +113,6 @@
     const itemsPerPage = 20;
     let currentPage = 1;
     let currentSearch = "";
-    let currentFilterInventoryAuto = ""; // Match ID in HTML
-    // currentFilterUsage removed
     let filteredData = [...pallets];
     // let selectedIds = new Set(); // Removed
 
@@ -147,9 +145,7 @@
 
             // Toolbar Dropdowns
 
-            inventoryStatusDropdown: document.getElementById('inventoryStatusDropdown'),
-            inventoryStatusSelected: document.getElementById('inventoryStatusSelected'),
-            inventoryStatusList: document.getElementById('inventoryStatusList'),
+
             // usageStatusDropdown removed
 
             // Confirmation Modal
@@ -193,8 +189,7 @@
     // --- 4. FILTER FUNCTION ---
     function filterData() {
         filteredData = pallets.filter(item => {
-            if (currentFilterInventoryAuto && item.inventoryStatus !== currentFilterInventoryAuto) return false;
-            // Usage filter removed
+
             if (currentSearch) {
                 const s = currentSearch.toLowerCase();
                 const match = item.code.toLowerCase().includes(s) ||
@@ -264,7 +259,7 @@
         if (filteredData.length === 0) {
             dom.tableBody.innerHTML = `
             <tr class="empty-state-row">
-                <td colspan="13" style="text-align: center; padding: 60px 20px; color: #64748b;">
+                <td colspan="12" style="text-align: center; padding: 60px 20px; color: #64748b;">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
                         <i class="fas fa-inbox" style="font-size: 48px; color: #cbd5e1;"></i>
                         <div style="font-size: 16px; font-weight: 500;">Không có dữ liệu</div>
@@ -294,11 +289,7 @@
 
             // const isSelected = selectedIds.has(pallet.id); // Removed
 
-            const invStatusClass = pallet.inventoryStatus === "Có hàng" ? "status-has-goods" : "status-empty-pallet";
 
-            const quantityDisplay = pallet.inventoryStatus === "Có hàng" ? pallet.quantity : '-';
-
-            // toggle logic removed
 
             const inboundInfo = pallet.inbound
                 ? `<div style="display: flex; align-items: center; gap: 6px;">
@@ -325,9 +316,7 @@
                 <td style="text-align: left; padding-left: 12px; font-size: 0.95em;">${inboundInfo}</td>
                 <td style="text-align: left; padding-left: 16px; font-size: 0.95em;">${materialInfo}</td>
                 <td style="text-align: center; color: #64748b;">${pallet.entryDate}</td>
-                <td style="text-align: center;">
-                    <span class="status-badge ${invStatusClass}">${pallet.inventoryStatus}</span>
-                </td>
+
                 <td style="text-align: center;">
                     <div style="font-weight: bold; color: #333;" title="${pallet.locationDetail}">${pallet.locationCode}</div>
                 </td>
@@ -430,17 +419,7 @@
     function initComboboxes() {
 
 
-        // 2. Inventory Status Filter
-        const invOptions = [
-            { value: '', text: 'Tất cả tình trạng' },
-            { value: 'Trống', text: 'Trống' },
-            { value: 'Có hàng', text: 'Có hàng' }
-        ];
 
-        setupCombobox('inventoryStatusCombobox', invOptions, 'Tất cả tình trạng', (val) => {
-            currentFilterInventoryAuto = val;
-            filterData();
-        }, '');
 
 
     }
@@ -582,9 +561,7 @@
             };
         };
 
-        const invStatuses = ["Tất cả tình trạng", "Có hàng", "Trống"];
 
-        setup(dom.inventoryStatusDropdown, dom.inventoryStatusList, dom.inventoryStatusSelected, invStatuses, "Tất cả tình trạng", (v) => currentFilterInventoryAuto = v);
 
 
     }
@@ -673,10 +650,7 @@
         selectedEndDate = null;
         activeStartDate = null;
         activeEndDate = null;
-        currentFilterInventoryAuto = "";
-        const dom_ = getDOMElements();
-        if (dom_.statusSelected) dom_.statusSelected.textContent = "Tất cả trạng thái";
-        if (dom_.inventoryStatusSelected) dom_.inventoryStatusSelected.textContent = "Tất cả tình trạng";
+
 
         dom.dateRangeDisplay.textContent = "dd/mm/yyyy - dd/mm/yyyy";
         dom.sidebarItems.forEach(i => i.classList.remove('active'));
@@ -840,13 +814,7 @@
             });
         }
 
-        // Inventory Status Filter
-        if (dom.inventoryStatusFilter) {
-            dom.inventoryStatusFilter.addEventListener('change', (e) => {
-                currentFilterInventoryAuto = e.target.value;
-                filterData();
-            });
-        }
+
 
         // Page Jump
         if (dom.pageInput) {

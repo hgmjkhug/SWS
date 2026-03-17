@@ -52,20 +52,20 @@
 
     let html = '';
     if (paginatedItems.length === 0) {
-      html = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #94a3b8;">Không tìm thấy dữ liệu</td></tr>';
+      html = '<tr><td colspan="6" class="empty-table-cell">Không tìm thấy dữ liệu</td></tr>';
     } else {
       paginatedItems.forEach((item, index) => {
         const isChecked = selectedIds.has(item.id) ? 'checked' : '';
         html += `
           <tr>
-            <td style="text-align: center">
+            <td>
               <input type="checkbox" class="row-checkbox" data-id="${item.id}" ${isChecked} onclick="handleRowCheckbox(event, ${item.id})" />
             </td>
-            <td style="text-align: center">${startIndex + index + 1}</td>
-            <td style="font-weight: 600; color: #076eb8;">${item.code}</td>
-            <td style="font-weight: 500;">${item.name || '<span style="color: #94a3b8; font-style: italic;">Chưa có tên</span>'}</td>
-            <td>${item.description || '<span style="color: #94a3b8; font-style: italic;">Chưa có mô tả</span>'}</td>
-            <td style="text-align: center">
+            <td>${startIndex + index + 1}</td>
+            <td class="resource-code-cell">${item.code}</td>
+            <td class="resource-name-cell">${item.name || '<span class="placeholder-text">Chưa có tên</span>'}</td>
+            <td class="resource-desc-cell">${item.description || '<span class="placeholder-text">Chưa có mô tả</span>'}</td>
+            <td>
               <button class="action-btn" onclick="openResourceModal(${item.id})" title="Chỉnh sửa">
                 <i class="fas fa-edit"></i>
               </button>

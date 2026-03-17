@@ -1,707 +1,588 @@
 <!doctype html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KHO THÔNG MINH | THACO INDUSTRIES</title>
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="https://demo-qtsx.thacoindustries.com/favicon.ico"
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/all.css"/>
-<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/sharp-solid.css"/>
-<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/sharp-regular.css"/>
-<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/sharp-light.css"/>
-<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/duotone.css"/>
 
-<!-- Additional Fontawesome Pro+ Icons for v7.2.0 -->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KHO THÔNG MINH | THACO INDUSTRIES</title>
+  <link rel="icon" type="image/svg+xml" href="https://demo-qtsx.thacoindustries.com/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-<!-- Sharp Duotone -->
-<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/sharp-duotone-solid.css"/>
-<!-- Chisel -->
-<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/chisel-regular.css"/>
-<!-- Etch -->
-<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/etch-solid.css"/>
-<!-- Graphite -->
-<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/graphite-thin.css"/>
-<!-- Jelly -->
-<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/jelly-regular.css"/>
-<!-- Notdog -->
-<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/notdog-solid.css"/>
-<!-- Slab -->
-<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/slab-regular.css"/>
-<!-- Thumb Print -->
-<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/thumbprint-light.css"/>
-<!-- Utility -->
-<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/utility-semibold.css"/>
-<!-- Whiteboard -->
-<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v7.2.0/css/whiteboard-semibold.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <link rel="stylesheet" href="sidebar.css" />
+  <link rel="stylesheet" href="global-table.css" />
+  <link rel="stylesheet" href="falling.css" />
+  <link rel="stylesheet" href="global-transition.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css" />
 
-    <link rel="stylesheet" href="sidebar.css" />
-    <link rel="stylesheet" href="global-table.css" />
-    <link rel="stylesheet" href="falling.css" />
-    <link rel="stylesheet" href="global-transition.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css"
-    />
-    
-    <script>
-      // Apply sidebar state immediately before HTML renders
-      try {
-        if (localStorage.getItem('sidebar_collapsed') === 'true') {
-          // Temporarily embed CSS for the collapsed state
-          document.write('<style id="pre-collapse">.sidebar { width: 70px !important; transition: none !important; } .brand-logo, .brand-text, .link-text, .arrow-icon, .submenu { display: none !important; visibility: hidden !important; }</style>');
-        }
-      } catch (e) {}
-    </script>
-  </head>
+  <!-- Fontawesome Pro -->
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/fontawesome.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/sharp-solid.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/sharp-regular.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/sharp-light.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/duotone.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/solid.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/regular.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/light.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/brands.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/sharp-duotone-solid.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/chisel-regular.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/etch-solid.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/graphite-thin.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/jelly-regular.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/notdog-solid.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/slab-regular.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/thumbprint-light.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/utility-semibold.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rizmyabdulla/fontawesome-pro@main/releases/v7.2.0/css/whiteboard-semibold.css" />
+  <script>
+    // Apply sidebar state immediately before HTML renders
+    try {
+      if (localStorage.getItem('sidebar_collapsed') === 'true') {
+        // Temporarily embed CSS for the collapsed state
+        document.write('<style id="pre-collapse">.sidebar { width: 70px !important; transition: none !important; } .brand-logo, .brand-text, .link-text, .arrow-icon, .submenu { display: none !important; visibility: hidden !important; }</style>');
+      }
+    } catch (e) { }
+  </script>
+</head>
 
-  <body>
-    <div class="page-transition-overlay" id="page-transition-overlay"></div>
-    <script>
-      (function() {
-        const overlay = document.getElementById('page-transition-overlay');
-        if (sessionStorage.getItem('sakura_transitioning') === 'true') {
-          overlay.classList.add('active');
-          sessionStorage.removeItem('sakura_transitioning');
-        }
-      })();
-    </script>
-    <nav class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <div class="brand-logo">
-          <img
-            src="https://demo-qtsx.thacoindustries.com/favicon.ico"
-            alt="Logo"
-            style="width: 24px; height: 24px"
-          />
-          <span class="brand-text">THACO INDUSTRIES</span>
+<body>
+  <div class="page-transition-overlay" id="page-transition-overlay"></div>
+  <script>
+    (function () {
+      const overlay = document.getElementById('page-transition-overlay');
+      if (sessionStorage.getItem('sakura_transitioning') === 'true') {
+        overlay.classList.add('active');
+        sessionStorage.removeItem('sakura_transitioning');
+      }
+    })();
+  </script>
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-logo">
+        <img src="https://demo-qtsx.thacoindustries.com/favicon.ico" alt="Logo" style="width: 24px; height: 24px" />
+        <span class="brand-text">THACO INDUSTRIES</span>
+      </div>
+      <div class="toggle-btn" onclick="toggleSidebar()">
+        <i class="fa-solid fa-bars"></i>
+      </div>
+    </div>
+
+    <div class="search-container">
+      <div class="search-icon-collapsed" onclick="toggleSidebar()" title="Tìm kiếm">
+        <i class="fas fa-search"></i>
+      </div>
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="menu-search" placeholder="Tìm kiếm chức năng" onkeyup="filterMenu()" />
+      </div>
+    </div>
+
+    <div class="sidebar-menu" id="menu-list">
+      <!-- Theo dõi & Giám sát -->
+      <div class="menu-item" data-module="DASHBOARD">
+        <div class="menu-link" onclick="toggleSubmenu(this)">
+          <div class="link-content">
+            <i class="fas fa-chart-line"></i>
+            <span class="link-text">Theo dõi & Giám sát</span>
+          </div>
+          <i class="fas fa-chevron-right arrow-icon"></i>
         </div>
-        <div class="toggle-btn" onclick="toggleSidebar()">
-          <i class="fa-regular fa-sidebar"></i>
+        <div class="submenu">
+          <!-- <a href="#" onclick="loadPage('Dashboard tổng quan')" data-code="DASHBOARD_OVERVIEW"><i
+              class="fas fa-chart-pie"></i>Dashboard tổng quan</a> -->
+          <a href="#" onclick="loadPage('Dashboard chi tiết')" data-code="DASHBOARD_DETAIL"><i
+              class="fas fa-chart-area"></i>Dashboard chi tiết</a>
+          <a href="#" onclick="loadPage('Giám sát hoạt động')" data-code="DASHBOARD_MONITOR"><i
+              class="fa-solid fa-chalkboard-user"></i>Giám sát hoạt động</a>
         </div>
       </div>
 
-      <div class="search-container">
-        <div
-          class="search-icon-collapsed"
-          onclick="toggleSidebar()"
-          title="Tìm kiếm"
-        >
-          <i class="fas fa-search"></i>
+      <!-- Layout Kho (2D) - Active -->
+      <div class="menu-item open" data-module="WAREHOUSE">
+        <div class="menu-link active" onclick="toggleSubmenu(this)">
+          <div class="link-content">
+            <i class="fas fa-map"></i>
+            <span class="link-text">Quản lý Kho</span>
+          </div>
+          <i class="fas fa-chevron-right arrow-icon"></i>
         </div>
-        <div class="search-box">
-          <i class="fas fa-search"></i>
-          <input
-            type="text"
-            id="menu-search"
-            placeholder="Tìm kiếm chức năng"
-            onkeyup="filterMenu()"
-          />
+        <div class="submenu">
+          <a href="#" onclick="loadPage('Quản lý Kho')" data-code="WAREHOUSE_LIST"><i class="fas fa-warehouse"></i>Danh
+            sách Kho</a>
+          <!-- <a href="#" onclick="loadPage('Quản lý thiết bị')"><i class="fas fa-mobile-alt"></i>Quản lý thiết bị</a> -->
+          <a href="#" onclick="loadPage('Quy cách sản phẩm')" data-code="PRODUCT_METHOD"><i
+              class="fa-regular fa-box-isometric-tape"></i>Quy cách sản phẩm</a>
+          <a href="#" onclick="loadPage('Quản lý vật chứa')" data-code="CONTAINER_MGMT"><i
+              class="fa-regular fa-pallet-box"></i>Quản lý vật chứa</a>
+          <a href="#" onclick="loadPage('Quản lý bảo trì')" data-code="MAINTENANCE"><i
+              class="fa-solid fa-toolbox"></i>Quản lý bảo trì</a>
         </div>
       </div>
 
-      <div class="sidebar-menu" id="menu-list">
-        <!-- Theo dõi & Giám sát -->
-        <div class="menu-item" data-module="DASHBOARD">
-          <div class="menu-link" onclick="toggleSubmenu(this)">
-            <div class="link-content">
-              <i class="fas fa-chart-line"></i>
-              <span class="link-text">Theo dõi & Giám sát</span>
-            </div>
-            <i class="fas fa-chevron-right arrow-icon"></i>
+      <!-- Hệ thống WCS -->
+      <div class="menu-item" data-module="WCS">
+        <div class="menu-link" onclick="toggleSubmenu(this)">
+          <div class="link-content">
+            <i class="fas fa-microchip"></i>
+            <span class="link-text">Quản lý điều phối WCS</span>
           </div>
-          <div class="submenu">
-            <a href="#" onclick="loadPage('Dashboard tổng quan')" data-code="DASHBOARD_OVERVIEW"
-              ><i class="fas fa-chart-pie"></i>Dashboard tổng quan</a
-            >
-            <a href="#" onclick="loadPage('Dashboard chi tiết')" data-code="DASHBOARD_DETAIL"
-              ><i class="fas fa-chart-area"></i>Dashboard chi tiết</a
-            >
-             <a href="#" onclick="loadPage('Giám sát hoạt động')" data-code="DASHBOARD_MONITOR"
-              ><i class="fa-solid fa-chalkboard-user"></i>Giám sát hoạt động</a
-            >
-          </div>
+          <i class="fas fa-chevron-right arrow-icon"></i>
         </div>
-
-        <!-- Layout Kho (2D) - Active -->
-        <div class="menu-item open" data-module="WAREHOUSE">
-          <div class="menu-link active" onclick="toggleSubmenu(this)">
-            <div class="link-content">
-              <i class="fas fa-map"></i>
-              <span class="link-text">Quản lý Kho</span>
-            </div>
-            <i class="fas fa-chevron-right arrow-icon"></i>
-          </div>
-          <div class="submenu">
-            <a href="#" onclick="loadPage('Quản lý Kho')" data-code="WAREHOUSE_LIST"><i class="fas fa-warehouse"></i>Danh sách Kho</a>
-            <!-- <a href="#" onclick="loadPage('Quản lý thiết bị')"><i class="fas fa-mobile-alt"></i>Quản lý thiết bị</a> -->
-            <a href="#" onclick="loadPage('Quy cách sản phẩm')" data-code="PRODUCT_METHOD"><i class="fa-regular fa-box-isometric-tape"></i>Quy cách sản phẩm</a>
-            <a href="#" onclick="loadPage('Quản lý vật chứa')" data-code="CONTAINER_MGMT"><i class="fa-regular fa-pallet-box"></i>Quản lý vật chứa</a>
-             <a href="#" onclick="loadPage('Quản lý bảo trì')" data-code="MAINTENANCE"
-              ><i class="fa-solid fa-toolbox"></i>Quản lý bảo trì</a
-            >
-          </div>
-        </div>
-
-        <!-- Hệ thống WCS -->
-        <div class="menu-item" data-module="WCS">
-          <div class="menu-link" onclick="toggleSubmenu(this)">
-            <div class="link-content">
-              <i class="fas fa-microchip"></i>
-              <span class="link-text">Quản lý điều phối WCS</span>
-            </div>
-            <i class="fas fa-chevron-right arrow-icon"></i>
-          </div>
-          <div class="submenu">
-            <!-- <a href="#" onclick="loadPage('Quản lý Lệnh')"><i class="fas fa-clipboard-list"></i>Quản lý Lệnh</a> -->
-            <a href="#" onclick="loadPage('Kanban WCS')" data-code="WCS_KANBAN"><i class="fa-regular fa-chart-kanban"></i>Kanban WCS</a>
-            <!-- <a href="#" onclick="loadPage('Quản lý Thiết bị')"
+        <div class="submenu">
+          <!-- <a href="#" onclick="loadPage('Quản lý Lệnh')"><i class="fas fa-clipboard-list"></i>Quản lý Lệnh</a> -->
+          <a href="#" onclick="loadPage('Kanban WCS')" data-code="WCS_KANBAN"><i
+              class="fa-regular fa-chart-kanban"></i>Kanban WCS</a>
+          <!-- <a href="#" onclick="loadPage('Quản lý Thiết bị')"
               >Quản lý Thiết bị</a
             > -->
-            <!-- <a href="#" onclick="loadPage('Giám sát Thiết bị')"
+          <!-- <a href="#" onclick="loadPage('Giám sát Thiết bị')"
               ><i class="fas fa-desktop"></i>Giám sát Thiết bị</a
             > -->
-            <!-- <a href="#" onclick="loadPage('Truy vết nhập xuất')"
+          <!-- <a href="#" onclick="loadPage('Truy vết nhập xuất')"
               >Truy vết nhập xuất</a
             > -->
-          </div>
         </div>
+      </div>
 
-        <!-- Nhập kho -->
-        <div class="menu-item" data-module="INBOUND">
-          <div class="menu-link" onclick="toggleSubmenu(this)">
-            <div class="link-content">
-              <i class="fas fa-file-import"></i>
-              <span class="link-text">Nhập kho</span>
-            </div>
-            <i class="fas fa-chevron-right arrow-icon"></i>
+      <!-- Nhập kho -->
+      <div class="menu-item" data-module="INBOUND">
+        <div class="menu-link" onclick="toggleSubmenu(this)">
+          <div class="link-content">
+            <i class="fas fa-file-import"></i>
+            <span class="link-text">Nhập kho</span>
           </div>
-          <div class="submenu">
-            <a href="#" onclick="loadPage('Lệnh nhập kho')" data-code="INBOUND_ORDER"><i class="fas fa-file-import"></i>Lệnh nhập kho</a>
-          </div>
+          <i class="fas fa-chevron-right arrow-icon"></i>
         </div>
-
-        <!-- Xuất kho -->
-        <div class="menu-item" data-module="OUTBOUND">
-          <div class="menu-link" onclick="toggleSubmenu(this)">
-            <div class="link-content">
-              <i class="fas fa-file-export"></i>
-              <span class="link-text">Xuất kho</span>
-            </div>
-            <i class="fas fa-chevron-right arrow-icon"></i>
-          </div>
-          <div class="submenu">
-            <a href="#" onclick="loadPage('Lệnh xuất kho')" data-code="OUTBOUND_ORDER"><i class="fas fa-file-export"></i>Lệnh xuất kho</a>
-          </div>
+        <div class="submenu">
+          <a href="#" onclick="loadPage('Lệnh nhập kho')" data-code="INBOUND_ORDER"><i
+              class="fas fa-file-import"></i>Lệnh nhập kho</a>
         </div>
+      </div>
 
-        <!-- Quản lý luồng và quy trình -->
-        <div class="menu-item" data-module="WORKFLOW">
-          <div class="menu-link" onclick="toggleSubmenu(this)">
-            <div class="link-content">
-              <i class="fas fa-project-diagram"></i>
-              <span class="link-text">Quản lý quy trình</span>
-            </div>
-            <i class="fas fa-chevron-right arrow-icon"></i>
+      <!-- Xuất kho -->
+      <div class="menu-item" data-module="OUTBOUND">
+        <div class="menu-link" onclick="toggleSubmenu(this)">
+          <div class="link-content">
+            <i class="fas fa-file-export"></i>
+            <span class="link-text">Xuất kho</span>
           </div>
-          <div class="submenu">
-            <!-- <a href="#" onclick="loadPage('Quản lý bước')">Quản lý bước</a> -->
-            <a href="#" onclick="loadPage('Danh sách Quy trình')" data-code="WORKFLOW_PROCESS"
-              ><i class="fa-light fa-arrow-progress"></i>Quản lý quy trình</a
-            >
-          </div>
+          <i class="fas fa-chevron-right arrow-icon"></i>
         </div>
-
-        <!-- Danh mục chung -->
-        <div class="menu-item" data-module="MASTER_DATA">
-          <div class="menu-link" onclick="toggleSubmenu(this)">
-            <div class="link-content">
-              <i class="fas fa-database"></i>
-              <span class="link-text">Danh mục chung</span>
-            </div>
-            <i class="fas fa-chevron-right arrow-icon"></i>
-          </div>
-          <div class="submenu">
-            <a href="#" onclick="loadPage('Nhóm thiết bị')" data-code="DEVICE_TYPE"><i class="fas fa-layer-group"></i>Nhóm thiết bị</a>
-            <a href="#" onclick="loadPage('Thiết bị')" data-code="DEVICE_LIST"><i class="fas fa-robot"></i>Thiết bị</a>
-            <a href="#" onclick="loadPage('Nhóm sản phẩm')" data-code="PRODUCT_GROUP"><i class="fas fa-cubes"></i>Nhóm sản phẩm</a>
-            <a href="#" onclick="loadPage('Sản phẩm')" data-code="PRODUCT_LIST"><i class="fas fa-box"></i>Sản phẩm</a>
-            <a href="#" onclick="loadPage('Quy cách')" data-code="METHOD"><i class="fa-solid fa-route"></i>Quy cách</a>
-            <a href="#" onclick="loadPage('Vật chứa')" data-code="PALLET_LIST"><i class="fa-light fa-pallet-box"></i>Vật chứa</a>
-            <a href="#" onclick="loadPage('Đơn vị tính')" data-code="UNIT_OF_MEASURE"><i class="fas fa-ruler"></i>Đơn vị tính</a>
-            <a href="#" onclick="loadPage('Loại khu vực')" data-code="LOCATION_TYPE"><i class="fas fa-map-marker-alt"></i>Loại khu vực</a>
-          </div>
+        <div class="submenu">
+          <a href="#" onclick="loadPage('Lệnh xuất kho')" data-code="OUTBOUND_ORDER"><i
+              class="fas fa-file-export"></i>Lệnh xuất kho</a>
         </div>
+      </div>
 
-        <!-- <Báo cáo thống kê -->
-        <div class="menu-item" data-module="STATISTIC">
-          <div class="menu-link" onclick="toggleSubmenu(this)">
-            <div class="link-content">
-              <i class="fas fa-chart-bar"></i>
-              <span class="link-text">Báo cáo thống kê</span>
-            </div>
-            <i class="fas fa-chevron-right arrow-icon"></i>
+      <!-- Quản lý luồng và quy trình -->
+      <div class="menu-item" data-module="WORKFLOW">
+        <div class="menu-link" onclick="toggleSubmenu(this)">
+          <div class="link-content">
+            <i class="fas fa-project-diagram"></i>
+            <span class="link-text">Quản lý quy trình</span>
           </div>
-          <div class="submenu">
-            <a href="#" onclick="loadPage('Báo cáo Nhập/Xuất')" data-code="STATISTIC_REPORT"
-              ><i class="fa-solid fa-arrow-up-right-dots"></i>Báo cáo Nhập/Xuất</a
-            >
+          <i class="fas fa-chevron-right arrow-icon"></i>
+        </div>
+        <div class="submenu">
+          <!-- <a href="#" onclick="loadPage('Quản lý bước')">Quản lý bước</a> -->
+          <a href="#" onclick="loadPage('Danh sách Quy trình')" data-code="WORKFLOW_PROCESS"><i
+              class="fa-light fa-arrow-progress"></i>Quản lý quy trình</a>
+        </div>
+      </div>
+
+      <!-- Danh mục chung -->
+      <div class="menu-item" data-module="MASTER_DATA">
+        <div class="menu-link" onclick="toggleSubmenu(this)">
+          <div class="link-content">
+            <i class="fas fa-database"></i>
+            <span class="link-text">Danh mục chung</span>
           </div>
-          <!-- <div class="submenu">
+          <i class="fas fa-chevron-right arrow-icon"></i>
+        </div>
+        <div class="submenu">
+          <a href="#" onclick="loadPage('Nhóm thiết bị')" data-code="DEVICE_TYPE"><i class="fas fa-layer-group"></i>Nhóm
+            thiết bị</a>
+          <a href="#" onclick="loadPage('Thiết bị')" data-code="DEVICE_LIST"><i class="fas fa-robot"></i>Thiết bị</a>
+          <a href="#" onclick="loadPage('Nhóm sản phẩm')" data-code="PRODUCT_GROUP"><i class="fas fa-cubes"></i>Nhóm sản
+            phẩm</a>
+          <a href="#" onclick="loadPage('Sản phẩm')" data-code="PRODUCT_LIST"><i class="fas fa-box"></i>Sản phẩm</a>
+          <a href="#" onclick="loadPage('Quy cách')" data-code="METHOD"><i class="fa-solid fa-route"></i>Quy cách</a>
+          <a href="#" onclick="loadPage('Vật chứa')" data-code="PALLET_LIST"><i class="fa-light fa-pallet-box"></i>Vật
+            chứa</a>
+          <a href="#" onclick="loadPage('Đơn vị tính')" data-code="UNIT_OF_MEASURE"><i class="fas fa-ruler"></i>Đơn vị
+            tính</a>
+          <a href="#" onclick="loadPage('Loại khu vực')" data-code="LOCATION_TYPE"><i
+              class="fas fa-map-marker-alt"></i>Loại khu vực</a>
+        </div>
+      </div>
+
+      <!-- <Báo cáo thống kê -->
+      <div class="menu-item" data-module="STATISTIC">
+        <div class="menu-link" onclick="toggleSubmenu(this)">
+          <div class="link-content">
+            <i class="fas fa-chart-bar"></i>
+            <span class="link-text">Báo cáo thống kê</span>
+          </div>
+          <i class="fas fa-chevron-right arrow-icon"></i>
+        </div>
+        <div class="submenu">
+          <a href="#" onclick="loadPage('Báo cáo Nhập/Xuất')" data-code="STATISTIC_REPORT"><i
+              class="fa-solid fa-arrow-up-right-dots"></i>Báo cáo Nhập/Xuất</a>
+        </div>
+        <!-- <div class="submenu">
             <a href="#" onclick="loadPage('Thống kê thiết bị')"
               ><i class="fa-solid fa-conveyor-belt"></i>Thống kê thiết bị</a
             >
           </div> -->
-        </div>
+      </div>
 
-        <!-- Hệ thống -->
-        <div class="menu-item" data-module="SYSTEM">
-          <div class="menu-link" onclick="toggleSubmenu(this)">
-            <div class="link-content">
-              <i class="fas fa-cogs"></i>
-              <span class="link-text">Hệ thống</span>
-            </div>
-            <i class="fas fa-chevron-right arrow-icon"></i>
+      <!-- Hệ thống -->
+      <div class="menu-item" data-module="SYSTEM">
+        <div class="menu-link" onclick="toggleSubmenu(this)">
+          <div class="link-content">
+            <i class="fas fa-cogs"></i>
+            <span class="link-text">Hệ thống</span>
           </div>
-          <div class="submenu">
-            <a href="#" onclick="loadPage('Tài khoản')" data-code="ACCOUNT"><i class="fas fa-user"></i>Tài khoản</a>
-            <a href="#" onclick="loadPage('Vai trò')" data-code="ROLE"><i class="fas fa-user-tag"></i>Vai trò</a>
-            <a href="#" onclick="loadPage('Chức năng')" data-code="MENU"><i class="fas fa-list"></i>Chức năng</a>
-            <a href="#" onclick="loadPage('Tài nguyên')" data-code="RESOURCE"><i class="fas fa-folder-open"></i>Tài nguyên</a>
-          </div>
+          <i class="fas fa-chevron-right arrow-icon"></i>
+        </div>
+        <div class="submenu">
+          <a href="#" onclick="loadPage('Tài khoản')" data-code="ACCOUNT"><i class="fas fa-user"></i>Tài khoản</a>
+          <a href="#" onclick="loadPage('Vai trò')" data-code="ROLE"><i class="fas fa-user-tag"></i>Vai trò</a>
+          <a href="#" onclick="loadPage('Chức năng')" data-code="MENU"><i class="fas fa-list"></i>Chức năng</a>
+          <a href="#" onclick="loadPage('Tài nguyên')" data-code="RESOURCE"><i class="fas fa-folder-open"></i>Tài
+            nguyên</a>
         </div>
       </div>
-    </nav>
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-      <header class="top-bar">
-        <div class="page-title" id="page-title">Danh sách Kho</div>
-        
-        <!-- Info Banner inserted in Top Bar -->
-        <div style="padding: 6px 15px; margin-left: 24px; margin-right: auto; background-color: none; color: #0369a1; border-radius: 6px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
-          <i class="fas fa-info-circle"></i>
-          <span>Các dữ liệu ở bản demo được hiển thị với vai trò người dùng là <strong>"Admin"</strong></span>
+       <!-- <Báo cáo thống kê -->
+      <div class="menu-item" data-module="DOCUMENT">
+        <div class="menu-link" onclick="toggleSubmenu(this)">
+          <div class="link-content">
+            <i class="fa-solid fa-book"></i>
+            <span class="link-text">Tài liệu</span>
+          </div>
+          <i class="fas fa-chevron-right arrow-icon"></i>
+        </div>
+        <div class="submenu">
+          <a href="#" onclick="loadPage('Tài liệu hướng dẫn')" data-code="USER_MANUAL"><i class="fa-solid fa-book"></i>Tài liệu hướng dẫn</a>
+        </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <header class="top-bar">
+      <div class="page-title" id="page-title">Danh sách Kho</div>
+
+      <!-- Info Banner inserted in Top Bar -->
+      <div
+        style="padding: 6px 15px; margin-left: 24px; margin-right: auto; background-color: none; color: #0369a1; border-radius: 6px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-info-circle"></i>
+        <span>Các dữ liệu ở bản demo được hiển thị với vai trò người dùng là <strong>"Admin"</strong></span>
+      </div>
+
+      <div style="display: flex; align-items: center">
+        <!-- Factory Selector -->
+        <div class="factory-selector-container">
+          <div class="factory-toggle" onclick="toggleFactoryMenu()">
+            <div class="factory-info-text">
+              <span class="factory-code" id="current-factory-code">TOMC</span>
+              <span class="factory-name" id="current-factory-name">CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO (TOMC)</span>
+            </div>
+            <div class="factory-icon-box">
+              <img src="icons/khoIcon.svg" width="20" height="20" alt="Factory" />
+            </div>
+          </div>
+          <div class="factory-dropdown" id="factory-dropdown">
+            <div class="factory-search-box">
+              <input type="text" id="factory-search-input" placeholder="Tìm kiếm Kho" onkeyup="filterFactories()"
+                onclick="event.stopPropagation()" />
+            </div>
+            <div class="factory-list" id="factory-list">
+              <!-- Populated by JS -->
+            </div>
+          </div>
         </div>
 
-        <div style="display: flex; align-items: center">
-          <!-- Factory Selector -->
-          <div class="factory-selector-container">
-            <div class="factory-toggle" onclick="toggleFactoryMenu()">
-              <div class="factory-info-text">
-                <span class="factory-code" id="current-factory-code">TOMC</span>
-                <span class="factory-name" id="current-factory-name"
-                  >CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO (TOMC)</span
-                >
-              </div>
-              <div class="factory-icon-box">
-                <img
-                  src="icons/khoIcon.svg"
-                  width="20"
-                  height="20"
-                  alt="Factory"
-                />
-              </div>
-            </div>
-            <div class="factory-dropdown" id="factory-dropdown">
-              <div class="factory-search-box">
-                <input
-                  type="text"
-                  id="factory-search-input"
-                  placeholder="Tìm kiếm Kho"
-                  onkeyup="filterFactories()"
-                  onclick="event.stopPropagation()"
-                />
-              </div>
-              <div class="factory-list" id="factory-list">
-                <!-- Populated by JS -->
-              </div>
-            </div>
+        <!-- Blossom Toggle -->
+        <div class="notification-container" style="margin-right: 12px;">
+          <div class="notification-btn" id="btn-cherry" onclick="toggleBlossom()" title="Hoa nở"
+            style="color: var(--text-3); background: var(--surface); border: 1px solid var(--border);">
+            <i class="fas fa-seedling"></i>
           </div>
+        </div>
 
-          <!-- Blossom Toggle -->
-          <div class="notification-container" style="margin-right: 12px;">
-            <div class="notification-btn" id="btn-cherry" onclick="toggleBlossom()" title="Hoa nở" style="color: var(--text-3); background: var(--surface); border: 1px solid var(--border);">
-              <i class="fas fa-seedling"></i>
-            </div>
+        <!-- Notifcation System -->
+        <div class="notification-container">
+          <div class="notification-btn" onclick="toggleNotificationMenu()">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notification-count" style="display: none">0</span>
           </div>
-
-          <!-- Notifcation System -->
-          <div class="notification-container">
-            <div class="notification-btn" onclick="toggleNotificationMenu()">
-              <i class="fas fa-bell"></i>
-              <span
-                class="notification-badge"
-                id="notification-count"
-                style="display: none"
-                >0</span
-              >
-            </div>
-            <div class="notification-dropdown" id="notification-dropdown">
-              <div class="notification-header" title="Đóng">
-                <h3>
-                  <span
-                    onclick="toggleNotificationMenu()"
-                    class="notification-close-btn"
-                  >
-                    <i class="fas fa-times"></i>
-                  </span>
-                  Thông báo
-                </h3>
-                <div class="notification-actions">
-                  <span onclick="refreshNotifications(this)" title="Làm mới"
-                    ><i class="fas fa-sync-alt"></i
-                  ></span>
-                  <span onclick="markAllRead()" title="Đọc tất cả"
-                    ><i class="fas fa-check-double"></i
-                  ></span>
-                  <span
-                    onclick="clearAllNotifications()"
-                    title="Xóa tất cả"
-                    style="position: relative"
-                  >
-                    <i class="fas fa-trash-alt"></i>
-                    <!-- Confirm Popover -->
-                    <div
-                      id="confirm-clear-popover"
-                      class="confirm-popover"
-                      onclick="event.stopPropagation()"
-                    >
-                      <div class="popover-arrow"></div>
-                      <div class="popover-content">
-                        <p>Xóa tất cả thông báo?</p>
-                        <div class="popover-actions">
-                          <button
-                            onclick="hideClearConfirm()"
-                            class="pop-btn-cancel"
-                          >
-                            Hủy
-                          </button>
-                          <button
-                            onclick="executeClearAll()"
-                            class="pop-btn-confirm"
-                          >
-                            Xác nhận
-                          </button>
-                        </div>
+          <div class="notification-dropdown" id="notification-dropdown">
+            <div class="notification-header" title="Đóng">
+              <h3>
+                <span onclick="toggleNotificationMenu()" class="notification-close-btn">
+                  <i class="fas fa-times"></i>
+                </span>
+                Thông báo
+              </h3>
+              <div class="notification-actions">
+                <span onclick="refreshNotifications(this)" title="Làm mới"><i class="fas fa-sync-alt"></i></span>
+                <span onclick="markAllRead()" title="Đọc tất cả"><i class="fas fa-check-double"></i></span>
+                <span onclick="clearAllNotifications()" title="Xóa tất cả" style="position: relative">
+                  <i class="fas fa-trash-alt"></i>
+                  <!-- Confirm Popover -->
+                  <div id="confirm-clear-popover" class="confirm-popover" onclick="event.stopPropagation()">
+                    <div class="popover-arrow"></div>
+                    <div class="popover-content">
+                      <p>Xóa tất cả thông báo?</p>
+                      <div class="popover-actions">
+                        <button onclick="hideClearConfirm()" class="pop-btn-cancel">
+                          Hủy
+                        </button>
+                        <button onclick="executeClearAll()" class="pop-btn-confirm">
+                          Xác nhận
+                        </button>
                       </div>
                     </div>
-                  </span>
-                </div>
-              </div>
-              <div class="notification-list" id="notification-list">
-                <!-- Populated by JS -->
-                <div class="empty-notification">Không có thông báo mới</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- User Info -->
-          <div class="user-info-container">
-            <div class="user-info" onclick="toggleUserMenu()">
-              <span>Minh Hưng</span>
-              <img src="icons/user-avatar.jpg" alt="Avatar" class="user-avatar" />
-            </div>
-            <div class="user-dropdown" id="user-dropdown">
-              <div class="dropdown-header">
-                <div class="header-avatar">
-                  <img src="icons/user-avatar.jpg" alt="Avatar" />
-                </div>
-                <div class="header-info">
-                  <div class="header-name">Minh Hưng</div>
-                  <div class="header-meta">
-                    <div class="header-id">hmhung</div>
-                    <div class="header-role">Admin</div>
                   </div>
-                </div>
+                </span>
               </div>
-              <div class="dropdown-item" onclick="openProfileModal()">
-                <i class="far fa-id-card"></i> Hồ sơ
-              </div>
-
-              <div class="dropdown-item text-danger" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> Đăng xuất
-              </div>
+            </div>
+            <div class="notification-list" id="notification-list">
+              <!-- Populated by JS -->
+              <div class="empty-notification">Không có thông báo mới</div>
             </div>
           </div>
         </div>
-      </header>
 
-      <div class="content-body" id="main-view">
-        <iframe id="app-frame" src="" style="display: none"></iframe>
-        <!-- Ensure iframe is present if logic depends on it, otherwise standard div -->
-        <!-- Content will be rendered here by JavaScript -->
-      </div>
-    </main>
+        <!-- User Info -->
+        <div class="user-info-container">
+          <div class="user-info" onclick="toggleUserMenu()">
+            <span>Minh Hưng</span>
+            <img src="icons/user-avatar.jpg" alt="Avatar" class="user-avatar" />
+          </div>
+          <div class="user-dropdown" id="user-dropdown">
+            <div class="dropdown-header">
+              <div class="header-avatar">
+                <img src="icons/user-avatar.jpg" alt="Avatar" />
+              </div>
+              <div class="header-info">
+                <div class="header-name">Minh Hưng</div>
+                <div class="header-meta">
+                  <div class="header-id">hmhung</div>
+                  <div class="header-role">Admin</div>
+                </div>
+              </div>
+            </div>
+            <div class="dropdown-item" onclick="openProfileModal()">
+              <i class="far fa-id-card"></i> Hồ sơ
+            </div>
 
-    <!-- PROFILE MODAL -->
-    <div class="modal-overlay" id="profile-modal">
-      <div class="modal-box medium-box">
-        <div class="modal-header">
-          <h3 class="modal-title">Thông tin tài khoản</h3>
+            <div class="dropdown-item text-danger" onclick="logout()">
+              <i class="fas fa-sign-out-alt"></i> Đăng xuất
+            </div>
+          </div>
         </div>
-        <button class="close-btn" onclick="closeProfileModal()">
-          <i class="fas fa-times"></i>
+      </div>
+    </header>
+
+    <div class="content-body" id="main-view">
+      <iframe id="app-frame" src="" style="display: none"></iframe>
+      <!-- Ensure iframe is present if logic depends on it, otherwise standard div -->
+      <!-- Content will be rendered here by JavaScript -->
+    </div>
+  </main>
+
+  <!-- PROFILE MODAL -->
+  <div class="modal-overlay" id="profile-modal">
+    <div class="modal-box medium-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Thông tin tài khoản</h3>
+      </div>
+      <button class="close-btn" onclick="closeProfileModal()">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Tên đăng nhập<span class="required-mark">*</span></label>
+          <input type="text" value="hmhung" disabled style="background: #f1f5f9" />
+        </div>
+        <div class="form-group">
+          <label>Họ và tên<span class="required-mark">*</span></label>
+          <input type="text" value="Minh Hưng" />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" value="minhhung@yopmail.com" />
+        </div>
+        <div class="form-group">
+          <label>Vai trò<span class="required-mark">*</span></label>
+          <input type="text" value="Admin" disabled style="background: #f1f5f9" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeProfileModal()">
+          Hủy
         </button>
+        <button class="btn-primary" onclick="saveProfile()">Lưu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHANGE PASSWORD MODAL -->
+  <div class="modal-overlay" id="change-password-modal">
+    <div class="modal-box medium-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Đổi mật khẩu</h3>
+      </div>
+      <button class="close-btn" onclick="closeChangePasswordModal()">
+        <i class="fas fa-times"></i>
+      </button>
+      <form onsubmit="updatePassword(event)">
+        <!-- Hidden username field for password managers/accessibility -->
+        <input type="text" name="username" autocomplete="username" style="display: none" value="admin" />
         <div class="modal-body">
           <div class="form-group">
-            <label>Tên đăng nhập<span class="required-mark">*</span></label>
-            <input
-              type="text"
-              value="hmhung"
-              disabled
-              style="background: #f1f5f9"
-            />
+            <label>Mật khẩu hiện tại<span class="required-mark">*</span></label>
+            <input type="password" id="current-password" placeholder="Nhập mật khẩu hiện tại"
+              autocomplete="current-password" required />
           </div>
           <div class="form-group">
-            <label>Họ và tên<span class="required-mark">*</span></label>
-            <input type="text" value="Minh Hưng" />
+            <label>Mật khẩu mới<span class="required-mark">*</span></label>
+            <input type="password" id="new-password" placeholder="Nhập mật khẩu mới" oninput="onInputPassword(this)"
+              autocomplete="new-password" required />
+            <!-- Password Requirements Checklist -->
+            <div class="password-requirements" id="password-requirements">
+              <div class="requirement" id="req-length">
+                <i class="fas fa-circle"></i> Ít nhất 8 ký tự
+              </div>
+              <div class="requirement" id="req-upper">
+                <i class="fas fa-circle"></i> Ít nhất 1 chữ hoa
+              </div>
+              <div class="requirement" id="req-number">
+                <i class="fas fa-circle"></i> Ít nhất 1 chữ số
+              </div>
+              <div class="requirement" id="req-special">
+                <i class="fas fa-circle"></i> Ít nhất 1 ký tự đặc biệt
+              </div>
+            </div>
           </div>
           <div class="form-group">
-            <label>Email</label>
-            <input type="email" value="minhhung@yopmail.com" />
-          </div>
-          <div class="form-group">
-            <label>Vai trò<span class="required-mark">*</span></label>
-            <input
-              type="text"
-              value="Admin"
-              disabled
-              style="background: #f1f5f9"
-            />
+            <label>Xác nhận mật khẩu mới<span class="required-mark">*</span></label>
+            <input type="password" id="confirm-password" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password"
+              required />
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn-secondary" onclick="closeProfileModal()">
+          <button type="button" class="btn-secondary" onclick="closeChangePasswordModal()">
             Hủy
           </button>
-          <button class="btn-primary" onclick="saveProfile()">Lưu</button>
+          <button type="submit" class="btn-primary" id="btn-update-password">
+            Cập nhật
+          </button>
         </div>
-      </div>
+      </form>
     </div>
+  </div>
 
-    <!-- CHANGE PASSWORD MODAL -->
-    <div class="modal-overlay" id="change-password-modal">
-      <div class="modal-box medium-box">
-        <div class="modal-header">
-          <h3 class="modal-title">Đổi mật khẩu</h3>
+  <!-- TOAST CONTAINER -->
+  <div class="app-toast-container" id="app-toast-container"></div>
+
+  <!-- LOGOUT CONFIRM MODAL -->
+  <div class="modal-overlay" id="logout-confirm-modal">
+    <div class="modal-box medium-box">
+      <button class="close-btn" onclick="closeLogoutModal()">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="modal-body" style="text-align: center; padding: 40px 20px">
+        <div style="font-size: 48px; color: #f59e0b; margin-bottom: 20px">
+          <i class="fas fa-exclamation-triangle"></i>
         </div>
-        <button class="close-btn" onclick="closeChangePasswordModal()">
-          <i class="fas fa-times"></i>
-        </button>
-        <form onsubmit="updatePassword(event)">
-          <!-- Hidden username field for password managers/accessibility -->
-          <input
-            type="text"
-            name="username"
-            autocomplete="username"
-            style="display: none"
-            value="admin"
-          />
-          <div class="modal-body">
-            <div class="form-group">
-              <label
-                >Mật khẩu hiện tại<span class="required-mark">*</span></label
-              >
-              <input
-                type="password"
-                id="current-password"
-                placeholder="Nhập mật khẩu hiện tại"
-                autocomplete="current-password"
-                required
-              />
-            </div>
-            <div class="form-group">
-              <label>Mật khẩu mới<span class="required-mark">*</span></label>
-              <input
-                type="password"
-                id="new-password"
-                placeholder="Nhập mật khẩu mới"
-                oninput="onInputPassword(this)"
-                autocomplete="new-password"
-                required
-              />
-              <!-- Password Requirements Checklist -->
-              <div class="password-requirements" id="password-requirements">
-                <div class="requirement" id="req-length">
-                  <i class="fas fa-circle"></i> Ít nhất 8 ký tự
-                </div>
-                <div class="requirement" id="req-upper">
-                  <i class="fas fa-circle"></i> Ít nhất 1 chữ hoa
-                </div>
-                <div class="requirement" id="req-number">
-                  <i class="fas fa-circle"></i> Ít nhất 1 chữ số
-                </div>
-                <div class="requirement" id="req-special">
-                  <i class="fas fa-circle"></i> Ít nhất 1 ký tự đặc biệt
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label
-                >Xác nhận mật khẩu mới<span class="required-mark"
-                  >*</span
-                ></label
-              >
-              <input
-                type="password"
-                id="confirm-password"
-                placeholder="Nhập lại mật khẩu mới"
-                autocomplete="new-password"
-                required
-              />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn-secondary"
-              onclick="closeChangePasswordModal()"
-            >
-              Hủy
-            </button>
-            <button type="submit" class="btn-primary" id="btn-update-password">
-              Cập nhật
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- TOAST CONTAINER -->
-    <div class="app-toast-container" id="app-toast-container"></div>
-
-    <!-- LOGOUT CONFIRM MODAL -->
-    <div class="modal-overlay" id="logout-confirm-modal">
-      <div class="modal-box medium-box">
-        <button class="close-btn" onclick="closeLogoutModal()">
-          <i class="fas fa-times"></i>
-        </button>
-        <div class="modal-body" style="text-align: center; padding: 40px 20px">
-          <div style="font-size: 48px; color: #f59e0b; margin-bottom: 20px">
-            <i class="fas fa-exclamation-triangle"></i>
-          </div>
-          <p
-            style="
+        <p style="
               font-size: 18px;
               font-weight: 700;
               color: #111827;
               margin-bottom: 12px;
-            "
-          >
-            Bạn có chắc chắn muốn đăng xuất?
-          </p>
-          <p style="font-size: 14px; color: #64748b; line-height: 1.5">
-            Mọi phiên làm việc hiện tại của bạn sẽ kết thúc. <br />
-            Bạn sẽ cần đăng nhập lại để tiếp tục sử dụng hệ thống SMART
-            WAREHOUSE.
-          </p>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-secondary" onclick="closeLogoutModal()">
-            Hủy
-          </button>
-          <button
-            class="btn-primary"
-            onclick="confirmLogout()"
-            style="background: #ef4444"
-          >
-            Đăng xuất
-          </button>
-        </div>
+            ">
+          Bạn có chắc chắn muốn đăng xuất?
+        </p>
+        <p style="font-size: 14px; color: #64748b; line-height: 1.5">
+          Mọi phiên làm việc hiện tại của bạn sẽ kết thúc. <br />
+          Bạn sẽ cần đăng nhập lại để tiếp tục sử dụng hệ thống SMART
+          WAREHOUSE.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeLogoutModal()">
+          Hủy
+        </button>
+        <button class="btn-primary" onclick="confirmLogout()" style="background: #ef4444">
+          Đăng xuất
+        </button>
       </div>
     </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
-    <!-- Dùng qua ExcelJS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
+  <!-- Dùng qua ExcelJS CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <script src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="script.js"></script>
 
-    <!-- Global Falling Effect (Snow & Blossoms) -->
-    <div class="falling-container" id="fallingContainer"></div>
-    <script>
-      let blossomsActive = localStorage.getItem('blossomsActive') === 'true';
-      let particleInterval = null;
+  <!-- Global Falling Effect (Snow & Blossoms) -->
+  <div class="falling-container" id="fallingContainer"></div>
+  <script>
+    let blossomsActive = localStorage.getItem('blossomsActive') === 'true';
+    let particleInterval = null;
 
-      function createParticles() {
-        const container = document.getElementById('fallingContainer');
-        if (!container) return;
-        container.innerHTML = ''; // clear existing
-        const particleCount = 45;
-        const petalTypes = ['petal-1', 'petal-2', 'petal-3', 'petal-4', 'petal-5', 'petal-6'];
-        const sizeTypes = ['size-xs', 'size-sm', 'size-md', 'size-lg', 'size-xl'];
-        const animationTypes = ['fall-a', 'fall-b', 'fall-c', 'fall-d', 'fall-e', 'fall-f'];
-        
-        for (let i = 0; i < particleCount; i++) {
-          const particle = document.createElement('div');
-          particle.className = 'particle';
-          const petalClass = petalTypes[Math.floor(Math.random() * petalTypes.length)];
-          particle.classList.add(petalClass);
-          const sizeClass = sizeTypes[Math.floor(Math.random() * sizeTypes.length)];
-          particle.classList.add(sizeClass);
-          const animClass = animationTypes[Math.floor(Math.random() * animationTypes.length)];
-          particle.classList.add(animClass);
-          particle.style.left = Math.random() * 100 + 'vw';
-          const delay = Math.random() * 15 + 's';
-          particle.style.animationDelay = delay;
-          container.appendChild(particle);
+    function createParticles() {
+      const container = document.getElementById('fallingContainer');
+      if (!container) return;
+      container.innerHTML = ''; // clear existing
+      const particleCount = 45;
+      const petalTypes = ['petal-1', 'petal-2', 'petal-3', 'petal-4', 'petal-5', 'petal-6'];
+      const sizeTypes = ['size-xs', 'size-sm', 'size-md', 'size-lg', 'size-xl'];
+      const animationTypes = ['fall-a', 'fall-b', 'fall-c', 'fall-d', 'fall-e', 'fall-f'];
+
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        const petalClass = petalTypes[Math.floor(Math.random() * petalTypes.length)];
+        particle.classList.add(petalClass);
+        const sizeClass = sizeTypes[Math.floor(Math.random() * sizeTypes.length)];
+        particle.classList.add(sizeClass);
+        const animClass = animationTypes[Math.floor(Math.random() * animationTypes.length)];
+        particle.classList.add(animClass);
+        particle.style.left = Math.random() * 100 + 'vw';
+        const delay = Math.random() * 15 + 's';
+        particle.style.animationDelay = delay;
+        container.appendChild(particle);
+      }
+    }
+
+    function updateBlossomUI() {
+      const btn = document.getElementById('btn-cherry');
+      const container = document.getElementById('fallingContainer');
+      if (blossomsActive) {
+        createParticles();
+        if (btn) {
+          btn.style.background = '#fdf2f8';
+          btn.style.color = '#f472b6';
+          btn.style.borderColor = '#fbcfe8';
+          btn.title = "Hoa tàn";
+        }
+      } else {
+        if (container) container.innerHTML = '';
+        if (btn) {
+          btn.style.background = 'var(--surface)';
+          btn.style.color = 'var(--text-3)';
+          btn.style.borderColor = 'var(--border)';
+          btn.title = "Hoa nở";
         }
       }
+    }
 
-      function updateBlossomUI() {
-        const btn = document.getElementById('btn-cherry');
-        const container = document.getElementById('fallingContainer');
-        if (blossomsActive) {
-          createParticles();
-          if (btn) {
-            btn.style.background = '#fdf2f8';
-            btn.style.color = '#f472b6';
-            btn.style.borderColor = '#fbcfe8';
-            btn.title = "Hoa tàn";
-          }
-        } else {
-          if (container) container.innerHTML = '';
-          if (btn) {
-            btn.style.background = 'var(--surface)';
-            btn.style.color = 'var(--text-3)';
-            btn.style.borderColor = 'var(--border)';
-            btn.title = "Hoa nở";
-          }
-        }
-      }
+    function toggleBlossom() {
+      blossomsActive = !blossomsActive;
+      localStorage.setItem('blossomsActive', blossomsActive);
+      updateBlossomUI();
+    }
 
-      function toggleBlossom() {
-        blossomsActive = !blossomsActive;
-        localStorage.setItem('blossomsActive', blossomsActive);
-        updateBlossomUI();
-      }
+    document.addEventListener('DOMContentLoaded', () => {
+      updateBlossomUI();
+    });
+  </script>
+</body>
 
-      document.addEventListener('DOMContentLoaded', () => {
-        updateBlossomUI();
-      });
-    </script>
-  </body>
 </html>

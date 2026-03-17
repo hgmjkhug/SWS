@@ -335,16 +335,11 @@ html, body {
     text-align: center;
 }
 
-/* Inventory Status (Column 6) */
+
+
+/* Location (Column 6) */
 .data-table th:nth-child(6),
 .data-table td:nth-child(6) {
-    width: 150px;
-    text-align: center;
-}
-
-/* Location (Column 7) */
-.data-table th:nth-child(7),
-.data-table td:nth-child(7) {
     width: 130px;
     min-width: 120px;
     max-width: 150px;
