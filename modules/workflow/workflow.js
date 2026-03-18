@@ -439,22 +439,36 @@ window.configureWorkflow = function(id) {
                 document.head.appendChild(link);
             }
 
-            // Load JS module dynamically
-             // Remove old script if exists to force reload/re-init
-             const oldScript = document.getElementById('workflow-config-js');
-             if(oldScript) oldScript.remove();
+            // Load Dependencies (SortableJS for drag and drop)
+            if (!window.Sortable) {
+                const sortableScript = document.createElement('script');
+                sortableScript.src = 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js';
+                document.body.appendChild(sortableScript);
+                
+                // Wait for Sortable to load before loading workflow-config.js
+                sortableScript.onload = () => loadConfigScript();
+            } else {
+                loadConfigScript();
+            }
 
-            const script = document.createElement('script');
-            script.id = 'workflow-config-js';
-            script.src = 'modules/workflow/workflow-config.js';
-            script.onload = () => {
-                if(window.initWorkflowConfig) {
-                    const item = workflows.find(w => w.id === id);
-                    const name = item ? item.name : '';
-                    window.initWorkflowConfig(id, name);
-                }
-            };
-            document.body.appendChild(script);
+            function loadConfigScript() {
+                // Load JS module dynamically
+                // Remove old script if exists to force reload/re-init
+                const oldScript = document.getElementById('workflow-config-js');
+                if(oldScript) oldScript.remove();
+
+                const script = document.createElement('script');
+                script.id = 'workflow-config-js';
+                script.src = 'modules/workflow/workflow-config.js';
+                script.onload = () => {
+                    if(window.initWorkflowConfig) {
+                        const item = workflows.find(w => w.id === id);
+                        const name = item ? item.name : '';
+                        window.initWorkflowConfig(id, name);
+                    }
+                };
+                document.body.appendChild(script);
+            }
 
         })
         .catch(err => console.error('Failed to load Workflow Builder:', err));

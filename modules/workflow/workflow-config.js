@@ -80,7 +80,69 @@ function initWorkflowConfig(workflowId, workflowName) {
         return;
     }
 
-    // --- STEP DATA (from workflow-step module) ---
+    // --- HELPER FUNCTIONS (Define early to avoid ReferenceErrors) ---
+    
+    // Updated createNode with value support
+    window.createNodeHTML = function (name, actionType = '', deviceId = '', params = [], properties = {}) {
+        const div = document.createElement('div');
+        div.className = 'node';
+        div.dataset.name = name;
+        // Store properties in dataset for persistence
+        div.dataset.properties = JSON.stringify(properties || {});
+        
+        // Add click listener for selection
+        div.onclick = function(e) {
+            // Prevent triggering if clicking delete button or inputs directly
+            if (e.target.closest('.del-node-btn') || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON') {
+                return;
+            }
+            if (window.selectNode) window.selectNode(this);
+            e.stopPropagation(); // Prevent bubbling to document
+        };
+
+        // Populate Device Options
+        // Note: deviceTypes is defined below, but since this is assigned to window.createNodeHTML, 
+        // it will be called AFTER deviceTypes is defined. However, for absolute safety, 
+        // let's ensure deviceTypes is also available.
+        const dtSource = [
+            { id: 1, code: 'AGV-LOAD', name: 'AGV Vận chuyển hàng' },
+            { id: 2, code: 'CRANE-STACK', name: 'Cần trục Stacker Crane' },
+            { id: 3, code: 'CONVEYOR-BELT', name: 'Băng tải dây' },
+            { id: 4, code: 'LIFTER-VERT', name: 'Thang máy nâng hàng' },
+            { id: 5, code: 'SCANNER-GATE', name: 'Cổng Scan RFID' },
+            { id: 6, code: 'SHUTTLE', name: 'Shuttle đi theo ray' }
+        ];
+
+        const deviceOptionsHtml = dtSource.map(dt => {
+            return `<option value="${dt.id}">${dt.code} - ${dt.name}</option>`;
+        }).join('');
+
+
+        div.innerHTML = `
+            <button class="del-node-btn" onclick="deleteNode(this)">×</button>
+            <div class="node-header">
+                <span class="stt-badge">Bước <span class="num">0</span></span>
+                <strong style="color: #076EB8; font-size: 13px;">${name}</strong>
+            </div>
+            <div class="node-body">
+                <label class="label">Nhóm thiết bị áp dụng</label>
+                <select class="select-device" onchange="saveStepsTrigger()" disabled style="background-color: #f1f5f9; cursor: not-allowed;">
+                    <option value="">Chọn nhóm thiết bị</option>
+                    ${deviceOptionsHtml}
+                </select>
+            </div>
+        `;
+
+        // Explicitly set the value to handle type safety
+        if (deviceId) {
+            const select = div.querySelector('.select-device');
+            if (select) select.value = deviceId;
+        }
+
+        return div;
+    }
+
+    // --- STEP DATA ---
     const deviceTypes = [
         { id: 1, code: 'AGV-LOAD', name: 'AGV Vận chuyển hàng' },
         { id: 2, code: 'CRANE-STACK', name: 'Cần trục Stacker Crane' },
@@ -669,54 +731,7 @@ function initWorkflowConfig(workflowId, workflowName) {
 
     // --- 3. HELPER FUNCTIONS ---
 
-    // Updated createNode with value support
-    window.createNodeHTML = function (name, actionType = '', deviceId = '', params = [], properties = {}) {
-        const div = document.createElement('div');
-        div.className = 'node';
-        div.dataset.name = name;
-        // Store properties in dataset for persistence
-        div.dataset.properties = JSON.stringify(properties || {});
-        
-        // Add click listener for selection
-        div.onclick = function(e) {
-            // Prevent triggering if clicking delete button or inputs directly
-            if (e.target.closest('.del-node-btn') || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'BUTTON') {
-                return;
-            }
-            selectNode(this);
-            e.stopPropagation(); // Prevent bubbling to document
-        };
-
-        // Populate Device Options
-        // defined in outer scope: const deviceTypes = [...]
-        const deviceOptionsHtml = deviceTypes.map(dt => {
-            return `<option value="${dt.id}">${dt.code} - ${dt.name}</option>`;
-        }).join('');
-
-
-        div.innerHTML = `
-            <button class="del-node-btn" onclick="deleteNode(this)">×</button>
-            <div class="node-header">
-                <span class="stt-badge">Bước <span class="num">0</span></span>
-                <strong style="color: #076EB8; font-size: 13px;">${name}</strong>
-            </div>
-            <div class="node-body">
-                <label class="label">Nhóm thiết bị áp dụng</label>
-                <select class="select-device" onchange="saveStepsTrigger()" disabled style="background-color: #f1f5f9; cursor: not-allowed;">
-                    <option value="">Chọn nhóm thiết bị</option>
-                    ${deviceOptionsHtml}
-                </select>
-            </div>
-        `;
-
-        // Explicitly set the value to handle type safety
-        if (deviceId) {
-            const select = div.querySelector('.select-device');
-            if (select) select.value = deviceId;
-        }
-
-        return div;
-    }
+    // (createNodeHTML moved to top)
 
     // Global wrappers for internal storage access
     window.saveStepsTrigger = function () {

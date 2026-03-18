@@ -1,11 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
 
 /* Container Frame 482421 */
 .warehouse-map-container {
     box-sizing: border-box;
     position: relative;
     width: 100%;
-    max-width: 1032px;
+    /* max-width removed to prevent clipping */
     min-height: 624px;
     background: #FFFFFF;
     border: 0.5px solid #0367CC;
@@ -43,10 +44,10 @@
     display: grid;
     /* 24 cols (a + A-W) * 40px = 960px */
     grid-template-columns: repeat(24, 40px); 
-    /* 17 rows * 40px = 680px */
-    grid-template-rows: repeat(17, 40px); 
+    /* 16 rows * 40px = 640px */
+    grid-template-rows: repeat(16, 40px); 
     width: 960px;
-    height: 680px;
+    height: 640px;
     padding: 0;
     margin: 0;
     position: relative;
@@ -307,6 +308,109 @@
     font-weight: 500;
     text-align: right;
     width: 24px;
+}
+
+
+/* ── Floor Selection Combobox ── */
+.floor-combobox {
+    position: absolute;
+    left: 876px;
+    top: -36px;
+    background: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 20;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    width: 90px;
+    height: 28px;
+    box-sizing: border-box;
+}
+
+.floor-combobox:hover {
+    border-color: #0367CC;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.floor-combobox.open {
+    border-color: #0367CC;
+    /* Removed border-bottom-left/right-radius: 0 to keep button rounded when open */
+}
+
+.floor-combobox .floor-dropdown {
+    display: none;
+    position: absolute;
+    top: 32px; /* 28px height + 4px gap */
+    left: 0;
+    width: 100%;
+    background: #FFFFFF;
+    border: 1px solid #0367CC; /* Full border */
+    border-radius: 6px; /* Rounded on all sides */
+    box-shadow: 0 10px 15px -3px rgba(3, 103, 204, 0.15);
+    z-index: 21;
+    overflow: hidden;
+}
+
+.floor-combobox.open .floor-dropdown {
+    display: block;
+}
+
+.floor-combobox .dropdown-item {
+    padding: 8px 12px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    color: #4B5563;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    display: block;
+    white-space: nowrap;
+    text-align: left;
+}
+
+.floor-combobox .dropdown-item:hover {
+    background: #E6F7FF;
+    color: #076EB8;
+}
+
+.floor-combobox .dropdown-item.active {
+    background: #F3F4F6;
+    color: #076EB8;
+    font-weight: 700;
+}
+
+.floor-combobox .btn-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8px;
+    gap: 4px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.floor-combobox .btn-text {
+    font-family: 'Nunito', sans-serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: normal;
+    display: flex;
+    align-items: center;
+    color: #076EB8;
+}
+
+.floor-combobox .btn-icon {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #076EB8;
+    flex-shrink: 0;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1350,4 +1454,72 @@
 .summary-tile-sub {
     font-size: 9.5px;
     color: #94a3b8;
+}
+
+/* Toast Notification Styles */
+.toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 9999;
+}
+
+.toast {
+    min-width: 320px;
+    background: #FFFFFF;
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.12);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: toast-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    border-left: 4px solid #059669;
+}
+
+.toast.removing {
+    animation: toast-out 0.3s ease forwards;
+}
+
+.toast-icon {
+    width: 24px;
+    height: 24px;
+    background: #ECFDF5;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #059669;
+}
+
+.toast-message {
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1F2937;
+}
+
+@keyframes toast-in {
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes toast-out {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(20px);
+        opacity: 0;
+    }
 }
