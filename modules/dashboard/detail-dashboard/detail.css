@@ -50,7 +50,7 @@ body { background: var(--bg); color: var(--text-1); min-height: 100vh; font-fami
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── LAYOUT ── */
-.dash { padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+.dash { padding: 24px 0px; display: flex; flex-direction: column; gap: 20px; }
 
 /* ── CARD BASE ── */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--sh); transition: box-shadow .2s; }

@@ -5,7 +5,7 @@
 .warehouse-map-container {
     box-sizing: border-box;
     position: relative;
-    width: 100%;
+    width: fit-content;
     /* max-width removed to prevent clipping */
     min-height: 624px;
     background: #FFFFFF;
@@ -14,10 +14,10 @@
     border-radius: 12px;
     
     /* Layout for labels and grid */
-    padding: 0; 
+    padding: 0 48px 24px 0; 
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Ensure grid doesn't leak out before scroll */
+    /* overflow: hidden; removed to ensure absolutely-positioned controls aren't clipped */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .lifter-pallet {
@@ -42,11 +42,11 @@
 /* Inner Grid Frame 482313 */
 #map-main-grid {
     display: grid;
-    /* 24 cols (a + A-W) * 40px = 960px */
-    grid-template-columns: repeat(24, 40px); 
+    /* 20 cols (A-T) * 40px = 800px */
+    grid-template-columns: repeat(20, 40px); 
     /* 16 rows * 40px = 640px */
     grid-template-rows: repeat(16, 40px); 
-    width: 960px;
+    width: 800px;
     height: 640px;
     padding: 0;
     margin: 0;
@@ -93,7 +93,13 @@
 }
 
 /* Shelf/Container Cell */
-.map-cell.shelf {
+/* Specialized Cell Backgrounds (Unified to #EDF6FF) */
+.map-cell.shelf,
+.map-cell.inbound,
+.map-cell.outbound,
+.map-cell.parking-pos,
+.map-cell.pallet-pos,
+.map-cell.charging {
     background-color: #EDF6FF;
     position: relative;
     box-sizing: border-box;
@@ -116,7 +122,7 @@
 
 /* Charging Station Cell */
 .map-cell.charging {
-    background: #EDF6FF; 
+    /* Background handled by unified rule above */
 }
 
 /* All special icon cells: position absolutely to fill cell perfectly */
@@ -314,7 +320,7 @@
 /* ── Floor Selection Combobox ── */
 .floor-combobox {
     position: absolute;
-    left: 876px;
+    right: 8px; /* Aligned relative to the right edge of the card, 8px from last column T */
     top: -36px;
     background: #FFFFFF;
     border: 1px solid #D1D5DB;
@@ -452,7 +458,7 @@
     position: relative !important;
     left: unset !important;
     top: unset !important;
-    flex: 3 1 800px; /* Map takes more space but is also flexible */
+    flex: 0 1 fit-content; /* Map card fits its content instead of growing infinitely */
     min-width: 400px;
     overflow-x: auto;
 }

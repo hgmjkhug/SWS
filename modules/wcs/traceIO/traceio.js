@@ -5,25 +5,27 @@
     // 0 = Empty/Path, 1 = Wall, 2 = Shelf, 3 = Charging Shelf
     let currentFloor = 1;
     const mapMatrix = [
-        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [0, 2, 2, 2, 2, 2, 3, 3, 3, 3, 2, 0, 0, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 0],
-        [5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4]
+        [5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     ];
-    mapMatrix[2][0] = 8;   // A3 Parking (New)
-    mapMatrix[7][23] = 7;  // X8 Parking (Moved from X7)
+    mapMatrix[2][0] = 8;     // A3 Parking
+    mapMatrix[8][19] = 7;    // T9 Parking (Moved from A9)
+    mapMatrix[15][0] = 9;    // A16 special corner
+    for (let c = 1; c <= 9; c++) mapMatrix[15][c] = 10; // B16-J16 horizontal
 
     // Create wrapper for spacing rules
     const wrapper = document.createElement('div');
@@ -36,12 +38,47 @@
     wrapper.appendChild(mainGrid);
 
     // --- Helper for shelf decoration ---
-    function addShelfDecor(cell) {
+    function addShelfDecor(cell, r, c) {
         const decor = document.createElement('div');
         decor.className = 'shelf-decor';
-        decor.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        
+        const isSpecialColumnA = (c === 0 && r >= 1 && r <= 14 && r !== 2);
+        const isSpecialColumnT = (c === 19 && r >= 1 && r <= 14 && r !== 8);
+
+        if (isSpecialColumnA) {
+            decor.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_4025_17050)">
+<rect width="40" height="40" fill="#DFF0FF" fill-opacity="0.5"/>
+<path d="M20 20H40" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M20 0V19.7531" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M20 19.7529V39.9998" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<ellipse cx="20" cy="19.7531" rx="2" ry="1.97531" fill="#677594"/>
+</g>
+<defs>
+<clipPath id="clip0_4025_17050">
+<rect width="40" height="40" fill="white"/>
+</clipPath>
+</defs>
+</svg>`;
+        } else if (isSpecialColumnT) {
+            decor.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_4025_17051)">
+<rect width="40" height="40" fill="#DFF0FF" fill-opacity="0.5"/>
+<path d="M20 20H0" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M20 0V19.7531" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M20 19.7529V39.9998" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<ellipse cx="20" cy="19.7531" rx="2" ry="1.97531" fill="#677594"/>
+</g>
+<defs>
+<clipPath id="clip0_4025_17051">
+<rect width="40" height="40" fill="white"/>
+</clipPath>
+</defs>
+</svg>`;
+        } else {
+            decor.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4025_16985)">
-<rect width="40" height="40" fill="#EDF6FF"/>
+<rect width="40" height="40" fill="#DFF0FF80"/>
 <path d="M0 20H12" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M40 20H28" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M23.4821 14.6838C23.1815 14.9844 22.6828 14.9844 22.3822 14.6838L19.9989 12.3005L17.6157 14.6838C17.3151 14.9844 16.8164 14.9844 16.5158 14.6838C16.2151 14.3831 16.2151 13.8845 16.5158 13.5838L19.449 10.6506C19.7496 10.35 20.2483 10.35 20.5489 10.6506L23.4821 13.5838C23.7828 13.8845 23.7828 14.3336 23.4821 14.6838Z" fill="#076EB8"/>
@@ -56,12 +93,13 @@
 </clipPath>
 </defs>
 </svg>`;
+        }
         cell.appendChild(decor);
     }
 
     // Render the grid cells
     mapMatrix.forEach((row, rowIndex) => {
-        row.forEach(cellType => {
+        row.forEach((cellType, colIndex) => {
             const cell = document.createElement('div');
             cell.className = 'map-cell';
             if (cellType === 0) {
@@ -75,7 +113,7 @@
                 cell.classList.add('wall');
             } else if (cellType === 2) {
                 cell.classList.add('shelf');
-                addShelfDecor(cell);
+                addShelfDecor(cell, rowIndex, colIndex);
             } else if (cellType === 3) {
                 cell.classList.add('shelf');
                 cell.classList.add('charging');
@@ -83,7 +121,7 @@
                 icon.className = 'charging-icon';
                 icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g clip-path="url(#clip0_4025_17542)">
-<rect width="40" height="40" fill="#A4D3FE" fill-opacity="0.4"/>
+<rect width="40" height="40" fill="#DFF0FF80" fill-opacity="0.4"/>
 <path d="M0 20H12" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M40 20H28" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <circle cx="20" cy="20" r="13" fill="white"/>
@@ -109,20 +147,20 @@
                 const icon = document.createElement('div');
                 icon.className = 'inbound-icon';
                 icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clip-path="url(#clip0_4305_21167)">
-<rect width="40" height="40" fill="#A4D3FE" fill-opacity="0.4"/>
-<path d="M20 0V12" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<g clip-path="url(#clip0_4305_21083)">
+<path d="M20 40V28" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M0 20H12" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M28.5412 17.2831V22.7164C28.5412 26.8081 26.7912 28.5581 22.6996 28.5581H22.5912C18.8912 28.5581 17.1079 27.0998 16.7996 23.8331C16.7746 23.4998 17.0246 23.1831 17.3662 23.1498C17.7079 23.1164 18.0162 23.3664 18.0496 23.7164C18.2912 26.3331 19.5246 27.3081 22.5996 27.3081H22.7079C26.0996 27.3081 27.2996 26.1081 27.2996 22.7164V17.2831C27.2996 13.8914 26.0996 12.6914 22.7079 12.6914H22.5996C19.5079 12.6914 18.2746 13.6831 18.0496 16.3498C18.0162 16.6914 17.7162 16.9498 17.3746 16.9164C17.0329 16.8831 16.7746 16.5914 16.8079 16.2414C17.0912 12.9248 18.8829 11.4414 22.6079 11.4414H22.7162C26.7912 11.4414 28.5412 13.1914 28.5412 17.2831Z" fill="#076EB8"/>
 <path d="M23.0253 20C23.0253 20.3417 22.742 20.625 22.4003 20.625H11.667C11.3253 20.625 11.042 20.3417 11.042 20C11.042 19.6583 11.3253 19.375 11.667 19.375H22.4003C22.7503 19.375 23.0253 19.6583 23.0253 20Z" fill="#076EB8"/>
 <path d="M23.9585 20C23.9585 20.1583 23.9002 20.3166 23.7752 20.4416L20.9835 23.2333C20.7419 23.475 20.3419 23.475 20.1002 23.2333C19.8585 22.9916 19.8585 22.5916 20.1002 22.35L22.4502 20L20.1002 17.65C19.8585 17.4083 19.8585 17.0083 20.1002 16.7666C20.3419 16.525 20.7419 16.525 20.9835 16.7666L23.7752 19.5583C23.9002 19.6833 23.9585 19.8416 23.9585 20Z" fill="#076EB8"/>
 </g>
-<rect x="0.25" y="0.25" width="39.5" height="39.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
 <defs>
-<clipPath id="clip0_4305_21167">
+<clipPath id="clip0_4305_21083">
 <rect width="40" height="40" fill="white"/>
 </clipPath>
 </defs>
 </svg>
+
 
 `;
                 cell.appendChild(icon);
@@ -132,16 +170,15 @@
                 icon.className = 'outbound-icon';
                 icon.innerHTML = `
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clip-path="url(#clip0_4305_21174)">
-<rect width="40" height="40" fill="#A4D3FE" fill-opacity="0.4"/>
-<path d="M20 0V12" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<g clip-path="url(#clip0_4305_21104)">
+<path d="M20 40V28" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M40 20H28" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M11.4588 22.7169V17.2836C11.4588 13.1919 13.2088 11.4419 17.3004 11.4419H17.4088C21.1088 11.4419 22.8921 12.9002 23.2004 16.1669C23.2254 16.5002 22.9754 16.8169 22.6338 16.8502C22.2921 16.8836 21.9838 16.6336 21.9504 16.2836C21.7088 13.6669 20.4754 12.6919 17.4004 12.6919H17.2921C13.9004 12.6919 12.7004 13.8919 12.7004 17.2836V22.7169C12.7004 26.1086 13.9004 27.3086 17.2921 27.3086H17.4004C20.4921 27.3086 21.7254 26.3169 21.9504 23.6502C21.9838 23.3086 22.2838 23.0502 22.6254 23.0836C22.9671 23.1169 23.2254 23.4086 23.1921 23.7586C22.9088 27.0752 21.1171 28.5586 17.3921 28.5586H17.2838C13.2088 28.5586 11.4588 26.8086 11.4588 22.7169Z" fill="#076EB8"/>
 <path d="M16.8751 20C16.8751 19.6583 17.1584 19.375 17.5001 19.375L26.9834 19.375C27.3251 19.375 27.6084 19.6583 27.6084 20C27.6084 20.3417 27.3251 20.625 26.9834 20.625H17.5001C17.1584 20.625 16.8751 20.3417 16.8751 20Z" fill="#076EB8"/>
 <path d="M24.5005 22.7917C24.5005 22.6334 24.5588 22.475 24.6838 22.35L27.0338 20L24.6838 17.65C24.4421 17.4084 24.4421 17.0084 24.6838 16.7667C24.9255 16.525 25.3255 16.525 25.5671 16.7667L28.3588 19.5584C28.6005 19.8 28.6005 20.2 28.3588 20.4417L25.5671 23.2334C25.3255 23.475 24.9255 23.475 24.6838 23.2334C24.5588 23.1167 24.5005 22.95 24.5005 22.7917Z" fill="#076EB8"/>
 </g>
-<rect x="0.25" y="0.25" width="39.5" height="39.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
 <defs>
-<clipPath id="clip0_4305_21174">
+<clipPath id="clip0_4305_21104">
 <rect width="40" height="40" fill="white"/>
 </clipPath>
 </defs>
@@ -155,14 +192,14 @@
                 icon.className = 'pallet-icon';
                 icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4025_17414)">
-<rect width="40" height="40" fill="#A4D3FE" fill-opacity="0.4"/>
+<path d="M0 20H8.1" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M40 20L31 20" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <g filter="url(#filter0_d_4025_17414)">
 <path d="M22.037 8.01953L9.26853 9.9016C8.82754 9.9666 8.6856 10.5325 9.04371 10.7979L15.0409 15.243C15.1556 15.328 15.3011 15.3599 15.4409 15.3307L30.3319 12.2195C30.8174 12.1181 30.8749 11.4479 30.4138 11.2652L22.2941 8.04932C22.2125 8.01701 22.1238 8.00674 22.037 8.01953Z" fill="#38A0F0" fill-opacity="0.7"/>
 <path d="M14.7693 15.5729L8.80567 11.0371C8.47594 10.7863 8.00176 11.0223 8.00298 11.4365L8.03598 22.6538C8.0363 22.7633 8.07256 22.8696 8.13918 22.9565L14.0698 30.6919C14.3605 31.0711 14.9666 30.8655 14.9666 30.3876V15.9709C14.9666 15.8147 14.8936 15.6675 14.7693 15.5729Z" fill="#1D8ADF"/>
 <path d="M31.3891 12.4606L15.7934 15.8453C15.5634 15.8952 15.3994 16.0987 15.3994 16.334V31.2908C15.3994 31.6365 15.7419 31.8779 16.0675 31.7617L31.6632 26.1965C31.8623 26.1254 31.9952 25.9369 31.9952 25.7256V12.9493C31.9952 12.6304 31.7007 12.393 31.3891 12.4606Z" fill="#0F6EB8" stroke="#0F6EB8" stroke-width="0.1"/>
 </g>
 </g>
-<rect x="0.25" y="0.25" width="39.5" height="39.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
 <defs>
 <filter id="filter0_d_4025_17414" x="4.00293" y="8.01416" width="32.042" height="31.8271" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
 <feFlood flood-opacity="0" result="BackgroundImageFix"/>
@@ -179,6 +216,7 @@
 </clipPath>
 </defs>
 </svg>
+
 `;
                 cell.appendChild(icon);
 
@@ -188,14 +226,12 @@
                 icon.className = 'parking-icon';
                 icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4305_21463)">
-<rect width="40" height="40" fill="#A4D3FE" fill-opacity="0.4"/>
 <path d="M20 0V11" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M20 40V29" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M0 20H10.7317" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <circle cx="20" cy="20" r="9.4" fill="white" stroke="#076EB8" stroke-width="1.2"/>
 <path d="M18.0909 26C17.4945 26 17 25.5705 17 25.0526V14.9474C17 14.4295 17.4945 14 18.0909 14H21C23.2109 14 25 15.5537 25 17.4737C25 19.3937 23.2109 20.9474 21 20.9474H19.1818V25.0526C19.1818 25.5705 18.6873 26 18.0909 26ZM19.1818 19.0526H21C22.0036 19.0526 22.8182 18.3453 22.8182 17.4737C22.8182 16.6021 22.0036 15.8947 21 15.8947H19.1818V19.0526Z" fill="#076EB8"/>
 </g>
-<rect x="0.25" y="0.25" width="39.5" height="39.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
 <defs>
 <clipPath id="clip0_4305_21463">
 <rect width="40" height="40" fill="white"/>
@@ -210,14 +246,12 @@
                 icon.className = 'parking-icon';
                 icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4305_21445)">
-<rect width="40" height="40" fill="#A4D3FE" fill-opacity="0.4"/>
 <path d="M20 0V11" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M20 40V29" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M40.0003 20L29.2686 20" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <circle cx="20" cy="20" r="9.4" fill="white" stroke="#076EB8" stroke-width="1.2"/>
 <path d="M18.0909 26C17.4945 26 17 25.5705 17 25.0526V14.9474C17 14.4295 17.4945 14 18.0909 14H21C23.2109 14 25 15.5537 25 17.4737C25 19.3937 23.2109 20.9474 21 20.9474H19.1818V25.0526C19.1818 25.5705 18.6873 26 18.0909 26ZM19.1818 19.0526H21C22.0036 19.0526 22.8182 18.3453 22.8182 17.4737C22.8182 16.6021 22.0036 15.8947 21 15.8947H19.1818V19.0526Z" fill="#076EB8"/>
 </g>
-<rect x="0.25" y="0.25" width="39.5" height="39.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
 <defs>
 <clipPath id="clip0_4305_21445">
 <rect width="40" height="40" fill="white"/>
@@ -225,6 +259,27 @@
 </defs>
 </svg>
 `;
+                cell.appendChild(icon);
+            }
+ else if (cellType === 9) {
+                cell.classList.add('empty');
+                const icon = document.createElement('div');
+                icon.className = 'empty-icon';
+                icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 20H40" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M20 0V19.7531" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<ellipse cx="20" cy="19.7531" rx="2" ry="1.97531" fill="#677594"/>
+</svg>`;
+                cell.appendChild(icon);
+            } else if (cellType === 10) {
+                cell.classList.add('empty');
+                const icon = document.createElement('div');
+                icon.className = 'empty-icon';
+                icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 20H20" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M20 20H40" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<ellipse cx="20" cy="19.7531" rx="2" ry="1.97531" fill="#677594"/>
+</svg>`;
                 cell.appendChild(icon);
             }
             mainGrid.appendChild(cell);
@@ -241,7 +296,7 @@
         return name;
     }
 
-    const cols = 24;
+    const cols = 20;
     const rows = 16;
     for (let c = 0; c < cols; c++) {
         const label = document.createElement('div');
@@ -300,14 +355,9 @@
             // Trigger success toast
             showToast(`Hiển thị bản đồ giám sát hoạt động của tầng ${currentFloor}`, 'success');
 
-            // Floor 2 only has 1 shuttle (Outbound/Shuttle 2)
-            if (currentFloor === 2) {
-                shuttleEl1.style.display = 'none';
-                shuttleEl2.style.display = 'block';
-            } else {
-                shuttleEl1.style.display = 'block';
-                shuttleEl2.style.display = 'block';
-            }
+            // Show both shuttles on all floors
+            shuttleEl1.style.display = 'block';
+            shuttleEl2.style.display = 'block';
         });
     });
 
@@ -370,7 +420,7 @@ ${cargoSVG}
     let lifterBar;
     let lifterTimeout1, lifterTimeout2;
     (function () {
-        const cell = mainGrid.children[15 * cols + 23];
+        const cell = mainGrid.children[0 * cols + 19];
         if (!cell) return;
         lifterBar = document.createElement('div');
         lifterBar.className = 'lifter-bar';
@@ -444,7 +494,7 @@ ${cargoSVG}
         const icon = document.createElement('div');
         icon.className = 'pallet-icon';
         icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="40" height="40" fill="#A4D3FE" fill-opacity="0.2"/>
+<rect width="40" height="40" fill="#DFF0FF80" fill-opacity="0.2"/>
 <path d="M0 20H8.1" stroke="#7C8DB5" stroke-opacity="0.3"/>
 <path d="M40 20L31 20" stroke="#7C8DB5" stroke-opacity="0.3"/>
 <g filter="url(#filter0_d_drop)">
@@ -520,17 +570,17 @@ ${cargoSVG}
         return null;
     }
 
-    const railColSet = new Set([0, 23]); // Vertically travel ONLY on columns A and X
+    const railColSet = new Set([0, 19]); // Vertically travel ONLY on columns A and X
     const shuttleStates = {}; // Global state to track all shuttle positions
 
-    function missionPath(startR, startC, sourceR, sourceC, destR, destC, currentAngle = 0) {
+    function missionPath(startR, startC, sourceR, sourceC, destR, destC, currentAngle = 0, role = 'inbound') {
         const path = [];
         let curR = startR, curC = startC;
 
-        // 1. Exit parking spot if in column 23/0 or on a shelf
-        if (curC === 0 || curC === 23 || mapMatrix[curR][curC] === 2) {
-             const targetRail = (curC <= 11) ? 0 : 23;
-             const approachC = (targetRail === 0) ? 1 : 22;
+        // 1. Exit parking spot if in column 19/0 or on a shelf
+        if (curC === 0 || curC === 19 || mapMatrix[curR][curC] === 2) {
+             const targetRail = (curC <= 9) ? 0 : 19;
+             const approachC = (targetRail === 0) ? 1 : 18;
              if (curC !== approachC && curC !== targetRail) {
                  const s = seg(curR, curC, curR, approachC, null, currentAngle);
                  path.push(...s.steps); currentAngle = s.lastAngle; curC = approachC;
@@ -538,8 +588,8 @@ ${cargoSVG}
         }
 
         // 2. Go to Source
-        let targetRailC = (curC <= 11) ? 0 : 23;
-        let sourceRailC = (sourceC <= 11) ? 0 : 23;
+        let targetRailC = (role === 'inbound') ? 19 : 0;
+        let sourceRailC = (role === 'inbound') ? 19 : 0;
 
         // Move to vertical rail
         if (curC !== targetRailC) {
@@ -561,7 +611,7 @@ ${cargoSVG}
         for (let i = 0; i < 3; i++) path.push({ r: sourceR, c: sourceC, angle: currentAngle, action: i === 0 ? 'load' : null });
 
         // 3. Go to Destination
-        let destRailC = (destC <= 11) ? 0 : 23;
+        let destRailC = (role === 'inbound') ? 19 : 0;
         // Move back to vertical rail
         if (curC !== destRailC) {
             const s = seg(curR, curC, curR, destRailC, null, currentAngle);
@@ -639,7 +689,8 @@ ${cargoSVG}
                 if (!target) return null;
                 const shelfKey = `${target.r},${target.c}`;
                 reservedShelves.add(shelfKey);
-                mData = missionPath(currR, currC, 15, 23, target.r, target.c, currAngle);
+                // Source is station T1 (0, 19)
+                mData = missionPath(currR, currC, 0, 19, target.r, target.c, currAngle, 'inbound');
                 mData.steps.forEach(s => {
                     if (s.action === 'unload') s.onComplete = () => {
                         reservedShelves.delete(shelfKey);
@@ -647,9 +698,10 @@ ${cargoSVG}
                     };
                 });
             } else {
-                // Flow: Occupied Shelf -> B15 (14,1)
+                // Flow: Occupied Shelf -> A1 (0, 0)
                 let target = null;
-                for (let r = 0; r < rows; r++) {
+                // Outbound only uses rows 1-15 (index 0-14)
+                for (let r = 0; r <= 14; r++) {
                     for (let c = 0; c < cols; c++) {
                         if (mapMatrix[r][c] === 2 && occupiedCells.has(`${r},${c}`) && !reservedShelves.has(`${r},${c}`)) {
                             target = { r, c }; break;
@@ -660,7 +712,8 @@ ${cargoSVG}
                 if (!target) return null;
                 const shelfKey = `${target.r},${target.c}`;
                 reservedShelves.add(shelfKey);
-                mData = missionPath(currR, currC, target.r, target.c, 15, 1, currAngle);
+                // Destination is A1 (0, 0) via Column A
+                mData = missionPath(currR, currC, target.r, target.c, 0, 0, currAngle, 'outbound');
                 mData.steps.forEach(s => {
                     if (s.action === 'load') s.onComplete = () => {
                          reservedShelves.delete(shelfKey);
@@ -669,9 +722,9 @@ ${cargoSVG}
                          const cell = mainGrid.children[target.r * cols + target.c];
                          cell.classList.remove('pallet-pos');
                          cell.classList.add('shelf');
-                         const pIcon = cell.querySelector('.pallet-icon');
-                         if (pIcon) pIcon.remove();
-                         addShelfDecor(cell);
+                         const icon = cell.querySelector('.pallet-icon');
+                         if (icon) icon.remove();
+                         addShelfDecor(cell, target.r, target.c);
                     };
                 });
             }
@@ -730,78 +783,9 @@ ${cargoSVG}
         setTimeout(move, startDelay);
     }
 
-    animateShuttle(shuttleEl1, 10, { r: 7, c: 23 }, 'shuttle-1', 'inbound');
+    animateShuttle(shuttleEl1, 10, { r: 7, c: 19 }, 'shuttle-1', 'inbound');
     animateShuttle(shuttleEl2, 10, { r: 2, c: 0 }, 'shuttle-2', 'outbound', 5000);
 
-    // --- Rail implementation ---
-    function addRailSegment(cell, type) {
-        const seg = document.createElement('div');
-        const orient = (type === 'h-left' || type === 'h-right') ? 'h' : 'v';
-        seg.className = `rail-segment ${orient} ${type}`;
-        cell.appendChild(seg);
-    }
-
-    // Helper: get cell type from mapMatrix by grid index
-    function cellTypeAt(r, c) {
-        if (r < 0 || r >= mapMatrix.length || c < 0 || c >= mapMatrix[0].length) return -1;
-        return mapMatrix[r][c];
-    }
-
-    // Special icon cell types that already have baked-in rail lines in their SVG
-    const ICON_CELL_TYPES = new Set([3, 4, 5, 7]); // charging=3, inbound=4, outbound=5, parking=7
-
-    const railCols = [0, 23];
-    const railRows = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-            const index = r * cols + c;
-            const cell = mainGrid.children[index];
-            if (!cell) continue;
-
-            const ct = cellTypeAt(r, c);
-            const isIconCell = ICON_CELL_TYPES.has(ct);
-            
-            // Horizontal rails (Row 1: B1 to W1)
-            if (r === 0) {
-                if (c >= 1 && c <= 22) {
-                    if (c > 1) addRailSegment(cell, 'h-left');
-                    if (c < 22) addRailSegment(cell, 'h-right');
-                }
-            } else if (railRows.includes(r) && r !== 16) {
-                const is8A = (r === 7 && c === 0);
-                const is8B = (r === 7 && c === 1);
-                const isW = (c === 22);
-                const isX = (c === 23);
-
-                if (!isIconCell) {
-                    if (c > 0 && !is8B && !isX) addRailSegment(cell, 'h-left');
-                    if (c < cols - 1 && !is8A && !isW) addRailSegment(cell, 'h-right');
-                }
-            } else if (r >= 1 && r <= 14) {
-                if ((c === 11 || c === 12) && !isIconCell) {
-                    addRailSegment(cell, 'h-left');
-                    addRailSegment(cell, 'h-right');
-                }
-            }
-
-            // Vertical rails logic: strictly on columns 0 and 23
-            if (c === 0 || c === 23) {
-                if (!isIconCell && r < 15) { // Skip Row 16
-                    if (r > 0)  addRailSegment(cell, 'v-up');
-                    if (r < 15) addRailSegment(cell, 'v-down'); // Reach Row 16
-                }
-            }
-
-            // Horizontal rails logic: rows 1-15 (indexed 0-14)
-            if (r >= 0 && r < 15) { // Skip Row 16
-                if (!isIconCell) {
-                    if (c > 0) addRailSegment(cell, 'h-left');
-                    if (c < cols - 1) addRailSegment(cell, 'h-right');
-                }
-            }
-        }
-    }
 })();
 
 (function initPanels() {
