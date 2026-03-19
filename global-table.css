@@ -464,3 +464,76 @@ table thead,
 .table-scroll-body table {
     margin-top: 0;
 }
+
+/* ========================================
+   GLOBAL ACTION BUTTONS & DROPDOWNS
+   Used for Import/Export and Sync actions
+   ======================================== */
+
+.dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #ffffff;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+    z-index: 1000;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin-top: 4px;
+    overflow: hidden;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-content a {
+    color: #334155;
+    padding: 10px 16px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.dropdown-content a i {
+    width: 16px;
+    text-align: center;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f5f9;
+    color: #076EB8;
+}
+
+.dropdown-container:hover .dropdown-content {
+    display: block;
+}
+
+.btn-outline-primary {
+    background-color: #fff !important;
+    border: 1px solid #2563eb !important;
+    color: #2563eb !important;
+}
+.btn-outline-primary:hover {
+    background-color: #eff6ff !important;
+}
+
+.btn-outline-success {
+    background-color: #fff !important;
+    border: 1px solid #22c55e !important;
+    color: #22c55e !important;
+}
+.btn-outline-success:hover {
+    background-color: #f0fdf4 !important;
+}

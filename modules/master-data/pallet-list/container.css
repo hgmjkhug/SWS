@@ -70,9 +70,20 @@
 
 .data-table thead th {
     position: sticky;
-    top: 0;
-    z-index: 10;
     background-color: #076EB8 !important;
+    z-index: 20;
+}
+
+.data-table thead tr:nth-child(1) th {
+    top: 0;
+    height: 44px;
+    z-index: 30;
+}
+
+.data-table thead tr:nth-child(2) th {
+    top: 44px; 
+    height: 34px;
+    z-index: 25;
 }
 
 /* Scrollbar styling for table wrapper */
@@ -97,22 +108,33 @@
 .data-table {
     width: 100%;
     table-layout: fixed; /* Crucial for alignment */
-    border-collapse: collapse;
+    border-collapse: separate; /* Better for sticky headers */
+    border-spacing: 0;
 }
 .data-table th, .data-table td {
-    padding: 12px 16px;
+    padding: 10px 12px;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color); /* Added for separate collapse */
     box-sizing: border-box;
+}
+.data-table th:first-child, .data-table td:first-child {
+    border-left: 1px solid var(--border-color); 
 }
 .data-table th {
     background-color: #076EB8 !important;
     color: #FFFFFF !important;
     font-weight: 600;
-    font-size: 16px !important;
+    font-size: 15px !important;
     text-transform: none !important;
-    border-bottom: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 8px; 
+    box-sizing: border-box;
+    white-space: nowrap;
 }
+
 .data-table td {
     font-size: 14px !important;
 }
@@ -120,13 +142,23 @@
     background-color: #f8fafc;
 }
 
-/* Columns */
-.data-table th:nth-child(1), .data-table td:nth-child(1) { width: 40px; text-align: center; } /* Checkbox */
-.data-table th:nth-child(2), .data-table td:nth-child(2) { width: 50px; text-align: center; } /* STT */
-.data-table th:nth-child(3), .data-table td:nth-child(3) { width: 150px; font-weight: 600; color: #475569; text-align: center; } /* Mã đơn vị chứa */
-.data-table th:nth-child(4), .data-table td:nth-child(4) { width: 180px; text-align: center; } /* Loại đơn vị chứa */
-.data-table th:nth-child(5), .data-table td:nth-child(5) { width: 80px; text-align: center; } /* Sử dụng */
-.data-table th:nth-child(6), .data-table td:nth-child(6) { width: 100px; text-align: center; } /* Thao tác */
+.data-table td:nth-child(3) { font-weight: 600; color: #475569; }
+.data-table td { text-align: center; }
+
+/* In thead, ensure first row header height is consistent */
+.data-table thead tr:first-child {
+    height: 44px;
+}
+.data-table thead tr:last-child {
+    height: 36px;
+}
+
+/* Sub-header unified color & separation */
+.data-table thead tr:last-child th {
+    font-size: 13px !important;
+    background-color: #076EB8 !important; 
+    padding: 0 4px;
+}
 
 /* Checkbox size */
 .data-table input[type="checkbox"] {
@@ -738,10 +770,7 @@ body > .copy-popover {
     align-items: flex-end;
     margin-left: auto;
 }
-.add-btn {
-    background-color: #076EB8;
-    color: white;
-    border: none;
+.btn {
     padding: 8px 16px;
     border-radius: 6px;
     font-weight: 600;
@@ -753,28 +782,34 @@ body > .copy-popover {
     height: 40px;
     box-sizing: border-box;
     white-space: nowrap;
+    border: none;
+    transition: all 0.2s;
+}
+
+.add-btn {
+    background-color: #076EB8;
+    color: white;
 }
 .add-btn:hover {
     background-color: #065a96;
 }
+
 .btn-outline-primary {
     background: white;
     color: #076EB8;
     border: 1px solid #076EB8;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 13px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    height: 40px;
-    box-sizing: border-box;
-    white-space: nowrap;
 }
 .btn-outline-primary:hover {
     background-color: #eff6ff;
+}
+
+.btn-outline-success {
+    background: white;
+    color: #22c55e;
+    border: 1px solid #22c55e;
+}
+.btn-outline-success:hover {
+    background-color: #f0fdf4;
 }
 
 /* Close button in modal */

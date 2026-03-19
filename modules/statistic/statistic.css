@@ -8,7 +8,10 @@
   --text-muted: #64748b;
   --border-color: #e2e8f0;
 }
-
+.content-body
+{
+  padding: 0px;
+}
 [data-theme="dark"] {
   --card-bg: #1e293b;
   --text-main: #f1f5f9;

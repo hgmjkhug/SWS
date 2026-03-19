@@ -90,9 +90,12 @@
             inbound: inbound,
             material: material,
             inventoryStatus: invStatus,
-            entryDate: entryDate,
             entryTimestamp: randomDate, // Added for filtering
             quantity: quantity,
+            length: type === "Đơn vị chứa gỗ" ? 1200 : (type === "Đơn vị chứa nhựa" ? 600 : 1200),
+            width: type === "Đơn vị chứa gỗ" ? 800 : (type === "Đơn vị chứa nhựa" ? 400 : 1000),
+            height: type === "Đơn vị chứa gỗ" ? 144 : (type === "Đơn vị chứa nhựa" ? 280 : 150),
+            maxLoad: type === "Đơn vị chứa gỗ" ? 1000 : (type === "Đơn vị chứa nhựa" ? 50 : 2000),
             isActive: Math.random() > 0.2 // Randomize initial status
         });
     }
@@ -244,6 +247,10 @@
                 <td>
                     ${container.type}
                 </td>
+                <td style="text-align: center;">${container.length || '-'}</td>
+                <td style="text-align: center;">${container.width || '-'}</td>
+                <td style="text-align: center;">${container.height || '-'}</td>
+                <td style="text-align: center;">${container.maxLoad || '-'}</td>
                 <td style="text-align: center;">
                         <label class="switch ${disabledClass}" title="${toggleTitle}">
                             <input type="checkbox" class="usage-toggle" data-id="${container.id}" ${container.isActive ? 'checked' : ''}>
@@ -878,6 +885,14 @@
                     modalTitle.innerText = 'Cập nhật vật chứa';
                     if (codeInput) codeInput.value = p.code;
                     if (typeInput) typeInput.value = p.type;
+                    const lengthInput = document.getElementById('newContainerLength');
+                    const widthInput = document.getElementById('newContainerWidth');
+                    const heightInput = document.getElementById('newContainerHeight');
+                    const maxLoadInput = document.getElementById('newContainerMaxLoad');
+                    if (lengthInput) lengthInput.value = p.length || '';
+                    if (widthInput) widthInput.value = p.width || '';
+                    if (heightInput) heightInput.value = p.height || '';
+                    if (maxLoadInput) maxLoadInput.value = p.maxLoad || '';
                     const activeToggle = document.getElementById('newContainerActive');
                     if (activeToggle) activeToggle.checked = p.isActive;
                 }
@@ -888,6 +903,14 @@
                 const nextId = containers.length > 0 ? Math.max(...containers.map(p => p.id)) + 1 : 1;
                 if (codeInput) codeInput.value = `CT-${1000 + nextId}`;
                 if (typeInput) typeInput.value = '';
+                const lengthInput = document.getElementById('newContainerLength');
+                const widthInput = document.getElementById('newContainerWidth');
+                const heightInput = document.getElementById('newContainerHeight');
+                const maxLoadInput = document.getElementById('newContainerMaxLoad');
+                if (lengthInput) lengthInput.value = '';
+                if (widthInput) widthInput.value = '';
+                if (heightInput) heightInput.value = '';
+                if (maxLoadInput) maxLoadInput.value = '';
                 const activeToggle = document.getElementById('newContainerActive');
                 if (activeToggle) activeToggle.checked = true;
             }
@@ -949,6 +972,10 @@
 
         const type = typeInput.value.trim();
         const code = codeInput.value.trim();
+        const length = document.getElementById('newContainerLength').value.trim();
+        const width = document.getElementById('newContainerWidth').value.trim();
+        const height = document.getElementById('newContainerHeight').value.trim();
+        const maxLoad = document.getElementById('newContainerMaxLoad').value.trim();
         const isActive = activeToggle.checked;
 
         if (!type || !code) {
@@ -963,6 +990,10 @@
             if (idx !== -1) {
                 containers[idx].code = code;
                 containers[idx].type = type;
+                containers[idx].length = length;
+                containers[idx].width = width;
+                containers[idx].height = height;
+                containers[idx].maxLoad = maxLoad;
                 containers[idx].isActive = isActive;
                 // Optionally update QR URL if code changed
                 containers[idx].qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${code}`;
@@ -975,6 +1006,10 @@
                 name: `Đơn vị chứa ${newId}`,
                 code: code,
                 type: type,
+                length: length,
+                width: width,
+                height: height,
+                maxLoad: maxLoad,
                 qrUrl: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${code}`,
                 status: "Đang đứng yên",
                 warehouse: "Kho Flat",
@@ -997,6 +1032,26 @@
 
     window.saveNewContainer = window.saveContainer; // Alias for backward compatibility if needed
 
+
+
+    // ========== EXPORT / SYNC ==========
+    window.exportExcel = function() {
+        if (window.showToast) window.showToast('Đang trích xuất dữ liệu ra file Excel...', 'info');
+        setTimeout(() => {
+            if (window.showToast) window.showToast('Xuất file Excel thành công!');
+        }, 1000);
+    };
+
+    window.importExcel = function() {
+        if (window.showToast) window.showToast('Tính năng nhập Excel đang được khởi tạo...', 'info');
+    };
+
+    window.syncData = function() {
+        if (window.showToast) window.showToast('Đang kết nối hệ thống...', 'info');
+        setTimeout(() => {
+            if (window.showToast) window.showToast('Đồng bộ thông tin mới nhất thành công', 'success');
+        }, 1000);
+    };
 
     // Hook up extra listeners safely inside init or setupEventListeners
     function setupExtraListeners() {

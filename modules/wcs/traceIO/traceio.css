@@ -120,11 +120,6 @@
     z-index: 3;
 }
 
-/* Charging Station Cell */
-.map-cell.charging {
-    /* Background handled by unified rule above */
-}
-
 /* All special icon cells: position absolutely to fill cell perfectly */
 .map-cell.charging .charging-icon,
 .map-cell.inbound .inbound-icon,

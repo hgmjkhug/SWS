@@ -101,7 +101,7 @@
     mapMatrix.forEach((row, rowIndex) => {
         row.forEach((cellType, colIndex) => {
             const cell = document.createElement('div');
-            cell.className = 'map-cell';
+            cell.className = `map-cell row-${rowIndex + 1}`;
             if (cellType === 0) {
                 cell.classList.add('empty');
                 if (rowIndex < 15) { // Skip dots for Row 16
@@ -305,10 +305,9 @@
         label.style.left = (c * 40 + 20) + 'px';
         wrapper.appendChild(label);
     }
-    
     for (let r = 0; r < rows; r++) {
         const label = document.createElement('div');
-        label.className = 'label-row';
+        label.className = `label-row row-label-${r + 1}`;
         label.innerText = r + 1;
         label.style.top = (r * 40 + 20) + 'px';
         wrapper.appendChild(label);
@@ -351,6 +350,11 @@
             floorCombo.classList.remove('open');
             currentFloor = parseInt(floor);
             console.log(`Switched to Floor ${currentFloor}`);
+
+            // Hide/Show row 16 based on floor
+            document.querySelectorAll('.row-16, .row-label-16').forEach(el => {
+                el.style.display = (currentFloor === 2) ? 'none' : '';
+            });
 
             // Trigger success toast
             showToast(`Hiển thị bản đồ giám sát hoạt động của tầng ${currentFloor}`, 'success');

@@ -271,7 +271,34 @@ function deleteSelected() {
     if (modal) modal.classList.add('show');
 }
 
-// Toast - Using global showToast from main script.js
+// ========== EXPORT / SYNC ==========
+window.exportExcel = function() {
+    showToast('Đang trích xuất dữ liệu ra file Excel...', 'info');
+    setTimeout(() => {
+        showToast('Xuất file Excel thành công!');
+    }, 1000);
+};
+
+window.importExcel = function() {
+    showToast('Tính năng nhập Excel đang được khởi tạo...', 'info');
+};
+
+window.syncData = function() {
+    showToast('Đang kết nối hệ thống...', 'info');
+    setTimeout(() => {
+        showToast('Đồng bộ thông tin mới nhất thành công', 'success');
+    }, 1000);
+};
+
+function showToast(msg, type = 'success') {
+    if (window.showToast) {
+        window.showToast(msg, type);
+    } else if (window.parent && window.parent.showToast) {
+        window.parent.showToast(msg, type);
+    } else {
+        console.log(`[Toast ${type}] ${msg}`);
+    }
+}
 
 // Set banner
 const bannerEl = document.getElementById('banner-warehouse-name');

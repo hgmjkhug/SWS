@@ -55,6 +55,24 @@
                     </div>
                   </div>
                 </div>
+                <div class="form-row">
+                  <div class="form-group" style="flex: 1;">
+                    <label>Dài (mm)</label>
+                    <input type="number" id="newContainerLength" class="form-control" placeholder="Nhập chiều dài" />
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label>Rộng (mm)</label>
+                    <input type="number" id="newContainerWidth" class="form-control" placeholder="Nhập chiều rộng" />
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label>Cao (mm)</label>
+                    <input type="number" id="newContainerHeight" class="form-control" placeholder="Nhập chiều cao" />
+                  </div>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                  <label>Tải trọng tối đa (kg)</label>
+                  <input type="number" id="newContainerMaxLoad" class="form-control" placeholder="Nhập tải trọng tối đa" />
+                </div>
                 <div class="form-group usage-form-group">
                   <label>Sử dụng</label>
                   <label class="switch">
@@ -118,10 +136,22 @@
           </div>
         </div>
 
-        <button class="btn-outline-primary btn-print" id="bulkPrintBtn" title="Chọn đơn vị vật chứa để in">
+        <button class="btn btn-outline-primary btn-print" id="bulkPrintBtn" title="Chọn đơn vị vật chứa để in">
           <i class="fas fa-print"></i> In
         </button>
-        <button class="add-btn" onclick="openContainerModal()">
+        <div class="dropdown-container">
+          <button class="btn btn-outline-primary">
+            <i class="fas fa-file-excel"></i> Nhập/Xuất
+          </button>
+          <div class="dropdown-content">
+            <a href="#" onclick="importExcel()"><i class="fas fa-upload"></i> Nhập excel</a>
+            <a href="#" onclick="exportExcel()"><i class="fas fa-download"></i> Xuất excel</a>
+          </div>
+        </div>
+        <button class="btn btn-outline-success" onclick="syncData()">
+          <i class="fas fa-sync-alt"></i> Đồng bộ
+        </button>
+        <button class="btn add-btn" onclick="openContainerModal()">
           <i class="fas fa-plus"></i> Thêm mới
         </button>
       </div>
@@ -134,16 +164,35 @@
     
     <div class="table-wrapper">
       <table id="containerTable" class="data-table">
+        <colgroup>
+          <col style="width: 40px;"> <!-- Checkbox -->
+          <col style="width: 50px;"> <!-- STT -->
+          <col style="width: 140px;"> <!-- Mã -->
+          <col style="width: 180px;"> <!-- Loại -->
+          <col style="width: 110px;"> <!-- Dài -->
+          <col style="width: 110px;"> <!-- Rộng -->
+          <col style="width: 110px;"> <!-- Cao -->
+          <col style="width: 150px;"> <!-- Tải trọng -->
+          <col style="width: 100px;"> <!-- Sử dụng -->
+          <col style="width: 120px;"> <!-- Thao tác -->
+        </colgroup>
         <thead>
           <tr>
-            <th class="sticky-col first-col" style="text-align: center;">
+            <th rowspan="2" class="sticky-col first-col" style="text-align: center;">
               <input type="checkbox" id="selectAll">
             </th>
-            <th style="text-align: center">STT</th>
-            <th style="text-align: center">Mã đơn vị chứa hàng</th>
-            <th style="text-align: center">Loại đơn vị chứa hàng</th>
-            <th style="text-align: center">Sử dụng</th>
-            <th style="text-align: center">Thao tác</th>
+            <th rowspan="2" style="text-align: center">STT</th>
+            <th rowspan="2" style="text-align: center">Mã đơn vị chứa hàng</th>
+            <th rowspan="2" style="text-align: center">Loại đơn vị chứa hàng</th>
+            <th colspan="3" style="text-align: center">Kích thước (mm)</th>
+            <th rowspan="2" style="text-align: center">Tải trọng tối đa (kg)</th>
+            <th rowspan="2" style="text-align: center">Sử dụng</th>
+            <th rowspan="2" style="text-align: center">Thao tác</th>
+          </tr>
+          <tr>
+            <th style="text-align: center">Dài</th>
+            <th style="text-align: center">Rộng</th>
+            <th style="text-align: center">Cao</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>

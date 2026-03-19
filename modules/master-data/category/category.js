@@ -69,6 +69,10 @@
     window.closeDeleteConfirm = closeDeleteConfirm;
     window.confirmDeleteCategory = confirmDeleteCategory;
 
+    window.exportExcel = exportExcel;
+    window.importExcel = importExcel;
+    window.syncData = syncData;
+
     function getCurrentWarehouse() {
         try {
             if (window.parent && window.parent.document) {
@@ -258,6 +262,24 @@
         closeCategoryModal();
         filterCategories();
         showToast('Lưu thành công!');
+    }
+
+    function exportExcel() {
+        showToast('Đang trích xuất dữ liệu ra file Excel...', 'info');
+        setTimeout(() => {
+            showToast('Xuất file Excel thành công!');
+        }, 1000);
+    }
+
+    function importExcel() {
+        showToast('Tính năng nhập Excel đang được khởi tạo...', 'info');
+    }
+
+    function syncData() {
+        showToast('Đang kết nối hệ thống...', 'info');
+        setTimeout(() => {
+            showToast('Đồng bộ thông tin mới nhất thành công', 'success');
+        }, 1000);
     }
 
 

@@ -31,6 +31,18 @@
             >
               <i class="fas fa-trash"></i> Xóa (0)
             </button>
+            <div class="dropdown-container">
+              <button class="btn btn-outline-primary">
+                <i class="fas fa-file-excel"></i> Nhập/Xuất
+              </button>
+              <div class="dropdown-content">
+                <a href="#" onclick="importExcel()"><i class="fas fa-upload"></i> Nhập excel</a>
+                <a href="#" onclick="exportExcel()"><i class="fas fa-download"></i> Xuất excel</a>
+              </div>
+            </div>
+            <button class="btn btn-outline-success" onclick="syncData()">
+              <i class="fas fa-sync-alt"></i> Đồng bộ
+            </button>
             <button class="btn btn-primary" onclick="openCategoryModal()">
               <i class="fas fa-plus"></i> Thêm mới
             </button>
