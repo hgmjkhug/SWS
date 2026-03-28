@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nhóm sản phẩm - Smart Warehouse</title>
+  </head>
+
+  <body>
+    <!-- Relative path so script.js handles base correctly. Version param forces update. -->
+    <link rel="stylesheet" href="category.css?v=115" />
+
+    <div id="main-view">
+      <div class="category-container">
+        <div class="category-actions">
+          <div class="category-filters">
+            <input
+              type="text"
+              id="category-search"
+              class="category-search-input"
+              placeholder="Tìm theo tên nhóm sản phẩm"
+              oninput="filterCategories()"
+            />
+          </div>
+          <div class="action-buttons">
+            <button
+              id="delete-selected-btn"
+              class="btn btn-danger"
+              onclick="deleteSelected()"
+              disabled
+            >
+              <i class="fas fa-trash"></i> Xóa (0)
+            </button>
+            <div class="dropdown-container">
+              <button class="btn btn-outline-primary">
+                <i class="fas fa-file-excel"></i> Nhập/Xuất
+              </button>
+              <div class="dropdown-content">
+                <a href="#" onclick="importExcel()"><i class="fas fa-upload"></i> Nhập excel</a>
+                <a href="#" onclick="exportExcel()"><i class="fas fa-download"></i> Xuất excel</a>
+              </div>
+            </div>
+            <button class="btn btn-outline-success" onclick="syncData()">
+              <i class="fas fa-sync-alt"></i> Đồng bộ
+            </button>
+            <button class="btn btn-primary" onclick="openCategoryModal()">
+              <i class="fas fa-plus"></i> Thêm mới
+            </button>
+          </div>
+        </div>
+        <div id="warehouse-info-banner" style="padding: 10px 15px; background-color: #e0f2fe; color: #0369a1; border-radius: 6px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-info-circle"></i>
+          <span>Bạn đang xem các thông tin của danh mục chung thuộc kho <strong><span id="banner-warehouse-name"></span></strong></span>
+        </div>
+        <div class="table-wrapper">
+          <div class="table-scroll-head">
+            <table class="category-table">
+              <thead>
+                <tr>
+                  <th style="width:50px; min-width:50px; text-align:center">
+                    <input type="checkbox" id="check-all" onchange="toggleAll(this)" />
+                  </th>
+                  <th style="width:60px; min-width:60px; text-align:center">STT</th>
+                  <th style="width:280px; min-width:280px; text-align:left">Tên nhóm sản phẩm</th>
+                  <th style="text-align:left">Mô tả</th>
+                  <th style="width:110px; min-width:110px; text-align:center">Thao tác</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+          <div class="table-scroll-body">
+            <table class="category-table">
+              <tbody id="category-table-body">
+                <!-- Data rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="pagination-bar">
+          <span id="pagination-info">Hiển thị 0 trên tổng 0</span>
+          <div class="pagination-controls">
+            <button
+              class="page-btn"
+              id="prev-page"
+              onclick="prevPage()"
+              disabled
+            >
+              &lt;
+            </button>
+            <div id="page-numbers" class="page-numbers"></div>
+            <button class="page-btn" id="next-page" onclick="nextPage()">
+              &gt;
+            </button>
+            <span class="page-goto">
+              Đến
+              <input
+                type="number"
+                id="goto-page"
+                min="1"
+                onchange="gotoPage(this.value)"
+              />
+              trang
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Thêm/Sửa Nhóm sản phẩm -->
+    <div id="category-modal" class="modal-overlay">
+      <div class="modal-box">
+        <button class="close-btn" onclick="closeCategoryModal()">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-header">
+          <h3 class="modal-title" id="modal-title">Thêm mới nhóm sản phẩm</h3>
+        </div>
+        <div class="modal-body">
+          <form id="category-form">
+            <input type="hidden" id="cat-id" />
+            <div class="form-group">
+              <label>Tên nhóm sản phẩm <span class="required">*</span></label>
+              <input
+                type="text"
+                id="cat-name"
+                required
+                placeholder="Ví dụ: sản phẩm kim khí"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Mô tả</label>
+              <textarea
+                id="cat-desc"
+                placeholder="Mô tả chi tiết nhóm sản phẩm..."
+              ></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeCategoryModal()">
+            Hủy
+          </button>
+          <button class="btn btn-primary" onclick="saveCategory()">Lưu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Popover (Standardized) -->
+    <div id="delete-confirm-modal" class="modal-confirm">
+      <div class="confirm-content">
+        <div class="confirm-icon-box">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="confirm-title">Xác nhận xóa</h3>
+        <p class="confirm-message" id="confirm-delete-message">
+          Bạn có chắc chắn muốn xóa nhóm sản phẩm này không?<br />Hành động này
+          không thể hoàn tác.
+        </p>
+        <div class="confirm-actions">
+          <button onclick="closeDeleteConfirm()" class="btn btn-secondary">
+            Hủy
+          </button>
+          <button onclick="confirmDeleteCategory()" class="btn btn-danger">
+            Xóa
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Relative path so script.js handles base correctly. Version param to bust cache. -->
+    <script src="category.js?v=112"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const scrollBody = document.querySelector('.table-scroll-body');
+        const scrollHead = document.querySelector('.table-scroll-head');
+        if (scrollBody && scrollHead) {
+          scrollBody.addEventListener('scroll', function () {
+            scrollHead.scrollLeft = scrollBody.scrollLeft;
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

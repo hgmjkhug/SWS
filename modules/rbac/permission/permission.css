@@ -1,0 +1,259 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+
+
+.permission-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin: 0 auto;
+    height: calc(100vh - 100px); /* Adjust to viewport */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.permission-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: white;
+    flex-shrink: 0;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #1e40af;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.back-btn:hover { background: #eff6ff; }
+
+.page-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b; 
+    /* color: #1e40af; Blue text as per request? Image shows blue text "Phân quyền..." */
+    color: #0c4a6e;
+}
+
+.header-right {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-outline {
+    background: white;
+    border: 1px solid #cbd5e1;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-outline:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.header-right .btn-save {
+    background-color: #3b82f6; /* Save button blue to match header */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.header-right .btn-save:hover { background-color: #2563eb; }
+
+
+/* Table Container */
+.table-container {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: white;
+}
+
+.table-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.table-scroll-head {
+    overflow: hidden;
+    background-color: #3b82f6;
+    flex-shrink: 0;
+    border-radius: 0;
+}
+
+.table-scroll-body {
+    overflow-y: auto;
+    overflow-x: auto;
+    flex: 1;
+}
+
+/* Ẩn scrollbar hoàn toàn nhưng vẫn scroll được */
+.table-scroll-body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+.table-scroll-body {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+
+.permission-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Crucial for alignment */
+}
+
+/* Header Styles */
+.permission-table thead th {
+    background-color: #3b82f6;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    padding: 12px 8px;
+    border-right: 1px solid rgba(255,255,255,0.2);
+    vertical-align: middle;
+    border-radius: 0 !important;
+}
+
+.permission-table thead th:last-child { border-right: none; }
+
+/* Columns - Explicit Widths */
+.col-stt { width: 60px; }
+.col-name { width: auto; text-align: left !important; padding-left: 16px !important; }
+.col-action { width: 80px; }
+
+/* Table Body */
+.permission-table tbody td {
+    padding: 10px 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 14px;
+    color: #334155;
+    vertical-align: middle;
+    word-break: break-word;
+}
+
+/* Group Row (Accordion Header) */
+.group-row {
+    background-color: #eff6ff; /* Very Light Blue */
+    color: #1e3a8a; /* Dark Blue Text */
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.group-row:hover {
+    background-color: #dbeafe; /* Slightly darker on hover */
+}
+
+.group-row td {
+    border-color: #bfdbfe; /* Blue border */
+    color: #1e3a8a;
+}
+
+.group-row .col-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toggle-icon {
+    font-size: 12px;
+    transition: transform 0.2s ease;
+}
+
+.group-row.expanded .toggle-icon {
+    transform: rotate(90deg); /* If using chevron-right */
+}
+/* Wait, implementation detail: If I use chevron-down as "expanded", then no rotate. 
+   If I use chevron-right as "collapsed", then rotate 90.
+   Let's stick to chevron-right (collapsed) -> rotate (expanded) or chevron-down.
+*/
+
+/* Child Rows */
+.child-row {
+    background-color: white;
+}
+.child-row td {
+    border-bottom: 1px solid #f1f5f9;
+}
+.child-row:hover {
+    background-color: #f8fafc;
+}
+
+/* Checkboxes */
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Utility */
+.hidden { display: none; }
+
+/* Custom Scrollbar for container if needed */
+.table-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+.table-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+/* Info Banner */
+.info-banner {
+    padding: 10px 15px;
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border-radius: 6px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0px;
+    border: 1px solid #bae6fd;
+}
+
+.info-banner i {
+    font-size: 16px;
+    color: #0ea5e9;
+}
+
+.info-banner strong {
+    font-weight: 700;
+}

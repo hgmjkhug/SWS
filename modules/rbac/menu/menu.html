@@ -1,0 +1,137 @@
+<link rel="stylesheet" href="../../../global-table.css" />
+<link rel="stylesheet" href="modules/rbac/menu/menu.css?v=1.2" />
+
+<div class="menu-container">
+  <!-- Toolbar -->
+  <div class="menu-toolbar">
+    <div class="toolbar-left">
+      <div class="search-box-panel">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="menu-search" placeholder="Tìm kiếm chức năng..." />
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn btn-secondary" id="btn-edit-mode" onclick="triggerEditMenu()" style="margin-right: 8px">
+        <i class="fas fa-edit"></i> Chỉnh sửa
+      </button>
+      <button class="btn btn-primary" onclick="openMenuModal()">
+        <i class="fas fa-plus"></i> Thêm mới
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-scroll-container">
+    <div class="table-scroll-head">
+      <table class="menu-table">
+        <thead>
+          <tr>
+            <th class="col-expand"></th>
+            <th class="col-stt">STT</th>
+            <th class="col-name">Tên phân hệ</th>
+            <th class="col-icon">Icon</th>
+            <th class="col-path">Đường dẫn</th>
+            <th class="col-resource">Tài nguyên</th>
+            <th class="col-order">Thứ tự</th>
+            <th class="col-usage">Sử dụng</th>
+            <th class="col-action">Thao tác</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <div class="table-scroll-body">
+      <table class="menu-table">
+        <tbody id="menu-table-body">
+          <!-- Data will be rendered here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="menu-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title" id="menu-modal-title">Thêm chức năng mới</h3>
+      <button class="close-btn" onclick="closeMenuModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="required">Thuộc phân hệ</label>
+        <!-- Custom Dropdown Structure -->
+        <div class="custom-select-wrapper" id="menu-parent-wrapper">
+          <div class="custom-select-trigger" id="menu-parent-trigger">
+            <span>Chọn phân hệ</span>
+            <input type="hidden" id="menu-parent" required />
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="custom-options" id="menu-parent-options">
+            <!-- Options will be populated by JS -->
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Mã chức năng</label>
+        <input type="text" id="menu-code" placeholder="VD: ACCOUNT" />
+      </div>
+      <div class="form-group">
+        <label class="required">Tên chức năng</label>
+        <input type="text" id="menu-name" placeholder="VD: Quản lý tài khoản" />
+      </div>
+      <div class="form-group">
+        <label>Icon</label>
+        <input type="text" id="menu-icon" placeholder="VD: fas fa-user" />
+      </div>
+      <div class="form-group">
+        <label class="required">Đường dẫn</label>
+        <input type="text" id="menu-path" placeholder="VD: modules/account/account.html" />
+      </div>
+      <div class="form-group" id="resource-field-group">
+        <label>Mã tài nguyên (Chức năng con)</label>
+        <div class="custom-select-wrapper searchable-resource-wrapper" id="menu-resource-wrapper">
+          <div class="resource-search-container">
+            <input type="text" id="menu-resource-search" placeholder="Chọn tài nguyên..." autocomplete="off" />
+            <input type="hidden" id="menu-resource" />
+            <i class="fas fa-chevron-down dropdown-arrow"></i>
+          </div>
+          <div class="custom-options resource-options-dropdown" id="menu-resource-options">
+            <div class="options-list" id="resource-options-list">
+              <!-- Options will be populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Thứ tự hiển thị</label>
+        <input type="number" id="menu-order" value="1" min="1" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeMenuModal()">Hủy</button>
+      <button class="btn btn-primary" onclick="saveMenu()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Popover -->
+<div id="delete-confirm-modal" class="modal-confirm">
+  <div class="confirm-content">
+    <div class="confirm-icon-box">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h3 class="confirm-title">Xác nhận xóa</h3>
+    <p class="confirm-message" id="confirm-delete-message">
+      Bạn có chắc chắn muốn xóa chức năng này không?<br />Hành động này không
+      thể hoàn tác.
+    </p>
+    <div class="confirm-actions">
+      <button onclick="closeDeleteConfirm()" class="btn btn-secondary">
+        Hủy
+      </button>
+      <button onclick="confirmDelete()" class="btn btn-danger">Xóa</button>
+    </div>
+  </div>
+</div>
+
+<script src="modules/rbac/menu/menu.js?v=1.2"></script>

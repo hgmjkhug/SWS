@@ -1,0 +1,190 @@
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản Lý Pallet - WMS</title>
+  <link rel="stylesheet" href="../../global-table.css" />
+  <link rel="stylesheet" href="pallet.css" />
+</head>
+
+<body>
+  <div id="main-view">
+    <div class="toolbar-section" style="align-items: flex-end;">
+      <div class="filter-group">
+        <!-- <label class="filter-label">Tìm kiếm</label> -->
+        <div class="pallet-search-box">
+          <input type="text" id="searchInput" class="toolbar-search-input"
+            placeholder="Tìm kiếm theo mã pallet, mã lệnh nhập" />
+        </div>
+      </div>
+
+
+
+
+
+
+
+      <div class="filter-group">
+        <!-- <label class="filter-label">Thời gian</label> -->
+        <div class="unified-date-filter">
+          <div class="date-picker-trigger" id="dateRangeTrigger" onclick="window.toggleDateRangePicker(event)">
+            <i class="fas fa-calendar-alt"></i>
+            <span id="dateRangeDisplay">dd/mm/yyyy - dd/mm/yyyy</span>
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <!-- Bespoke Analytics Date Picker -->
+          <div class="analytics-date-picker" id="analyticsPicker">
+            <div class="picker-sidebar">
+              <div class="sidebar-item" data-range="today">Hôm nay</div>
+              <div class="sidebar-item" data-range="last3">3 ngày gần đây</div>
+              <div class="sidebar-item" data-range="last7">7 ngày gần đây</div>
+              <div class="sidebar-item" data-range="last30">
+                30 ngày gần đây
+              </div>
+              <div class="sidebar-item" data-range="last3mo">
+                3 tháng gần đây
+              </div>
+              <div class="sidebar-item" data-range="last6mo">
+                6 tháng gần đây
+              </div>
+              <div class="sidebar-item" data-range="last1yr">1 năm qua</div>
+            </div>
+
+            <div class="picker-main">
+              <div class="picker-header">
+                <div class="selected-range-box" id="tempRangeDisplay">
+                  10 February 2023 — 17 March 2023
+                </div>
+                <div class="header-actions">
+                  <button type="button" class="text-btn clear-btn" id="clearPicker">
+                    Xóa bộ lọc
+                  </button>
+                  <button type="button" class="text-btn cancel-btn" id="cancelPicker">
+                    Hủy
+                  </button>
+                  <button type="button" class="apply-btn" id="applyPicker">
+                    Áp dụng
+                  </button>
+                </div>
+              </div>
+
+              <div class="picker-body">
+                <div class="calendar-panel left-panel">
+                  <div class="panel-title">Từ ngày</div>
+                  <div class="panel-nav">
+                    <div class="custom-dropdown month-dropdown" id="leftMonthDropdown">
+                      <div class="dropdown-selected" id="leftMonthSelected">
+                        Tháng
+                      </div>
+                      <div class="dropdown-list" id="leftMonthList"></div>
+                    </div>
+                    <div class="custom-dropdown year-dropdown" id="leftYearDropdown">
+                      <div class="dropdown-selected" id="leftYearSelected">
+                        Năm
+                      </div>
+                      <div class="dropdown-list" id="leftYearList"></div>
+                    </div>
+                  </div>
+                  <div class="calendar-grid" id="leftCalendar">
+                    <div class="day-names">
+                      <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                    </div>
+                    <div class="days-container"></div>
+                  </div>
+                </div>
+
+                <div class="calendar-panel right-panel">
+                  <div class="panel-title">Đến ngày</div>
+                  <div class="panel-nav">
+                    <div class="custom-dropdown month-dropdown" id="rightMonthDropdown">
+                      <div class="dropdown-selected" id="rightMonthSelected">
+                        Tháng
+                      </div>
+                      <div class="dropdown-list" id="rightMonthList"></div>
+                    </div>
+                    <div class="custom-dropdown year-dropdown" id="rightYearDropdown">
+                      <div class="dropdown-selected" id="rightYearSelected">
+                        Năm
+                      </div>
+                      <div class="dropdown-list" id="rightYearList"></div>
+                    </div>
+                  </div>
+                  <div class="calendar-grid" id="rightCalendar">
+                    <div class="day-names">
+                      <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                    </div>
+                    <div class="days-container"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="toolbar-actions">
+        <!-- Buttons removed -->
+      </div>
+    </div>
+
+    <div class="table-container">
+      <!-- Split table: Head (no scroll) -->
+      <div class="table-scroll-head" id="tableScrollHead">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:50px;  min-width:50px;  text-align:center">STT</th>
+              <th style="width:130px; min-width:130px; text-align:center">Mã container</th>
+              <th style="width:300px; min-width:300px; text-align:left">Mã lệnh nhập</th>
+              <th style="min-width:200px; text-align:left">Vật tư</th>
+              <th style="width:130px; min-width:130px; text-align:center">Ngày nhập</th>
+
+              <th style="width:130px; min-width:130px; text-align:center">Mã mộc</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+      <!-- Split table: Body (scrollable) -->
+      <div class="table-scroll-body" id="tableScrollBody">
+        <table id="palletTable" class="data-table">
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="pagination-bar">
+      <div class="pagination-info">
+        Hiển thị <span id="showing-range">0-0</span> trên tổng <span id="total-items">0</span>
+      </div>
+
+      <div class="pagination-controls">
+        <button class="btn-page" id="btn-prev">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div id="pagination-numbers" class="pages-numbers">
+          <!-- Page numbers rendered by JS -->
+        </div>
+        <button class="btn-page" id="btn-next">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        
+        <div class="pagination-goto">
+          <span>Trang</span>
+          <input type="number" id="pageInput" min="1" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="pallet.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const scrollBody = document.getElementById('tableScrollBody');
+      const scrollHead = document.getElementById('tableScrollHead');
+      if (scrollBody && scrollHead) {
+        scrollBody.addEventListener('scroll', function () {
+          scrollHead.scrollLeft = scrollBody.scrollLeft;
+        });
+      }
+    });
+  </script>
+</body>
+</html>

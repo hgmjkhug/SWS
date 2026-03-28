@@ -1,0 +1,380 @@
+<link rel="stylesheet" href="modules/warehouse/warehouse.css" />
+<div class="warehouse-container">
+  <div class="content-wrapper">
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="warehouse-search-box">
+        <i class="fas fa-search"></i>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Tìm theo mã kho, tên kho..."
+        />
+      </div>
+
+      <!-- Status Filter (Custom Dropdown) -->
+      <div
+        class="filter-group-wrapper"
+        style="display: flex; flex-direction: column; gap: 4px"
+      >
+        <label class="filter-title">Trạng thái</label>
+        <div
+          class="custom-dropdown"
+          id="status-filter-dropdown"
+          style="margin-left: 0"
+        >
+          <div
+            class="custom-dropdown-toggle"
+            onclick="window.toggleFilterDropdown()"
+          >
+            <span id="status-filter-display">Tất cả trạng thái</span>
+            <i
+              class="fas fa-chevron-down"
+              style="font-size: 12px; color: #64748b"
+            ></i>
+          </div>
+          <div class="custom-dropdown-menu" id="status-filter-menu">
+            <div
+              class="custom-dropdown-item selected"
+              onclick="window.selectFilterOption('', 'Tất cả trạng thái')"
+            >
+              Tất cả Trạng thái
+            </div>
+            <div
+              class="custom-dropdown-item"
+              onclick="window.selectFilterOption('Mới tạo', 'Mới tạo')"
+            >
+              Mới tạo
+            </div>
+            <div
+              class="custom-dropdown-item"
+              onclick="
+                window.selectFilterOption('Đang sử dụng', 'Đang sử dụng')
+              "
+            >
+              Đang sử dụng
+            </div>
+            <div
+              class="custom-dropdown-item"
+              onclick="
+                window.selectFilterOption('Đang bảo trì', 'Đang bảo trì')
+              "
+            >
+              Đang bảo trì
+            </div>
+            <div
+              class="custom-dropdown-item"
+              onclick="
+                window.selectFilterOption('Ngưng sử dụng', 'Ngưng sử dụng')
+              "
+            >
+              Ngưng sử dụng
+            </div>
+          </div>
+        </div>
+        <input type="hidden" id="statusFilter" value="" />
+      </div>
+
+      <!-- Type Filter (Custom Dropdown) -->
+      <div
+        class="filter-group-wrapper"
+        style="display: flex; flex-direction: column; gap: 4px"
+      >
+        <label class="filter-title">Loại kho</label>
+        <div
+          class="custom-dropdown"
+          id="type-filter-dropdown"
+          style="margin-left: 0"
+        >
+          <div
+            class="custom-dropdown-toggle"
+            onclick="window.toggleTypeFilterDropdown()"
+          >
+            <span id="type-filter-display">Tất cả loại kho</span>
+            <i
+              class="fas fa-chevron-down"
+              style="font-size: 12px; color: #64748b"
+            ></i>
+          </div>
+          <div class="custom-dropdown-menu" id="type-filter-menu">
+            <div
+              class="custom-dropdown-item selected"
+              onclick="window.selectTypeFilterOption('', 'Tất cả loại kho')"
+            >
+              Tất cả loại kho
+            </div>
+            <div
+              class="custom-dropdown-item"
+              onclick="window.selectTypeFilterOption('Kho Tower', 'Kho Tower')"
+            >
+              Kho Tower
+            </div>
+            <div
+              class="custom-dropdown-item"
+              onclick="window.selectTypeFilterOption('Kho Stacker crane', 'Kho Stacker crane')"
+            >
+              Kho Stacker crane
+            </div>
+            <div
+              class="custom-dropdown-item"
+              onclick="window.selectTypeFilterOption('Kho Flat', 'Kho Flat')"
+            >
+              Kho Flat
+            </div>
+          </div>
+        </div>
+        <input type="hidden" id="typeFilter" value="" />
+      </div>
+
+      <button class="btn btn-primary" onclick="openModal()">
+        <i class="fas fa-plus"></i> Thêm mới
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+      <div class="table-wrapper">
+        <div class="table-scroll-head">
+          <table class="warehouse-table">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" id="checkAll" />
+                </th>
+                <th>STT</th>
+                <th>Mã kho</th>
+                <th>Tên kho</th>
+                <th>Loại kho</th>
+                <th>Số tầng</th>
+                <th>Tổng vị trí</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+        <div class="table-scroll-body" id="table-scroll-body">
+          <table class="warehouse-table">
+            <tbody id="warehouseBody">
+              <!-- Data will be rendered here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-wrapper">
+        <div class="page-info"></div>
+        <div class="pagination"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal" id="warehouseModal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal()">&times;</span>
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">Thêm mới Kho</h3>
+    </div>
+    <div class="modal-body">
+      <form id="warehouseForm">
+        <input type="hidden" id="warehouseId" />
+        <div class="form-group">
+          <label class="required">Tên kho</label>
+          <input
+            type="text"
+            id="warehouseName"
+            class="form-control"
+            required
+            placeholder="Nhập tên kho"
+          />
+        </div>
+        <div class="form-group">
+          <label class="required">Loại kho</label>
+          <div
+            class="custom-dropdown"
+            id="modal-type-dropdown"
+            style="width: 100%"
+          >
+            <div
+              class="custom-dropdown-toggle"
+              onclick="window.toggleModalTypeDropdown()"
+            >
+              <span id="modal-type-display">Chọn loại kho</span>
+              <i
+                class="fas fa-chevron-down"
+                style="font-size: 12px; color: #64748b"
+              ></i>
+            </div>
+            <div class="custom-dropdown-menu" id="modal-type-menu">
+              <div
+                class="custom-dropdown-item"
+                onclick="window.selectModalTypeOption('Kho Tower')"
+              >
+                Kho Tower
+              </div>
+              <div
+                class="custom-dropdown-item"
+                onclick="window.selectModalTypeOption('Kho Stacker crane')"
+              >
+                Kho Stacker crane
+              </div>
+              <div
+                class="custom-dropdown-item"
+                onclick="window.selectModalTypeOption('Kho Flat')"
+              >
+                Kho Flat
+              </div>
+            </div>
+            <input type="hidden" id="warehouseType" value="" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group half">
+            <label class="required">Số tầng</label>
+            <input
+              type="number"
+              id="floors"
+              class="form-control"
+              min="1"
+              step="1"
+              required
+              value="1"
+            />
+          </div>
+          <!-- <div class="form-group half">
+            <label>Tổng vị trí</label>
+            <input
+              type="number"
+              id="totalLocations"
+              class="form-control"
+              min="0"
+              value="0"
+            />
+          </div> -->
+        </div>
+        <div class="form-row">
+          <div class="form-group half">
+            <label class="required">Chiều dài kho (ô)</label>
+            <input
+              type="number"
+              id="warehouseLength"
+              class="form-control"
+              min="1"
+              step="1"
+              required
+              placeholder="Nhập chiều dài kho"
+            />
+          </div>
+          <div class="form-group half">
+            <label class="required">Chiều rộng kho (ô)</label>
+            <input
+              type="number"
+              id="warehouseWidth"
+              class="form-control"
+              min="1"
+              step="1"
+              required
+              placeholder="Nhập chiều rộng kho"
+            />
+          </div>
+        </div>
+        <div class="form-group" id="statusFormGroup">
+          <label class="required">Trạng thái</label>
+          <div
+            class="custom-dropdown"
+            id="modal-status-dropdown"
+            style="width: 100%"
+          >
+            <div
+              class="custom-dropdown-toggle"
+              onclick="window.toggleModalStatusDropdown()"
+            >
+              <span id="modal-status-display">Mới tạo</span>
+              <i
+                class="fas fa-chevron-down"
+                style="font-size: 12px; color: #64748b"
+              ></i>
+            </div>
+            <div class="custom-dropdown-menu" id="modal-status-menu">
+
+              <div
+                class="custom-dropdown-item"
+                onclick="window.selectModalStatusOption('Đang sử dụng')"
+              >
+                Đang sử dụng
+              </div>
+              <div
+                class="custom-dropdown-item"
+                onclick="window.selectModalStatusOption('Đang bảo trì')"
+              >
+                Đang bảo trì
+              </div>
+              <div
+                class="custom-dropdown-item"
+                onclick="window.selectModalStatusOption('Ngưng sử dụng')"
+              >
+                Ngưng sử dụng
+              </div>
+            </div>
+            <input type="hidden" id="warehouseStatus" value="Mới tạo" />
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+      <button class="btn btn-primary" onclick="saveWarehouse()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Popover (Standardized) -->
+<div id="delete-confirm-modal" class="modal-confirm">
+  <div class="confirm-content">
+    <div class="confirm-icon-box">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h3 class="confirm-title">Xác nhận xóa</h3>
+    <p class="confirm-message" id="confirm-delete-message">
+      Bạn có chắc chắn muốn xóa kho này không?<br />Hành động này không thể hoàn
+      tác.
+    </p>
+    <div class="confirm-actions">
+      <button onclick="closeDeleteModal()" class="btn btn-secondary">
+        Hủy
+      </button>
+      <button onclick="confirmDeleteWarehouse()" class="btn btn-danger">
+        Xóa
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Disable Modal (Existing but updated ID to avoid conflict if any) -->
+<div class="modal-confirm" id="confirmModal">
+  <div class="confirm-content">
+    <div class="confirm-icon warning">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h3 class="confirm-title">Xác nhận ngưng sử dụng</h3>
+    <p class="confirm-message">
+      Bạn có chắc chắn muốn ngưng sử dụng kho
+      <strong id="confirmWarehouseName"></strong>? <br />
+      Hành động này có thể ảnh hưởng đến các dữ liệu tồn kho.
+    </p>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" onclick="closeConfirmModal()">
+        Hủy bỏ
+      </button>
+      <button class="btn btn-warning" onclick="confirmDisable()">
+        Ngưng sử dụng
+      </button>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="warehouse.css" />
+<script src="warehouse.js"></script>

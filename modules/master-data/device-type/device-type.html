@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý Nhóm thiết bị</title>
+    <link
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="device-type.css" />
+  </head>
+
+  <body>
+    <div class="device-type-container">
+      <!-- Actions Toolbar -->
+      <div class="device-type-actions">
+        <div class="device-type-filters">
+          <div class="filter-group">
+            <!-- <span class="filter-title">Tìm kiếm</span> -->
+            <input
+              type="text"
+              class="device-type-search-input"
+              id="search-input"
+              placeholder="Tìm theo mã hoặc tên nhóm thiết bị"
+            />
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button
+            class="btn btn-danger"
+            id="bulk-delete-btn"
+            onclick="deleteSelected()"
+            disabled
+          >
+            <i class="fas fa-trash"></i> Xóa (<span id="selected-count">0</span
+            >)
+          </button>
+          <button class="btn btn-primary" onclick="openAddModal()">
+            <i class="fas fa-plus"></i> Thêm mới
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table class="device-type-table">
+          <thead>
+            <tr>
+              <th>
+                <input
+                  type="checkbox"
+                  id="select-all"
+                  onclick="toggleSelectAll()"
+                />
+              </th>
+              <th>STT</th>
+              <th>Mã nhóm</th>
+              <th>Tên nhóm thiết bị</th>
+              <th>Mô tả</th>
+              <!-- <th>Thông số</th> -->
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="device-type-table-body">
+            <!-- Rows rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-bar">
+        <div class="pagination-info" id="pagination-info">
+          Hiển thị 0-0 của 0 bản ghi
+        </div>
+        <div class="pagination-controls">
+          <button class="page-btn" id="prev-btn" onclick="prevPage()">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <div class="page-numbers" id="page-numbers">
+            <button class="page-btn active">1</button>
+          </div>
+          <button class="page-btn" id="next-btn" onclick="nextPage()">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal-overlay" id="device-type-modal">
+      <div class="modal-box">
+        <button class="close-btn" onclick="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-header">
+          <h3 class="modal-title" id="modal-title">Thêm mới Nhóm thiết bị</h3>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="device-type-id" />
+          <div class="form-row">
+            <div class="form-group">
+              <label>Mã nhóm <span class="required">*</span></label>
+              <input
+                type="text"
+                id="device-type-code"
+                placeholder="Nhập mã nhóm"
+              />
+            </div>
+            <div class="form-group">
+              <label>Tên nhóm <span class="required">*</span></label>
+              <input
+                type="text"
+                id="device-type-name"
+                placeholder="Nhập tên nhóm"
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Mô tả</label>
+            <textarea
+              id="device-type-desc"
+              rows="3"
+              placeholder="Mô tả chi tiết (tùy chọn)"
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label>Thông số kỹ thuật</label>
+            <textarea
+              id="device-type-specs"
+              rows="5"
+              class="code-editor"
+              placeholder='{"key": "value"}'
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+          <button class="btn btn-primary" onclick="saveDeviceType()">
+            Lưu lại
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Popover (Standardized) -->
+    <div id="delete-confirm-modal" class="modal-confirm">
+      <div class="confirm-content">
+        <div class="confirm-icon-box">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="confirm-title">Xác nhận xóa</h3>
+        <p class="confirm-message" id="confirm-delete-message">
+          Bạn có chắc chắn muốn xóa nhóm thiết bị này không?<br />Hành động này
+          không thể hoàn tác.
+        </p>
+        <div class="confirm-actions">
+          <button onclick="closeDeleteConfirm()" class="btn btn-secondary">
+            Hủy
+          </button>
+          <button onclick="confirmDeleteDeviceType()" class="btn btn-danger">
+            Xóa
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="device-type.js"></script>
+  </body>
+</html>

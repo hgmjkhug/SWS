@@ -1,0 +1,1374 @@
+.account-container {
+    padding: 10px 24px 24px 24px;
+    background-color: #f8fafc;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow: visible; /* Ensure dropdowns aren't cut */
+}
+
+/* Actions Toolbar */
+.account-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: relative;
+    z-index: 1000 !important; /* Lowered from 9999 to allow modals (z-index 20000) to appear on top */
+    overflow: visible !important;
+}
+
+/* Account Filters - always horizontal */
+.account-filters {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    /* Use flex: 1 but with max-width on children to control layout */
+    flex: 1;
+    max-width: 1000px;
+    position: relative;
+    z-index: 101;
+    overflow: visible !important;
+}
+
+.account-search-input {
+    width: 270px !important;
+    max-width: 270px !important;
+    min-width: 200px;
+    flex-shrink: 0; /* Don't compress me */
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    background: #fff;
+}
+
+.account-search-input:focus {
+    border-color: #4672eb;
+}
+
+.account-search-input::placeholder {
+    color: #94a3b8;
+}
+
+.role-filter {
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    outline: none;
+    background-color: #f8fafc;
+    color: #475569;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+/* Buttons */
+.btn {
+    font-family: roboto !important;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Added for centering */
+    gap: 8px;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background-color: #4179f0;
+    color: white;
+}
+.btn-primary:hover { background-color: #1d4ed8; }
+
+.btn-success {
+    background-color: #22c55e;
+    color: white;
+}
+.btn-success:hover { background-color: #16a34a; }
+
+.btn-outline-success {
+    background-color: white;
+    color: #22c55e;
+    border: 1px solid #22c55e;
+}
+.btn-outline-success:hover {
+    background-color: #f0fdf4;
+}
+
+
+.btn-secondary {
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+}
+.btn-secondary:hover { background-color: #f1f5f9; }
+
+.btn-warning {
+    background-color: #eab308;
+    color: white;
+}
+.btn-warning:hover { background-color: #ca8a04; }
+
+.btn-danger {
+    background-color: #ef4444;
+    color: white;
+}
+.btn-danger:hover { background-color: #dc2626; }
+
+.btn-outline-danger {
+    background-color: white;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
+.btn-outline-danger:hover {
+    background-color: #fef2f2;
+}
+
+
+/* Table Wrapper - scrollable with sticky header */
+/* Table Wrapper - split head/body pattern */
+.table-wrapper {
+    background: white;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+.table-scroll-head {
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #076EB8;
+}
+
+.table-scroll-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    min-height: 0;
+    background: white;
+}
+
+.account-table {
+    width: 100%;
+    table-layout: fixed; /* Crucial for alignment */
+    border-collapse: collapse;
+}
+
+.account-table thead {
+    /* Restore standard table display */
+    display: table-header-group;
+}
+
+.account-table tbody {
+    /* Restore standard table display */
+    display: table-row-group;
+}
+
+.account-table tbody tr {
+    /* Restore standard table display */
+    display: table-row;
+}
+
+/* Standard header styling - No sticky needed in split mode */
+.account-table th {
+    background-color: #076EB8 !important;
+    color: #FFFFFF !important;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* Scrollbar styling for table scroll body - matching unit.css */
+.table-scroll-body::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.table-scroll-body::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.table-scroll-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.table-scroll-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Legacy hacks removed */
+
+.account-table th, .account-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+    box-sizing: border-box;
+}
+
+.account-table th {
+    border-bottom: 2px solid #e2e8f0;
+    /* Sticky header implementation già được định nghĩa ở trên */
+}
+
+/* Explicit Column Widths for Alignment - MUST BE IDENTICAL FOR HEAD AND BODY */
+.account-table th:nth-child(1), .account-table td:nth-child(1) { width: 45px; text-align: center; } /* Checkbox */
+.account-table th:nth-child(2), .account-table td:nth-child(2) { width: 50px; text-align: center; } /* STT */
+.account-table th:nth-child(3), .account-table td:nth-child(3) { width: 65px; text-align: center; } /* Avatar */
+.account-table th:nth-child(4), .account-table td:nth-child(4) { width: 130px; } /* Code */
+.account-table th:nth-child(5), .account-table td:nth-child(5) { width: 220px; } /* Name */
+.account-table th:nth-child(6), .account-table td:nth-child(6) { width: 200px; } /* Email */
+.account-table th:nth-child(7), .account-table td:nth-child(7) { width: 110px; text-align: center; } /* Role */
+.account-table th:nth-child(8), .account-table td:nth-child(8) { width: 250px; } /* Warehouse Scope */
+.account-table th:nth-child(9), .account-table td:nth-child(9) { width: 90px; text-align: center; } /* Status */
+.account-table th:nth-child(10), .account-table td:nth-child(10) { width: 110px; text-align: center; } /* Action */
+
+/* Universal Vertical Alignment */
+.account-table th, .account-table td {
+    vertical-align: middle;
+}
+
+/* Specific inner centering for Action column icons */
+.account-table td:nth-child(10) div { 
+    justify-content: center; 
+}
+
+.account-table th {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+    font-size: 13px;
+}
+
+.account-group-body:hover tr {
+    background-color: #f1f5f9 !important;
+}
+
+/* Scrollbar styling */
+.account-table tbody::-webkit-scrollbar { width: 6px; }
+.account-table tbody::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+.avatar-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e2e8f0;
+    display: block; /* Ensure it respects margin auto */
+    margin: 0 auto; /* Center in cell */
+}
+
+.role-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    display: block;
+    width: fit-content;
+    min-width: 90px;
+    text-align: center;
+    margin: 0 auto;
+    background: transparent !important; /* Remove fill */
+    border: 1px solid; /* Add stroke */
+}
+
+/* Universal Vertical Alignment */
+.account-table th, .account-table td {
+    vertical-align: middle;
+}
+
+/* Specific inner centering for Action column icons */
+.account-table td:nth-child(10) div { 
+    justify-content: center; 
+}
+
+.account-table th {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+/* Scrollbar styling */
+.account-table tbody::-webkit-scrollbar { width: 6px; }
+.account-table tbody::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+.avatar-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e2e8f0;
+    display: block; /* Ensure it respects margin auto */
+    margin: 0 auto; /* Center in cell */
+}
+
+.role-badge {
+    padding: 6px 6px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    display: block;
+    /* width: fit-content; */
+    min-width: 60px;
+    text-align: center;
+    margin: 0 auto;
+    background: transparent !important; /* Remove fill */
+    border: 1px solid; /* Add stroke */
+}
+/* Border color takes the previous background color values */
+.role-admin { color: #3730a3; border-color: #a5b4fc; } /* e0e7ff is too light, bumped to a5b4fc (indigo-300) for visibility */
+.role-manager { color: #115e59; border-color: #5eead4; } /* ccfbf1 -> 5eead4 (teal-300) */
+.role-user { color: #475569; border-color: #cbd5e1; } /* f1f5f9 -> cbd5e1 (slate-300) */
+.role-operator { color: #92400e; border-color: #fcd34d; } /* fef3c7 -> fcd34d (amber-300) */
+
+/* Action Icons */
+/* Action Icons */
+.action-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    transition: all 0.2s;
+    cursor: pointer;
+    font-size: 16px;
+    background: transparent;
+}
+
+.action-icon:hover { color: #3b82f6; transform: scale(1.1); }
+.action-icon.delete:hover { color: #ef4444; }
+.action-icon.reset:hover { color: #eab308; }
+
+/* Toggle Switch */
+.switch {
+    position: relative;
+    display: block; /* Changed from inline-block for margin auto to work */
+    width: 44px;
+    height: 24px;
+    margin: 0 auto; /* Center in cell */
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1;
+    transition: .4s;
+    border-radius: 24px;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+input:checked + .slider { background-color: #22c55e; }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 20000; /* Increased from 1000 to ensure it's always above toolbars (z-index 1000) */
+}
+.modal-overlay.show { display: flex; }
+
+.modal-box {
+    position: relative; /* For absolute close button */
+    background: white;
+    border-radius: 16px;
+    width: 1000px;
+    max-width: 90%;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    animation: modalSlide 0.3s ease-out;
+}
+.small-box { width: 400px; }
+
+@keyframes modalSlide {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+    padding: 12px 24px; /* Reduced padding from 20px */
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title { 
+    font-size: 18px; 
+    margin: 0; 
+    border-bottom: none !important; /* Remove double line */
+    padding-bottom: 0 !important;
+}
+
+.close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: #f1f5f9;
+    border: none;
+    font-size: 24px;
+    color: #64748b;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.close-btn:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.modal-body { padding: 24px; }
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Form */
+.form-group { margin-bottom: 16px; }
+.form-row { display: flex; gap: 16px; }
+.form-row .form-group { flex: 1; }
+
+label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #334155; }
+.required { color: #ef4444; }
+
+input[type="text"], input[type="email"], select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.toggle-label {
+    display: flex;
+    justify-content: flex-start;
+    gap: 12px;
+    align-items: center;
+    cursor: pointer;
+    height: 32px; /* Matches switch height + small buffer */
+    margin-top: 8px;
+}
+
+.toggle-label span {
+    font-weight: 500;
+    color: #334155;
+    margin: 0;
+    /* Removed padding-top and line-height hacks */
+}
+
+.toggle-label .switch {
+    margin: 0; /* Ensure no inherited margins overlap */
+}
+
+.warning-text { color: #d97706; background: #fffbeb; padding: 10px; border-radius: 6px; font-size: 13px; }
+
+/* Custom Dropdown Styling */
+.custom-dropdown {
+    position: relative;
+    width: 100%; /* Wider by default to fill container */
+    max-width: 300px; /* Limit width in filters */
+    font-family: inherit;
+}
+
+/* Modals should always be full width for fields */
+.modal-box .custom-dropdown {
+    max-width: none;
+}
+
+/* Global Custom Dropdown Styles (For Role Filter) */
+.custom-dropdown {
+    position: relative !important;
+    width: 200px;
+    display: block !important;
+}
+
+.account-filters .custom-dropdown {
+    width: 220px; /* Base for warehouse */
+}
+
+#role-dropdown, 
+#status-filter-dropdown {
+    width: 160px !important;
+}
+
+.dropdown-selected {
+    padding: 0 12px; /* Adjusted padding for height */
+    height: 40px; /* Fixed height */
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #ffffff !important;
+    cursor: pointer;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    font-size: 14px;
+    color: #1e293b;
+    transition: all 0.2s;
+    position: relative;
+    z-index: 10;
+}
+
+.dropdown-selected:hover {
+    border-color: #3b82f6;
+}
+
+.custom-dropdown.open .dropdown-options {
+    display: block !important;
+}
+
+.dropdown-options {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+    z-index: 999999 !important; /* Extremely high */
+    margin-top: 4px !important;
+    display: none;
+    max-height: 350px;
+    overflow-y: auto;
+    padding: 6px 0 !important;
+    min-width: 100%; /* Ensure it spans at least full dropdown */
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Custom Scrollbar for Dropdown Options */
+.dropdown-options::-webkit-scrollbar {
+    width: 5px;
+}
+
+.dropdown-options::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dropdown-options::-webkit-scrollbar-thumb {
+    background: #BFDBFE;
+    border-radius: 10px;
+}
+
+.dropdown-options::-webkit-scrollbar-thumb:hover {
+    background: #93C5FD;
+}
+
+.dropdown-option {
+    padding: 10px 12px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    color: #475569 !important;
+    transition: all 0.2s !important;
+    background: #ffffff !important;
+    display: block;
+}
+
+.hidden-option {
+    display: none !important;
+}
+
+.dropdown-option:hover {
+    background: #f8fafc !important;
+    color: #2563eb !important;
+}
+
+/* Searchable Dropdown Styles */
+.dropdown-search-container {
+    padding: 8px 12px;
+    position: sticky;
+    top: -6px; /* Offset the padding of dropdown-options */
+    background: white;
+    z-index: 10;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dropdown-search-input {
+    flex: 1;
+    padding: 8px 12px 8px 30px !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    outline: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.dropdown-search-input:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+}
+
+.dropdown-search-container .search-icon {
+    position: absolute;
+    left: 22px;
+    color: #94a3b8;
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.no-results {
+    padding: 20px 12px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+#warehouse-filter-label {
+    display: block;
+    max-width: 175px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dropdown-option.active {
+    background: #eff6ff !important;
+    color: #2563eb !important;
+    font-weight: 600 !important;
+}
+
+/* Isolated Warehouse Selection (Exactly as Kanban WCS) */
+/* Editable Combobox Styles */
+.editable-combobox {
+    position: relative;
+    width: 100%;
+}
+
+.combobox-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.combobox-input {
+    width: 100%;
+    padding: 10px 36px 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #334155;
+    background: #fff;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.combobox-input:focus {
+    border-color: #4672eb;
+    /* box-shadow: 0 0 0 2px rgba(70, 114, 235, 0.1); */
+}
+
+.combobox-input::placeholder {
+    color: #94a3b8;
+}
+
+.combobox-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 11px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+    padding: 4px;
+    z-index: 10;
+    will-change: transform;
+}
+
+.editable-combobox.open .combobox-icon {
+    transform: translateY(-50%) rotate(180deg) !important;
+}
+
+.combobox-clear {
+    position: absolute;
+    right: 32px; /* Left of the chevron */
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    background: white; /* Cover background if needed */
+}
+
+.combobox-clear:hover {
+    color: #ef4444;
+    background: #f1f5f9;
+}
+
+.combobox-options {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    max-height: 240px;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    /* box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); */
+    display: none;
+    z-index: 9999;
+    padding: 6px;
+}
+
+.editable-combobox.open .combobox-options {
+    display: block;
+}
+
+.combobox-option {
+    padding: 10px 12px;
+    color: #334155;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 13.5px;
+    display: block;
+    border-radius: 6px;
+    background: #ffffff;
+}
+
+.combobox-option:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.combobox-option.selected {
+    background: #eff6ff;
+    color: #4672eb;
+    font-weight: 600;
+}
+
+/* Hide old kb-dropdown styles */
+.kb-dropdown,
+.kb-combo-wrapper,
+.kb-combo-input,
+.kb-combo-icon,
+.kb-options,
+.kb-option {
+    display: none !important;
+}
+
+/* Warehouse Dropdown Container - wider */
+#warehouse-dropdown-container {
+    width: 100%;
+}
+
+#warehouse-dropdown-container .dropdown-options {
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Option Items for Warehouse Multi-select */
+.option-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #334155;
+    transition: background 0.2s;
+    user-select: none;
+}
+
+.option-item:hover {
+    background-color: #f1f5f9;
+}
+
+.option-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    pointer-events: none;
+    accent-color: #3b82f6;
+}
+
+/* Selected Tags in Dropdown */
+.selected-tag {
+    display: inline-flex;
+    align-items: center;
+    background: #eff6ff;
+    color: #1e40af;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-right: 4px;
+    margin-bottom: 2px;
+    border: 1px solid #dbeafe;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.selected-placeholder {
+    color: #94a3b8;
+}
+
+.role-operator { background: #fef3c7; color: #92400e; }
+
+/* Permissions Section */
+.permissions-section {
+    margin: 8px 0 20px 0;
+    padding: 0; /* No internal padding needed now */
+    border-radius: 12px;
+}
+
+.section-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #f1f5f9;
+}
+
+.btn-add-permission {
+    font-size: 13px;
+    min-width: 200px !important;
+    text-align: center !important;
+    color: #2563eb;
+    background: white;
+    border: 1px solid #2563eb;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center !important; /* Center text and icon */
+    gap: 6px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-add-permission:hover {
+    background: #eff6ff;
+}
+
+.permission-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 140px 1fr; /* Fixed width for Role, expanded for Warehouse */
+    gap: 16px;
+    align-items: flex-start;
+    padding: 24px 16px 16px 16px; /* Increased top padding for icons */
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.permission-row-actions {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    z-index: 10;
+}
+
+.btn-icon-add, .btn-icon-remove {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    border-radius: 4px;
+}
+
+.btn-icon-add {
+    color: #2563eb; /* Blue per user request */
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.btn-icon-add:hover {
+    background: #eff6ff;
+    transform: scale(1.1);
+}
+
+.btn-icon-remove {
+    color: #94a3b8;
+}
+
+.btn-icon-remove:hover:not(.disabled) {
+    color: #ef4444;
+    background: #fef2f2;
+}
+
+.btn-icon-remove.disabled {
+    cursor: not-allowed !important;
+    opacity: 0.3;
+}
+
+.permission-row:last-child {
+    margin-bottom: 0;
+}
+
+.btn-remove-permission {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 5;
+}
+
+.btn-remove-permission:hover {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+.permission-row .form-group {
+    margin-bottom: 0;
+}
+
+/* Import Modal */
+.import-modal-box {
+    width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.import-step {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.import-step:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.step-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.step-desc {
+    color: #64748b;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.file-upload-zone {
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #f8fafc;
+}
+
+.file-upload-zone:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.file-upload-zone i {
+    font-size: 36px;
+    color: #94a3b8;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.file-upload-zone span {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.selected-file {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #22c55e;
+    font-weight: 500;
+}
+
+.import-preview {
+    margin-top: 20px;
+}
+
+.preview-table-wrapper {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-top: 12px;
+}
+
+.preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.preview-table th, .preview-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.preview-table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+    position: sticky;
+    top: 0;
+}
+
+.preview-table tr:hover {
+    background: #f8fafc;
+}
+
+.import-error {
+    background: #fef2f2;
+    color: #dc2626;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.import-summary {
+    margin-top: 12px;
+    padding: 12px;
+    background: #f0fdf4;
+    border-radius: 8px;
+    color: #166534;
+    font-size: 13px;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Pagination Bar */
+.pagination-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 0 0 8px 8px;
+    border-top: 1px solid #f1f5f9;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #e2e8f0;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #475569;
+    transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.page-btn.active {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+
+.page-numbers {
+    display: flex;
+    gap: 4px;
+}
+
+.page-goto {
+    margin-left: 12px;
+    font-size: 13px;
+}
+
+.page-goto input {
+    width: 50px;
+    padding: 6px 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    text-align: center;
+    margin: 0 4px;
+}
+
+.avatar-panel {
+    margin-top: 0;
+}
+
+.avatar-upload-zone {
+    width: 100%;
+    height: 120px;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #f8fafc;
+    overflow: hidden;
+    position: relative;
+    border-style: solid; /* Default solid as per user's latest change */
+}
+
+.avatar-upload-zone.drag-over {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+    border-style: dashed;
+}
+
+.avatar-upload-zone:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.avatar-upload-zone img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Don't crop if it's wide now */
+}
+
+#avatar-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: #94a3b8;
+}
+
+#avatar-placeholder i {
+    font-size: 24px;
+}
+
+#avatar-placeholder span {
+    font-size: 11px;
+    text-align: center;
+}
+
+/* Confirm Popover Styles */
+.modal-confirm {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    align-items: flex-start;
+    justify-content: flex-start;
+    pointer-events: auto;
+}
+
+.modal-confirm.show {
+    display: block;
+}
+
+.confirm-content {
+    background: white;
+    border-radius: 8px;
+    width: 280px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    position: fixed;
+    pointer-events: auto;
+    animation: popIn 0.2s ease-out;
+}
+
+@keyframes popIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.confirm-content::after {
+    content: "";
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-right: 1px solid #e2e8f0;
+    border-top: 1px solid #e2e8f0;
+}
+
+.confirm-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 24px;
+}
+
+.confirm-icon.warning {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.confirm-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.confirm-message {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Centered Modal Variant */
+.modal-confirm.centered {
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.4); /* Dim background */
+}
+
+.modal-confirm.centered.show {
+    display: flex; /* Override display: block from .show */
+}
+
+.modal-confirm.centered .confirm-content {
+    position: relative;
+    top: auto !important;
+    left: auto !important;
+    width: 750px !important; /* Force width */
+    max-width: 90vw;
+    transform: none !important;
+    animation: popIn 0.3s ease-out;
+}
+
+.modal-confirm.centered .confirm-content::after {
+    display: none; /* Hide arrow */
+}
+
+/* Warehouse Badges */
+.badge-warehouse {
+    display: block;
+    width: fit-content;
+    max-width: 300px;
+    padding: 3px 10px;
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #dbeafe;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.badge-warehouse:last-child {
+    margin-bottom: 0;
+}
+
+.badge-warehouse.all {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #bbf7d0;
+    font-weight: 500;
+}

@@ -1,0 +1,55 @@
+:root {
+    --bg-dark: #0f172a; --panel-bg: #1e293b; --crane-color: #f59e0b;
+    --color-get: #61afef; --color-post: #98c379; --color-put: #d19a66; --color-patch: #c678dd;
+}
+
+body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-dark); color: white; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+/* VIEWPORT CỦA KHO */
+.warehouse-viewport { flex: 1; display: flex; justify-content: center; align-items: center; overflow-x: auto; }
+.warehouse-container-horizontal { display: flex; flex-direction: column; gap: 10px; background: var(--panel-bg); padding: 40px; border-radius: 12px; min-width: 800px; }
+
+/* DÃY KỆ (CHẠY NGANG) */
+.block-row { display: flex; gap: 4px; background: var(--bg-dark); padding: 8px; border: 1px solid #475569; }
+.slot { width: 35px; height: 45px; border: 1px solid rgba(255,255,255,0.05); font-size: 8px; display: flex; align-items: center; justify-content: center; }
+
+/* HÀNH LANG (AISLE) */
+.aisle-horizontal { height: 80px; background: #161e2e; position: relative; border-top: 2px dashed #334155; border-bottom: 2px dashed #334155; }
+
+/* CRANE NGANG */
+.crane-horizontal { 
+    position: absolute; 
+    width: 40px; height: 100%; 
+    background: rgba(245, 158, 11, 0.2); 
+    border-left: 3px solid var(--crane-color); 
+    border-right: 3px solid var(--crane-color);
+    left: 0; transition: left 1.5s ease-in-out; 
+    display: flex; align-items: center; justify-content: center; z-index: 10; 
+}
+.crane-arm { width: 30px; height: 30px; background: var(--crane-color); border-radius: 4px; position: relative; }
+
+/* PALLET */
+.pallet { 
+    width: 24px; height: 20px; background: #d97706; border: 1px solid #fff; 
+    position: absolute; font-size: 10px; font-weight: bold; color: white; 
+    display: flex; align-items: center; justify-content: center; border-radius: 2px;
+}
+
+/* PANEL ĐIỀU KHIỂN (GIỮ NGUYÊN) */
+.panel { width: 450px; background: var(--panel-bg); display: flex; flex-direction: column; border-left: 1px solid #334155; }
+.header-top { padding: 15px; background: #161e2e; border-bottom: 2px solid var(--crane-color); display: flex; justify-content: space-between; align-items: center; }
+.current-date-badge { background: #5e96e4; color: white; padding: 4px 10px; border-radius: 4px; font-family: monospace; }
+.status-section { padding: 15px; }
+.stat-card { background: var(--bg-dark); padding: 12px; border-radius: 8px; border-left: 4px solid #22c55e; }
+.stat-label { font-size: 10px; color: #64748b; }
+.stat-value { font-weight: bold; color: #22c55e; }
+
+/* LOGS (GIỮ NGUYÊN) */
+.log-tabs { display: flex; background: var(--bg-dark); padding: 8px 8px 0 8px; gap: 4px; }
+.tab-btn { flex: 1; padding: 10px; background: var(--panel-bg); border: none; color: #64748b; cursor: pointer; border-radius: 6px 6px 0 0; }
+.tab-btn.active { background: #334155; color: white; }
+.log-viewport { flex: 1; overflow-y: auto; padding: 15px; background: var(--bg-dark); font-family: 'Consolas', monospace; font-size: 12px; }
+.log-content { display: none; }
+.log-content.active { display: block; }
+.api-entry { margin-bottom: 10px; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 4px; }
+.m-get { color: var(--color-get); } .m-post { color: var(--color-post); }

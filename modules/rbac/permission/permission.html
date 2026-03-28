@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="permission.css" />
+  <body>
+    <div class="permission-container">
+      <div class="permission-header">
+        <div class="header-left"></div>
+        <div class="header-right">
+          <button class="btn-outline" id="btn-select-all">Chọn tất cả</button>
+          <button class="btn-outline" id="btn-deselect-all">
+            Bỏ chọn tất cả
+          </button>
+          <button class="btn-save"><i class="fas fa-save"></i> Lưu</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <div class="table-wrapper">
+          <div class="table-scroll-head">
+            <table class="permission-table">
+              <thead>
+                <tr>
+                  <th class="col-stt">STT</th>
+                  <th class="col-name">Tên menu</th>
+                  <th class="col-action">Tất cả</th>
+                  <th class="col-action">Xem</th>
+                  <th class="col-action">Thêm</th>
+                  <th class="col-action">Sửa</th>
+                  <th class="col-action">Xóa</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+          <div class="table-scroll-body">
+            <table class="permission-table" id="permission-data-table">
+              <tbody id="permission-table-body">
+                <!-- Javascript will populate this -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="permission.js"></script>
+  </body>
+</html>

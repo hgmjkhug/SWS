@@ -1,0 +1,279 @@
+    <link rel="stylesheet" href="device.css" />
+
+  <body>
+    <div class="device-container">
+      <!-- Actions Toolbar -->
+      <div class="device-actions">
+        <div class="device-filters">
+          <div class="filter-group">
+            <!-- <span class="filter-title">Tìm kiếm</span> -->
+            <input
+              type="text"
+              class="device-search-input"
+              id="search-input"
+              placeholder="Tìm theo mã thiết bị"
+            />
+          </div>
+          <div class="filter-group">
+            <span class="filter-title">Nhóm thiết bị</span>
+            <div class="custom-dropdown" id="group-dropdown">
+              <div
+                class="dropdown-selected"
+                onclick="toggleDeviceDropdown('group-dropdown')"
+              >
+                <span id="group-selected-label">Tất cả nhóm</span>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="dropdown-options" id="group-options">
+                <!-- Populated by JS -->
+              </div>
+              <input type="hidden" id="group-filter-value" value="" />
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-title">Trạng thái</span>
+            <div class="custom-dropdown" id="status-dropdown">
+              <div
+                class="dropdown-selected"
+                onclick="toggleDeviceDropdown('status-dropdown')"
+              >
+                <span id="status-selected-label">Tất cả trạng thái</span>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="dropdown-options">
+                <div
+                  class="dropdown-option active"
+                  data-value=""
+                  onclick="
+                    selectDeviceOption('status', '', 'Tất cả trạng thái')
+                  "
+                >
+                  Tất cả trạng thái
+                </div>
+                <div
+                  class="dropdown-option"
+                  data-value="idle"
+                  onclick="selectDeviceOption('status', 'idle', 'Idle')"
+                >
+                  Idle
+                </div>
+                <div
+                  class="dropdown-option"
+                  data-value="in_progress"
+                  onclick="
+                    selectDeviceOption('status', 'in_progress', 'In Progress')
+                  "
+                >
+                  In Progress
+                </div>
+                <div
+                  class="dropdown-option"
+                  data-value="waiting"
+                  onclick="selectDeviceOption('status', 'waiting', 'Waiting')"
+                >
+                  Waiting
+                </div>
+                <div
+                  class="dropdown-option"
+                  data-value="completed"
+                  onclick="
+                    selectDeviceOption('status', 'completed', 'Completed')
+                  "
+                >
+                  Completed
+                </div>
+              </div>
+              <input type="hidden" id="status-filter-value" value="" />
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-title">Lệnh thực thi</span>
+            <div class="custom-dropdown" id="command-dropdown">
+              <div
+                class="dropdown-selected"
+                onclick="toggleDeviceDropdown('command-dropdown')"
+              >
+                <input
+                  type="text"
+                  id="command-search-input"
+                  placeholder="Tất cả lệnh"
+                  oninput="filterCommandOptions(this)"
+                  onfocus="openDeviceDropdown('command-dropdown')"
+                  onclick="event.stopPropagation()"
+                  autocomplete="off"
+                />
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="dropdown-options">
+                <div id="command-options-list">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+              <input type="hidden" id="command-filter-value" value="" />
+            </div>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button
+            class="btn btn-danger"
+            id="bulk-delete-btn"
+            onclick="deleteSelected()"
+            disabled
+          >
+            <i class="fas fa-trash"></i> Xóa (<span id="selected-count">0</span
+            >)
+          </button>
+          <button class="btn btn-primary" onclick="openAddModal()">
+            <i class="fas fa-plus"></i> Thêm mới
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-scroll-container">
+        <div class="table-scroll-body">
+          <table class="device-table">
+            <thead>
+              <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    id="select-all"
+                    onclick="toggleSelectAll()"
+                  />
+                </th>
+                <th>STT</th>
+                <th>Nhóm thiết bị</th>
+                <th>Mã thiết bị</th>
+                <th>IP</th>
+                <th>Port</th>
+                <th>Lệnh thực thi</th>
+                <th>Công đoạn</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="device-table-body">
+              <!-- Rows rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-bar">
+        <div class="pagination-info" id="pagination-info">
+          Hiển thị 0 - 0 trong 0
+        </div>
+        <div class="pagination-controls">
+          <button class="page-btn" id="prev-btn" onclick="prevPage()" disabled>
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <div class="page-numbers" id="page-numbers">
+            <!-- Page numbers rendered by JS -->
+          </div>
+          <button class="page-btn" id="next-btn" onclick="nextPage()" disabled>
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Form (Add/Edit) -->
+    <div class="modal-overlay" id="device-modal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modal-title">Thêm mới Thiết bị</h3>
+          <button class="close-btn" onclick="closeModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="device-id" />
+          <div class="form-row">
+            <div class="form-group">
+              <label>Mã thiết bị <span class="required">*</span></label>
+              <input
+                type="text"
+                id="device-code"
+                placeholder="Nhập mã thiết bị"
+              />
+            </div>
+            <div class="form-group">
+              <label>Tên thiết bị <span class="required">*</span></label>
+              <input
+                type="text"
+                id="device-name"
+                placeholder="Nhập tên thiết bị"
+              />
+            </div>
+          </div>
+          <div class="form-row single-col">
+            <div class="form-group">
+              <label>Nhóm thiết bị <span class="required">*</span></label>
+              <div class="custom-dropdown" id="modal-group-dropdown">
+                <div
+                  class="dropdown-selected"
+                  onclick="toggleDeviceDropdown('modal-group-dropdown')"
+                >
+                  <span id="modal-group-selected-label">-- Chọn Nhóm --</span>
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-options" id="modal-group-options">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+              <input type="hidden" id="device-group" value="" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>IP Address</label>
+              <input type="text" id="device-ip" placeholder="192.168.1.1" />
+            </div>
+            <div class="form-group">
+              <label>Port</label>
+              <input type="number" id="device-port" placeholder="8080" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+          <button class="btn btn-primary" onclick="saveDevice()">
+            Lưu
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Delete Modal (Using standard alert or custom) -->
+    <!-- Ideally creating a custom one for consistency -->
+    <!-- Delete Confirmation Popover (Standardized) -->
+    <div id="delete-confirm-modal" class="modal-confirm">
+      <div class="confirm-content">
+        <div class="confirm-icon-box">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="confirm-title">Xác nhận xóa</h3>
+        <p class="confirm-message" id="confirm-delete-message">
+          Bạn có chắc chắn muốn xóa thiết bị này không?<br />Hành động này không
+          thể hoàn tác.
+        </p>
+        <div class="confirm-actions">
+          <button onclick="closeDeleteModal()" class="btn btn-secondary">
+            Hủy
+          </button>
+          <button onclick="confirmDeleteDevice()" class="btn btn-danger">
+            Xóa
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="device.js"></script>
+
+  </body>
+</html>

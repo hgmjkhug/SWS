@@ -1,0 +1,274 @@
+<!-- Batch Module: Core Content -->
+<link rel="stylesheet" href="modules/batch/batch.css" data-module-asset="true">
+
+<div id="main-view">
+    <!-- Toolbar Section -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <!-- Search Bar -->
+            <div class="filter-group">
+                <input type="text" id="batch-search" class="search-input" style="width: 180px" placeholder="Mã lô, tên lô..." onkeyup="window.handleSearch(this.value)">
+            </div>
+            
+            <!-- Status Filter -->
+            <div class="filter-group">
+                <div class="status-custom-dropdown" id="status-dropdown">
+                    <div class="dropdown-selected" onclick="window.toggleStatusDropdown()">
+                        <span id="status-selected-label">Tất cả trạng thái</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="dropdown-options">
+                        <div class="dropdown-option active" onclick="window.selectStatusFilter('ALL', 'Tất cả trạng thái')">Tất cả trạng thái</div>
+                        <div class="dropdown-option" onclick="window.selectStatusFilter('NEW', 'Mới tạo')">Mới tạo</div>
+                        <div class="dropdown-option" onclick="window.selectStatusFilter('IMPORTING', 'Đang nhập')">Đang nhập</div>
+                        <div class="dropdown-option" onclick="window.selectStatusFilter('INSTOCK', 'Đã lưu kho')">Đã lưu kho</div>
+                        <div class="dropdown-option" onclick="window.selectStatusFilter('EXPORTING', 'Đang xuất')">Đang xuất</div>
+                        <div class="dropdown-option" onclick="window.selectStatusFilter('OUTSTOCK', 'Đã xuất kho')">Đã xuất kho</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Creator Filter -->
+            <div class="filter-group">
+                <div class="custom-combobox-wrapper" id="creator-filter-combobox">
+                    <div class="combobox-input-group">
+                        <input type="text" id="creator-filter-input" class="search-input" placeholder="Tất cả người tạo..." autocomplete="off">
+                        <div id="creator-filter-list" class="combobox-dropdown"></div>
+                        <i class="fas fa-chevron-down combobox-arrow" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 11px; pointer-events: none;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grade Type Filter (NEW) -->
+            <div class="filter-group">
+                <div class="custom-combobox-wrapper" id="grade-type-filter-combobox">
+                    <div class="combobox-input-group">
+                        <input type="text" id="grade-type-filter-input" class="search-input" placeholder="Tất cả loại phẩm cấp..." autocomplete="off">
+                        <div id="grade-type-filter-list" class="combobox-dropdown"></div>
+                        <i class="fas fa-chevron-down combobox-arrow" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 11px; pointer-events: none;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Date Range Picker -->
+            <div class="filter-group">
+                <div class="unified-date-filter" style="position: relative">
+                    <div class="date-picker-trigger" id="dateRangeTrigger" onclick="window.toggleDateRangePicker(event)">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="dateRangeDisplay">dd/mm/yyyy - dd/mm/yyyy</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+
+                    <!-- Bespoke Analytics Date Picker -->
+                    <div class="analytics-date-picker" id="analyticsPicker">
+                        <div class="picker-sidebar">
+                            <div class="sidebar-item" data-range="today">Hôm nay</div>
+                            <div class="sidebar-item" data-range="last3">3 ngày gần đây</div>
+                            <div class="sidebar-item" data-range="thisweek">Tuần này</div>
+                            <div class="sidebar-item" data-range="last7">7 ngày gần đây</div>
+                            <div class="sidebar-item" data-range="last30">30 ngày gần đây</div>
+                            <div class="sidebar-item" data-range="last3mo">3 tháng gần đây</div>
+                            <div class="sidebar-item" data-range="last6mo">6 tháng gần đây</div>
+                            <div class="sidebar-item" data-range="last1yr">1 năm qua</div>
+                        </div>
+
+                        <div class="picker-main">
+                            <div class="picker-header">
+                                <div class="selected-range-box" id="tempRangeDisplay">-</div>
+                                <div class="header-actions">
+                                    <button type="button" class="text-btn clear-btn" id="clearPicker">Xóa bộ lọc</button>
+                                    <button type="button" class="text-btn cancel-btn" id="cancelPicker">Hủy</button>
+                                    <button type="button" class="apply-btn" id="applyPicker">Áp dụng</button>
+                                </div>
+                            </div>
+
+                            <div class="picker-body">
+                                <div class="calendar-panel left-panel">
+                                    <div class="panel-title">Từ ngày</div>
+                                    <div class="panel-nav">
+                                        <div class="custom-dropdown month-dropdown" id="leftMonthDropdown">
+                                            <div class="dropdown-selected" id="leftMonthSelected">Tháng</div>
+                                            <div class="dropdown-list" id="leftMonthList"></div>
+                                        </div>
+                                        <div class="custom-dropdown year-dropdown" id="leftYearDropdown">
+                                            <div class="dropdown-selected" id="leftYearSelected">Năm</div>
+                                            <div class="dropdown-list" id="leftYearList"></div>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-grid" id="leftCalendar">
+                                        <div class="day-names">
+                                            <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                                        </div>
+                                        <div class="days-container"></div>
+                                    </div>
+                                </div>
+
+                                <div class="calendar-panel right-panel">
+                                    <div class="panel-title">Đến ngày</div>
+                                    <div class="panel-nav">
+                                        <div class="custom-dropdown month-dropdown" id="rightMonthDropdown">
+                                            <div class="dropdown-selected" id="rightMonthSelected">Tháng</div>
+                                            <div class="dropdown-list" id="rightMonthList"></div>
+                                        </div>
+                                        <div class="custom-dropdown year-dropdown" id="rightYearDropdown">
+                                            <div class="dropdown-selected" id="rightYearSelected">Năm</div>
+                                            <div class="dropdown-list" id="rightYearList"></div>
+                                        </div>
+                                    </div>
+                                    <div class="calendar-grid" id="rightCalendar">
+                                        <div class="day-names">
+                                            <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                                        </div>
+                                        <div class="days-container"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="toolbar-right">
+            <button class="btn-primary" onclick="window.openCreateModal()" style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px;">
+                <i class="fas fa-plus"></i> Thêm mới
+            </button>
+        </div>
+    </div>
+
+    <!-- Split Table Architecture -->
+    <div class="batch-table-container">
+        <!-- Header Part -->
+        <div class="batch-table-header" id="batch-header-wrapper">
+            <table class="data-table">
+                <colgroup>
+                    <col style="width: 50px">
+                    <col style="width: 140px">
+                    <col style="width: 260px">
+                    <col style="width: 150px">
+                    <col style="width: 80px">
+                    <col style="width: 120px">
+                    <col style="width: 110px">
+                    <col style="width: 110px">
+                    <col style="width: 190px">
+                    <col style="width: 110px">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="text-center">STT</th>
+                        <th>Mã lô hàng</th>
+                        <th>Tên lô hàng</th>
+                        <th>Loại phẩm cấp</th>
+                        <th>Phẩm cấp</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th>Ngày nhập</th>
+                        <th>Ngày xuất</th>
+                        <th>Người tạo</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+        <!-- Body Part -->
+        <div class="batch-table-body" id="batch-body-wrapper">
+            <table class="data-table">
+                <colgroup>
+                    <col style="width: 50px">
+                    <col style="width: 140px">
+                    <col style="width: 260px">
+                    <col style="width: 150px">
+                    <col style="width: 80px">
+                    <col style="width: 120px">
+                    <col style="width: 110px">
+                    <col style="width: 110px">
+                    <col style="width: 190px">
+                    <col style="width: 110px">
+                </colgroup>
+                <tbody id="batch-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination Section -->
+    <div class="pagination-bar">
+        <div id="main-info" class="page-info">Hiển thị 0 - 0 trong tổng 0</div>
+        <div class="right-controls" style="display: flex; align-items: center; gap: 16px;">
+            <div id="main-pagination" class="page-numbers"></div>
+            <div class="page-jump">
+                Đến <input type="number" id="go-page" min="1" onchange="window.goToPage(this.value)"> Trang
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add New -->
+<div id="modal-add-batch" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title">Thêm mới lô hàng</div>
+            <div class="close-modal" onclick="window.closeCreateModal()">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        <div class="modal-body">
+            <form id="form-add-batch" onsubmit="event.preventDefault(); window.saveNewBatch()">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Mã lô hàng <span class="required" style="color: red">*</span></label>
+                        <input type="text" id="batch-code" class="form-control" placeholder="Nhập mã lô" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tên lô hàng <span class="required" style="color: red">*</span></label>
+                        <input type="text" id="batch-name" class="form-control" placeholder="Nhập tên lô" required>
+                    </div>
+                    <div class="form-group" id="product-type-combobox">
+                        <label>Loại phẩm cấp <span class="required" style="color: red">*</span></label>
+                        <div class="searchable-combobox" style="position: relative">
+                            <input type="text" id="product-type-input" class="form-control" placeholder="Tìm loại phẩm cấp..." autocomplete="off">
+                            <input type="hidden" id="product-type-id">
+                            <div id="product-type-list" class="combobox-dropdown" style="display: none; position: absolute; z-index: 1001; background: white; width: 100%; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="window.closeCreateModal()">Hủy</button>
+            <button class="btn-primary" onclick="window.saveNewBatch()">Thêm mới</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit -->
+<div id="modal-edit-batch" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title">Chỉnh sửa lô hàng</div>
+            <div class="close-modal" onclick="window.closeEditModal()">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        <div class="modal-body">
+            <form id="form-edit-batch" onsubmit="event.preventDefault(); window.saveEditBatch()">
+                <input type="hidden" id="edit-batch-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Mã lô hàng <span class="required" style="color: red">*</span></label>
+                        <input type="text" id="edit-batch-code" class="form-control" disabled style="background: #f1f5f9">
+                    </div>
+                    <div class="form-group">
+                        <label>Tên lô hàng <span class="required" style="color: red">*</span></label>
+                        <input type="text" id="edit-batch-name" class="form-control" required>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="window.closeEditModal()">Hủy</button>
+            <button class="btn-primary" onclick="window.saveEditBatch()">Lưu thay đổi</button>
+        </div>
+    </div>
+</div>
+
+<script src="modules/batch/batch.js"></script>

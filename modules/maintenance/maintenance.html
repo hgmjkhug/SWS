@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="maintenance.css" />
+</head>
+<body>
+<div class="maintenance-module">
+  <!-- Header / Tabs -->
+  <div class="module-header">
+    <div class="tabs-control">
+      <button class="tab-btn active" onclick="switchMaintenanceTab('list')">Danh sách bảo trì</button>
+      <button class="tab-btn" onclick="switchMaintenanceTab('monitoring')">Giám sát bảo trì</button>
+    </div>
+  </div>
+
+  <!-- Tab: List -->
+  <div class="tab-content active" id="tab-list">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="maintenance-search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="device-search" placeholder="Tìm mã / tên thiết bị..." oninput="filterMaintenanceList()">
+        </div>
+        <div class="filter-group-inline">
+          <select id="device-type-filter" class="table-filter-select" onchange="filterMaintenanceList()">
+            <option value="all">Tất cả loại thiết bị</option>
+            <option value="Lifter">Lifter</option>
+            <option value="Shuttle">Shuttle</option>
+          </select>
+        </div>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn-bulk-action" id="btn-bulk-maintenance" disabled onclick="handleBulkMaintenance()">
+          <i class="fas fa-tools"></i> Bảo trì hàng loạt (<span id="selected-count">0</span>)
+        </button>
+      </div>
+    </div>
+
+    <!-- Accordion Table -->
+    <div class="table-container">
+      <div class="table-scroll-head">
+        <table class="maintenance-table">
+          <colgroup>
+            <col style="width: 45px;">
+            <col style="width: 55px;">
+            <col style="width: 150px;">
+            <col style="width: 140px;">
+            <col style="width: 180px;">
+            <col style="width: 120px;">
+            <col style="width: 145px;">
+            <col style="width: 145px;">
+            <col style="width: 150px;">
+          </colgroup>
+          <thead>
+            <tr>
+              <th width="45" class="text-center"><input type="checkbox" id="select-all" onclick="toggleSelectAll(this)"></th>
+              <th width="55" class="text-center">STT</th>
+              <th width="150" class="text-center">Nhóm thiết bị</th>
+              <th width="140">Mã thiết bị</th>
+              <th width="180">Tên thiết bị</th>
+              <th width="120" class="text-center">Số lần BT</th>
+              <th width="145" class="text-center">Bảo trì lần cuối</th>
+              <th width="145" class="text-center">Bảo trì tiếp theo</th>
+              <th width="150" class="text-center">Thao tác</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+      <div class="table-scroll-body" onscroll="syncScroll(this)">
+        <table class="maintenance-table">
+          <colgroup>
+            <col style="width: 45px;">
+            <col style="width: 55px;">
+            <col style="width: 150px;">
+            <col style="width: 140px;">
+            <col style="width: 180px;">
+            <col style="width: 120px;">
+            <col style="width: 145px;">
+            <col style="width: 145px;">
+            <col style="width: 150px;">
+          </colgroup>
+          <tbody id="maintenance-list-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+      <!-- Main Table Pagination (Copied from inbound.html) -->
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 16px;
+          padding: 12px 0;
+          border-top: 1px solid #e2e8f0;
+        "
+      >
+        <div id="main-info" style="color: #64748b; font-size: 13px">
+          Hiển thị 0 trong tổng 0
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <div
+            id="main-pagination"
+            class="page-numbers"
+            style="display: flex; gap: 4px"
+          ></div>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              color: #64748b;
+              font-size: 13px;
+            "
+          >
+            Đến
+            <input
+              type="number"
+              id="main-go-page"
+              style="
+                width: 50px;
+                padding: 6px 8px;
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
+                text-align: center;
+              "
+              min="1"
+              onchange="goToMainPageFromInput()"
+            />
+            Trang
+          </div>
+        </div>
+      </div>
+  </div>
+
+  <!-- Tab: Monitoring -->
+  <div class="tab-content" id="tab-monitoring">
+    <div class="monitoring-filters">
+      <div class="filter-group">
+        <label>Tìm thiết bị</label>
+        <div class="searchable-combobox" id="device-combobox">
+          <div class="combobox-input-wrap">
+            <i class="fas fa-search combobox-icon"></i>
+            <input type="text" placeholder="Mã/Tên thiết bị..." onfocus="showDeviceOptions()" oninput="filterDeviceOptions(this)" autocomplete="off">
+            <span class="combobox-clear" id="combobox-clear" onclick="clearDeviceFilter()" style="display:none"><i class="fas fa-times"></i></span>
+          </div>
+          <div class="options-list" id="device-options"></div>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Tháng</label>
+        <select id="month-select" class="form-select" onchange="renderCalendar()">
+          <option value="0">Tháng 1</option><option value="1">Tháng 2</option>
+          <option value="2">Tháng 3</option><option value="3">Tháng 4</option>
+          <option value="4">Tháng 5</option><option value="5">Tháng 6</option>
+          <option value="6">Tháng 7</option><option value="7">Tháng 8</option>
+          <option value="8">Tháng 9</option><option value="9">Tháng 10</option>
+          <option value="10">Tháng 11</option><option value="11">Tháng 12</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Năm</label>
+        <select id="year-select" class="form-select" onchange="renderCalendar()"></select>
+      </div>
+      <!-- Legend moved here -->
+      <div class="filter-group legend-filter-group">
+        <label>Chú thích</label>
+        <div class="calendar-legend inline">
+          <div class="legend-item"><span class="dot done"></span> Đã bảo trì</div>
+          <div class="legend-item"><span class="dot pending"></span> Chưa bảo trì</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calendar-container">
+      <div class="calendar-grid-header">
+        <div>Thứ 2</div><div>Thứ 3</div><div>Thứ 4</div><div>Thứ 5</div>
+        <div>Thứ 6</div><div>Thứ 7</div><div>Chủ nhật</div>
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Record Maintenance Modal -->
+<div class="modal-overlay" id="maintenance-modal">
+  <div class="modal-box md">
+    <div class="modal-header">
+      <h3 class="modal-title" id="maintenance-modal-title">Ghi nhận bảo trì</h3>
+      <span class="close-modal" onclick="closeModal('maintenance-modal')">&times;</span>
+    </div>
+    <div class="modal-body" style="padding: 24px;">
+      <div class="form-row" style="grid-template-columns: 1fr 1fr 1.5fr;">
+        <div class="form-field">
+          <label>Nhóm thiết bị</label>
+          <input type="text" id="modal-device-group" readonly class="form-input readonly not-allowed">
+        </div>
+        <div class="form-field">
+          <label>Mã thiết bị</label>
+          <input type="text" id="modal-device-code" readonly class="form-input readonly not-allowed">
+        </div>
+        <div class="form-field">
+          <label>Tên thiết bị</label>
+          <input type="text" id="modal-device-name" readonly class="form-input readonly not-allowed">
+        </div>
+      </div>
+      
+      <hr style="border: none; border-top: 1px dashed #cbd5e1; margin: 20px 0;">
+
+      <div class="form-row">
+        <div class="form-field" style="position: relative;">
+          <label>Ngày bảo trì</label>
+          <div class="pda-datepicker-wrapper">
+            <input type="text" id="modal-maintenance-date" class="form-input pda-datepicker-input" style="background-color: #fff; cursor: pointer; border: 1px solid #e2e8f0; width: 100%;" placeholder="dd/mm/yyyy" readonly onclick="togglePdaCalendar('maint')">
+            <button type="button" class="pda-calendar-btn" onclick="togglePdaCalendar('maint')"><i class="fas fa-calendar-alt"></i></button>
+            <div id="calendar-mount-maint"></div>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Người thực hiện</label>
+          <input type="text" id="modal-technician" class="form-input" placeholder="Tên kỹ thuật viên...">
+        </div>
+      </div>
+      <div class="form-field full">
+        <label>Kết quả bảo trì</label>
+        <div class="custom-select-wrapper">
+            <div class="form-input custom-select-trigger" onclick="toggleResultDropdown()" id="result-dropdown-trigger">
+                <span id="modal-result-text">Hoàn thành - Thiết bị hoạt động tốt</span>
+                <i class="fas fa-chevron-down" style="color: #64748b; font-size: 12px;"></i>
+            </div>
+            <div class="custom-options-panel" id="result-dropdown-options">
+                <div class="custom-option selected" onclick="selectResult('ok', 'Hoàn thành - Thiết bị hoạt động tốt', this)">
+                    <i class="fas fa-check-circle" style="color: #22c55e"></i> Hoàn thành - Thiết bị hoạt động tốt
+                </div>
+                <div class="custom-option" onclick="selectResult('partial', 'Hoàn thành một phần', this)">
+                    <i class="fas fa-exclamation-circle" style="color: #f59e0b"></i> Hoàn thành một phần
+                </div>
+                <div class="custom-option" onclick="selectResult('failed', 'Cần sửa chữa thêm', this)">
+                    <i class="fas fa-times-circle" style="color: #ef4444"></i> Cần sửa chữa thêm
+                </div>
+            </div>
+            <input type="hidden" id="modal-result" value="ok">
+        </div>
+      </div>
+      <div class="form-field full">
+        <label>Ghi chú</label>
+        <textarea id="modal-note" class="form-input" rows="3" placeholder="Nhập ghi chú, quan sát..."></textarea>
+      </div>
+
+      <!-- Khung ngày bảo trì tiếp theo theo yêu cầu -->
+      <div class="form-row" style="margin-bottom: 0;">
+        <div class="form-field full" style="position: relative;">
+          <label>Ngày bảo trì tiếp theo</label>
+          <div class="pda-datepicker-wrapper">
+            <input type="text" id="modal-next-maintenance-date" class="form-input pda-datepicker-input" style="background-color: #fff; cursor: pointer; border: 1px solid #e2e8f0; width: 100%;" placeholder="Dự kiến dd/mm/yyyy" readonly onclick="togglePdaCalendar('next')">
+            <button type="button" class="pda-calendar-btn" onclick="togglePdaCalendar('next')"><i class="fas fa-calendar-alt"></i></button>
+            <div id="calendar-mount-next"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #f1f5f9;">
+        <button class="btn-cancel" onclick="closeModal('maintenance-modal')">Hủy</button>
+        <button class="btn-save" onclick="saveMaintenance()"><i class="fas fa-save"></i> Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="maintenance.js"></script>
+</body>
+</html>

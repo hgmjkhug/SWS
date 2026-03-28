@@ -1,0 +1,303 @@
+<div class="workflow-config-view">
+  <div id="stepModal" class="modal">
+    <div class="modal-content">
+      <h3>Thêm bước mới</h3>
+      <input
+        type="text"
+        id="newStepName"
+        placeholder="Tên bước (để trống nếu chưa có tên)"
+      />
+      <div class="modal-btns">
+        <button class="btn btn-cancel" onclick="closeWorkflowModal()">
+          Hủy
+        </button>
+        <button class="btn btn-save" onclick="saveStep()">Thêm ngay</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="workflow-header">
+    <div class="header-left">
+      <div class="sidebar-title" id="workflowNameDisplay">
+        Thiết lập quy trình: <span>-</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="btn-back" onclick="tryCloseWorkflowConfig()">
+        <i class="fas fa-arrow-left"></i> Quay lại
+      </button>
+
+      <button class="btn-save-final" onclick="saveWorkflowFinal()">
+        <i class="fas fa-save"></i> Lưu quy trình
+      </button>
+    </div>
+  </div>
+
+  <div class="workflow-main-content">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">
+          Tổng số bước đã thiết lập: <span id="configuredSteps">0</span>
+        </div>
+      </div>
+
+      <!-- New Step Creation Form -->
+      <div class="sidebar-add-step">
+        <h4>Tạo bước mới</h4>
+        <div class="add-step-form">
+          <div class="form-group">
+            <label>Tên bước<span style="color: red;">*</span></label>
+            <input type="text" id="sidebar-new-step-name" placeholder="Ví dụ: Kiểm tra hàng..." />
+          </div>
+          
+          <div class="form-group">
+            <label>Nhóm thiết bị áp dụng <span style="color: red;"> *</span></label>
+            <div class="custom-dropdown" id="sidebar-device-dropdown">
+              <div class="combo-wrapper">
+                <input
+                  type="text"
+                  class="combo-input"
+                  placeholder="Chọn nhóm thiết bị"
+                  id="sidebar-device-input"
+                  autocomplete="off"
+                />
+                <i class="fas fa-chevron-down combo-icon"></i>
+              </div>
+              <div class="dropdown-options" id="sidebar-device-options">
+                <!-- Options rendered via JS -->
+              </div>
+              <input type="hidden" id="sidebar-device-value" value="" />
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-add-step" onclick="addNewAvailableStep()">
+        <i class="fas fa-plus"></i> Thêm bước mới
+      </button>
+
+      <!-- Total Available Steps -->
+      <div class="sidebar-step-count">
+        Số bước đã tạo: <span id="totalAvailableSteps">0</span>
+      </div>
+
+      <!-- Draggable Step List -->
+      <div class="step-list" id="stepList">
+        <!-- Steps will be populated by JS -->
+      </div>
+
+      <!-- Static End Step in Sidebar -->
+      <div class="sidebar-footer-step">
+         <div class="step-item step-item-end" id="sidebar-end-step" data-is-end-node="true">
+            <div class="step-item-name"><i class="fa-solid fa-stop"></i> Kết thúc quy trình</div>
+         </div>
+      </div>
+
+      <div id="sidebar-templates" style="display: none"></div>
+    </div>
+
+    <div class="canvas-container" id="canvasContainer">
+      <!-- Zoom Controls -->
+      <div class="zoom-controls">
+        <button
+          onclick="toggleFlowDirection()"
+          title="Chuyển chiều hiển thị (Dọc/Ngang)"
+        >
+          <i class="fas fa-exchange-alt"></i>
+        </button>
+        <button onclick="zoomWorkflow(0.1)" title="Zoom In">
+          <i class="fas fa-search-plus"></i>
+        </button>
+        <button onclick="zoomWorkflow(-0.1)" title="Zoom Out">
+          <i class="fas fa-search-minus"></i>
+        </button>
+        <button onclick="resetZoom()" title="Reset Zoom">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+      </div>
+
+      <div id="flowchart-list">
+        <!-- Static Start Node -->
+        <div id="node-start" class="node-special node-start">
+          <i class="fa-solid fa-play"></i> Bắt đầu
+        </div>
+        
+        <svg
+          id="svg-canvas"
+          style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: visible;
+          "
+        >
+          <defs>
+            <marker
+              id="arrow"
+              markerWidth="10"
+              markerHeight="10"
+              refX="9"
+              refY="5"
+              orient="auto"
+            >
+              <path d="M0,0 L0,10 L10,5 Z" fill="#3498db" />
+            </marker>
+          </defs>
+        </svg>
+      </div>
+    </div>
+    <div class="properties-panel" style="display: none;" id="propertiesPanel">
+      <div class="properties-header">
+        <div class="properties-title-group">
+          <h3>Thuộc tính bước <span id="prop-step-number"></span></h3>
+          <div id="prop-step-name" class="properties-step-name"></div>
+        </div>
+        <button class="close-panel-btn" onclick="deselectNode()" title="Đóng">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="properties-body">
+        
+        <div class="properties-form" id="propertiesForm">
+          <div class="accordion">
+            <!-- New: Trình tự vận hành Accordion -->
+            <div class="accordion-item active">
+              <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Trình tự vận hành</span>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="accordion-content">
+                <div id="sequence-container">
+                  <!-- Sequence cards will be rendered here by JS -->
+                </div>
+                <div style="padding: 12px 0 16px;">
+                  <button type="button" class="btn-add-sequence" onclick="addNewSequence()">
+                    <i class="fas fa-plus"></i> Thêm trình tự
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Existing: Thông số vận hành đầu vào Accordion -->
+            <div class="accordion-item">
+              <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>Thông số vận hành đầu vào</span>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="accordion-content">
+                <div class="form-group">
+                   <label>Tốc độ di chuyển</label>
+                   <div class="custom-dropdown" id="speedDropdown">
+                     <div class="combo-wrapper" onclick="toggleSpeedDropdown()">
+                       <input type="text" class="combo-input" id="prop-speed-display" readonly value="Bình thường" style="cursor: pointer;">
+                       <i class="fas fa-chevron-down combo-icon"></i>
+                     </div>
+                     <div class="dropdown-options" id="speedOptionsList">
+                         <div class="dropdown-option" onclick="selectSpeed('NORMAL', 'Bình thường')">Bình thường</div>
+                         <div class="dropdown-option" onclick="selectSpeed('FAST', 'Nhanh')">Nhanh</div>
+                         <div class="dropdown-option" onclick="selectSpeed('SLOW', 'Chậm')">Chậm</div>
+                     </div>
+                     <input type="hidden" id="prop-speed" value="NORMAL">
+                   </div>
+                </div>
+                
+                <div class="form-group">
+                   <label>Door Time (s)</label>
+                   <input type="number" id="prop-door-time" min="0" placeholder="Nhập thời gian chờ đóng/mở cửa thang">
+                </div>
+     
+                <div class="form-group">
+                   <label>Ngưỡng pin tự động sạc (%)</label>
+                   <input type="number" id="prop-battery-threshold" min="0" max="100" placeholder="0 - 100">
+                </div>
+     
+                <div class="form-group">
+                   <label>Âm thanh di chuyển</label>
+                   <div class="file-upload-wrapper">
+                     <input type="file" id="prop-audio-file" accept="audio/*">
+                     <label for="prop-audio-file" class="file-upload-label">
+                         <i class="fas fa-upload"></i> <span id="audio-filename">Chọn file âm thanh...</span>
+                     </label>
+                   </div>
+                </div>
+     
+                <div class="form-group">
+                   <label>Số lần quét thử (Retry)</label>
+                   <input type="number" id="prop-retry-scan" min="1" step="1" placeholder="Nhập số lần quét thử">
+                </div>
+     
+                <div class="form-group">
+                   <label>Tốc độ vươn càng (m/s)</label>
+                   <input type="number" id="prop-fork-speed" min="0" step="0.1" placeholder="Nhập tốc độ vươn càng">
+                </div>
+     
+                <div class="form-group">
+                   <label>Sai số cho phép (mm)</label>
+                   <input type="number" id="prop-allowed-error" min="0" step="1" placeholder="Nhập sai số cho phép">
+                </div>
+     
+                <div class="form-group">
+                   <label>Tải trọng tối đa (kg)</label>
+                   <input type="number" id="prop-max-payload" min="0" step="10" placeholder="Nhập tải trọng tối đa">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="properties-footer">
+          <button class="btn-cancel-prop" onclick="closePropertiesPanel()">Hủy</button>
+          <button class="btn-save-prop" onclick="saveProperties()">Lưu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Delete Step Confirmation -->
+  <div class="modal-confirm" id="deleteStepModal" style="display: none">
+    <div class="confirm-content">
+      <div class="confirm-icon warning">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3 class="confirm-title">Xác nhận xóa bước</h3>
+      <p class="confirm-message">
+        Bạn có chắc chắn muốn xóa bước này không? <br />
+        Các thiết lập của bước này sẽ bị mất hoàn toàn.
+      </p>
+      <div class="confirm-actions">
+        <button class="btn btn-secondary" onclick="closeDeleteModal()">
+          Hủy bỏ
+        </button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">
+          Xác nhận xóa
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Exit Modal (Unsaved Changes) -->
+<div id="confirmExitModal" class="modal-overlay" style="display: none; z-index: 10001;">
+    <div class="confirm-popover" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; padding: 24px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: fadeIn 0.2s ease-out;">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #f59e0b; margin-bottom: 16px;"></i>
+        <h3 style="margin: 0 0 8px 0; color: #1e293b; font-size: 18px; font-weight: 600;">Chưa lưu thay đổi</h3>
+        <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.5;">
+          Bạn có thay đổi chưa được lưu. Nếu thoát bây giờ, các thay đổi này có thể bị mất?<br>
+          Bạn có chắc chắn muốn thoát không?
+        </button>
+      </div>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button class="btn btn-secondary" onclick="closeExitConfirmModal()" style="padding: 8px 20px;">
+          Ở lại
+        </button>
+        <button class="btn btn-primary" onclick="confirmExit()" style="padding: 8px 20px; background-color: #ef4444; border-color: #ef4444;">
+          Thoát không lưu
+        </button>
+      </div>
+    </div>
+</div>
+

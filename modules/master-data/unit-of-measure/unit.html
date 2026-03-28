@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đơn vị tính - Smart Warehouse</title>
+</head>
+
+<body>
+  <!-- Relative path so script.js handles base correctly. Version param forces update. -->
+  <link rel="stylesheet" href="unit.css?v=110" />
+
+  <div id="main-view">
+    <div class="unit-container">
+      <!-- Actions & Filter -->
+      <div class="unit-actions">
+        <!-- Search -->
+        <div class="unit-filters">
+          <input type="text" id="unit-search" class="unit-search-input" placeholder="Tìm theo tên đơn vị tính"
+            oninput="filterUnits()" />
+        </div>
+
+        <!-- Buttons -->
+        <div class="action-buttons">
+          <button id="delete-selected-btn" class="btn btn-danger" onclick="deleteSelected()" disabled>
+            <i class="fas fa-trash"></i> Xóa (0)
+          </button>
+          <div class="dropdown-container">
+            <button class="btn btn-outline-primary">
+              <i class="fas fa-file-excel"></i> Nhập/Xuất
+            </button>
+            <div class="dropdown-content">
+              <a href="#" onclick="importExcel()"><i class="fas fa-upload"></i> Nhập excel</a>
+              <a href="#" onclick="exportExcel()"><i class="fas fa-download"></i> Xuất excel</a>
+            </div>
+          </div>
+          <button class="btn btn-outline-success" onclick="syncData()">
+            <i class="fas fa-sync-alt"></i> Đồng bộ
+          </button>
+          <button class="btn btn-primary" onclick="openUnitModal()">
+            <i class="fas fa-plus"></i> Thêm mới
+          </button>
+        </div>
+      </div>
+
+      <div id="warehouse-info-banner" style="margin-top: 15px; margin-bottom: 15px; padding: 10px 15px; background-color: #e0f2fe; color: #0369a1; border-radius: 6px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-info-circle"></i>
+        <span>Bạn đang xem các thông tin của danh mục chung thuộc kho <strong><span id="banner-warehouse-name"></span></strong></span>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <div class="table-scroll-head">
+          <table class="unit-table">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" id="check-all" onchange="toggleAll(this)" />
+                </th>
+                <th>STT</th>
+                <th>Tên đơn vị tính</th>
+                <th>Mô tả</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+        <div class="table-scroll-body">
+          <table class="unit-table">
+            <tbody id="unit-table-body">
+              <!-- Data rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pagination Bar -->
+      <div class="pagination-bar">
+        <span id="pagination-info">Hiển thị 0 trên tổng 0</span>
+        <div class="pagination-controls">
+          <button class="page-btn" id="prev-page" onclick="prevPage()" disabled>
+            &lt;
+          </button>
+          <div id="page-numbers" class="page-numbers"></div>
+          <button class="page-btn" id="next-page" onclick="nextPage()">
+            &gt;
+          </button>
+          <span class="page-goto">
+            Đến
+            <input type="number" id="goto-page" min="1" onchange="gotoPage(this.value)" />
+            trang
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Thêm/Sửa Đơn vị tính -->
+  <div id="unit-modal" class="modal-overlay">
+    <div class="modal-box">
+      <button class="close-btn" onclick="closeUnitModal()">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Thêm mới đơn vị tính</h3>
+      </div>
+      <div class="modal-body">
+        <form id="unit-form">
+          <input type="hidden" id="unit-id" />
+
+            <div class="form-group">
+              <label>Tên đơn vị tính <span class="required">*</span></label>
+              <input type="text" id="unit-name" required placeholder="Ví dụ: Kilogram" />
+            </div>
+
+            <!-- Mô tả -->
+            <div class="form-group">
+              <label>Mô tả</label>
+              <textarea id="unit-note" placeholder="Mô tả thêm..."></textarea>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeUnitModal()">
+          Hủy
+        </button>
+        <button class="btn btn-primary" onclick="saveUnit()">Lưu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Popover (Standardized) -->
+  <div id="delete-confirm-modal" class="modal-confirm">
+    <div class="confirm-content">
+      <div class="confirm-icon-box">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3 class="confirm-title">Xác nhận xóa</h3>
+      <p class="confirm-message" id="confirm-delete-message">
+        Bạn có chắc chắn muốn xóa đơn vị tính này không?<br />Hành động này không thể hoàn tác.
+      </p>
+      <div class="confirm-actions">
+        <button onclick="closeDeleteConfirm()" class="btn btn-secondary">
+          Hủy
+        </button>
+        <button onclick="confirmDeleteUnit()" class="btn btn-danger">
+          Xóa
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Relative path so script.js handles base correctly. Version param to bust cache. -->
+  <script src="unit.js?v=110"></script>
+</body>
+
+</html>

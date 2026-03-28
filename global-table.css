@@ -1,0 +1,539 @@
+/* ========================================
+   GLOBAL TABLE HEADER STYLES
+   Apply blue #076EB8 to all table headers
+   across the entire system
+   ======================================== */
+
+/* Universal table header styles */
+table th,
+.data-table th,
+.warehouse-table th,
+.material-table th,
+.account-table th,
+.unit-table th,
+.product-table th,
+.category-table th,
+.device-table th,
+.device-type-table th,
+.permission-table th,
+.preview-table th,
+thead th {
+    background-color: #076EB8 !important;
+    color: #FFFFFF !important;
+    font-weight: 600;
+    border-bottom: none !important;
+    font-size: 16px !important;
+    text-transform: none !important;
+}
+
+/* Universal table cell styles */
+table td,
+.data-table td,
+.warehouse-table td,
+.material-table td,
+.account-table td,
+.unit-table td,
+.product-table td,
+.category-table td,
+.device-table td,
+.device-type-table td,
+.permission-table td,
+.preview-table td,
+tbody td {
+    font-size: 14px !important;
+}
+
+/* Ensure sticky headers maintain the blue color */
+table th[style*="sticky"],
+.data-table th,
+thead th {
+    background-color: #076EB8 !important;
+}
+
+/* First column checkbox header styling */
+table th:first-child input[type="checkbox"],
+thead th:first-child input[type="checkbox"] {
+    accent-color: #FFFFFF;
+}
+
+/* Remove old gray backgrounds from thead */
+table thead,
+.data-table thead,
+.warehouse-table thead,
+.account-table thead,
+.unit-table thead,
+.product-table thead,
+.category-table thead,
+.permission-table thead {
+    background-color: #076EB8 !important;
+}
+
+/* ========================================
+   GLOBAL PAGINATION STYLES
+   Active page: white fill with blue border
+   ======================================== */
+
+/* Active page button - white fill, blue border */
+.btn-page.active,
+.page-btn.active {
+    background-color: #FFFFFF !important;
+    color: #56adea !important;
+    border: 2px solid #56adea !important;
+    font-weight: 600 !important;
+}
+
+/* Normal page buttons */
+.btn-page,
+.page-btn {
+    background-color: #FFFFFF;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* Hover state for non-active buttons */
+.btn-page:hover:not(.active):not(:disabled),
+.page-btn:hover:not(.active):not(:disabled) {
+    background-color: #f1f5f9;
+    border-color: #076EB8;
+    color: #076EB8;
+}
+
+/* Disabled state */
+.btn-page:disabled,
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ========================================
+   GLOBAL TABLE STICKY HEADER & SCROLLABLE BODY
+   The header stays fixed while only tbody scrolls.
+   This works with overflow-y: auto on .table-wrapper
+   ======================================== */
+
+/* Sticky table headers - works with scrollable wrapper */
+.table-wrapper thead th,
+.data-table thead th,
+.warehouse-table thead th,
+.material-table thead th,
+.account-table thead th,
+.unit-table thead th,
+.product-table thead th,
+.category-table thead th,
+.device-table thead th,
+.device-type-table thead th,
+.permission-table thead th,
+.role-table thead th,
+.inbound-table thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background-color: #076EB8 !important;
+}
+
+/* Custom scrollbar styling for table wrappers */
+.table-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 3px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Ensure table-container also has sticky headers */
+.table-container thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background-color: #076EB8 !important;
+}
+
+.table-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Truncated Warehouse Name Styling */
+.warehouse-name-cell {
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+
+/* ========================================
+   GLOBAL DELETE CONFIRMATION MODAL STYLES
+   Standardized centered popup for all modules
+   ======================================== */
+
+.modal-confirm {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.5);
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-confirm.show {
+    display: flex;
+}
+
+.confirm-content {
+    background: white;
+    border-radius: 16px;
+    width: 400px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: confirmPop 0.2s ease-out;
+}
+
+@keyframes confirmPop {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.confirm-icon-box {
+    margin-bottom: 16px;
+}
+
+.confirm-icon-box i {
+    font-size: 32px;
+    color: #ef4444;
+}
+
+.confirm-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 8px;
+    margin-top: 0;
+}
+
+.confirm-message {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.confirm-actions .btn {
+    min-width: 100px;
+    justify-content: center;
+}
+
+.btn-danger {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+}
+
+.btn-danger:hover {
+    background-color: #dc2626;
+}
+
+/* Combobox Styles Removed */
+
+/* ========================================
+   GLOBAL TOAST NOTIFICATION STYLES
+   White background with colored border & progress bar
+   ======================================== */
+
+.app-toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.app-toast {
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 280px;
+    max-width: 400px;
+    position: relative;
+    overflow: hidden;
+    transform: translateX(120%);
+    opacity: 0;
+    transition: all 0.35s ease;
+}
+
+/* Success toast (default) */
+.app-toast.success {
+    color: #22c55e;
+    border: 1.5px solid #22c55e;
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.15);
+}
+
+/* Error toast */
+.app-toast.error {
+    color: #ef4444;
+    border: 1.5px solid #ef4444;
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.15);
+}
+
+/* Warning toast */
+.app-toast.warning {
+    color: #f59e0b;
+    border: 1.5px solid #f59e0b;
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15);
+}
+
+/* Info toast */
+.app-toast.info {
+    color: #3b82f6;
+    border: 1.5px solid #3b82f6;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
+}
+
+/* Progress bar animations */
+@keyframes toastProgress {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+@keyframes toastProgressError {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+@keyframes toastProgressWarning {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+@keyframes toastProgressInfo {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+.notification-close-btn {
+    cursor: pointer;
+    display: inline-block; /* Bắt buộc có để xoay được */
+    transition: transform 0.6s ease-in-out, color 0.5s; /* Tạo độ mượt */
+}
+
+.notification-close-btn:hover {
+    color: #ef4444;
+    background-color:none;
+    transform: rotate(180deg); /* Xoay chính nó khi hover */
+}
+
+/* Các đoạn pseudo-element (::before, ::after) dùng để tạo hình dấu X */
+.notification-close-btn::before {
+    transform: rotate(45deg);
+}
+
+.notification-close-btn::after {
+    transform: rotate(-45deg);
+}
+
+/* ========================================
+   SEPARATED TABLE SCROLL STYLES
+   Fixes the 6px misalignment issue
+   ======================================== */
+
+.table-scroll-container {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Contains the children */
+    flex: 1;
+    min-height: 0; /* Allow shrinking in flex layouts */
+}
+
+/* Header container */
+.table-scroll-head {
+    overflow-x: auto;
+    overflow-y: hidden;
+    background-color: #076EB8;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+/* Hide scrollbar for head while keeping sync functionality */
+.table-scroll-head::-webkit-scrollbar {
+    display: none;
+}
+.table-scroll-head {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Body container - the one that actually scrolls vertically */
+.table-scroll-body {
+    overflow-y: auto;
+    overflow-x: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Ensure consistent table layout */
+.table-scroll-head table,
+.table-scroll-body table {
+    width: 100%;
+    table-layout: fixed; /* CRITICAL: ensures head and body align */
+    border-collapse: collapse;
+}
+
+/* Responsive adjust if needed */
+.table-scroll-head table {
+    margin-bottom: 0;
+}
+
+.table-scroll-body table {
+    margin-top: 0;
+}
+
+/* ========================================
+   GLOBAL ACTION BUTTONS & DROPDOWNS
+   Used for Import/Export and Sync actions
+   ======================================== */
+
+.dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #ffffff;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
+    z-index: 1000;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin-top: 4px;
+    overflow: hidden;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-content a {
+    color: #334155;
+    padding: 10px 16px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.dropdown-content a i {
+    width: 16px;
+    text-align: center;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f5f9;
+    color: #076EB8;
+}
+
+.dropdown-container:hover .dropdown-content {
+    display: block;
+}
+
+.btn-outline-primary {
+    background-color: #fff !important;
+    border: 1px solid #2563eb !important;
+    color: #2563eb !important;
+}
+.btn-outline-primary:hover {
+    background-color: #eff6ff !important;
+}
+
+.btn-outline-success {
+    background-color: #fff !important;
+    border: 1px solid #22c55e !important;
+    color: #22c55e !important;
+}
+.btn-outline-success:hover {
+    background-color: #f0fdf4 !important;
+}

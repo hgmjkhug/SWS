@@ -1,0 +1,54 @@
+<div class="method-container">
+  <div class="module-header">
+    <div class="method-search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        id="method-search"
+        placeholder="Tìm theo mã quy cách..."
+        oninput="filterMethods()"
+      />
+    </div>
+    <div class="module-actions">
+      <button class="btn btn-primary btn-disabled" title="Không thể thêm">
+        <i class="fas fa-plus"></i> Thêm mới
+      </button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 50px; text-align: center">STT</th>
+          <th>Mã quy cách</th>
+          <th>Tên quy cách</th>
+          <th>Mô tả</th>
+          <th style="width: 120px; text-align: center">Hành động</th>
+        </tr>
+      </thead>
+      <tbody id="method-table-body">
+        <!-- Data rendered by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination-bar">
+    <span id="method-page-info">Hiển thị 1-3 trên tổng 3</span>
+    <div class="pagination-controls">
+      <button class="btn-page" id="btn-prev" disabled>
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <div id="method-pages" class="pages-numbers">
+        <button class="btn-page active">1</button>
+      </div>
+      <button class="btn-page" id="btn-next" disabled>
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Load CSS and JS -->
+<link href="method.css" rel="stylesheet" />
+<script src="method.js"></script>

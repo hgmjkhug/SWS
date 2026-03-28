@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Tổng Quan</title>
+  <link rel="stylesheet" href="general.css" />
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="clock-block">
+    <div class="clock-time" id="rt-time">00:00:00</div>
+    <div class="clock-date" id="rt-date">--</div>
+  </div>
+  <button class="btn-sync" id="btn-sync" onclick="doSync()" title="Đồng bộ">
+    <i class="fas fa-arrows-rotate"></i>
+  </button>
+</div>
+
+<!-- MAIN -->
+<div class="dash">
+
+  <!-- ROW 1: Stat Donuts -->
+  <div class="row-stats">
+
+    <div class="card is-loading">
+      <div class="card-skeleton">
+        <div class="skeleton sk-title"></div>
+        <div class="sk-donut-row">
+          <div class="skeleton sk-circle"></div>
+          <div class="sk-legend">
+            <div class="skeleton sk-leg-line"></div>
+            <div class="skeleton sk-leg-line"></div>
+            <div class="skeleton sk-leg-line"></div>
+            <div class="skeleton sk-leg-line"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="card-head">
+          <div class="card-title"><i class="fas fa-warehouse"></i>Thống kê Kho</div>
+          <div class="card-total"><div class="total-n" id="wh-total">0</div><div class="total-l">Tổng</div></div>
+        </div>
+        <div class="donut-body">
+          <div class="donut-wrap">
+            <canvas id="c-wh" width="140" height="140"></canvas>
+            <div class="donut-center"><span class="donut-n" id="wh-center">0</span><span class="donut-l">Kho</span></div>
+          </div>
+          <div class="legend">
+            <div class="leg-row"><span class="leg-dot" style="background:#38bdf8"></span><span class="leg-label">Mới tạo</span><span class="leg-val" id="wh-new">0</span></div>
+            <div class="leg-row"><span class="leg-dot" style="background:#4ade80"></span><span class="leg-label">Đang hoạt động</span><span class="leg-val" id="wh-active">0</span></div>
+            <div class="leg-row"><span class="leg-dot" style="background:#f87171"></span><span class="leg-label">Ngưng sử dụng</span><span class="leg-val" id="wh-inactive">0</span></div>
+            <div class="leg-row"><span class="leg-dot" style="background:#fbbf24"></span><span class="leg-label">Đang bảo trì</span><span class="leg-val" id="wh-maint">0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card is-loading">
+      <div class="card-skeleton">
+        <div class="skeleton sk-title"></div>
+        <div class="sk-donut-row">
+          <div class="skeleton sk-circle"></div>
+          <div class="sk-legend">
+            <div class="skeleton sk-leg-line"></div>
+            <div class="skeleton sk-leg-line"></div>
+            <div class="skeleton sk-leg-line"></div>
+            <div class="skeleton sk-leg-line"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="card-head">
+          <div class="card-title"><i class="fas fa-list-check"></i>Thống kê Lệnh</div>
+          <div class="card-total"><div class="total-n" id="cmd-total">0</div><div class="total-l">Tổng</div></div>
+        </div>
+        <div class="donut-body">
+          <div class="donut-wrap">
+            <canvas id="c-cmd" width="140" height="140"></canvas>
+            <div class="donut-center"><span class="donut-n" id="cmd-center">0</span><span class="donut-l">Lệnh</span></div>
+          </div>
+          <div class="legend">
+            <div class="leg-row"><span class="leg-dot" style="background:#94a3b8"></span><span class="leg-label">Đang chờ</span><span class="leg-val" id="cmd-wait">0</span></div>
+            <div class="leg-row"><span class="leg-dot" style="background:#60a5fa"></span><span class="leg-label">Đang thực hiện</span><span class="leg-val" id="cmd-prog">0</span></div>
+            <div class="leg-row"><span class="leg-dot" style="background:#34d399"></span><span class="leg-label">Hoàn thành</span><span class="leg-val" id="cmd-done">0</span></div>
+            <div class="leg-row"><span class="leg-dot" style="background:#f87171"></span><span class="leg-label">Lỗi</span><span class="leg-val" id="cmd-err">0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW 2: Occupancy / Capacity / OEE -->
+  <div class="row-mid">
+
+    <div class="card is-loading">
+      <div class="card-skeleton" style="padding: 15px 20px;">
+        <div class="skeleton sk-title"></div>
+        <div class="sk-occ-row"><div class="skeleton sk-occ-line"></div><div class="skeleton sk-occ-bar"></div></div>
+        <div class="sk-occ-row"><div class="skeleton sk-occ-line"></div><div class="skeleton sk-occ-bar"></div></div>
+        <div class="sk-occ-row"><div class="skeleton sk-occ-line"></div><div class="skeleton sk-occ-bar"></div></div>
+      </div>
+      <div class="card-content">
+        <div class="card-head">
+          <div class="card-title"><i class="fas fa-chart-bar"></i>Tỉ lệ lấp đầy theo kho</div>
+        </div>
+        <div class="occ-list" id="occ-list"></div>
+      </div>
+    </div>
+
+    <div class="card is-loading">
+      <div class="card-skeleton" style="padding: 15px 20px;">
+        <div class="skeleton sk-title"></div>
+        <div class="sk-gauge-wrap">
+          <div class="skeleton sk-gauge"></div>
+          <div class="sk-grid">
+            <div class="skeleton sk-cell"></div>
+            <div class="skeleton sk-cell"></div>
+            <div class="skeleton sk-cell"></div>
+            <div class="skeleton sk-cell"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="card-head">
+          <div class="card-title"><i class="fas fa-gauge-high"></i>Năng lực hệ thống</div>
+        </div>
+        <div class="cap-body">
+          <div class="gauge-wrap">
+            <canvas id="c-gauge" width="220" height="130"></canvas>
+            <div class="gauge-inner">
+              <span class="gauge-n" id="gauge-n">94%</span>
+              <span class="gauge-l">CÔNG SUẤT</span>
+            </div>
+          </div>
+          <div class="cap-grid">
+            <div class="cap-cell"><div class="cap-l">Throughput hiện tại</div><div class="cap-n">2,847</div><div class="cap-u">kiện/giờ</div></div>
+            <div class="cap-cell"><div class="cap-l">Công suất thiết kế</div><div class="cap-n">3,020</div><div class="cap-u">kiện/giờ</div></div>
+            <div class="cap-cell"><div class="cap-l">Còn chịu tải</div><div class="cap-n green">173</div><div class="cap-u">kiện/giờ</div></div>
+            <div class="cap-cell"><div class="cap-l">Lệnh chờ xử lý</div><div class="cap-n amber">84</div><div class="cap-u">lệnh đang queue</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card is-loading">
+      <div class="card-skeleton" style="padding: 15px 20px;">
+        <div class="skeleton sk-title"></div>
+        <div class="sk-table">
+          <div class="skeleton sk-tr"></div>
+          <div class="skeleton sk-tr"></div>
+          <div class="skeleton sk-tr"></div>
+          <div class="skeleton sk-tr"></div>
+          <div class="skeleton sk-tr"></div>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="card-head">
+          <div class="card-title"><i class="fas fa-microchip"></i>Hiệu suất vận hành</div>
+        </div>
+        <div class="oee-wrap">
+          <table class="oee">
+            <thead><tr><th>KHO</th><th>UPTIME</th><th>LỖI TB</th><th>TRẠNG THÁI</th></tr></thead>
+            <tbody id="oee-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW 2.5: Traffic Intelligence -->
+  <div class="card" style="display: none;">
+    <div class="card-head">
+      <div class="card-title"><i class="fas fa-traffic-light"></i>Giám sát mật độ giao thông</div>
+    </div>
+    <div id="traffic-widget" class="traffic-widget-body"></div>
+  </div>
+
+  <!-- ROW 3: Alerts + Trend -->
+  <div class="row-bot">
+
+    <div class="card is-loading">
+      <div class="card-skeleton" style="padding: 15px 20px;">
+        <div class="skeleton sk-title"></div>
+        <div class="sk-table" style="gap: 12px;">
+          <div class="skeleton sk-alert-item"></div>
+          <div class="skeleton sk-alert-item"></div>
+          <div class="skeleton sk-alert-item"></div>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="card-head">
+          <div class="card-title"><i class="fas fa-triangle-exclamation"></i>Cảnh báo hệ thống</div>
+          <div class="live-pill"><span class="live-dot"></span>LIVE</div>
+        </div>
+        <div class="alert-list" id="alert-list"></div>
+      </div>
+    </div>
+
+    <div class="card is-loading">
+      <div class="card-skeleton" style="padding: 15px 20px;">
+        <div class="skeleton sk-title"></div>
+        <div class="skeleton sk-trend-chart"></div>
+      </div>
+      <div class="card-content">
+        <div class="card-head">
+          <div class="card-title"><i class="fas fa-chart-column"></i>Xu hướng lệnh nhập/xuất theo giờ</div>
+        </div>
+        <div class="trend-legend">
+          <div class="t-leg"><span class="t-swatch" style="background:#38bdf8"></span>Nhập kho</div>
+          <div class="t-leg"><span class="t-swatch" style="background:#4ade80"></span>Xuất kho</div>
+          <span class="t-unit">Đơn vị: lệnh/giờ</span>
+        </div>
+        <div class="chart-wrap"><canvas id="c-trend"></canvas></div>
+        <div class="t-xlabels" id="t-xlabels"></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="general.js"></script>
+</body>
+</html>

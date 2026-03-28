@@ -1,0 +1,343 @@
+<link rel="stylesheet" href="job.css" />
+<div id="main-view">
+  <div id="job-view">
+    <!-- Content here -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <!-- Search -->
+        <div class="search-box-panel">
+          <i class="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            id="job-search"
+            class="search-input"
+            placeholder="Tìm theo mã lệnh..."
+            onkeyup="JobModule.handleSearch()"
+          />
+        </div>
+
+        <!-- Job Type Filter -->
+        <div class="filter-group">
+          <label class="filter-label">Loại lệnh</label>
+          <div class="custom-select-wrapper" id="type-select-wrapper">
+            <div
+              class="custom-select-trigger"
+              onclick="JobModule.toggleTypeSelect()"
+            >
+              <span id="type-select-text">Tất cả</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="custom-options" id="type-options">
+              <div
+                class="custom-option selected"
+                data-value="ALL"
+                onclick="JobModule.selectType('ALL', 'Tất cả', this)"
+              >
+                Tất cả
+              </div>
+              <div
+                class="custom-option"
+                data-value="IMPORT_NEW"
+                onclick="JobModule.selectType('IMPORT_NEW', 'Nhập mới', this)"
+              >
+                Nhập mới
+              </div>
+              <div
+                class="custom-option"
+                data-value="IMPORT_RETURN"
+                onclick="JobModule.selectType('IMPORT_RETURN', 'Nhập lại', this)"
+              >
+                Nhập lại
+              </div>
+              <div
+                class="custom-option"
+                data-value="IMPORT_DIRECT"
+                onclick="JobModule.selectType('IMPORT_DIRECT', 'Nhập chuyền thẳng', this)"
+              >
+                Nhập chuyền thẳng
+              </div>
+              <div
+                class="custom-option"
+                data-value="EXPORT_MATERIAL"
+                onclick="JobModule.selectType('EXPORT_MATERIAL', 'Xuất theo vật tư', this)"
+              >
+                Xuất theo vật tư
+              </div>
+              <div
+                class="custom-option"
+                data-value="EXPORT_PALLET"
+                onclick="JobModule.selectType('EXPORT_PALLET', 'Xuất theo pallet', this)"
+              >
+                Xuất theo pallet
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="filter-type" value="ALL" />
+        </div>
+
+        <!-- Status Filter -->
+        <div class="filter-group">
+          <label class="filter-label">Trạng thái</label>
+          <div class="custom-select-wrapper" id="status-select-wrapper">
+            <div
+              class="custom-select-trigger"
+              onclick="JobModule.toggleStatusSelect()"
+            >
+              <span id="status-select-text">Tất cả</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="custom-options" id="status-options">
+              <div
+                class="custom-option selected"
+                data-value="ALL"
+                onclick="JobModule.selectStatus('ALL', 'Tất cả', this)"
+              >
+                Tất cả
+              </div>
+              <div
+                class="custom-option"
+                data-value="PENDING"
+                onclick="JobModule.selectStatus('PENDING', 'Đang chờ', this)"
+              >
+                Đang chờ
+              </div>
+              <div
+                class="custom-option"
+                data-value="PROCESSING"
+                onclick="JobModule.selectStatus('PROCESSING', 'Đang xử lý', this)"
+              >
+                Đang xử lý
+              </div>
+              <div
+                class="custom-option"
+                data-value="COMPLETED"
+                onclick="JobModule.selectStatus('COMPLETED', 'Đã hoàn thành', this)"
+              >
+                Đã hoàn thành
+              </div>
+              <div
+                class="custom-option"
+                data-value="ERROR"
+                onclick="JobModule.selectStatus('ERROR', 'Lỗi', this)"
+              >
+                Lỗi
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="filter-status" value="ALL" />
+        </div>
+
+        <!-- Priority Filter Button -->
+        <button id="btn-filter-priority" class="filter-priority-btn" onclick="JobModule.togglePriorityFilter()" title="Lọc lệnh ưu tiên">
+          <i class="fas fa-star"></i>
+        </button>
+
+        <!-- Date Range Filter -->
+        <div class="filter-group">
+          <label class="filter-label">Thời gian</label>
+          <div class="unified-date-filter">
+            <div
+              class="date-picker-trigger"
+              id="dateRangeTrigger"
+              onclick="JobModule.toggleDatePicker(event)"
+            >
+              <i class="fas fa-calendar-alt"></i>
+              <span id="dateRangeDisplay">dd/mm/yyyy - dd/mm/yyyy</span>
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <!-- Date Picker Dropdown (Copied structure from Pallet) -->
+            <div class="analytics-date-picker" id="analyticsPicker">
+              <div class="picker-sidebar">
+                <div class="sidebar-item" data-range="today">Hôm nay</div>
+                <div class="sidebar-item" data-range="last3">
+                  3 ngày gần đây
+                </div>
+                <div class="sidebar-item" data-range="last7">
+                  7 ngày gần đây
+                </div>
+                <div class="sidebar-item" data-range="last30">
+                  30 ngày gần đây
+                </div>
+                <div class="sidebar-item" data-range="last3mo">
+                  3 tháng gần đây
+                </div>
+                <div class="sidebar-item" data-range="last6mo">
+                  6 tháng gần đây
+                </div>
+                <div class="sidebar-item" data-range="last1yr">1 năm qua</div>
+              </div>
+              <div class="picker-main">
+                <div class="picker-header">
+                  <div class="selected-range-box" id="tempRangeDisplay">
+                    Chọn khoảng thời gian
+                  </div>
+                  <div class="header-actions">
+                    <button
+                      type="button"
+                      class="text-btn clear-btn"
+                      id="clearPicker"
+                    >
+                      Xóa bộ lọc
+                    </button>
+                    <button
+                      type="button"
+                      class="text-btn cancel-btn"
+                      id="cancelPicker"
+                    >
+                      Hủy
+                    </button>
+                    <button type="button" class="apply-btn" id="applyPicker">
+                      Áp dụng
+                    </button>
+                  </div>
+                </div>
+                <div class="picker-body">
+                  <!-- Left Calendar -->
+                  <div class="calendar-panel left-panel">
+                    <div class="panel-title">Từ ngày</div>
+                    <div class="panel-nav">
+                      <div
+                        class="custom-dropdown month-dropdown"
+                        id="leftMonthDropdown"
+                      >
+                        <div class="dropdown-selected" id="leftMonthSelected">
+                          Tháng
+                        </div>
+                        <div class="dropdown-list" id="leftMonthList"></div>
+                      </div>
+                      <div
+                        class="custom-dropdown year-dropdown"
+                        id="leftYearDropdown"
+                      >
+                        <div class="dropdown-selected" id="leftYearSelected">
+                          Năm
+                        </div>
+                        <div class="dropdown-list" id="leftYearList"></div>
+                      </div>
+                    </div>
+                    <div class="calendar-grid" id="leftCalendar">
+                      <div class="day-names">
+                        <span>T2</span><span>T3</span><span>T4</span
+                        ><span>T5</span><span>T6</span><span>T7</span
+                        ><span>CN</span>
+                      </div>
+                      <div class="days-container"></div>
+                    </div>
+                  </div>
+                  <!-- Right Calendar -->
+                  <div class="calendar-panel right-panel">
+                    <div class="panel-title">Đến ngày</div>
+                    <div class="panel-nav">
+                      <div
+                        class="custom-dropdown month-dropdown"
+                        id="rightMonthDropdown"
+                      >
+                        <div class="dropdown-selected" id="rightMonthSelected">
+                          Tháng
+                        </div>
+                        <div class="dropdown-list" id="rightMonthList"></div>
+                      </div>
+                      <div
+                        class="custom-dropdown year-dropdown"
+                        id="rightYearDropdown"
+                      >
+                        <div class="dropdown-selected" id="rightYearSelected">
+                          Năm
+                        </div>
+                        <div class="dropdown-list" id="rightYearList"></div>
+                      </div>
+                    </div>
+                    <div class="calendar-grid" id="rightCalendar">
+                      <div class="day-names">
+                        <span>T2</span><span>T3</span><span>T4</span
+                        ><span>T5</span><span>T6</span><span>T7</span
+                        ><span>CN</span>
+                      </div>
+                      <div class="days-container"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Toolbar right removed -->
+    </div>
+
+    <!-- Status Indicators -->
+    <div class="legend-container">
+      <div class="status-legend">
+        <div class="legend-item"><span class="dot dot-completed"></span>Hoàn thành</div>
+        <div class="legend-item"><span class="dot dot-processing"></span>Đang xử lý</div>
+        <div class="legend-item"><span class="dot dot-pending"></span>Đang chờ</div>
+        <div class="legend-item"><span class="dot dot-error"></span>Lỗi</div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="table-wrapper">
+        <div class="table-scroll-head">
+          <table class="job-table">
+            <colgroup>
+              <col style="width: 50px">
+              <col style="width: 260px">
+              <col style="width: 160px">
+              <col style="width: 250px">
+              <col style="width: 180px">
+              <col style="width: 180px">
+              <col style="width: 350px">
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="col-stt">STT</th>
+                <th class="col-code">Mã phiếu nhập/ xuất</th>
+                <th class="col-type">Loại lệnh</th>
+                <th class="col-material">Vật tư</th>
+                <th class="col-time">Thời gian khởi tạo</th>
+                <th class="col-duration">Thời gian hoàn thành</th>
+                <th class="col-process">Công đoạn</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+        <div class="table-scroll-body">
+          <table class="job-table" id="job-data-table">
+            <colgroup>
+              <col style="width: 50px">
+              <col style="width: 260px">
+              <col style="width: 160px">
+              <col style="width: 250px">
+              <col style="width: 180px">
+              <col style="width: 180px">
+              <col style="width: 350px">
+            </colgroup>
+            <tbody id="job-table-body">
+              <!-- Data Rendered Here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-bar">
+      <div id="job-info" class="page-info">Hiển thị 0 trong tổng 0</div>
+      <div class="pagination-controls">
+        <button
+          class="page-btn"
+          id="prev-page"
+          onclick="JobModule.prevPage()"
+          disabled
+        >
+          &lt;
+        </button>
+        <div id="job-pagination" class="page-numbers"></div>
+        <button class="page-btn" id="next-page" onclick="JobModule.nextPage()">
+          &gt;
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="job.js"></script>

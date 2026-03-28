@@ -1,0 +1,121 @@
+<div class="resource-container">
+  <div class="module-header">
+    <div class="resource-search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        id="resource-search"
+        placeholder="Tìm kiếm theo mã tài nguyên..."
+        oninput="handleSearch()"
+      />
+    </div>
+    <div class="module-actions">
+      <button class="btn btn-danger" id="btn-bulk-delete" onclick="openBulkDeleteConfirm()" style="display: none;">
+        <i class="fas fa-trash-alt"></i> Xóa đã chọn (<span id="selected-count">0</span>)
+      </button>
+      <button class="btn btn-primary" onclick="openResourceModal()">
+        <i class="fas fa-plus"></i> Thêm mới
+      </button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <div class="table-scroll-head">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>
+              <input type="checkbox" id="check-all" onclick="toggleSelectAll()" />
+            </th>
+            <th>STT</th>
+            <th>Mã tài nguyên</th>
+            <th>Tên tài nguyên</th>
+            <th>Mô tả</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <div class="table-scroll-body">
+      <table class="data-table" id="resource-data-table">
+        <tbody id="resource-table-body">
+          <!-- Data rendered by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="pagination-bar">
+    <span id="resource-page-info"></span>
+    <div class="pagination-controls">
+      <button class="btn-page" onclick="prevPage()" id="btn-prev">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <div id="resource-pages" class="pages-numbers">
+        <!-- Page numbers rendered by JS -->
+      </div>
+      <button class="btn-page" onclick="nextPage()" id="btn-next">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Resource Modal -->
+<div class="modal-overlay" id="resource-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title" id="resource-modal-title">Thêm mới tài nguyên</h3>
+      <button class="modal-close-square" onclick="closeResourceModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="resource-id" />
+      <div class="form-group">
+        <label>Mã tài nguyên <span class="text-danger">*</span></label>
+        <input type="text" id="resource-code" placeholder="Nhập mã tài nguyên" />
+        <small class="error-message" id="resource-code-error"></small>
+      </div>
+      <div class="form-group">
+        <label>Tên tài nguyên <span class="text-danger">*</span></label>
+        <input type="text" id="resource-name" placeholder="Nhập tên tài nguyên" />
+        <small class="error-message" id="resource-name-error"></small>
+      </div>
+
+      <div class="form-group">
+        <label>Mô tả</label>
+        <textarea
+          id="resource-desc"
+          rows="3"
+          placeholder="Nhập mô tả tài nguyên"
+        ></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeResourceModal()">Hủy</button>
+      <button class="btn-primary" onclick="saveResource()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-confirm-modal" class="modal-confirm">
+  <div class="confirm-content">
+    <div class="confirm-icon-box">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h3 class="confirm-title" id="delete-title">Xác nhận xóa</h3>
+    <p class="confirm-message" id="delete-message">
+      Bạn có chắc chắn muốn xóa tài nguyên này không?<br />Hành động này không thể hoàn tác.
+    </p>
+    <div class="confirm-actions">
+      <button onclick="closeDeleteConfirm()" class="btn btn-secondary">Hủy</button>
+      <button id="btn-confirm-delete" class="btn btn-danger">Xóa</button>
+    </div>
+  </div>
+</div>
+
+<!-- Load CSS and JS -->
+<link href="resource.css" rel="stylesheet" />
+<script src="resource.js"></script>
