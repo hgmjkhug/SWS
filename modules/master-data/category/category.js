@@ -346,9 +346,7 @@
         }
     }
 
-    // Set banner
-    const bannerEl = document.getElementById('banner-warehouse-name');
-    if (bannerEl) bannerEl.textContent = getCurrentWarehouse();
+
 
     // Initialization Logic matching product.js pattern
     // Try immediate init

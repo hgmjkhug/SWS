@@ -641,6 +641,12 @@
             dom.dateRangeDisplay.textContent = `${format(activeStartDate)} - ${format(activeEndDate)}`;
             dom.analyticsPicker.classList.remove('active');
             filterData();
+        } else if (!selectedStartDate && !selectedEndDate) {
+            activeStartDate = null;
+            activeEndDate = null;
+            dom.dateRangeDisplay.textContent = 'Tất cả thời gian';
+            dom.analyticsPicker.classList.remove('active');
+            filterData();
         }
     }
 
@@ -756,6 +762,7 @@
 
                     // Correct logic for ranges
                     switch (range) {
+                        case 'all': start = null; end = null; break;
                         case 'today': 
                             // start and end are already 'now'
                             break;
@@ -771,9 +778,11 @@
                     selectedEndDate = end;
                     
                     // Update calendar view to show the start of the range
-                    currentViewLeft = new Date(start);
-                    currentViewRight = new Date(start);
-                    currentViewRight.setMonth(start.getMonth() + 1);
+                    if (start && end) {
+                        currentViewLeft = new Date(start);
+                        currentViewRight = new Date(start);
+                        currentViewRight.setMonth(start.getMonth() + 1);
+                    }
 
                     renderCalendars();
                 };

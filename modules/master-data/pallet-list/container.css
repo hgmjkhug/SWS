@@ -57,51 +57,49 @@
 }
 
 /* TABLE */
-.table-wrapper {
-    background: white;
+.table-scroll-head {
+    background: #076EB8;
     border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+}
+
+.table-scroll-body {
+    background: white;
+    border-radius: 0 0 8px 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    max-height: 70vh;
-    overflow-y: auto; /* Enable vertical scroll */
-    overflow-x: auto; /* Enable horizontal scroll if needed */
+    max-height: 65vh;
+    overflow-y: auto;
+    overflow-x: auto;
     position: relative;
     z-index: 1;
+    border: 1px solid var(--border-color);
 }
 
 .data-table thead th {
-    position: sticky;
     background-color: #076EB8 !important;
-    z-index: 20;
+    color: #FFFFFF !important;
 }
 
-.data-table thead tr:nth-child(1) th {
-    top: 0;
-    height: 44px;
-    z-index: 30;
-}
-
-.data-table thead tr:nth-child(2) th {
-    top: 44px; 
-    height: 34px;
-    z-index: 25;
-}
-
-/* Scrollbar styling for table wrapper */
-.table-wrapper::-webkit-scrollbar {
-    width: 7px;
+/* Scrollbar styling for table body */
+.table-scroll-body::-webkit-scrollbar {
+    width: 6px;
     height: 6px;
 }
 
-.table-wrapper::-webkit-scrollbar-track {
+.table-scroll-body::-webkit-scrollbar-track {
     background: #f1f5f9;
 }
 
-.table-wrapper::-webkit-scrollbar-thumb {
+.table-scroll-body::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 3px;
 }
 
-.table-wrapper::-webkit-scrollbar-thumb:hover {
+.table-scroll-body::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
 

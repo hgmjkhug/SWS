@@ -38,28 +38,33 @@
         { code: 'CTSV', name: 'CÔNG TY SX XE CHUYÊN DỤNG' }
     ];
 
-    let devices = Array.from({ length: 50 }, (_, i) => {
-        const groupIndex = i % 4;
-        const groups = ['Lifter', 'Transfer', 'Stacker Crane', 'AMR'];
-        const prefixes = ['LIFT', 'TRANS', 'STACKER', 'AMR'];
-        const group = groups[groupIndex];
-        const prefix = prefixes[groupIndex];
-        const sequence = Math.floor(i / 4) + 1;
-        const code = `${prefix}-${String(sequence).padStart(3, '0')}`;
+    const groups = ['Shuttle', 'Lifter', 'Transfer', 'Stacker Crane', 'AMR'];
+    const protocols = ['TCP/IP', 'Modbus TCP', 'Profinet'];
 
-        const protocols = ['TCP/IP', 'Modbus TCP', 'Profinet'];
-
-        return {
+    let devices = [
+        // 13 Shuttle devices
+        ...Array.from({ length: 13 }, (_, i) => ({
             id: i + 1,
-            code: code,
-            name: `${group} ${sequence}`,
+            code: `SHUTTLE-${String(i + 1).padStart(3, '0')}`,
+            name: `Shuttle ${i + 1}`,
             warehouse: availableWarehouses[i % availableWarehouses.length].code,
-            group: group,
+            group: 'Shuttle',
             ip: `192.168.1.${100 + i}`,
             port: 8080 + i,
-            protocol: protocols[i % 3]
-        };
-    });
+            protocol: protocols[i % protocols.length]
+        })),
+        // 6 Lifter devices
+        ...Array.from({ length: 6 }, (_, i) => ({
+            id: 13 + i + 1,
+            code: `LIFTER-${String(i + 1).padStart(3, '0')}`,
+            name: `Lifter ${i + 1}`,
+            warehouse: availableWarehouses[(13 + i) % availableWarehouses.length].code,
+            group: 'Lifter',
+            ip: `192.168.1.${113 + i}`,
+            port: 8093 + i,
+            protocol: protocols[(13 + i) % protocols.length]
+        }))
+    ];
 
     // State
     let currentPage = 1;
@@ -69,10 +74,6 @@
     let collapsedGroups = new Set();
     // Removed global deviceToToggle
     let pendingDeleteDeviceIds = [];
-
-    // Mock Groups
-    const groups = ['Lifter', 'Transfer', 'Stacker Crane', 'AMR'];
-    const protocols = ['TCP/IP', 'Modbus TCP', 'Profinet'];
 
     // Initialization
     function initDeviceModule() {

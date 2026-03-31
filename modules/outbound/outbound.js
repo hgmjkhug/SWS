@@ -1723,10 +1723,10 @@
         const range = item.getAttribute("data-range");
         const today = new Date();
 
-        if (range === "today") {
-          tempRange.start = today;
-          tempRange.end = today;
-        } else if (range === "last3") {
+        if (range === "all") {
+          tempRange.start = null;
+          tempRange.end = null;
+        } else if (range === "today") {
           const start = new Date();
           start.setDate(today.getDate() - 3);
           tempRange.start = start;
@@ -1766,11 +1766,12 @@
         }
 
         // Update views
-        currentLeftDate = new Date(tempRange.start);
-        currentRightDate = new Date(tempRange.end);
-        // Ensure they are different months if possible or logic handles it
-        if (isSameDay(currentLeftDate, currentRightDate)) {
-          currentRightDate.setMonth(currentRightDate.getMonth() + 1);
+        if (tempRange.start && tempRange.end) {
+          currentLeftDate = new Date(tempRange.start);
+          currentRightDate = new Date(tempRange.end);
+          if (isSameDay(currentLeftDate, currentRightDate)) {
+            currentRightDate.setMonth(currentRightDate.getMonth() + 1);
+          }
         }
 
         renderCalendars();
@@ -1785,10 +1786,14 @@
 
         // Update Trigger Display
         const triggerDisplay = document.getElementById("dateRangeDisplay");
-        if (triggerDisplay && selectedRange.start && selectedRange.end) {
-          const s = selectedRange.start;
-          const e = selectedRange.end;
-          triggerDisplay.textContent = `${s.getDate()}/${s.getMonth() + 1}/${s.getFullYear()} - ${e.getDate()}/${e.getMonth() + 1}/${e.getFullYear()}`;
+        if (triggerDisplay) {
+            if (selectedRange.start && selectedRange.end) {
+                const s = selectedRange.start;
+                const e = selectedRange.end;
+                triggerDisplay.textContent = `${s.getDate()}/${s.getMonth() + 1}/${s.getFullYear()} - ${e.getDate()}/${e.getMonth() + 1}/${e.getFullYear()}`;
+            } else {
+                triggerDisplay.textContent = "Tất cả thời gian";
+            }
         }
 
         // Close Picker
@@ -1821,7 +1826,7 @@
         // Update Trigger
         const triggerDisplay = document.getElementById("dateRangeDisplay");
         if (triggerDisplay)
-          triggerDisplay.textContent = "dd/mm/yyyy - dd/mm/yyyy";
+          triggerDisplay.textContent = "Tất cả thời gian";
 
         // Close and Render
         const picker = document.getElementById("analyticsPicker");

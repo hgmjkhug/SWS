@@ -751,19 +751,22 @@
                 const range = item.getAttribute("data-range");
                 const today = new Date();
                 
-                if (range === "thisweek") {
-                    const currentDayOfWeek = today.getDay();
-                    const daysSinceMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-                    const start = new Date(today);
-                    start.setDate(today.getDate() - daysSinceMonday);
-                    tempRange.start = start;
-                    tempRange.end = today;
+                if (range === "all") {
+                    tempRange.start = null;
+                    tempRange.end = null;
                 } else if (range === "today") {
                     tempRange.start = today;
                     tempRange.end = today;
                 } else if (range === "last3") {
                     const start = new Date();
                     start.setDate(today.getDate() - 3);
+                    tempRange.start = start;
+                    tempRange.end = today;
+                } else if (range === "thisweek") {
+                    const currentDayOfWeek = today.getDay();
+                    const daysSinceMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+                    const start = new Date(today);
+                    start.setDate(today.getDate() - daysSinceMonday);
                     tempRange.start = start;
                     tempRange.end = today;
                 } else if (range === "last7") {
@@ -792,10 +795,12 @@
                     tempRange.start = start;
                     tempRange.end = today;
                 }
-                currentLeftDate = new Date(tempRange.start);
-                currentRightDate = new Date(tempRange.end);
-                if (isSameDay(currentLeftDate, currentRightDate)) {
-                    currentRightDate.setMonth(currentRightDate.getMonth() + 1);
+                if (tempRange.start && tempRange.end) {
+                    currentLeftDate = new Date(tempRange.start);
+                    currentRightDate = new Date(tempRange.end);
+                    if (isSameDay(currentLeftDate, currentRightDate)) {
+                        currentRightDate.setMonth(currentRightDate.getMonth() + 1);
+                    }
                 }
                 renderCalendars();
             };
@@ -806,8 +811,12 @@
             applyBtn.onclick = () => {
                 selectedRange = { ...tempRange };
                 const triggerDisplay = document.getElementById("dateRangeDisplay");
-                if (triggerDisplay && selectedRange.start && selectedRange.end) {
-                    triggerDisplay.textContent = `${formatDate(selectedRange.start)} - ${formatDate(selectedRange.end)}`;
+                if (triggerDisplay) {
+                    if (selectedRange.start && selectedRange.end) {
+                        triggerDisplay.textContent = `${formatDate(selectedRange.start)} - ${formatDate(selectedRange.end)}`;
+                    } else {
+                        triggerDisplay.textContent = "Tất cả thời gian";
+                    }
                 }
                 const picker = document.getElementById("analyticsPicker");
                 if (picker) picker.classList.remove("active");
@@ -831,7 +840,7 @@
                 document.querySelectorAll(".sidebar-item").forEach((i) => i.classList.remove("active"));
                 renderCalendars();
                 const triggerDisplay = document.getElementById("dateRangeDisplay");
-                if (triggerDisplay) triggerDisplay.textContent = "dd/mm/yyyy - dd/mm/yyyy";
+                if (triggerDisplay) triggerDisplay.textContent = "Tất cả thời gian";
                 const picker = document.getElementById("analyticsPicker");
                 if (picker) picker.classList.remove("active");
                 renderBoard();

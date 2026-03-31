@@ -8,9 +8,61 @@
 </head>
 <body>
     <div class="grid-container">
+        <div class="layout-controls">
+            <div class="control-group">
+                <div class="custom-select" id="level-select-custom">
+                    <div class="select-header">
+                        <span class="selected-text">Tầng 1</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="select-options">
+                        <div class="option-item active" data-value="1">
+                            <span class="label-text">Tầng 1</span>
+                        </div>
+                        <div class="option-item" data-value="2">
+                            <span class="label-text">Tầng 2</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="custom-multiselect" id="module-multiselect">
+                    <div class="multiselect-header">
+                        <span class="selected-text">Tất cả module</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="multiselect-options">
+                        <div class="option-item all-option active" data-value="all">
+                            <span class="label-text">Tất cả</span>
+                            <i class="fa-solid fa-circle-check verified-icon"></i>
+                        </div>
+                        <div class="option-item active" data-value="A">
+                            <span class="label-text">Kho mát A</span>
+                            <i class="fa-solid fa-circle-check verified-icon"></i>
+                        </div>
+                        <div class="option-item active" data-value="B">
+                            <span class="label-text">Kho mát B</span>
+                            <i class="fa-solid fa-circle-check verified-icon"></i>
+                        </div>
+                        <div class="option-item active" data-value="C">
+                            <span class="label-text">Kho mát C</span>
+                            <i class="fa-solid fa-circle-check verified-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="map-wrapper">
-            <div id="new-layout-grid"></div>
+            <div id="new-layout-grid-scaler">
+                <div id="new-layout-grid"></div>
+            </div>
             <div class="bottom-rail"></div>
+            <div class="zoom-controls">
+                <button id="zoom-in" title="Phóng to"><i class="fa-solid fa-plus"></i></button>
+                <button id="zoom-out" title="Thu nhỏ"><i class="fa-solid fa-minus"></i></button>
+                <button id="zoom-reset" title="Đặt lại"><i class="fa-solid fa-arrows-rotate"></i></button>
+            </div>
         </div>
     </div>
     <script src="new.js"></script>

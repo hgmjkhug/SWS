@@ -1,10 +1,3 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="container.css" />
-</head>
-
 <body>
   <div class="container">
     <div class="toolbar" style="align-items: flex-end;">
@@ -13,7 +6,7 @@
           <!-- <label class="filter-label">Tìm kiếm</label> -->
           <div class="container-search-box">
             <input type="text" id="searchInput" class="toolbar-search-input"
-              placeholder="Tìm kiếm theo mã đơn vị chứa hàng" />
+              placeholder="Tìm kiếm theo mã vật chứa" />
           </div>
         </div>
 
@@ -43,13 +36,13 @@
             <div class="modal-body">
               <form id="containerForm">
                 <div class="form-group">
-                  <label>Mã đơn vị chứa hàng<span style="color: red;">*</span></label>
-                  <input type="text" id="newContainerCode" class="form-control" placeholder="Nhập mã (VD: CT-1001)" />
+                  <label>Mã vật chứa<span style="color: red;">*</span></label>
+                  <input type="text" id="newContainerCode" class="form-control" placeholder="Nhập mã vật chứa" />
                 </div>
                 <div class="form-group">
-                  <label>Loại đơn vị chứa hàng<span style="color: red;">*</span></label>
+                  <label>Nhóm vật chứa<span style="color: red;">*</span></label>
                   <div class="searchable-combobox" id="containerTypeCombobox">
-                    <input type="text" id="newContainerType" class="form-control" placeholder="Chọn hoặc nhập loại" autocomplete="off" />
+                    <input type="text" id="newContainerType" class="form-control" placeholder="Chọn nhóm vật chứa" autocomplete="off" />
                     <div class="combobox-options" id="containerTypeOptions">
                       <!-- Options will be populated by JS -->
                     </div>
@@ -157,13 +150,10 @@
       </div>
     </div>
 
-    <div id="warehouse-info-banner" style="margin-top: 15px; margin-bottom: 15px; padding: 10px 15px; background-color: #e0f2fe; color: #0369a1; border-radius: 6px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
-      <i class="fas fa-info-circle"></i>
-      <span>Bạn đang xem các thông tin của danh mục chung thuộc kho <strong><span id="banner-warehouse-name"></span></strong></span>
-    </div>
+
     
-    <div class="table-wrapper">
-      <table id="containerTable" class="data-table">
+    <div class="table-scroll-head">
+      <table class="data-table">
         <colgroup>
           <col style="width: 40px;"> <!-- Checkbox -->
           <col style="width: 50px;"> <!-- STT -->
@@ -178,13 +168,13 @@
         </colgroup>
         <thead>
           <tr>
-            <th rowspan="2" class="sticky-col first-col" style="text-align: center;">
+            <th rowspan="2" style="text-align: center;">
               <input type="checkbox" id="selectAll">
             </th>
             <th rowspan="2" style="text-align: center">STT</th>
-            <th rowspan="2" style="text-align: center">Mã đơn vị chứa hàng</th>
-            <th rowspan="2" style="text-align: center">Loại đơn vị chứa hàng</th>
-            <th colspan="3" style="text-align: center">Kích thước (mm)</th>
+            <th rowspan="2" style="text-align: center">Mã vật chứa</th>
+            <th rowspan="2" style="text-align: center">Nhóm vật chứa</th>
+            <th colspan="3" style="text-align: center">Quy cách vật chứa</th>
             <th rowspan="2" style="text-align: center">Tải trọng tối đa (kg)</th>
             <th rowspan="2" style="text-align: center">Sử dụng</th>
             <th rowspan="2" style="text-align: center">Thao tác</th>
@@ -195,6 +185,23 @@
             <th style="text-align: center">Cao</th>
           </tr>
         </thead>
+      </table>
+    </div>
+
+    <div class="table-scroll-body">
+      <table id="containerTable" class="data-table">
+        <colgroup>
+          <col style="width: 40px;"> <!-- Checkbox -->
+          <col style="width: 50px;"> <!-- STT -->
+          <col style="width: 140px;"> <!-- Mã -->
+          <col style="width: 180px;"> <!-- Loại -->
+          <col style="width: 110px;"> <!-- Dài -->
+          <col style="width: 110px;"> <!-- Rộng -->
+          <col style="width: 110px;"> <!-- Cao -->
+          <col style="width: 150px;"> <!-- Tải trọng -->
+          <col style="width: 100px;"> <!-- Sử dụng -->
+          <col style="width: 120px;"> <!-- Thao tác -->
+        </colgroup>
         <tbody id="tableBody"></tbody>
       </table>
     </div>
@@ -217,7 +224,6 @@
 
 
   </div>
-
+  <link rel="stylesheet" href="container.css" />
   <script src="container.js"></script>
 </body>
-</html>

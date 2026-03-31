@@ -146,7 +146,10 @@
             selectAll: document.getElementById('selectAll'),
             bulkActions: document.getElementById('bulkActions'),
             bulkDeleteBtn: document.getElementById('bulkDeleteBtn'),
-            bulkPrintBtn: document.getElementById('bulkPrintBtn')
+            bulkPrintBtn: document.getElementById('bulkPrintBtn'),
+            // Scroll Synchronization
+            scrollHead: document.querySelector('.table-scroll-head'),
+            scrollBody: document.querySelector('.table-scroll-body')
         };
     }
 
@@ -205,7 +208,7 @@
 
         // Handle empty state
         const paginationContainer = document.querySelector('.pagination-container');
-        const tableContainer = document.querySelector('.table-wrapper');
+        const tableContainer = document.querySelector('.table-scroll-body');
 
         if (filteredData.length === 0) {
             dom.tableBody.innerHTML = `
@@ -847,6 +850,13 @@
         }
 
         if (dom.bulkPrintBtn) dom.bulkPrintBtn.onclick = window.bulkPrint;
+
+        // --- 11. SCROLL SYNCHRONIZATION ---
+        if (dom.scrollBody && dom.scrollHead) {
+            dom.scrollBody.addEventListener('scroll', () => {
+                dom.scrollHead.scrollLeft = dom.scrollBody.scrollLeft;
+            });
+        }
     }
 
     // --- 10. INITIALIZE ---

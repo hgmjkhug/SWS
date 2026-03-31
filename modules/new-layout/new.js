@@ -1,6 +1,6 @@
 function getPathSVG(top = true, bottom = true, left = true, right = true) {
-    return `<svg width="40" height="40" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="40" height="40" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
+    return `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="30" height="30" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
     ${top ? '<path d="M15 0V15" stroke="#7C8DB5" stroke-opacity="0.7"/>' : ''}
     ${bottom ? '<path d="M15 15V30" stroke="#7C8DB5" stroke-opacity="0.7"/>' : ''}
     ${left ? '<path d="M0 15H15" stroke="#7C8DB5" stroke-opacity="0.7"/>' : ''}
@@ -12,67 +12,69 @@ function getPathSVG(top = true, bottom = true, left = true, right = true) {
 function getRailSVG(hasVertical = false, hasLeft = true, hasRight = true) {
     const xStart = hasLeft ? 0 : 15;
     const xEnd = hasRight ? 30 : 15;
-    return `<svg width="40" height="40" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="40" height="40" fill="#DFF0FF" fill-opacity="0.3"/>
+    return `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="30" height="30" fill="#DFF0FF" fill-opacity="0.3"/>
     <path d="M${xStart} 15H${xEnd}" stroke="#7C8DB5" stroke-opacity="0.8" stroke-width="1"/>
     ${hasVertical ? '<path d="M15 0V30" stroke="#7C8DB5" stroke-opacity="0.7"/>' : ''}
     <circle cx="15" cy="15" r="1.5" fill="#677594"/>
     </svg>`;
 }
 
-const SVG_EMPTY = `<svg width="40" height="40" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="40" height="40" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
-<ellipse cx="2" cy="1.97531" rx="2" ry="1.97531" transform="matrix(-1 0 0 1 17 13)" fill="#677594"/>
+const SVG_EMPTY = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="30" height="30" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
+    <ellipse cx="2" cy="1.97531" rx="2" ry="1.97531" transform="matrix(-1 0 0 1 17 13)" fill="#677594"/>
+    </svg>`;
+
+const SVG_WALL_V = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" fill="#DFF0FF" fill-opacity="0.5"/>
+<path d="M15 0L15 15" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M15 15L15 30" stroke="#7C8DB5" stroke-opacity="0.7"/>
 </svg>`;
 
-const SVG_WALL_V = `<svg width="40" height="40" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="40" height="40" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
-<path d="M15 0L15 30" stroke="#7C8DB5" stroke-opacity="0.7"/>
+const SVG_WALL_H = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" transform="matrix(0 -1 1 0 0 30)" fill="#DFF0FF" fill-opacity="0.5"/>
+<path d="M0 15L15 15" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M15 15L30 15" stroke="#7C8DB5" stroke-opacity="0.7"/>
 </svg>`;
 
-const SVG_WALL_H = `<svg width="40" height="40" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="40" height="40" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
-<path d="M0 15H30" stroke="#7C8DB5" stroke-opacity="0.7"/>
-</svg>`;
-
-const SVG_WALL_CORNER_TL = `<svg width="40" height="40" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="40" height="40" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
+const SVG_WALL_CORNER_TL = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
 <path d="M15 15H30" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M15 15V30" stroke="#7C8DB5" stroke-opacity="0.7"/>
 </svg>`;
 
-const SVG_WALL_CORNER_TR = `<svg width="40" height="40" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="40" height="40" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
+const SVG_WALL_CORNER_TR = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
 <path d="M0 15H15" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M15 15V30" stroke="#7C8DB5" stroke-opacity="0.7"/>
 </svg>`;
 
-const SVG_WALL_CORNER_BL = `<svg width="40" height="40" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="40" height="40" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
+const SVG_WALL_CORNER_BL = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
 <path d="M15 0V15" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M15 15H30" stroke="#7C8DB5" stroke-opacity="0.7"/>
 </svg>`;
 
-const SVG_WALL_CORNER_BR = `<svg width="40" height="40" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="40" height="40" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
+const SVG_WALL_CORNER_BR = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
 <path d="M15 0V15" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M0 15H15" stroke="#7C8DB5" stroke-opacity="0.7"/>
 </svg>`;
 
-const SVG_WALL_T_TOP = `<svg width="40" height="40" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="40" height="40" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
+const SVG_WALL_T_TOP = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
 <path d="M0 15H30" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M15 15V30" stroke="#7C8DB5" stroke-opacity="0.7"/>
 </svg>`;
 
-const SVG_WALL_T_BOTTOM = `<svg width="40" height="40" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="40" height="40" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
+const SVG_WALL_T_BOTTOM = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
 <path d="M0 15H30" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M15 0V15" stroke="#7C8DB5" stroke-opacity="0.7"/>
 </svg>`;
 
-const SVG_SHELF = `<svg width="40" height="40" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="40" height="40" fill="#A4D3FE" fill-opacity="0.4"/>
+const SVG_SHELF = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
 <path d="M0 15H9" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M30 15H21" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M17.6113 11.0128C17.3858 11.2383 17.0119 11.2383 16.7864 11.0128L14.999 9.22541L13.2116 11.0128C12.9861 11.2383 12.6121 11.2383 12.3866 11.0128C12.1611 10.7873 12.1611 10.4134 12.3866 10.1879L14.5865 7.98798C14.812 7.76249 15.186 7.76249 15.4114 7.98798L17.6113 10.1879C17.8368 10.4134 17.8368 10.7873 17.6113 11.0128Z" fill="#076EB8"/>
@@ -103,22 +105,70 @@ const SVG_OUTBOUND = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none
 <rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
 </svg>`;
 
-const SVG_DOOR = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="30" height="30" fill="#DFF0FF" fill-opacity="0.4"/>
-<path d="M15.0667 5.60001C15.0667 11.804 15.0667 18.008 15.0667 24.4C12.8226 24.1507 10.6162 23.6324 8.40002 23.2C8.40002 17.92 8.40002 12.64 8.40002 7.20001C9.74987 6.75006 9.74987 6.75006 10.4146 6.60001C10.5593 6.56701 10.704 6.53401 10.8531 6.50001C11.0006 6.46701 11.1481 6.43401 11.3 6.40001C11.4454 6.36701 11.5908 6.33401 11.7406 6.30001C12.0334 6.23357 12.3262 6.16742 12.619 6.10157C13.2325 5.96239 13.8447 5.8181 14.4569 5.67344C14.8 5.60001 14.8 5.60001 15.0667 5.60001Z" fill="#FBFBFB"/>
-<path d="M16.875 3.375C16.875 10.811 16.8 18.6053 16.8 26.2667C15.4766 26.2667 14.3943 26.2445 13.1349 25.9844C12.987 25.9554 12.8391 25.9265 12.6867 25.8966C12.2213 25.8051 11.7565 25.7109 11.2917 25.6167C10.9781 25.5545 10.6644 25.4925 10.3508 25.4307C9.65911 25.2941 8.96779 25.1558 8.27676 25.016C7.69575 24.8989 7.11451 24.7829 6.53333 24.6667C6.53333 18.4187 6.53333 12.1707 6.53333 5.73334C8.67407 5.1217 8.67407 5.1217 9.58072 4.92865C9.68114 4.90668 9.78156 4.88471 9.88503 4.86207C10.1982 4.7936 10.5116 4.72589 10.825 4.65834C11.2409 4.56836 11.6567 4.47782 12.0724 4.38699C12.1723 4.36545 12.2722 4.34392 12.3751 4.32173C12.9095 4.20475 13.4268 4.06663 13.9484 3.90053C14.6667 3.73334 14.625 3.75 16.875 3.375ZM13.8432 5.81928C13.7471 5.842 13.651 5.86473 13.5519 5.88815C13.2429 5.96127 12.9339 6.03479 12.625 6.10834C12.3222 6.18015 12.0194 6.25188 11.7166 6.32357C11.5183 6.37056 11.3201 6.41764 11.1218 6.46482C10.6608 6.57436 10.1996 6.68245 9.7373 6.78614C9.5801 6.82148 9.42289 6.85682 9.26093 6.89324C9.12288 6.92378 8.98483 6.95432 8.8426 6.98578C8.5406 7.03695 8.5406 7.03695 8.39999 7.20001C8.38721 7.4075 8.38374 7.61558 8.38396 7.82346C8.38377 7.95827 8.38359 8.09308 8.3834 8.23198C8.38388 8.38111 8.38436 8.53024 8.38485 8.68389C8.38484 8.83997 8.38482 8.99605 8.3848 9.15685C8.38487 9.58603 8.38554 10.0152 8.38647 10.4444C8.3873 10.8925 8.38738 11.3405 8.38754 11.7886C8.38796 12.6377 8.38905 13.4867 8.39039 14.3357C8.39188 15.3021 8.39261 16.2685 8.39328 17.2348C8.39468 19.2232 8.39702 21.2116 8.39999 23.2C9.26357 23.3716 10.1273 23.5424 10.9911 23.7127C11.285 23.7707 11.5788 23.8289 11.8726 23.8873C12.2949 23.9712 12.7172 24.0544 13.1396 24.1375C13.271 24.1638 13.4024 24.19 13.5378 24.217C13.6605 24.2411 13.7833 24.2651 13.9098 24.2899C14.0714 24.3218 14.0714 24.3218 14.2363 24.3545C14.5711 24.4135 14.5711 24.4135 15.0667 24.4C15.0667 18.196 15.0667 11.992 15.0667 5.60001C14.6471 5.60001 14.2494 5.72217 13.8432 5.81928Z" fill="#0F6EB8"/>
-<path d="M18.8 5.60001C20.34 5.60001 21.88 5.60001 23.4667 5.60001C23.4667 11.804 23.4667 18.008 23.4667 24.4C21.9267 24.4 20.3867 24.4 18.8 24.4C18.8 23.784 18.8 23.168 18.8 22.5333C19.724 22.5333 20.648 22.5333 21.6 22.5333C21.6 17.5613 21.6 12.5893 21.6 7.46667C20.676 7.46667 19.752 7.46667 18.8 7.46667C18.8 6.85067 18.8 6.23467 18.8 5.60001Z" fill="#0F6EB8"/>
-<path d="M14.1524 15.01C14.1524 15.4242 13.8166 15.76 13.4024 15.76C12.9882 15.76 12.6524 15.4242 12.6524 15.01C12.6524 14.5958 12.9882 14.26 13.4024 14.26C13.8166 14.26 14.1524 14.5958 14.1524 15.01Z" fill="#0F6EB8"/>
-</svg>`;
-
-
-const SVG_CLSDOOR = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="30" height="30" fill="#DFF0FF" fill-opacity="0.4"/>
-<path d="M18.75 5.25C18.75 11.9325 18.75 18.615 18.75 25.5C16.2254 25.2314 13.7432 24.6732 11.25 24.2074C11.25 18.5202 11.25 12.833 11.25 6.9734C12.7686 6.48875 12.7686 6.48875 13.5164 6.32713C13.6792 6.29158 13.842 6.25604 14.0098 6.21941C14.1757 6.18387 14.3416 6.14832 14.5125 6.1117C14.6761 6.07616 14.8397 6.04061 15.0082 6.00399C15.3375 5.93243 15.6669 5.86118 15.9964 5.79025C16.6865 5.64033 17.3753 5.48491 18.064 5.3291C18.45 5.25 18.45 5.25 18.75 5.25Z" fill="#FBFBFB"/>
-<path d="M9.90834 26.25C9.90834 18.814 9.98333 11.0197 9.98333 3.35833C11.3067 3.35833 12.389 3.38048 13.6484 3.64062C13.7963 3.66958 13.9442 3.69854 14.0966 3.72838C14.562 3.81993 15.0268 3.91407 15.4917 4.00833C15.8053 4.07048 16.1189 4.13246 16.4326 4.19426C17.1242 4.33093 17.8155 4.4692 18.5066 4.60897C19.0876 4.72612 19.6688 4.84209 20.25 4.95833C20.25 11.2063 20.25 17.4543 20.25 23.8917C18.1093 24.5033 18.1093 24.5033 17.2026 24.6963C17.1022 24.7183 17.0018 24.7403 16.8983 24.7629C16.5851 24.8314 16.2717 24.8991 15.9583 24.9667C15.5424 25.0566 15.1267 25.1472 14.7109 25.238C14.611 25.2595 14.5111 25.2811 14.4082 25.3033C13.8738 25.4202 13.3566 25.5584 12.8349 25.7245C12.1167 25.8917 12.1583 25.875 9.90834 26.25ZM12.9401 23.8057C13.0362 23.783 13.1324 23.7603 13.2314 23.7369C13.5405 23.6637 13.8494 23.5902 14.1583 23.5167C14.4611 23.4448 14.7639 23.3731 15.0667 23.3014C15.265 23.2544 15.4633 23.2074 15.6615 23.1602C16.1225 23.0506 16.5837 22.9426 17.046 22.8389C17.2032 22.8035 17.3604 22.7682 17.5224 22.7318C17.6604 22.7012 17.7985 22.6707 17.9407 22.6392C18.2427 22.588 18.2427 22.588 18.3833 22.425C18.3961 22.2175 18.3996 22.0094 18.3994 21.8015C18.3996 21.6667 18.3997 21.5319 18.3999 21.393C18.3994 21.2439 18.399 21.0948 18.3985 20.9411C18.3985 20.785 18.3985 20.629 18.3985 20.4681C18.3985 20.039 18.3978 19.6098 18.3969 19.1806C18.396 18.7325 18.3959 18.2845 18.3958 17.8364C18.3954 16.9873 18.3943 16.1383 18.3929 15.2893C18.3914 14.3229 18.3907 13.3565 18.39 12.3902C18.3886 10.4018 18.3863 8.41338 18.3833 6.42499C17.5198 6.25339 16.656 6.08257 15.7922 5.9123C15.4983 5.85428 15.2045 5.79607 14.9107 5.73769C14.4885 5.65382 14.0661 5.57059 13.6438 5.48749C13.5123 5.46124 13.3809 5.435 13.2455 5.40795C13.1228 5.38393 13 5.3599 12.8736 5.33515C12.7119 5.30317 12.7119 5.30317 12.547 5.27055C12.2122 5.21151 12.2122 5.21152 11.7167 5.22499C11.7167 11.429 11.7167 17.633 11.7167 24.025C12.1363 24.025 12.5339 23.9028 12.9401 23.8057Z" fill="#0F6EB8"/>
-<path d="M17.25 15C17.25 15.4142 16.9142 15.75 16.5 15.75C16.0858 15.75 15.75 15.4142 15.75 15C15.75 14.5858 16.0858 14.25 16.5 14.25C16.9142 14.25 17.25 14.5858 17.25 15Z" fill="#0F6EB8"/>
+const SVG_DOOR = `
+<svg width="90" height="30" viewBox="0 0 90 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_128_188)">
+<rect width="90" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
+<path d="M0 15H12.5H25" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
+<path d="M65 15H90" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
+<path d="M26 8V16" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
+<path d="M64 8V16" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
+<path d="M45 0V30" stroke="#7C8DB5" stroke-opacity="0.7"/>
+</g>
+<rect x="0.25" y="0.25" width="89.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
+<defs>
+<clipPath id="clip0_128_188">
+<rect width="90" height="30" fill="white"/>
+</clipPath>
+</defs>
 </svg>
 `;
+
+
+const SVG_CLSDOOR = `
+<svg width="90" height="30" viewBox="0 0 90 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_128_188)">
+<rect width="90" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
+<path d="M0 15H12.5H25" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
+<path d="M65 15H90" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
+<path d="M26 8V16" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
+<path d="M64 8V16" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
+<path d="M45 0V30" stroke="#7C8DB5" stroke-opacity="0.7"/>
+</g>
+<rect x="0.25" y="0.25" width="89.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
+<defs>
+<clipPath id="clip0_128_188">
+<rect width="90" height="30" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+`;
+
+const SVG_WAITING = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
+<rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
+<path d="M15.0004 0V8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M15.0004 30V21.75" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M0 15H8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<g clip-path="url(#clip0_130_214)">
+<path d="M21.5938 14.5C21.5937 16.1162 20.9517 17.6661 19.8089 18.8089C18.6661 19.9517 17.1162 20.5938 15.5 20.5938C13.8838 20.5938 12.3339 19.9517 11.1911 18.8089C10.0483 17.6661 9.40625 16.1162 9.40625 14.5C9.40625 12.8838 10.0483 11.3339 11.1911 10.1911C12.3339 9.04827 13.8838 8.40625 15.5 8.40625C17.1162 8.40625 18.6661 9.04827 19.8089 10.1911C20.9517 11.3339 21.5938 12.8838 21.5938 14.5ZM8 14.5C8 16.4891 8.79018 18.3968 10.1967 19.8033C11.6032 21.2098 13.5109 22 15.5 22C17.4891 22 19.3968 21.2098 20.8033 19.8033C22.2098 18.3968 23 16.4891 23 14.5C23 12.5109 22.2098 10.6032 20.8033 9.1967C19.3968 7.79018 17.4891 7 15.5 7C13.5109 7 11.6032 7.79018 10.1967 9.1967C8.79018 10.6032 8 12.5109 8 14.5ZM14.7969 10.5156V14.5C14.7969 14.7344 14.9141 14.9541 15.1104 15.0859L17.9229 16.9609C18.2451 17.1777 18.6816 17.0898 18.8984 16.7646C19.1152 16.4395 19.0273 16.0059 18.7021 15.7891L16.2031 14.125V10.5156C16.2031 10.126 15.8896 9.8125 15.5 9.8125C15.1104 9.8125 14.7969 10.126 14.7969 10.5156Z" fill="#076EB8"/>
+</g>
+<defs>
+<clipPath id="clip0_130_214">
+<rect width="15" height="15" fill="white" transform="translate(8 7)"/>
+</clipPath>
+</defs>
+</svg>`;
+
+const SVG_P_PORT = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
+<rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
+<path d="M15.0004 0V8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M15.0004 30V21.75" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M0 15H8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<circle cx="15.5" cy="14.5" r="6.9" fill="white" stroke="#076EB8" stroke-width="1.2"/>
+<path d="M14.0682 19C13.6209 19 13.25 18.6779 13.25 18.2895V10.7105C13.25 10.3221 13.6209 10 14.0682 10H16.25C17.9082 10 19.25 11.1653 19.25 12.6053C19.25 14.0453 17.9082 15.2105 16.25 15.2105H14.8864V18.2895C14.8864 18.6779 14.5155 19 14.0682 19ZM14.8864 13.7895H16.25C17.0027 13.7895 17.6136 13.2589 17.6136 12.6053C17.6136 11.9516 17.0027 11.4211 16.25 11.4211H14.8864V13.7895Z" fill="#076EB8"/>
+</svg>`;
 
 const SVG_SHUTTLE_LOADED = `<svg width="30" height="22" viewBox="0 0 30 22" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g filter="url(#filter0_i_112_208)">
@@ -255,6 +305,14 @@ const COLS = 55;
         mapMatrix.push(row);
     }
     
+    // Prepare Module Containers
+    const modA = document.createElement('div');
+    modA.className = 'module-block mod-A';
+    const modB = document.createElement('div');
+    modB.className = 'module-block mod-B';
+    const modC = document.createElement('div');
+    modC.className = 'module-block mod-C';
+
     // Render the grid
     mapMatrix.forEach((row, r) => {
         row.forEach((type, c) => {
@@ -293,15 +351,31 @@ const COLS = 55;
                 const hasRight = (c !== COLS - 1);
                 svgContent = getRailSVG(vertCols.includes(c), hasLeft, hasRight);
             }
+
+            if (c === 17 && (r === 4 || r === 6)) {
+                svgContent = SVG_P_PORT;
+            }
+
+            if (c === 17 && r === 8) {
+                svgContent = SVG_WAITING;
+            }
             
             cell.innerHTML = svgContent;
-            grid.appendChild(cell);
+            
+            // Append to appropriate module block
+            if (c <= 18) modA.appendChild(cell);
+            else if (c <= 36) modB.appendChild(cell);
+            else modC.appendChild(cell);
         });
     });
+    
+    grid.appendChild(modA);
+    grid.appendChild(modB);
+    grid.appendChild(modC);
 
     // Shuttle Animation Logic
     function createShuttle() {
-        const wrapper = document.querySelector('.map-wrapper');
+        const wrapper = document.getElementById('new-layout-grid-scaler');
         const shuttle = document.createElement('div');
         shuttle.className = 'shuttle-cargo';
         shuttle.innerHTML = SVG_SHUTTLE_LOADED_V; // Initial vertical
@@ -315,7 +389,7 @@ const COLS = 55;
     }
 
     function setPosition(shuttle, r, c, vertical = true) {
-        const cellSize = 40;
+        const cellSize = 30;
         const w = vertical ? 22 : 30;
         const h = vertical ? 30 : 22;
         
@@ -401,6 +475,167 @@ const COLS = 55;
     }
 
     setTimeout(animateShuttle, 2000);
+
+    // Zoom Logic
+    let currentScale = 1;
+    const zoomInBtn = document.getElementById('zoom-in');
+    const zoomOutBtn = document.getElementById('zoom-out');
+    const zoomResetBtn = document.getElementById('zoom-reset');
+    const gridScaler = document.getElementById('new-layout-grid-scaler');
+
+    if (zoomInBtn && zoomOutBtn && zoomResetBtn && gridScaler) {
+        zoomInBtn.addEventListener('click', () => {
+            currentScale = Math.min(currentScale + 0.05, 2);
+            applyZoom();
+        });
+
+        zoomOutBtn.addEventListener('click', () => {
+            currentScale = Math.max(currentScale - 0.05, 0.5);
+            applyZoom();
+        });
+
+        zoomResetBtn.addEventListener('click', () => {
+            currentScale = 1;
+            applyZoom();
+        });
+
+        function applyZoom() {
+            gridScaler.style.transform = `scale(${currentScale})`;
+        }
+    }
+
+    // Custom Level Selector logic (Single Select)
+    const levelSelect = document.getElementById('level-select-custom');
+    const levelHeader = levelSelect?.querySelector('.select-header');
+    const levelText = levelSelect?.querySelector('.selected-text');
+    const levelOptions = levelSelect?.querySelectorAll('.option-item');
+
+    if (levelHeader && levelSelect) {
+        levelHeader.addEventListener('click', (e) => {
+            e.stopPropagation();
+            levelSelect.classList.toggle('active');
+            multiselect?.classList.remove('active');
+        });
+
+        levelOptions.forEach(opt => {
+            opt.addEventListener('click', () => {
+                levelOptions.forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                const selectedText = opt.querySelector('.label-text').innerText;
+                levelText.innerText = selectedText;
+                levelSelect.classList.remove('active');
+                
+                // Show success toast
+                if (typeof showToast === 'function') {
+                    showToast(`Hiển thị thông tin dữ liệu của ${selectedText}`, 'success');
+                }
+                
+                console.log('Level Selected:', opt.dataset.value);
+            });
+        });
+    }
+
+    // Custom Multiselect logic for Modules
+    const multiselect = document.getElementById('module-multiselect');
+    const multiHeader = multiselect?.querySelector('.multiselect-header');
+    const multiText = multiselect?.querySelector('.selected-text');
+    const multiOptions = multiselect?.querySelectorAll('.option-item:not(.all-option)');
+    const allOption = multiselect?.querySelector('.all-option');
+
+    if (multiHeader && multiselect) {
+        multiHeader.addEventListener('click', (e) => {
+            e.stopPropagation();
+            multiselect.classList.toggle('active');
+            levelSelect?.classList.remove('active');
+        });
+
+        multiOptions.forEach(opt => {
+            opt.addEventListener('click', (e) => {
+                e.stopPropagation();
+                opt.classList.toggle('active');
+                
+                // Show success toast if becoming active
+                if (opt.classList.contains('active') && typeof showToast === 'function') {
+                    showToast(`Hiển thị thông tin dữ liệu của ${opt.querySelector('.label-text').innerText}`, 'success');
+                }
+
+                updateAllOptionState();
+                updateMultiselectText();
+                updateMapVisibility();
+            });
+        });
+
+        if (allOption) {
+            allOption.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isAllActive = allOption.classList.contains('active');
+                if (isAllActive) {
+                    allOption.classList.remove('active');
+                    multiOptions.forEach(o => o.classList.remove('active'));
+                } else {
+                    allOption.classList.add('active');
+                    multiOptions.forEach(o => o.classList.add('active'));
+                    
+                    // Show success toast for "All"
+                    if (typeof showToast === 'function') {
+                        showToast('Hiển thị thông tin dữ liệu của Tất cả module', 'success');
+                    }
+                }
+                updateMultiselectText();
+                updateMapVisibility(); // Added missing update call for All option toggle
+            });
+        }
+
+        function updateAllOptionState() {
+            const allActive = Array.from(multiOptions).every(o => o.classList.contains('active'));
+            if (allActive) allOption.classList.add('active');
+            else allOption.classList.remove('active');
+        }
+
+        function updateMultiselectText() {
+            const selected = Array.from(multiOptions)
+                .filter(o => o.classList.contains('active'))
+                .map(o => o.querySelector('.label-text').innerText);
+            
+            if (selected.length === 0) {
+                multiText.innerText = 'Chọn module';
+            } else if (selected.length === multiOptions.length) {
+                multiText.innerText = 'Tất cả module';
+            } else {
+                multiText.innerText = selected.join(', ');
+            }
+        }
+
+        function updateMapVisibility() {
+            const selectedModules = Array.from(multiOptions)
+                .filter(o => o.classList.contains('active'))
+                .map(o => o.dataset.value);
+
+            const blocks = {
+                'A': document.querySelector('.mod-A'),
+                'B': document.querySelector('.mod-B'),
+                'C': document.querySelector('.mod-C')
+            };
+
+            ['A', 'B', 'C'].forEach(modId => {
+                const block = blocks[modId];
+                if (!block) return;
+                
+                if (selectedModules.includes(modId)) {
+                    block.classList.remove('hidden-module');
+                } else {
+                    block.classList.add('hidden-module');
+                }
+            });
+        }
+        
+        // Initial sync
+        updateMapVisibility();
+    }
+
+    // Close all when clicking outside
+    document.addEventListener('click', () => {
+        levelSelect?.classList.remove('active');
+        multiselect?.classList.remove('active');
+    });
 })();
-
-

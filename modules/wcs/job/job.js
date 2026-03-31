@@ -593,6 +593,8 @@
                 const format = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
                 if (activeStartDate && activeEndDate) {
                     if(rangeDisplay) rangeDisplay.textContent = `${format(activeStartDate)} - ${format(activeEndDate)}`;
+                } else if (!activeStartDate && !activeEndDate) {
+                    if(rangeDisplay) rangeDisplay.textContent = 'Tất cả thời gian';
                 } else {
                     if(rangeDisplay) rangeDisplay.textContent = 'dd/mm/yyyy - dd/mm/yyyy';
                 }
@@ -608,15 +610,21 @@
                 selectedEndDate = new Date(now);
                 selectedStartDate = new Date(now);
                 switch(range) {
+                    case 'all': 
+                        selectedStartDate = null; 
+                        selectedEndDate = null; 
+                        break;
                     case 'today': break;
                     case 'last3': selectedStartDate.setDate(now.getDate() - 2); break;
                     case 'last7': selectedStartDate.setDate(now.getDate() - 6); break;
                     case 'last30': selectedStartDate.setDate(now.getDate() - 29); break;
                     case 'last3mo': selectedStartDate.setMonth(now.getMonth() - 3); break;
                 }
-                currentViewLeft = new Date(selectedStartDate);
-                currentViewRight = new Date(selectedStartDate);
-                currentViewRight.setMonth(currentViewRight.getMonth() + 1);
+                if (selectedStartDate) {
+                    currentViewLeft = new Date(selectedStartDate);
+                    currentViewRight = new Date(selectedStartDate);
+                    currentViewRight.setMonth(currentViewRight.getMonth() + 1);
+                }
                 renderCalendars();
             };
         });

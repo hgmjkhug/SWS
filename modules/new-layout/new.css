@@ -1,52 +1,282 @@
-/* Container for the grid */
 .grid-container {
     padding: 20px;
-    background-color: #f5f7fa;
+    background-color: #f8fafc;
     width: 100vw;
     height: 100vh;
     overflow: auto;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
+.layout-controls {
+    display: flex;
+    gap: 12px;
+    background: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    align-items: center;
+    border: 1px solid #e2e8f0;
+    width: fit-content;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+}
+
+.select-wrapper {
+    position: relative;
+    width: 120px;
+}
+
+/* Custom Select & Multiselect Unified Styles */
+.custom-select, .custom-multiselect {
+    position: relative;
+    width: 150px;
+}
+
+.custom-multiselect {
+    width: 200px;
+}
+
+.select-header, .multiselect-header {
+    background: white;
+    border: 1px solid #cbd5e1;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.select-header:hover, .multiselect-header:hover {
+    border-color: #94a3b8;
+}
+
+.selected-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1e293b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.select-header i, .multiselect-header i {
+    font-size: 10px;
+    color: #64748b;
+    transition: transform 0.2s;
+}
+
+.custom-select.active .select-header i, 
+.custom-multiselect.active .multiselect-header i {
+    transform: rotate(180deg);
+}
+
+.select-options, .multiselect-options {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    z-index: 2000;
+    display: none;
+    padding: 6px;
+}
+
+.custom-select.active .select-options, 
+.custom-multiselect.active .multiselect-options {
+    display: block;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+    user-select: none;
+    margin-bottom: 2px;
+}
+
+.option-item:last-child {
+    margin-bottom: 0;
+}
+
+.option-item:hover {
+    background: #f1f5f9;
+}
+
+.option-item.active {
+    background: #eff6ff;
+}
+
+.option-item .label-text {
+    font-size: 13px;
+    color: #475569;
+    font-weight: 500;
+}
+
+.option-item.active .label-text {
+    color: #2563eb;
+}
+
+.verified-icon {
+    font-size: 14px;
+    color: #2563eb;
+    display: none;
+}
+
+.option-item.active .verified-icon {
+    display: block;
+}
+
+.all-option {
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 5px;
+    padding-bottom: 10px;
+    border-radius: 6px 6px 0 0;
+}
+
+/* Module Visibility Filtering */
+.hidden-module {
+    opacity: 0.03;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.4s ease;
+}
+
+/* Map Wrapper & Scaler */
 .map-wrapper {
     display: inline-block;
+    padding: 0px;
+    position: relative;
+    overflow: visible;
+    width: fit-content;
+}
+
+#new-layout-grid-scaler {
+    transform-origin: top left;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     background: white;
     padding: 0px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border: 1px solid #e2e8f0;
     width: fit-content;
-    overflow-x: auto;
-    position: relative;
 }
 
 #new-layout-grid {
-    display: grid;
-    /* 55 cols (4 boundaries + 3 * 17 module columns) */
-    grid-template-columns: repeat(55, 40px);
-    /* 17 rows (14 module area including walls + 3 rail) */
-    grid-template-rows: repeat(17, 40px);
+    display: flex;
     gap: 0;
+    width: fit-content;
+}
+
+.module-block {
+    display: grid;
+    grid-template-rows: repeat(17, 30px);
+    transition: all 0.4s ease;
+}
+
+.mod-A { grid-template-columns: repeat(19, 30px); }
+.mod-B { grid-template-columns: repeat(18, 30px); }
+.mod-C { grid-template-columns: repeat(18, 30px); }
+
+/* Module Visibility Filtering */
+.module-block.hidden-module {
+    display: none !important;
+}
+
+/* Zoom Controls */
+.zoom-controls {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 1000;
+    background: white;
+    padding: 8px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    backdrop-filter: blur(8px);
+}
+
+.zoom-controls button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #f1f5f9;
+    border-radius: 6px;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.zoom-controls button:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+    transform: scale(1.05);
+}
+
+.zoom-controls button:active {
+    transform: scale(0.95);
+}
+
+#zoom-reset {
+    margin-top: 4px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 8px;
+    border-radius: 0 0 6px 6px;
+    width: 36px;
+    height: 40px;
 }
 
 .map-cell {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .map-cell svg {
-    width: 100%;
-    height: 100%;
     display: block;
+}
+
+/* Door SVG overflow fix */
+.cell-door {
+    overflow: visible;
+    z-index: 100;
+}
+.cell-door svg {
+    max-width: none !important;
+    flex-shrink: 0;
+    width: 90px !important;
+    height: 30px !important;
 }
 
 /* Base styles for document */
 body {
     margin: 0;
+    font-family: 'Roboto', sans-serif;
 }
-.content-body
-{
+.content-body {
     padding: 0px 0px;
 }

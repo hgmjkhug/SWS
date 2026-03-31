@@ -1,0 +1,129 @@
+<!-- container-group.html -->
+<div class="container-group-container">
+  <div class="module-header">
+    <div class="container-group-search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        id="container-group-search"
+        placeholder="Tìm kiếm loại vật chứa..."
+        oninput="filterContainerGroups()"
+      />
+    </div>
+    <div class="module-actions">
+      <button class="btn btn-danger" id="btn-cg-bulk-delete" onclick="bulkDeleteContainerGroups()" style="display: none;">
+        <i class="fas fa-trash"></i> Xóa đã chọn (<span id="cg-selected-count">0</span>)
+      </button>
+      <button class="btn btn-primary" onclick="openContainerGroupModal()">
+        <i class="fas fa-plus"></i> Thêm mới
+      </button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <div class="table-scroll-head">
+      <table class="data-table">
+        <colgroup>
+          <col style="width: 60px;" />
+          <col style="width: 80px;" />
+          <col style="width: 320px;" />
+          <col style="width: auto;" />
+          <col style="width: 120px;" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th style="text-align: center">
+              <input type="checkbox" id="cg-select-all" class="cg-header-checkbox" onchange="toggleAllContainerGroups(this)" />
+            </th>
+            <th style="text-align: center">STT</th>
+            <th>Tên loại vật chứa</th>
+            <th>Mô tả</th>
+            <th style="text-align: center">Thao tác</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <div class="table-scroll-body" id="container-group-scroll-body">
+      <table class="data-table">
+        <colgroup>
+          <col style="width: 60px;" />
+          <col style="width: 80px;" />
+          <col style="width: 320px;" />
+          <col style="width: auto;" />
+          <col style="width: 120px;" />
+        </colgroup>
+        <tbody id="container-group-table-body">
+          <!-- Data rendered by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="pagination-bar">
+    <span id="container-group-page-info">Hiển thị 1-20 trên tổng 20</span>
+    <div class="pagination-controls">
+      <button class="btn-page" onclick="prevCgPage()" id="btn-cg-prev" disabled>
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <div id="container-group-pages" class="pages-numbers">
+        <button class="btn-page active">1</button>
+      </div>
+      <button class="btn-page" onclick="nextCgPage()" id="btn-cg-next" disabled>
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="container-group-modal">
+  <div class="modal-box" style="width: 750px; max-width: 95vw;">
+    <div class="modal-header">
+      <h3 class="modal-title" id="container-group-modal-title">Thêm mới loại vật chứa</h3>
+      <button class="modal-close-square" onclick="closeContainerGroupModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="container-group-id" />
+      <div class="form-group">
+        <label>Tên loại vật chứa <span class="text-danger">*</span></label>
+        <input type="text" id="container-group-name" placeholder="Nhập tên loại vật chứa" />
+        <small class="error-message" id="container-group-name-error"></small>
+      </div>
+
+      <div class="form-group">
+        <label>Mô tả</label>
+        <textarea
+          id="container-group-desc"
+          rows="3"
+          placeholder="Mô tả chi tiết loại vật chứa"
+        ></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeContainerGroupModal()">Hủy</button>
+      <button class="btn btn-primary" onclick="saveContainerGroup()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-cg-confirm-modal" class="modal-confirm" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
+  <div class="confirm-content" style="background: white; border-radius: 12px; padding: 24px; width: 400px; max-width: 90%; text-align: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
+    <div class="confirm-icon-box" style="width: 48px; height: 48px; border-radius: 50%; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px;">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h3 class="confirm-title" id="delete-cg-title" style="margin: 0 0 10px; font-size: 18px; color: #1e293b;">Xác nhận xóa</h3>
+    <p class="confirm-message" id="delete-cg-message" style="margin: 0 0 24px; color: #64748b; font-size: 14px; line-height: 1.5;">
+      Bạn có chắc chắn muốn xóa loại vật chứa này không?<br />Hành động này không thể hoàn tác.
+    </p>
+    <div class="confirm-actions" style="display: flex; gap: 12px; justify-content: center;">
+      <button onclick="closeDeleteCgConfirm()" class="btn btn-secondary" style="flex: 1;">Hủy</button>
+      <button onclick="confirmDeleteCg()" class="btn btn-danger" style="flex: 1;">Xóa</button>
+    </div>
+  </div>
+</div>
+
+<link href="container-group.css" rel="stylesheet" />
+<script src="container-group.js"></script>

@@ -572,9 +572,9 @@
                 <td class="col-resource"></td>
                 <td class="col-order" style="text-align: center;">${module.order}</td>
                 <td class="col-usage">
-                    <label class="switch" onclick="event.stopPropagation();">
-                        <input type="checkbox" id="toggle-mod-${module.id}" ${getMenuStatus(module.code) !== false ? 'checked' : ''} onchange="toggleMenuStatus(${module.id}, 0, this.checked); event.stopPropagation();">
-                        <span class="slider"></span>
+                    <label class="switch" onclick="event.stopPropagation();" ${module.code === 'SYSTEM' ? 'style="cursor: not-allowed;" title="Không thể ngưng sử dụng phân hệ này"' : ''}>
+                        <input type="checkbox" id="toggle-mod-${module.id}" ${getMenuStatus(module.code) !== false ? 'checked' : ''} onchange="toggleMenuStatus(${module.id}, 0, this.checked); event.stopPropagation();" ${module.code === 'SYSTEM' ? 'disabled' : ''}>
+                        <span class="slider" ${module.code === 'SYSTEM' ? 'style="pointer-events: none;"' : ''}></span>
                     </label>
                 </td>
                  <td class="col-action">
@@ -647,9 +647,9 @@
                     </td>
                     <td class="col-order" style="text-align: center;">${func.order}</td>
                     <td class="col-usage">
-                        <label class="switch" onclick="event.stopPropagation();">
-                            <input type="checkbox" id="toggle-func-${func.id}" ${getMenuStatus(func.code) !== false ? 'checked' : ''} onchange="toggleMenuStatus(${func.id}, 1, this.checked); event.stopPropagation();">
-                            <span class="slider"></span>
+                        <label class="switch" onclick="event.stopPropagation();" ${func.code === 'MENU' ? 'style="cursor: not-allowed;" title="Không thể ngưng sử dụng phân hệ này"' : ''}>
+                            <input type="checkbox" id="toggle-func-${func.id}" ${getMenuStatus(func.code) !== false ? 'checked' : ''} onchange="toggleMenuStatus(${func.id}, 1, this.checked); event.stopPropagation();" ${func.code === 'MENU' ? 'disabled' : ''}>
+                            <span class="slider" ${func.code === 'MENU' ? 'style="pointer-events: none;"' : ''}></span>
                         </label>
                     </td>
                     <td class="col-action">

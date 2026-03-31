@@ -191,6 +191,7 @@ function loadPage(title) {
         'Giám sát hoạt động': 'modules/wcs/traceIO/traceio.html',
         'Giao diện kho mới': 'modules/new-layout/new.html',
         'Quản lý lô hàng': 'modules/batch/batch.html',
+        'Nhóm vật chứa': 'modules/master-data/container-group/container-group.html',
         // add more mappings here as modules are created
     };
 

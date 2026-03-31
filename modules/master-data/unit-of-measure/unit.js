@@ -300,9 +300,7 @@ function showToast(msg, type = 'success') {
     }
 }
 
-// Set banner
-const bannerEl = document.getElementById('banner-warehouse-name');
-if (bannerEl) bannerEl.textContent = getCurrentWarehouse();
+
 
 // Run Init
 initUnitModule();

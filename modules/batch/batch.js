@@ -18,7 +18,10 @@
         start: new Date(today.getFullYear(), today.getMonth(), today.getDate()), 
         end: new Date(today.getFullYear(), today.getMonth(), today.getDate()) 
     };
-    var tempRange = { start: null, end: null };
+    var tempRange = { 
+        start: new Date(selectedRange.start), 
+        end: new Date(selectedRange.end) 
+    };
 
     var PRODUCT_TYPES = [
         { id: 'PT01', name: 'Thép ống tròn' },
@@ -526,7 +529,8 @@
                 var t = new Date();
                 var start = new Date(t.getFullYear(), t.getMonth(), t.getDate());
                 var end = new Date(t.getFullYear(), t.getMonth(), t.getDate());
-                if (range === "today") { /* already set */ }
+                if (range === "all") { start = null; end = null; }
+                else if (range === "today") { /* already set */ }
                 else if (range === "last3") start.setDate(t.getDate() - 3);
                 else if (range === "thisweek") {
                     var day = t.getDay();
@@ -540,9 +544,11 @@
                 else if (range === "last1yr") start.setFullYear(t.getFullYear() - 1);
                 tempRange.start = start;
                 tempRange.end = end;
-                currentLeftDate = new Date(tempRange.start);
-                currentRightDate = new Date(tempRange.end);
-                if (isSameDay(currentLeftDate, currentRightDate)) currentRightDate.setMonth(currentRightDate.getMonth() + 1);
+                if (start && end) {
+                    currentLeftDate = new Date(tempRange.start);
+                    currentRightDate = new Date(tempRange.end);
+                    if (isSameDay(currentLeftDate, currentRightDate)) currentRightDate.setMonth(currentRightDate.getMonth() + 1);
+                }
                 renderCalendars();
             };
         });
@@ -551,8 +557,12 @@
             applyBtn.onclick = function () {
                 selectedRange = { start: tempRange.start, end: tempRange.end };
                 var triggerDisplay = document.getElementById("dateRangeDisplay");
-                if (triggerDisplay && selectedRange.start && selectedRange.end) {
-                    triggerDisplay.textContent = formatDate(selectedRange.start) + " - " + formatDate(selectedRange.end);
+                if (triggerDisplay) {
+                    if (selectedRange.start && selectedRange.end) {
+                        triggerDisplay.textContent = formatDate(selectedRange.start) + " - " + formatDate(selectedRange.end);
+                    } else if (!selectedRange.start && !selectedRange.end) {
+                        triggerDisplay.textContent = "Tất cả thời gian";
+                    }
                 }
                 var p = document.getElementById("analyticsPicker");
                 if (p) p.classList.remove("active");
@@ -775,11 +785,13 @@
                     '</div>' +
                     '<div class="sd-detail-card">' +
                         '<div class="sd-detail-header" style="color:' + s.color + '">' +
-                            '<i class="fa-solid fa-shield-heart"></i> ' + s.label +
+                            '<div style="display: flex; align-items: center; gap: 10px;">' +
+                                '<i class="fa-solid fa-shield-heart"></i> ' + s.label +
+                            '</div>' +
+                            badgeHtml +
                         '</div>' +
                         detailsHtml +
                         (s.date ? '<div class="sd-detail-date"><i class="fa-regular fa-clock"></i> Cập nhật: ' + s.date + '</div>' : '') +
-                        badgeHtml +
                     '</div>' +
                 '</div>';
         });
@@ -850,6 +862,16 @@
         setupExtraDatePickerListeners();
         initCreatorFilterCombobox();
         initGradeTypeFilterCombobox();
+        
+        // Initialize Date Range Display
+        var triggerDisplay = document.getElementById("dateRangeDisplay");
+        if (triggerDisplay && selectedRange.start && selectedRange.end) {
+            triggerDisplay.textContent = formatDate(selectedRange.start) + " - " + formatDate(selectedRange.end);
+        }
+        
+        // Mark "Today" as active in picker sidebar
+        var todayItem = document.querySelector('.analytics-date-picker .sidebar-item[data-range="today"]');
+        if (todayItem) todayItem.classList.add('active');
 
         // Horizontal Sync Scroll Logic
         var headerWrapper = document.getElementById('batch-header-wrapper');

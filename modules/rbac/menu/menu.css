@@ -50,10 +50,11 @@
   flex: 1;
   min-height: 0;
   max-height: calc(100vh - 120px);
+  overflow: auto; /* Allow both vertical and horizontal scrolling */
 }
 
 .menu-table {
-  width: 100%;
+  width: 1160px; /* Sum of all column widths to ensure perfect alignment */
   border-collapse: collapse;
   table-layout: fixed; /* CRITICAL */
 }
@@ -762,4 +763,19 @@ input:focus + .slider {
 .col-usage {
   width: 80px;
   text-align: center !important;
+}
+
+/* Disabled Switch Aesthetic */
+.switch input:disabled + .slider {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #4ED17E; /* Grayer background */
+}
+
+.switch input:disabled + .slider:before {
+  background-color: #f1f5f9; /* Off-white for the thumb */
+}
+
+.switch input:disabled ~ .slider {
+  pointer-events: none; /* Secondary catch-all */
 }

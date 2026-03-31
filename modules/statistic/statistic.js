@@ -156,7 +156,10 @@ function setupPickerListeners() {
             const range = item.getAttribute("data-range");
             const today = new Date();
             
-            if (range === "today") {
+            if (range === "all") {
+                tempRange.start = null;
+                tempRange.end = null;
+            } else if (range === "today") {
                 tempRange.start = today;
                 tempRange.end = today;
             } else if (range === "last7") {
@@ -171,10 +174,12 @@ function setupPickerListeners() {
                 tempRange.end = today;
             }
 
-            currentLeftDate = new Date(tempRange.start);
-            currentRightDate = new Date(tempRange.end);
-            if (currentLeftDate.getMonth() === currentRightDate.getMonth() && currentLeftDate.getFullYear() === currentRightDate.getFullYear()) {
-                currentRightDate.setMonth(currentRightDate.getMonth() + 1);
+            if (tempRange.start && tempRange.end) {
+                currentLeftDate = new Date(tempRange.start);
+                currentRightDate = new Date(tempRange.end);
+                if (currentLeftDate.getMonth() === currentRightDate.getMonth() && currentLeftDate.getFullYear() === currentRightDate.getFullYear()) {
+                    currentRightDate.setMonth(currentRightDate.getMonth() + 1);
+                }
             }
             renderCalendars();
         };
@@ -184,8 +189,12 @@ function setupPickerListeners() {
     document.getElementById("applyPicker").onclick = () => {
         selectedRange = { ...tempRange };
         const triggerDisplay = document.getElementById("dateRangeDisplay");
-        const s = selectedRange.start, e = selectedRange.end;
-        triggerDisplay.textContent = `${s.getDate()}/${s.getMonth() + 1}/${s.getFullYear()} - ${e.getDate()}/${e.getMonth() + 1}/${e.getFullYear()}`;
+        if (selectedRange.start && selectedRange.end) {
+            const s = selectedRange.start, e = selectedRange.end;
+            triggerDisplay.textContent = `${s.getDate()}/${s.getMonth() + 1}/${s.getFullYear()} - ${e.getDate()}/${e.getMonth() + 1}/${e.getFullYear()}`;
+        } else if (!selectedRange.start && !selectedRange.end) {
+            triggerDisplay.textContent = 'Tất cả thời gian';
+        }
         document.getElementById("analyticsPicker").classList.remove("active");
         refreshData();
     };

@@ -101,10 +101,7 @@
         if (!tbody) return;
 
         // Hiển thị tên kho đang chọn
-        const bannerNameEl = document.getElementById('banner-warehouse-name');
-        if (bannerNameEl) {
-            bannerNameEl.innerText = getCurrentWarehouse();
-        }
+        // Banner removed
 
         filteredData = products.filter(p => !p.is_deleted);
         renderCategoryFilter();
