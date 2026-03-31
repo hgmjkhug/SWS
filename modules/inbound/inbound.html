@@ -60,7 +60,7 @@
             type="text"
             id="search-input"
             class="search-input"
-            placeholder="Tìm theo mã lệnh, mã hoặc tên vật tư"
+            placeholder="Tìm theo mã lệnh, mã hoặc tên sản phẩm"
             onkeyup="handleMainSearchKeyup()"
             style="
               width: 260px;
@@ -236,6 +236,7 @@
             <!-- Bespoke Analytics Date Picker -->
             <div class="analytics-date-picker" id="analyticsPicker">
               <div class="picker-sidebar">
+                <div class="sidebar-item" data-range="all">Tất cả</div>
                 <div class="sidebar-item" data-range="today">Hôm nay</div>
                 <div class="sidebar-item" data-range="last3">3 ngày gần đây</div>
                 <div class="sidebar-item" data-range="thisweek">Tuần này</div>
@@ -382,6 +383,7 @@
               <col style="width: 250px">
               <col style="width: 250px">
               <col style="width: 180px">
+              <col style="width: 180px">
               <col style="width: 130px">
               <col style="width: 120px">
               <col style="width: 80px">
@@ -392,7 +394,8 @@
               <tr>
                 <th class="text-center">STT</th>
                 <th>Mã lệnh nhập</th>
-                <th>Vật tư</th>
+                <th>Sản phẩm</th>
+                <th>Lô hàng</th>
                 <th style="text-align: left">Thông tin lưu</th>
                 <th style="text-align: center">Loại lệnh nhập</th>
                 <th class="text-center">Trạng thái</th>
@@ -413,6 +416,7 @@
               <col style="width: 50px">
               <col style="width: 250px">
               <col style="width: 250px">
+              <col style="width: 180px">
               <col style="width: 180px">
               <col style="width: 130px">
               <col style="width: 120px">
@@ -539,10 +543,10 @@
             </div>
           </div>
 
-          <!-- Vật tư và Số lượng chung 1 dòng -->
+          <!-- Sản phẩm và Số lượng chung 1 dòng -->
           <div class="pda-form-group">
             <label class="pda-label"
-              >Vật tư<span style="color: red">*</span></label
+              >Sản phẩm<span style="color: red">*</span></label
             >
             <div style="border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #f8fafc; border-style: dashed; position: relative;">
               <!-- Nút thêm nhỏ ở góc trên bên phải -->
@@ -551,13 +555,13 @@
                 style="position: absolute; top: -20px; right: 18px; height: 32px; padding: 0 16px; border-radius: 6px; background: #3b82f6; color: white; font-size: 13px; font-weight: 600; cursor: pointer;border:none; display: flex; align-items: center; gap: 6px; z-index: 5;"
                 onclick="addMaterialFromInput()"
               >
-                <i class="fas fa-plus" style="font-size: 11px;"></i> Thêm vật tư
+                <i class="fas fa-plus" style="font-size: 11px;"></i> Thêm sản phẩm
               </button>
 
               <div style="display: flex; gap: 8px; align-items: flex-start;">
-                <!-- Mã Vật tư -->
+                <!-- Mã Sản phẩm -->
                 <div style="flex: 6;">
-                  <label style="font-size: 13px; font-weight: 500; color: #475569; display: block; margin-bottom: 8px;">Quét/Nhập mã vật tư<span style="color: red">*</span></label>
+                  <label style="font-size: 13px; font-weight: 500; color: #475569; display: block; margin-bottom: 8px;">Quét/Nhập mã sản phẩm<span style="color: red">*</span></label>
                   <div class="pda-input-box">
                     <input
                       type="text"
@@ -741,7 +745,7 @@
             </div>
           </div>
             
-            <!-- Danh sách vật tư đã thêm -->
+            <!-- Danh sách sản phẩm đã thêm -->
             <div id="added-materials-container" style="margin-top: 12px; display: none;">
                 <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Danh sách đã thêm:</div>
                 <div id="added-materials-list" style="display: flex; flex-direction: column; gap: 8px;">
@@ -783,19 +787,22 @@
           </div> <!-- End Row grouping -->
 
           <!-- Priority Toggle -->
-          <div class="pda-form-group" style="margin-bottom: 18px;">
-            <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;">
-              <label class="priority-toggle-switch">
+          <div class="pda-form-group" style="margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 16px; padding: 14px 20px; background: linear-gradient(to right, #fffdf5, #fffbeb); border: 1px solid #fde68a; border-left: 4px solid #f59e0b; border-radius: 12px; transition: all 0.2s ease; cursor: pointer;" onclick="document.getElementById('inputPriority').click()">
+              <label class="priority-toggle-switch" onclick="event.stopPropagation()">
                 <input type="checkbox" id="inputPriority" onchange="validatePDAForm()" />
                 <span class="priority-toggle-slider"></span>
               </label>
-              <div>
-                <div style="font-size: 14px; font-weight: 600; color: #92400e;">Ưu tiên</div>
-                <div style="font-size: 12px; color: #a16207; margin-top: 2px;">Đánh dấu lệnh này là lệnh ưu tiên</div>
+              <div style="flex: 1;">
+                <div style="font-size: 15px; font-weight: 700; color: #92400e; letter-spacing: -0.3px;">Thiết lập ưu tiên</div>
+                <div style="font-size: 12.5px; color: #b45309; margin-top: 1px; opacity: 0.9;">Đánh dấu lệnh này để xử lý khẩn cấp trong kho</div>
               </div>
-              <i class="fas fa-star" style="margin-left: auto; color: #f59e0b; font-size: 18px;" id="priority-star-icon"></i>
+              <div style="width: 36px; height: 36px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-star" style="color: #f59e0b; font-size: 18px;" id="priority-star-icon"></i>
+              </div>
             </div>
           </div>
+
 
           <!-- Submit Button -->
           <button
@@ -857,7 +864,7 @@
               type="text"
               id="select-search-input"
               class="search-input"
-              placeholder="Tìm theo mã lệnh nhập hoặc tên vật tư"
+              placeholder="Tìm theo mã lệnh nhập hoặc tên sản phẩm"
               onkeyup="handleSelectSearch(this.value)"
             />
             <!-- <select
@@ -884,13 +891,13 @@
                     STT
                   </th>
                   <th rowspan="2" style="width: 120px; vertical-align: middle">
-                    Mã vật tư
+                    Mã sản phẩm
                   </th>
                   <th rowspan="2" style="width: 180px; vertical-align: middle">
-                    Tên vật tư
+                    Tên sản phẩm
                   </th>
                   <th rowspan="2" style="width: 200px; vertical-align: middle">
-                    Chi tiết vật tư
+                    Chi tiết sản phẩm
                   </th>
                   <th colspan="3" style="text-align: center">
                     Quy cách chi tiết (mm)
@@ -1031,7 +1038,7 @@
         style="max-width: 600px"
       >
         <div class="modal-header">
-          <div class="modal-title">Import vật tư</div>
+          <div class="modal-title">Import sản phẩm</div>
           <i class="fas fa-times close-modal" onclick="closeImportModal()"></i>
         </div>
         <div class="modal-body">
@@ -1246,7 +1253,7 @@
 
             <!-- Right Column: Materials & Status -->
             <div>
-              <div style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">Chi tiết vật tư</div>
+              <div style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">Chi tiết sản phẩm</div>
               <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                 <tbody id="order-detail-mat-tbody">
                   <!-- JS populated -->
@@ -1291,7 +1298,7 @@
             </p>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
               <ul style="font-size: 13px; color: #64748b; padding-left: 20px; list-style-type: disc; margin: 0;">
-                <li><b>Trường bắt buộc:</b> Mã pallet, Vật tư, Số lượng, <b>Ưu tiên</b>.</li>
+                <li><b>Trường bắt buộc:</b> Mã pallet, Sản phẩm, Số lượng, <b>Ưu tiên</b>.</li>
                 <li><b>Ưu tiên:</b> Nhập <b>1</b> (Ưu tiên) hoặc <b>0</b> (Không ưu tiên).</li>
                 <li><b>Định dạng ngày:</b> dd/mm/yyyy.</li>
               </ul>
