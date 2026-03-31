@@ -5,49 +5,102 @@
 (function () {
     'use strict';
 
+    // Mock Area Data Generator
+    function generateMockAreas(warehouseId, floors) {
+        const areas = [];
+        const specs = ['FIFO', 'FEFO', 'LIFO'];
+        const products = [
+            { code: 'SP001', name: 'Thép tấm' },
+            { code: 'SP002', name: 'Linh kiện nhựa' },
+            { code: 'SP003', name: 'Keo dán kính' },
+            { code: 'SP004', name: 'Khung gầm' },
+            { code: 'SP005', name: 'Động cơ' }
+        ];
+
+        let areaCounter = 1;
+        // Duyệt qua từng tầng để đảm bảo mỗi tầng đều có khu vực
+        for (let f = 1; f <= floors; f++) {
+            // Tạo khu vực đầu tiên cho mỗi tầng
+            const product = products[Math.floor(Math.random() * products.length)];
+            areas.push({
+                id: areaCounter++,
+                floor: `Tầng ${f}`,
+                areaCode: `KV-${warehouseId}-${areaCounter}`,
+                areaName: `Khu vực ${String.fromCharCode(64 + areaCounter)}`,
+                positions: Math.floor(Math.random() * 50) + 20,
+                product: `${product.code} - ${product.name}`,
+                specification: specs[Math.floor(Math.random() * specs.length)]
+            });
+
+            // Ngẫu nhiên thêm khu vực thứ 2 cho cùng tầng đó (tỉ lệ 40%)
+            if (Math.random() > 0.6) {
+                const product2 = products[Math.floor(Math.random() * products.length)];
+                areas.push({
+                    id: areaCounter++,
+                    floor: `Tầng ${f}`,
+                    areaCode: `KV-${warehouseId}-${areaCounter}`,
+                    areaName: `Khu vực ${String.fromCharCode(64 + areaCounter)}`,
+                    positions: Math.floor(Math.random() * 30) + 10,
+                    product: `${product2.code} - ${product2.name}`,
+                    specification: specs[Math.floor(Math.random() * specs.length)]
+                });
+            }
+        }
+        return areas;
+    }
+
     // Mock Data
     let warehouses = [
-        { id: 1, code: 'CSC', type: 'Kho Tower', name: 'CÔNG TY THÉP', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 2, code: 'INDUSTRIES', type: 'Kho stacker crane', name: 'CÔNG TY TNHH TẬP ĐOÀN CÔNG NGHIỆP TRƯỜNG HẢI', floors: 3, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 3, code: 'VAM', type: 'Kho Flat', name: 'CÔNG TY TNHH SẢN XUẤT MÁY LẠNH Ô TÔ VINA', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang bảo trì' },
-        { id: 4, code: 'TACB', type: 'Kho Tower', name: 'CÔNG TY LINH KIỆN KHUNG THÂN VỎ Ô TÔ', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 5, code: 'LAPRO', type: 'Kho stacker crane', name: 'CÔNG TY BẢO HỘ LAO ĐỘNG', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Ngưng sử dụng' },
-        { id: 6, code: 'TOMCDD', type: 'Kho Flat', name: 'CÔNG TY THIẾT BỊ CƠ KHÍ DÂN DỤNG', floors: 8, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Mới tạo' },
-        { id: 7, code: 'TUC', type: 'Kho Tower', name: 'CÔNG TY THACO INDUSTRIES TẠI MỸ', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 8, code: 'DA', type: 'Kho stacker crane', name: 'DỰ ÁN MỚI', floors: 6, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Mới tạo' },
-        { id: 9, code: 'CTMC', type: 'Kho Flat', name: 'CÔNG TY CƠ KHÍ CHÍNH XÁC & KHUÔN MẪU', floors: 3, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 10, code: 'CASF', type: 'Kho Tower', name: 'CÔNG TY KEO & DUNG DỊCH CHUYÊN DỤNG', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 11, code: 'TIP', type: 'Kho stacker crane', name: 'CÔNG TY NHỰA CÔNG NGHIỆP', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 12, code: 'M&E', type: 'Kho Flat', name: 'CÔNG TY CƠ ĐIỆN', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang bảo trì' },
-        { id: 13, code: 'VPĐH', type: 'Kho Tower', name: 'VPĐH THACO INDUSTRIES', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 14, code: 'TOMC', type: 'Kho stacker crane', name: 'CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO (TOMC)', floors: 4, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 15, code: 'TCMC', type: 'Kho Flat', name: 'CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO CHU LAI (TCMC)', floors: 4, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 16, code: 'TSEC', type: 'Kho Tower', name: 'CÔNG TY THIẾT BỊ CHUYÊN DỤNG', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Ngưng sử dụng' },
-        { id: 17, code: 'CPM', type: 'Kho stacker crane', name: 'CÔNG TY BAO BÌ', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 18, code: 'TAI', type: 'Kho Flat', name: 'CÔNG TY NỘI THẤT Ô TÔ TẢI, BUS', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 19, code: 'CASC', type: 'Kho Tower', name: 'CÔNG TY NHÍP Ô TÔ', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 20, code: 'TPC', type: 'Kho stacker crane', name: 'CÔNG TY LINH KIỆN NHỰA', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 21, code: 'TACC', type: 'Kho Flat', name: 'CÔNG TY MÁY LẠNH Ô TÔ TẢI, BUS', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 22, code: 'AEE', type: 'Kho Tower', name: 'CÔNG TY TNHH SẢN XUẤT THIẾT BỊ ĐIỆN Ô TÔ', floors: 2, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 23, code: 'AUTOCOM', type: 'Kho stacker crane', name: 'CÔNG TY GHẾ Ô TÔ DU LỊCH', floors: 1, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Đang sử dụng' },
-        { id: 24, code: 'R&D', type: 'Kho Flat', name: 'TRUNG TÂM R&D - INDUSTRIES', floors: 7, totalLocations: Math.floor(Math.random() * 401) + 100, status: 'Mới tạo' }
+        { id: 1, code: 'CSC', type: 'Kho Tower', name: 'CÔNG TY THÉP', floors: 2, status: 'Đang sử dụng' },
+        { id: 2, code: 'INDUSTRIES', type: 'Kho stacker crane', name: 'CÔNG TY TNHH TẬP ĐOÀN CÔNG NGHIỆP TRƯỜNG HẢI', floors: 3, status: 'Đang sử dụng' },
+        { id: 3, code: 'VAM', type: 'Kho Flat', name: 'CÔNG TY TNHH SẢN XUẤT MÁY LẠNH Ô TÔ VINA', floors: 1, status: 'Đang bảo trì' },
+        { id: 4, code: 'TACB', type: 'Kho Tower', name: 'CÔNG TY LINH KIỆN KHUNG THÂN VỎ Ô TÔ', floors: 2, status: 'Đang sử dụng' },
+        { id: 5, code: 'LAPRO', type: 'Kho stacker crane', name: 'CÔNG TY BẢO HỘ LAO ĐỘNG', floors: 1, status: 'Ngưng sử dụng' },
+        { id: 6, code: 'TOMCDD', type: 'Kho Flat', name: 'CÔNG TY THIẾT BỊ CƠ KHÍ DÂN DỤNG', floors: 2, status: 'Mới tạo' },
+        { id: 7, code: 'TUC', type: 'Kho Tower', name: 'CÔNG TY THACO INDUSTRIES TẠI MỸ', floors: 2, status: 'Đang sử dụng' },
+        { id: 8, code: 'DA', type: 'Kho stacker crane', name: 'DỰ ÁN MỚI', floors: 2, status: 'Mới tạo' },
+        { id: 9, code: 'CTMC', type: 'Kho Flat', name: 'CÔNG TY CƠ KHÍ CHÍNH XÁC & KHUÔN MẪU', floors: 3, status: 'Đang sử dụng' },
+        { id: 10, code: 'CASF', type: 'Kho Tower', name: 'CÔNG TY KEO & DUNG DỊCH CHUYÊN DỤNG', floors: 1, status: 'Đang sử dụng' },
+        { id: 11, code: 'TIP', type: 'Kho stacker crane', name: 'CÔNG TY NHỰA CÔNG NGHIỆP', floors: 2, status: 'Đang sử dụng' },
+        { id: 12, code: 'M&E', type: 'Kho Flat', name: 'CÔNG TY CƠ ĐIỆN', floors: 2, status: 'Đang bảo trì' },
+        { id: 13, code: 'VPĐH', type: 'Kho Tower', name: 'VPĐH THACO INDUSTRIES', floors: 1, status: 'Đang sử dụng' },
+        { id: 14, code: 'TOMC', type: 'Kho stacker crane', name: 'CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO (TOMC)', floors: 4, status: 'Đang sử dụng' },
+        { id: 15, code: 'TCMC', type: 'Kho Flat', name: 'CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO CHU LAI (TCMC)', floors: 4, status: 'Đang sử dụng' },
+        { id: 16, code: 'TSEC', type: 'Kho Tower', name: 'CÔNG TY THIẾT BỊ CHUYÊN DỤNG', floors: 2, status: 'Ngưng sử dụng' },
+        { id: 17, code: 'CPM', type: 'Kho stacker crane', name: 'CÔNG TY BAO BÌ', floors: 1, status: 'Đang sử dụng' },
+        { id: 18, code: 'TAI', type: 'Kho Flat', name: 'CÔNG TY NỘI THẤT Ô TÔ TẢI, BUS', floors: 2, status: 'Đang sử dụng' },
+        { id: 19, code: 'CASC', type: 'Kho Tower', name: 'CÔNG TY NHÍP Ô TÔ', floors: 1, status: 'Đang sử dụng' },
+        { id: 20, code: 'TPC', type: 'Kho stacker crane', name: 'CÔNG TY LINH KIỆN NHỰA', floors: 2, status: 'Đang sử dụng' },
+        { id: 21, code: 'TACC', type: 'Kho Flat', name: 'CÔNG TY MÁY LẠNH Ô TÔ TẢI, BUS', floors: 1, status: 'Đang sử dụng' },
+        { id: 22, code: 'AEE', type: 'Kho Tower', name: 'CÔNG TY TNHH SẢN XUẤT THIẾT BỊ ĐIỆN Ô TÔ', floors: 2, status: 'Đang sử dụng' },
+        { id: 23, code: 'AUTOCOM', type: 'Kho stacker crane', name: 'CÔNG TY GHẾ Ô TÔ DU LỊCH', floors: 1, status: 'Đang sử dụng' },
+        { id: 24, code: 'R&D', type: 'Kho Flat', name: 'TRUNG TÂM R&D - INDUSTRIES', floors: 2, status: 'Mới tạo' }
     ];
 
+    // Initialize areas for mock data if not present
+    warehouses.forEach(w => {
+        if (!w.areas) {
+            w.areas = generateMockAreas(w.id, w.floors);
+        }
+        // Constraint: Total positions = sum of positions in areas
+        w.totalLocations = w.areas.reduce((sum, area) => sum + area.positions, 0);
+    });
+
     // Initialize from LocalStorage if available
-    const storedWarehouses = localStorage.getItem('wms_warehouses_v6');
+    const storedWarehouses = localStorage.getItem('wms_warehouses_v7');
     if (storedWarehouses) {
         try {
             const parsed = JSON.parse(storedWarehouses);
             if (Array.isArray(parsed) && parsed.length > 0) {
                 warehouses = parsed;
             } else {
-                localStorage.setItem('wms_warehouses_v6', JSON.stringify(warehouses));
+                localStorage.setItem('wms_warehouses_v7', JSON.stringify(warehouses));
             }
         } catch (e) {
-            localStorage.setItem('wms_warehouses_v6', JSON.stringify(warehouses));
+            localStorage.setItem('wms_warehouses_v7', JSON.stringify(warehouses));
         }
     } else {
-        localStorage.setItem('wms_warehouses_v6', JSON.stringify(warehouses));
+        localStorage.setItem('wms_warehouses_v7', JSON.stringify(warehouses));
     }
 
     let pendingToggleId = null;
@@ -145,22 +198,28 @@
 
         paginatedData.forEach((item, index) => {
             const tr = document.createElement('tr');
+            tr.setAttribute('data-id', item.id);
+            tr.className = 'warehouse-row';
+            
+            const totalPos = item.areas ? item.areas.reduce((sum, a) => sum + a.positions, 0) : (item.totalLocations || 0);
+
             tr.innerHTML = `
-                <td><input type="checkbox" class="row-checkbox" value="${item.id}" onchange="window.toggleBulkDeleteBtn()"></td>
+                <td><input type="checkbox" class="row-checkbox" value="${item.id}"></td>
                 <td style="text-align: center;">${startIndex + index + 1}</td>
                 <td style="text-align: center; font-weight: 600; color: #1e40af;">${item.code || '-'}</td>
                 <td style="color: #2563eb; cursor: pointer; font-weight: 500;">
-                    <span class="warehouse-name-cell ${item.status === 'Mới tạo' ? '' : 'disabled'}" 
-                          title="${item.status === 'Mới tạo' ? item.name : 'Chỉ có thể cấu hình kho mới tạo'}" 
-                          onclick="${item.status === 'Mới tạo' ? `window.configureWarehouse(${item.id})` : ''}">
-                        ${item.name}
-                    </span>
+                    <div class="warehouse-name-wrapper" onclick="window.toggleWarehouseDetail(${item.id}, this.closest('tr'))">
+                        <i class="fas fa-chevron-right expand-icon"></i>
+                        <span class="warehouse-name-cell" title="Click để xem chi tiết">
+                            ${item.name}
+                        </span>
+                    </div>
                 </td>
                 <td style="text-align: center;">
                     <span class="badge ${getTypeBadgeClass(item.type)}">${item.type}</span>
                 </td>
                 <td style="text-align: center;">${item.floors}</td>
-                <td style="text-align: center;">${item.totalLocations.toLocaleString()}</td>
+                <td style="text-align: center;">${totalPos.toLocaleString()}</td>
                 <td style="text-align: center;">
                     <span class="badge badge-status ${getStatusBadgeClass(item.status)}">${item.status}</span>
                 </td>
@@ -171,8 +230,8 @@
                              title="${item.status === 'Mới tạo' ? 'Cấu hình layout kho' : 'Chỉ có thể cấu hình kho mới tạo'}">
                              <i class="fas fa-cog"></i>
                         </div>
-                        <div class="action-icon" onclick="window.editWarehouse(${item.id})" title="Chỉnh sửa"><i class="fas fa-edit"></i></div>
-                        <div class="action-icon delete" onclick="window.deleteWarehouse(${item.id})" title="Xóa"><i class="fas fa-trash"></i></div>
+                        <div class="action-icon" onclick="window.editWarehouse(${item.id}, event)" title="Chỉnh sửa"><i class="fas fa-edit"></i></div>
+                        <div class="action-icon delete" onclick="window.deleteWarehouse(${item.id}, event)" title="Xóa"><i class="fas fa-trash"></i></div>
                     </div>
                 </td>
             `;
@@ -356,6 +415,80 @@
         document.getElementById('modal-type-menu').classList.remove('show');
     };
 
+    // --- DETAIL TABLE LOGIC ---
+    window.toggleWarehouseDetail = function (id, tr) {
+        const icon = tr.querySelector('.expand-icon');
+        const nextRow = tr.nextElementSibling;
+        
+        if (nextRow && nextRow.classList.contains('detail-row')) {
+            nextRow.remove();
+            icon.classList.remove('expanded');
+            tr.classList.remove('active');
+            return;
+        }
+
+        // Close other open details
+        document.querySelectorAll('.detail-row').forEach(row => row.remove());
+        document.querySelectorAll('.expand-icon').forEach(i => i.classList.remove('expanded'));
+        document.querySelectorAll('.warehouse-row').forEach(r => r.classList.remove('active'));
+
+        const item = warehouses.find(w => w.id === id);
+        if (!item) return;
+
+        const detailRow = document.createElement('tr');
+        detailRow.className = 'detail-row';
+        
+        const areas = item.areas || [];
+        let areasHtml = '';
+        
+        if (areas.length === 0) {
+            areasHtml = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #64748b;">Chưa có dữ liệu khu vực</td></tr>';
+        } else {
+            areas.forEach((area, idx) => {
+                areasHtml += `
+                    <tr>
+                        <td style="text-align: center;">${idx + 1}</td>
+                        <td style="text-align: center;">${area.floor}</td>
+                        <td style="font-weight: 500;">${area.areaCode}</td>
+                        <td>${area.areaName}</td>
+                        <td style="text-align: center; font-weight: 600;">${area.positions}</td>
+                        <td style="color: #1e40af;">${area.product}</td>
+                        <td style="text-align: center;">
+                            <span class="badge-spec spec-${area.specification.toLowerCase()}">${area.specification}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        detailRow.innerHTML = `
+            <td colspan="9" style="padding: 0;">
+                <div class="detail-container">
+                    <table class="detail-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px; text-align: center;">STT</th>
+                                <th style="width: 100px; text-align: center;">Tầng</th>
+                                <th style="width: 130px;">Mã khu vực</th>
+                                <th style="width: 180px;">Tên khu vực</th>
+                                <th style="width: 120px; text-align: center;">Số vị trí</th>
+                                <th style="width: 300px;">Sản phẩm</th>
+                                <th style="width: 110px; text-align: center;">Quy cách</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${areasHtml}
+                        </tbody>
+                    </table>
+                </div>
+            </td>
+        `;
+
+        tr.after(detailRow);
+        icon.classList.add('expanded');
+        tr.classList.add('active');
+    };
+
     // --- GLOBAL FUNCTIONS EXPOSED TO WINDOW ---
 
     window.openModal = function () {
@@ -373,6 +506,10 @@
         document.getElementById('statusFormGroup').style.display = 'none';
         document.getElementById('warehouseStatus').value = 'Mới tạo';
         document.getElementById('modal-status-display').textContent = 'Mới tạo';
+
+        // Set default floors for new warehouse
+        document.getElementById('floors').value = 2;
+        document.getElementById('floors').readOnly = true;
         
         modalTitle.textContent = 'Thêm mới Kho';
         warehouseModal.classList.add('show');
@@ -382,7 +519,8 @@
         if (warehouseModal) warehouseModal.classList.remove('show');
     };
 
-    window.editWarehouse = function (id) {
+    window.editWarehouse = function (id, event) {
+        if (event) event.stopPropagation();
         if (!warehouseModal) refreshElements();
         const item = warehouses.find(w => w.id === id);
         if (!item) return;
@@ -395,6 +533,14 @@
         document.getElementById('warehouseLength').value = item.warehouseLength || '';
         document.getElementById('warehouseWidth').value = item.warehouseWidth || '';
         
+        // Enforce 2 floors if status is 'Mới tạo'
+        if (item.status === 'Mới tạo') {
+            document.getElementById('floors').value = 2;
+            document.getElementById('floors').readOnly = true;
+        } else {
+            document.getElementById('floors').readOnly = false;
+        }
+
         // Show status field when editing
         document.getElementById('statusFormGroup').style.display = '';
         document.getElementById('warehouseStatus').value = item.status;
@@ -406,7 +552,8 @@
 
     let pendingDeleteId = null;
 
-    window.deleteWarehouse = function (id) {
+    window.deleteWarehouse = function (id, event) {
+        if (event) event.stopPropagation();
         pendingDeleteId = id;
         const item = warehouses.find(w => w.id === id);
         const msgEl = document.getElementById('confirm-delete-message');
@@ -436,11 +583,15 @@
         const id = document.getElementById('warehouseId').value;
         const type = document.getElementById('warehouseType').value;
         const name = document.getElementById('warehouseName').value;
-        const floors = parseInt(document.getElementById('floors').value) || 0;
+        let floors = parseInt(document.getElementById('floors').value) || 0;
         const warehouseLength = parseInt(document.getElementById('warehouseLength').value) || 0;
         const warehouseWidth = parseInt(document.getElementById('warehouseWidth').value) || 0;
-        // const totalLocations = parseInt(document.getElementById('totalLocations').value) || 0;
         const status = document.getElementById('warehouseStatus').value;
+
+        // Enforce 2 floors for 'Mới tạo'
+        if (status === 'Mới tạo') {
+            floors = 2;
+        }
 
         if (!type || !name) {
             alert('Vui lòng chọn Loại kho và Tên kho');
@@ -466,14 +617,17 @@
             // Update
             const index = warehouses.findIndex(w => w.id == id);
             if (index !== -1) {
-                // Keep existing totalLocations
-                const existingTotal = warehouses[index].totalLocations;
-                warehouses[index] = { ...warehouses[index], type, name, floors, warehouseLength, warehouseWidth, totalLocations: existingTotal, status };
+                // Keep existing totalLocations or update based on areas
+                const areas = warehouses[index].areas || generateMockAreas(id, floors);
+                const totalLocations = areas.reduce((sum, a) => sum + a.positions, 0);
+                warehouses[index] = { ...warehouses[index], type, name, floors, warehouseLength, warehouseWidth, totalLocations, status, areas };
             }
         } else {
             // Create
             const newId = warehouses.length > 0 ? Math.max(...warehouses.map(w => w.id)) + 1 : 1;
-            warehouses.push({ id: newId, type, name, floors, warehouseLength, warehouseWidth, totalLocations: 0, status: 'Mới tạo' });
+            const areas = generateMockAreas(newId, floors);
+            const totalLocations = areas.reduce((sum, a) => sum + a.positions, 0);
+            warehouses.push({ id: newId, type, name, floors, warehouseLength, warehouseWidth, totalLocations, status: 'Mới tạo', areas });
         }
 
         saveWarehouses();
