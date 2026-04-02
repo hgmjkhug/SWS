@@ -1,0 +1,139 @@
+<div class="bus-container">
+  <div class="module-header">
+    <div class="bus-search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        id="bus-search"
+        placeholder="Tìm kiếm theo tên loại xe..."
+        oninput="filterBuses()"
+      />
+    </div>
+    <div class="module-actions">
+      <button class="btn btn-danger" id="btn-bulk-delete" onclick="openBulkDeleteConfirm()" style="display: none;">
+        <i class="fas fa-trash-alt"></i> Xóa đã chọn (<span id="selected-count">0</span>)
+      </button>
+      <button class="btn btn-primary" onclick="openBusModal()">
+        <i class="fas fa-plus"></i> Thêm mới
+      </button>
+    </div>
+  </div>
+
+  <div class="table-scroll-container">
+    <div class="table-scroll-head">
+      <table class="data-table" style="margin-bottom: 0;">
+        <colgroup>
+          <col style="width: 45px;">
+          <col style="width: 80px;">
+          <col style="width: 150px;">
+          <col>
+          <col>
+          <col style="width: 140px;">
+        </colgroup>
+        <thead>
+          <tr>
+            <th class="text-center" style="width: 45px;">
+              <input type="checkbox" id="check-all" onclick="toggleAllBuses(this)" />
+            </th>
+            <th class="text-center" style="width: 80px;">STT</th>
+            <th style="width: 150px">Mã loại xe</th>
+            <th>Tên loại xe</th>
+            <th>Mô tả</th>
+            <th class="text-center" style="width: 140px;">Hành động</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <div class="table-scroll-body">
+      <table class="data-table" style="margin-top: 0;">
+        <!-- Define identical colgroup for alignment -->
+        <colgroup>
+          <col style="width: 45px;">
+          <col style="width: 80px;">
+          <col style="width: 150px;">
+          <col>
+          <col>
+          <col style="width: 140px;">
+        </colgroup>
+        <tbody id="bus-table-body">
+          <!-- Data rendered by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="pagination-bar">
+    <span id="bus-page-info">Hiển thị 0-0 trên tổng 0</span>
+    <div class="pagination-controls">
+      <button class="btn-page" onclick="prevPage()" id="btn-prev" disabled>
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <div id="bus-pages" class="pages-numbers">
+        <!-- Page numbers rendered by JS -->
+      </div>
+      <button class="btn-page" onclick="nextPage()" id="btn-next" disabled>
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Bus Modal -->
+<div class="modal-overlay" id="bus-modal">
+  <div class="modal-box" style="width: 600px; max-width: 95vw;">
+    <div class="modal-header">
+      <h3 class="modal-title" id="bus-modal-title">Thêm mới loại xe</h3>
+      <button class="modal-close-square" onclick="closeBusModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="bus-id" />
+      <div class="form-group">
+        <label>Mã loại xe <span class="text-danger">*</span></label>
+        <input type="text" id="bus-code" placeholder="Nhập mã loại xe (VD: B123)" />
+        <small class="error-msg" id="bus-code-error"></small>
+      </div>
+
+      <div class="form-group">
+        <label>Tên loại xe <span class="text-danger">*</span></label>
+        <input type="text" id="bus-name" placeholder="Nhập tên loại xe (VD: Bus 45 chỗ)" />
+        <small class="error-msg" id="bus-name-error"></small>
+      </div>
+
+      <div class="form-group">
+        <label>Mô tả</label>
+        <textarea
+          id="bus-desc"
+          rows="3"
+          placeholder="Mô tả chi tiết loại xe"
+        ></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeBusModal()">Hủy</button>
+      <button class="btn btn-primary" onclick="saveBus()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-confirm-modal" class="modal-confirm" style="display: none;">
+  <div class="confirm-content">
+    <div class="confirm-icon-box">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h3 class="confirm-title">Xác nhận xóa</h3>
+    <p class="confirm-message" id="confirm-message">
+      Bạn có chắc chắn muốn xóa loại xe này không?<br />Hành động này không thể hoàn tác.
+    </p>
+    <div class="confirm-actions">
+      <button onclick="closeDeleteConfirm()" class="btn btn-secondary">Hủy</button>
+      <button id="btn-confirm-delete" class="btn btn-danger">Xóa</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts & Styles -->
+<link rel="stylesheet" href="modules/bus/bus.css">
+<script src="modules/bus/bus.js"></script>

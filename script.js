@@ -192,6 +192,8 @@ function loadPage(title) {
         'Giao diện kho mới': 'modules/new-layout/new.html',
         'Quản lý lô hàng': 'modules/batch/batch.html',
         'Nhóm vật chứa': 'modules/master-data/container-group/container-group.html',
+        'Loại xe': 'modules/bus/bus.html',
+        'Dòng sản phẩm': 'modules/product-line/line.html',
         // add more mappings here as modules are created
     };
 

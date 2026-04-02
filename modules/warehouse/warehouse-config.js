@@ -38,8 +38,13 @@
     var floorTypeIdCounter = 1;
     var activeAreaId = null; // Track which area is being configured on the grid
     var activeLocationId = null; // Track which location type is being configured on the grid
+    var activeSubAreaId = null; // Track which sub-area is being configured on the grid
+    var activeParentAreaId = null; // Track parent of the active sub-area
     var selectedEqCodes = {}; // Track selected equipment for bulk assignment
     var currentAssignFloor = 'all'; // 'all' or floor number
+    var moduleData = [];
+    var moduleIdCounter = 1;
+    var activeModuleId = null;
 
 
     // Initialize selected as empty objects (using object instead of Set for ES5 compatibility)
@@ -453,6 +458,52 @@
             }
             renderLocationCards();
         }
+
+        // Sync back to Sub-area if we have an active sub-area
+        if (activeSubAreaId !== null && activeParentAreaId !== null) {
+            var parentAreaForSync = areaData.find(function(a) { return a.id === activeParentAreaId; });
+            if (parentAreaForSync && parentAreaForSync.subAreas) {
+                var subAreaForSync = parentAreaForSync.subAreas.find(function(sa) { return sa.id === activeSubAreaId; });
+                if (subAreaForSync) {
+                    // Convert grid IDs back to position labels
+                    subAreaForSync.positions = getSelectionKeys(config.selected).sort(function(a, b) {
+                        var partsA = a.split('-').map(Number);
+                        var partsB = b.split('-').map(Number);
+                        if (partsA[0] !== partsB[0]) return partsA[0] - partsB[0];
+                        return partsA[1] - partsB[1];
+                    }).map(function(id) {
+                        var pts = id.split('-').map(Number);
+                        return currentFloor + '-' + getColName(pts[1]) + (pts[0] + 1);
+                    });
+
+                    // Validation: Sub-area positions must belong to parent area positions
+                    var outOfBounds = subAreaForSync.positions.filter(function(pos) {
+                        return parentAreaForSync.positions.indexOf(pos) === -1;
+                    });
+                    
+                     subAreaForSync.isValid = (outOfBounds.length === 0);
+                }
+            }
+            renderAreaCards();
+        }
+
+        // Sync back to Module tab if we have an active module
+        if (activeModuleId !== null) {
+            for (var mm = 0; mm < moduleData.length; mm++) {
+                if (moduleData[mm].id === activeModuleId) {
+                    moduleData[mm].positions = getSelectionKeys(config.selected).sort(function(a, b) {
+                        var pa = a.split('-').map(Number), pb = b.split('-').map(Number);
+                        if (pa[0] !== pb[0]) return pa[0] - pb[0];
+                        return pa[1] - pb[1];
+                    }).map(function(key) {
+                        var pts = key.split('-').map(Number);
+                        return currentFloor + '-' + getColName(pts[1]) + (pts[0] + 1);
+                    });
+                    break;
+                }
+            }
+            renderModuleCards();
+        }
     }
 
     function handleMouseDown(e, r, c) {
@@ -496,6 +547,7 @@
         var areaObj = areaData[a];
         for (var p = 0; p < areaObj.positions.length; p++) {
             areaInfoMap[areaObj.positions[p]] = {
+                id: areaObj.id,
                 isActive: areaObj.isActive !== false
             };
         }
@@ -535,8 +587,14 @@
         if (isAreaAssigned) {
             node.classList.add('is-area');
             if (isAreaActive) {
-                node.style.backgroundColor = '#e0f2fe'; // Active blue
-                node.style.borderColor = '#bae6fd';
+                // Special highlighting if we are editing a sub-area of this area
+                if (activeSubAreaId !== null && (areaInfo.id === activeParentAreaId)) {
+                    node.style.backgroundColor = '#dcfce7'; // Light green for valid parent positions
+                    node.style.borderColor = '#86efac';
+                } else {
+                    node.style.backgroundColor = '#e0f2fe'; // Active blue
+                    node.style.borderColor = '#bae6fd';
+                }
             } else {
                 node.style.backgroundColor = '#F9FBFC'; // Inactive light gray
                 node.style.borderColor = '#e2e8f0';
@@ -603,6 +661,20 @@
         } else {
             node.classList.remove('has-goods');
         }
+
+        // 5. Check Assigned Module
+        moduleData.forEach(function(mod) {
+            if (mod.positions.indexOf(posLabelWithFloor) !== -1 || mod.positions.indexOf(posLabel) !== -1) {
+                node.classList.add('is-module');
+                if (activeModuleId === mod.id) {
+                    node.style.backgroundColor = '#fef3c7'; // Light amber for active module
+                    node.style.borderColor = '#fcd34d';
+                } else if (!node.classList.contains('is-area') && !node.classList.contains('is-location')) {
+                    node.style.backgroundColor = '#f1f5f9';
+                    node.style.borderColor = '#e2e8f0';
+                }
+            }
+        });
     }
     var countEl = document.getElementById('selectedCount');
     if (countEl) {
@@ -683,14 +755,14 @@
         // Save to parent warehouse store
         if (currentWarehouseId) {
             try {
-                var stored = localStorage.getItem('wms_warehouses_v6');
+                var stored = localStorage.getItem('wms_warehouses_v7');
                 if (stored) {
                     var list = JSON.parse(stored);
                     var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
                     if (idx !== -1) {
                         list[idx].totalLocations = totalLocs;
                         list[idx].configData = floorConfigs; 
-                        localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
+                        localStorage.setItem('wms_warehouses_v7', JSON.stringify(list));
                         alert('Đã lưu cấu hình kho thành công!\nTổng vị trí: ' + totalLocs.toLocaleString());
                     }
                 }
@@ -874,7 +946,7 @@
         currentWarehouseId = parseInt(idStr);
         
         try {
-            var stored = localStorage.getItem('wms_warehouses_v6');
+            var stored = localStorage.getItem('wms_warehouses_v7');
             if (stored) {
                 var list = JSON.parse(stored);
                 currentWarehouse = list.find(function(w) { return w.id === currentWarehouseId; }) || null;
@@ -926,10 +998,27 @@
         // Restore Area Data if available
         if (currentWarehouse && currentWarehouse.areas && currentWarehouse.areas.length > 0) {
             areaData = currentWarehouse.areas.map(function(area) {
-                // Ensure positions are preserved if they exist, or fallback to empty array
-                area.positions = area.positions || [];
+                // Ensure positions is an array (might be a number from mock data)
+                area.positions = Array.isArray(area.positions) ? area.positions : [];
+                if (area.subAreas) {
+                    area.subAreas.forEach(function(sa) {
+                        sa.positions = Array.isArray(sa.positions) ? sa.positions : [];
+                    });
+                }
                 return area;
             });
+
+            // If it's a NEW warehouse and hasn't been configured (all positions empty), keep only 1 card for current floor
+            if (currentWarehouse.status === 'Mới tạo') {
+                var isConfigured = areaData.some(function(a) { return a.positions.length > 0; });
+                if (!isConfigured) {
+                    areaData = [areaData[0]]; // Keep only the first one as a template
+                    areaData[0].areaCode = '';
+                    areaData[0].areaName = '';
+                    areaData[0].positions = [];
+                    areaData[0].floor = 'Tầng ' + currentFloor;
+                }
+            }
             // Update counter
             var maxAreaId = 0;
             areaData.forEach(function(a) { if (a.id > maxAreaId) maxAreaId = a.id; });
@@ -964,9 +1053,20 @@
             collapsed: false,
             isActive: true
         });
-        areaIdCounter = 2;
-    }
-    
+            areaIdCounter = 2;
+        }
+
+        // Ensure all areas have at least one subArea by default
+        areaData.forEach(function(a) {
+            if (!a.subAreas || a.subAreas.length === 0) {
+                a.subAreas = [
+                    { id: Date.now() + Math.floor(Math.random() * 1000), code: '', name: 'Khu vực con 1', positions: [], collapsed: false }
+                ];
+            }
+            a.subAreas.forEach(function(sa) {
+                if (sa.collapsed === undefined) sa.collapsed = false;
+            });
+        });
 
         // Restore Location Data if available
         if (currentWarehouse && currentWarehouse.locationTypes && currentWarehouse.locationTypes.length > 0) {
@@ -978,18 +1078,23 @@
             locationData.forEach(function(l) { if (l.id > maxLocId) maxLocId = l.id; });
             locationIdCounter = maxLocId + 1;
         } else {
-            // Default sample
-            locationData = [
-                {
-                    id: 1,
-                    code: 'VTL01',
-                    name: 'Vị trí lưu trữ tiêu chuẩn',
-                    image: '',
-                    positions: [],
-                    collapsed: false
-                }
-            ];
             locationIdCounter = 2;
+        }
+
+        // Restore Module Data if available
+        if (currentWarehouse && currentWarehouse.modules && currentWarehouse.modules.length > 0) {
+            moduleData = currentWarehouse.modules;
+            var maxModId = 0;
+            moduleData.forEach(function(m) { if (m.id > maxModId) maxModId = m.id; });
+            moduleIdCounter = maxModId + 1;
+            
+            var modInput = document.getElementById('initWarehouseModules');
+            if (modInput) modInput.value = moduleData.length;
+        } else {
+            // Default 4 modules if none exist
+            updateModuleDataCount(4);
+            // Ensure first module is expanded
+            if (moduleData.length > 0) moduleData[0].collapsed = false;
         }
     }
 
@@ -1056,12 +1161,21 @@
                 var val = parseInt(e.target.value) || 1;
                 if (currentWarehouse) {
                     currentWarehouse.floors = val;
-                    // Also update floorConfigs for new floors if they don't exist
                     for (var i = 1; i <= val; i++) {
                         if (!floorConfigs[i]) floorConfigs[i] = { rows: 18, cols: 27, selected: {}, goods: {}, name: '', height: '' };
                     }
                     renderFloorMenu();
                 }
+            };
+        }
+
+        // Module count input listener
+        var initModulesInput = document.getElementById('initWarehouseModules');
+        if (initModulesInput) {
+            initModulesInput.disabled = false; // Ensure it's editable
+            initModulesInput.oninput = function(e) {
+                var val = parseInt(e.target.value) || 0;
+                updateModuleDataCount(val);
             };
         }
 
@@ -1403,6 +1517,10 @@
             if (locTab) locTab.classList.add('active');
             // Remove inline display modification: document.querySelector('.grid-area').style.display = 'flex';
             renderLocationCards();
+        } else if (tab === 'module') {
+            var moduleTab = document.getElementById('tabContentModule');
+            if (moduleTab) moduleTab.classList.add('active');
+            renderModuleCards();
         }
         
         // Refresh grid visualization to show all assigned areas/locations
@@ -1435,10 +1553,303 @@
         if (!currentWarehouseId) return;
         try {
             var raw = localStorage.getItem('wms_eq_assign_v1_' + currentWarehouseId);
-            if (raw) { equipmentAssignment = JSON.parse(raw); }
-            else if (currentWarehouse && currentWarehouse.equipmentAssignment) { equipmentAssignment = currentWarehouse.equipmentAssignment; }
-            else { equipmentAssignment = {}; }
-        } catch(e) { equipmentAssignment = {}; }
+            if (raw) { 
+                // Migration: if we have old global assignment, we ignore it for per-module or try to map it?
+                // For now, we'll keep it as a fallback if no module-specific assignment exists.
+            }
+        } catch(e) { }
+    }
+
+    // ---- NEW MODULE MANAGEMENT ----
+    function updateModuleDataCount(count) {
+        if (count < 0) count = 0;
+        
+        // Adjust moduleData length
+        if (moduleData.length < count) {
+            while (moduleData.length < count) {
+                moduleData.push({
+                    id: moduleIdCounter++,
+                    code: 'MOD-' + (moduleData.length + 1),
+                    name: 'Module ' + (moduleData.length + 1),
+                    positions: [],
+                    equipmentAssignment: {},
+                    selectedEqCodes: {},
+                    eqFilterMode: 'all',
+                    isActive: true,
+                    collapsed: true
+                });
+            }
+        } else if (moduleData.length > count) {
+            moduleData = moduleData.slice(0, count);
+        }
+        
+        if (window.setConfigTab && document.querySelector('.segment-btn.active').innerText.trim() === 'Module') {
+            renderModuleCards();
+        }
+    }
+
+    function renderModuleCards() {
+        var container = document.getElementById('moduleCardList');
+        if (!container) return;
+        
+        if (moduleData.length === 0) {
+            container.innerHTML = '<div style="padding: 40px; text-align: center; color: #94a3b8;"><i class="fas fa-cubes" style="font-size: 40px; opacity: 0.2; margin-bottom: 15px; display: block;"></i>Chưa có module nào. Vui lòng nhập số module ở tab Khai báo.</div>';
+            return;
+        }
+
+        var html = '';
+        moduleData.forEach(function(mod, idx) {
+            var isCollapsed = mod.collapsed ? ' collapsed' : '';
+            var isActive = (activeModuleId === mod.id) ? ' active' : '';
+            
+            html += '<div class="area-card' + isCollapsed + isActive + '" data-module-id="' + mod.id + '">';
+            html += '<div class="card-number-label-container"><span class="card-number-label">Module ' + (idx + 1) + '</span></div>';
+            html += '<div class="area-card-body">';
+            
+            // Mã module
+            html += '<div class="area-field">';
+            html += '<span class="area-field-label">Mã module<span class="required-star">*</span></span>';
+            html += '<div class="area-field-value">';
+            html += '<input type="text" value="' + escapeHtml(mod.code) + '" onchange="updateModuleField(' + mod.id + ', \'code\', this.value)" placeholder="Nhập mã module...">';
+            html += '</div></div>';
+            
+            // Tên module
+            html += '<div class="area-field">';
+            html += '<span class="area-field-label">Tên module<span class="required-star">*</span></span>';
+            html += '<div class="area-field-value">';
+            html += '<input type="text" value="' + escapeHtml(mod.name) + '" onchange="updateModuleField(' + mod.id + ', \'name\', this.value)" placeholder="Nhập tên module...">';
+            html += '</div></div>';
+
+            // Vị trí
+            var modPositionsCount = mod.positions ? mod.positions.length : 0;
+            html += '<div class="area-field area-position">';
+            html += '<span class="area-field-label">Vị trí<span class="required-star">*</span></span>';
+            html += '<div class="area-field-value">';
+            html += '<label style="font-size: 13px; display: block; margin-bottom: 5px;">Đã chọn: <strong style="color: #076eb8">' + modPositionsCount + '</strong> vị trí</label>';
+            html += '<div class="area-tags" style="overflow-y: auto; max-height: 120px; cursor: pointer;" onclick="editModule(' + mod.id + ')">';
+            if (mod.positions && mod.positions.length > 0) {
+                mod.positions.forEach(function(pos) {
+                    html += '<span class="tag-item">' + pos + '<span class="tag-remove" onclick="removeModuleTag(' + mod.id + ', \'' + pos + '\', event)">&times;</span></span>';
+                });
+            } else {
+                html += '<span style="color: #94a3b8; font-size: 13px; font-style: italic; display: inline-block; padding: 5px;">Chưa chọn vị trí nào</span>';
+            }
+            html += '</div></div></div>';
+
+            // Sử dụng field (Moved from Area tab)
+            html += '<div class="area-field" style="align-items: center; margin-top: 0px;">';
+            html += '<span class="area-field-label" style="padding-top: 0;">Sử dụng<span style="color: red;">*</span></span>';
+            html += '<div class="area-field-value">';
+            html += '<label class="switch">';
+            html += '<input type="checkbox" ' + (mod.isActive !== false ? 'checked' : '') + ' onchange="toggleModuleActive(' + mod.id + ', this.checked)">';
+            html += '<span class="slider"></span>';
+            html += '</label>';
+            html += '</div></div>';
+
+            // THIẾT BỊ SECTION (Per Module)
+            html += '<div class="init-info-row init-equipment-section" style="padding: 10px 0 0 0; border-top: 1px solid #f1f5f9; margin-top: 0px;">';
+            html += '<label class="area-field-label" style="width: 100px;">Thiết bị <span style="color: red;">*</span></label>';
+            html += '<div class="init-equipment-container" style="flex: 1;">';
+            
+            // Search & Filters
+            html += '  <div class="eq-search-bar" style="margin-bottom: 10px;">';
+            html += '    <i class="fas fa-search" style="color:#94a3b8; font-size:12px;"></i>';
+            html += '    <input type="text" id="eqSearchInput-' + mod.id + '" placeholder="Tìm thiết bị..." oninput="renderModuleEqList(' + mod.id + ')" style="font-size: 13px;">';
+            html += '  </div>';
+            
+            html += '  <div class="eq-filter-tabs" style="margin-bottom: 10px;">';
+            ['all', 'nhap', 'xuat', 'danang', 'unset'].forEach(function(f) {
+                var label = f === 'all' ? 'Tất cả' : f === 'unset' ? 'Chưa gán' : EQ_LABELS[f];
+                var active = mod.eqFilterMode === f ? ' active' : '';
+                html += '<button class="eq-filter-btn' + active + '" onclick="setModuleEqFilter(' + mod.id + ', \'' + f + '\')" style="font-size: 11px; padding: 4px 8px;">' + label + '</button>';
+            });
+            html += '  </div>';
+
+            // Device list
+            html += '  <div class="eq-device-list" id="eqDeviceList-' + mod.id + '" style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;">';
+            // Populated by renderModuleEqList
+            html += '  </div>';
+
+            html += '</div></div>'; // end equipment section
+
+            html += '</div>'; // end area-card-body
+            
+            // Actions
+            html += '<div class="area-card-actions">';
+            html += '<button class="area-action-btn' + (activeModuleId === mod.id ? ' active' : '') + '" onclick="editModule(' + mod.id + ')" title="Chọn vị trí trên bản đồ"><i class="fas fa-th"></i></button>';
+            html += '</div>';
+
+            // Collapse Toggle
+            html += '<div class="location-toggle" onclick="toggleModuleCollapse(' + mod.id + ')">';
+            html += '<i class="fas fa-chevron-down"></i>';
+            html += '</div>';
+
+            html += '</div>'; // end area-card
+        });
+
+        container.innerHTML = html;
+        
+        // Render equipment lists for all expanded modules
+        moduleData.forEach(function(mod) {
+            if (!mod.collapsed) {
+                renderModuleEqList(mod.id);
+            }
+        });
+    }
+
+    function renderModuleEqList(modId) {
+        var mod = moduleData.find(function(m) { return m.id === modId; });
+        if (!mod) return;
+        
+        var container = document.getElementById('eqDeviceList-' + modId);
+        if (!container) return;
+        
+        var searchEl = document.getElementById('eqSearchInput-' + modId);
+        var searchTerm = searchEl ? searchEl.value.toLowerCase().trim() : '';
+        var html = '';
+
+        equipmentData.forEach(function(group, gIdx) {
+            var filteredItems = group.items.filter(function(item) {
+                if (searchTerm && item.toLowerCase().indexOf(searchTerm) === -1) return false;
+                var assigned = mod.equipmentAssignment[item] || null;
+                if (mod.eqFilterMode === 'all') return true;
+                if (mod.eqFilterMode === 'unset') return !assigned;
+                return assigned === mod.eqFilterMode;
+            });
+            
+            if (filteredItems.length === 0) return;
+
+            html += '<div class="eq-group-header" style="font-size: 12px; padding: 6px 10px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">';
+            html += '<span>' + group.group + '</span>';
+            html += '<span style="background: #fff; padding: 1px 6px; border-radius: 10px; font-size: 10px; color: #64748b;">' + filteredItems.length + '</span></div>';
+            
+            filteredItems.forEach(function(item) {
+                var assigned = mod.equipmentAssignment[item] || null;
+                html += '<div class="eq-device-row" style="padding: 6px 10px; border-bottom: 1px dotted #e2e8f0; display: flex; align-items: center; gap: 8px;">';
+                html += '<span style="flex: 1; font-size: 13px; font-weight: 500; color: #1e293b;">' + item + '</span>';
+                html += '<div class="eq-type-pills" style="display: flex; gap: 4px;">';
+                ['nhap', 'xuat', 'danang'].forEach(function(type) {
+                    var isActive = assigned === type;
+                    var colors = {
+                        nhap: { bg: '#fff7ed', text: '#c2410c', border: '#ffedd5' },
+                        xuat: { bg: '#f0fdf4', text: '#15803d', border: '#dcfce7' },
+                        danang: { bg: '#eff6ff', text: '#1d4ed8', border: '#dbeafe' }
+                    }[type];
+                    var style = isActive ? 
+                        ('background: ' + colors.bg + '; color: ' + colors.text + '; border: 1px solid ' + colors.text + ';') : 
+                        ('background: #fff; color: #94a3b8; border: 1px solid #e2e8f0;');
+                    html += '<button onclick="assignModuleEq(' + modId + ', \'' + item + '\', \'' + type + '\')" style="padding: 2px 6px; font-size: 10px; border-radius: 4px; cursor: pointer; ' + style + ' transition: all 0.2s;">' + EQ_LABELS[type] + '</button>';
+                });
+                html += '</div></div>';
+            });
+        });
+
+        if (!html) html = '<div style="padding: 15px; text-align: center; color: #94a3b8; font-size: 12px;">Không có thiết bị phù hợp</div>';
+        container.innerHTML = html;
+    }
+
+    window.assignModuleEq = function(modId, item, type) {
+        var mod = moduleData.find(function(m) { return m.id === modId; });
+        if (!mod) return;
+        
+        if (mod.equipmentAssignment[item] === type) {
+            delete mod.equipmentAssignment[item];
+        } else {
+            mod.equipmentAssignment[item] = type;
+        }
+        renderModuleEqList(modId);
+    };
+
+    window.setModuleEqFilter = function(modId, filter) {
+        var mod = moduleData.find(function(m) { return m.id === modId; });
+        if (mod) {
+            mod.eqFilterMode = filter;
+            renderModuleCards();
+        }
+    };
+
+    function updateModuleField(id, field, value) {
+        var mod = moduleData.find(function(m) { return m.id === id; });
+        if (mod) mod[field] = value;
+    }
+
+    function toggleModuleCollapse(id) {
+        moduleData.forEach(function(mod) {
+            if (mod.id === id) mod.collapsed = !mod.collapsed;
+        });
+        renderModuleCards();
+    }
+
+    window.toggleModuleActive = function(id, isActive) {
+        var mod = moduleData.find(function(m) { return m.id === id; });
+        if (mod) mod.isActive = isActive;
+    };
+
+    window.toggleModuleActive = function(id, isActive) {
+        moduleData.forEach(function(mod) {
+            if (mod.id === id) mod.isActive = isActive;
+        });
+    };
+
+    function editModule(id) {
+        activeModuleId = (activeModuleId === id) ? null : id;
+        
+        // Reset grid selection
+        var config = floorConfigs[currentFloor];
+        if (config) config.selected = {};
+        
+        if (activeModuleId !== null) {
+            var mod = moduleData.find(function(m) { return m.id === activeModuleId; });
+            if (mod && mod.positions) {
+                // Pre-select positions on grid if they belong to current floor
+                mod.positions.forEach(function(pos) {
+                    if (pos.indexOf(currentFloor + '-') === 0) {
+                        var idOnGrid = pos.replace(currentFloor + '-', '').split(':'); // Need to handle parsing label to r-c
+                        // Actually, I should store r-c IDs or have a reverse lookup
+                    }
+                });
+            }
+        }
+        
+        renderModuleCards();
+        refreshVisuals();
+    }
+
+    function removeModuleTag(modId, pos, event) {
+        if (event) event.stopPropagation();
+        var mod = moduleData.find(function(m) { return m.id === modId; });
+        if (mod) {
+            mod.positions = mod.positions.filter(function(p) { return p !== pos; });
+            renderModuleCards();
+            refreshVisuals();
+        }
+    }
+
+    function saveModuleTab() {
+        if (!currentWarehouse) {
+            alert('Chưa chọn kho để lưu!');
+            return;
+        }
+        
+        currentWarehouse.modules = JSON.parse(JSON.stringify(moduleData));
+        
+        try {
+            var stored = localStorage.getItem('wms_warehouses_v7');
+            if (stored) {
+                var list = JSON.parse(stored);
+                var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
+                if (idx !== -1) {
+                    list[idx] = currentWarehouse;
+                    localStorage.setItem('wms_warehouses_v7', JSON.stringify(list));
+                }
+            }
+        } catch (e) {
+            alert('Lỗi lưu module: ' + e.message);
+            return;
+        }
+        
+        if (window.showToast) window.showToast('Đã lưu cấu hình module thành công!', 'success');
+        else alert('Đã lưu cấu hình module thành công!');
     }
 
     // ---- Filter ----
@@ -1704,41 +2115,46 @@
     var warehouseType = 'Kho Tower';
 
     var productData = [
-        { 
-            group: 'Kim khí & Sản phẩm phụ', 
-            items: [
-                { code: 'KK-001', name: 'Bulong Inox 304 M8x20', quyTac: 'FIFO' },
-                { code: 'KK-002', name: 'Đai ốc M8', quyTac: 'FIFO' },
-                { code: 'KK-003', name: 'Vít tự khoan', quyTac: 'FEFO' },
-                { code: 'KK-004', name: 'Nẹp nhôm chữ V', quyTac: 'LIFO' }
-            ] 
-        },
-        { 
-            group: 'Dụng cụ cắt gọt', 
-            items: [
-                { code: 'DC-001', name: 'Mũi khoan bê tông 8mm', quyTac: 'FIFO' },
-                { code: 'DC-002', name: 'Lưỡi cưa sắt', quyTac: 'FIFO' },
-                { code: 'DC-003', name: 'Mũi phay ngón 10mm', quyTac: 'FEFO' },
-                { code: 'DC-004', name: 'Đá mài Hải Dương', quyTac: 'LIFO' }
-            ] 
-        },
-        { 
-            group: 'Dụng cụ cầm tay', 
-            items: [
-                { code: 'CT-001', name: 'Kìm cắt Stanley', quyTac: 'FIFO' },
-                { code: 'CT-002', name: 'Mỏ lết 10 inch', quyTac: 'FIFO' },
-                { code: 'CT-003', name: 'Tua vít bake PH2', quyTac: 'LIFO' }
-            ] 
-        },
-        { 
-            group: 'Sản phẩm Hàn', 
-            items: [
-                { code: 'VH-001', name: 'Que hàn Kim Tín 3.2mm', quyTac: 'FIFO' },
-                { code: 'VH-002', name: 'Kính hàn điện tử', quyTac: 'FEFO' },
-                { code: 'VH-003', name: 'Máy hàn Inverter 200A', quyTac: 'LIFO' }
-            ] 
-        }
-    ];
+  {
+    group: 'Chuối Trung Quốc/ Chinese bananas',
+    items: [
+      { code: 'A456', name: 'Chuối Trung Quốc/Chinese bananas - A456' },
+      { code: 'A789', name: 'Chuối Trung Quốc/Chinese bananas - A789' },
+      { code: 'B456', name: 'Chuối Trung Quốc/Chinese bananas - B456' },
+      { code: 'B789', name: 'Chuối Trung Quốc/Chinese bananas - B789' },
+      { code: 'CL', name: 'Chuối Trung Quốc/Chinese bananas - CL' },
+      { code: '16CP', name: 'Chuối Trung Quốc/Chinese bananas - 16CP' },
+      { code: 'CP', name: 'Chuối Trung Quốc/Chinese bananas - CP' }
+    ]
+  },
+  {
+    group: 'Chuối Nhật Bản/Japanese bananas',
+    items: [
+      { code: '14CP', name: 'Chuối Nhật Bản/Japanese bananas - 14CP' },
+      { code: '16CP', name: 'Chuối Nhật Bản/Japanese bananas - 16CP' },
+      { code: '26CP', name: 'Chuối Nhật Bản/Japanese bananas - 26CP' },
+      { code: '35CLD', name: 'Chuối Nhật Bản/Japanese bananas - 35CLD' },
+      { code: '18CP', name: 'Chuối Nhật Bản/Japanese bananas - 18CP' },
+      { code: '28CP', name: 'Chuối Nhật Bản/Japanese bananas - 28CP' },
+      { code: '30CP', name: 'Chuối Nhật Bản/Japanese bananas - 30CP' },
+      { code: '36CP', name: 'Chuối Nhật Bản/Japanese bananas - 36CP' },
+      { code: '38CP', name: 'Chuối Nhật Bản/Japanese bananas - 38CP' },
+      { code: '40CP', name: 'Chuối Nhật Bản/Japanese bananas - 40CP' },
+      { code: '43CP', name: 'Chuối Nhật Bản/Japanese bananas - 43CP' },
+      { code: 'B5', name: 'Chuối Nhật Bản/Japanese bananas - B5' },
+      { code: 'B6', name: 'Chuối Nhật Bản/Japanese bananas - B6' },
+      { code: '33CP', name: 'Chuối Nhật Bản/Japanese bananas - 33CP' },
+      { code: '28LY', name: 'Chuối Nhật Bản/Japanese bananas - 28LY' },
+      { code: '35CP', name: 'Chuối Nhật Bản/Japanese bananas - 35CP' },
+      { code: 'RCL', name: 'Chuối Nhật Bản/Japanese bananas - RCL' },
+      { code: '6 NẢI', name: 'Chuối Nhật Bản/Japanese bananas - 6 NẢI' },
+      { code: '7 NẢI', name: 'Chuối Nhật Bản/Japanese bananas - 7 NẢI' },
+      { code: '8 NẢI', name: 'Chuối Nhật Bản/Japanese bananas - 8 NẢI' },
+      { code: '10CP', name: 'Chuối Nhật Bản/Japanese bananas - 10CP' },
+      { code: '28H', name: 'Chuối Nhật Bản/Japanese bananas - 28H' }
+    ]
+  }
+];
 
     function populateInitTab() {
         if (!currentWarehouse) return;
@@ -1978,6 +2394,21 @@
         if (floorsEl) currentWarehouse.floors = parseInt(floorsEl.value) || 1;
         if (lengthEl) currentWarehouse.warehouseLength = parseInt(lengthEl.value) || 27;
         if (widthEl) currentWarehouse.warehouseWidth = parseInt(widthEl.value) || 18;
+        
+        try {
+            var stored = localStorage.getItem('wms_warehouses_v7');
+            if (stored) {
+                var list = JSON.parse(stored);
+                var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
+                if (idx !== -1) {
+                    list[idx].locationTypes = floorTypeData;
+                    localStorage.setItem('wms_warehouses_v7', JSON.stringify(list));
+                }
+            }
+        } catch (e) {
+            alert('Lỗi lưu loại vị trí: ' + e.message);
+        }
+
         currentWarehouse.warehouseType = warehouseType;
         currentWarehouse.equipmentAssignment = equipmentAssignment;
         saveEqAssignmentToStorage();
@@ -2045,6 +2476,29 @@
             html += '<div class="area-card' + isCollapsed + isActive + isReadonly + '" data-area-id="' + area.id + '">';
             html += '<div class="card-number-label-container"><span class="card-number-label">Khu vực ' + (i + 1) + '</span></div>';
             html += '<div class="area-card-body">';
+
+            // Module (New field)
+            var selectedModule = area.selectedModule || null;
+            var displayModule = selectedModule ? selectedModule.code + ' - ' + selectedModule.name : '';
+            var hasModuleSelection = selectedModule ? ' has-selection' : '';
+
+            html += '<div class="init-info-row init-equipment-section" style="padding: 0; margin-bottom: 8px;">';
+            html += '<label class="area-field-label" style="padding-top: 10px; width: 100px;">Module<span style="color: red;">*</span></label>';
+            html += '<div class="init-equipment-container" style="flex: 1;">';
+            html += '  <div class="init-equipment-search-wrapper' + hasModuleSelection + '">';
+            html += '    <div class="init-equipment-search">';
+            html += '      <i class="fas fa-search search-icon"></i>';
+            html += '      <input type="text" id="areaModuleSearch-' + area.id + '" value="' + displayModule + '" placeholder="Chọn module..." onfocus="showAreaModuleList(' + area.id + ')" oninput="filterAreaModuleList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selectedModule ? 'readonly' : '') + '>';
+            
+            if (selectedModule && !isReadonly) {
+                html += '      <i class="fas fa-times clear-icon" title="Xóa" onclick="removeAreaModule(' + area.id + ')"></i>';
+            }
+            html += '      <i class="fas fa-chevron-down toggle-icon" onclick="' + (isReadonly ? '' : 'toggleAreaModuleList(' + area.id + ')') + '"></i>';
+            html += '    </div>';
+            html += '    <div class="init-equipment-list" id="areaModuleList-' + area.id + '" style="max-height: 200px; overflow-y: auto;"></div>';
+            html += '  </div>';
+            html += '</div>';
+            html += '</div>';
 
             // Loại khu vực (Searchable combobox)
             var selectedAreaType = area.selectedAreaType || null;
@@ -2123,17 +2577,14 @@
             var hasSelectionClass = selectedProduct ? ' has-selection' : '';
 
             html += '<div class="init-info-row init-equipment-section" style="padding: 0;' + (shouldShowConditionalFields ? '' : ' display: none;') + '">';
-            html += '<label class="area-field-label" style="padding-top: 10px;">Sản phẩm <span style="color: red;">*</span></label>';
+            html += '<label class="area-field-label" style="padding-top: 10px;">Nhóm sản phẩm <span style="color: red;">*</span></label>';
             html += '<div class="init-equipment-container">';
             html += '  <div class="init-equipment-search-wrapper' + hasSelectionClass + '">';
             html += '    <div class="init-equipment-search">';
             html += '      <i class="fas fa-search search-icon"></i>';
-            html += '      <input type="text" id="areaProductSearch-' + area.id + '" value="' + displayValue + '" placeholder="Tìm theo mã hoặc tên sản phẩm..." onfocus="showAreaProductList(' + area.id + ')" oninput="filterAreaProductList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selectedProduct ? 'readonly' : '') + '>';
+            html += '      <input type="text" id="areaProductSearch-' + area.id + '" value="' + displayValue + '" placeholder="Tìm theo mã hoặc tên nhóm sản phẩm..." onfocus="showAreaProductList(' + area.id + ')" oninput="filterAreaProductList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selectedProduct ? 'readonly' : '') + '>';
             
-            if (selectedProduct) {
-                var badgeClass = 'badge-' + (selectedProduct.quyTac || 'FIFO').toLowerCase();
-                html += '      <span class="badge-spec ' + badgeClass + '">' + (selectedProduct.quyTac || 'FIFO') + '</span>';
-            }
+            // No rule badge for main product group as requested
 
             if (selectedProduct && !isReadonly) {
                 html += '      <i class="fas fa-times clear-icon" title="Xóa sản phẩm" onclick="removeAreaProduct(' + area.id + ', 0)"></i>';
@@ -2162,15 +2613,107 @@
         }
         html += '</div></div></div>';
 
-            // Sử dụng field (Below Vị trí)
-            html += '<div class="area-field" style="align-items: center;">';
-            html += '<span class="area-field-label" style="padding-top: 0;">Sử dụng<span style="color: red;">*</span></span>';
-            html += '<div class="area-field-value">';
-            html += '<label class="switch">';
-            html += '<input type="checkbox" ' + (area.isActive !== false ? 'checked' : '') + ' onchange="toggleAreaActive(' + area.id + ', this.checked)" ' + (isReadonly ? 'disabled' : '') + '>';
-            html += '<span class="slider"></span>';
-            html += '</label>';
-            html += '</div></div>';
+
+            // --- Sub-area Section (Moved here) ---
+            html += '<div class="sub-area-section">';
+            html += '  <div class="sub-area-header">';
+            html += '    <div class="sub-area-title"><i class="fas fa-sitemap"></i> Khu vực con</div>';
+            html += '    <button class="btn-add-sub-area" onclick="' + (isReadonly ? '' : 'addSubArea(' + area.id + ')') + '"><i class="fas fa-plus"></i> Thêm khu vực con</button>';
+            html += '  </div>';
+            
+            html += '  <div class="sub-area-accordion">';
+            if (area.subAreas && area.subAreas.length > 0) {
+                for (var sIdx = 0; sIdx < area.subAreas.length; sIdx++) {
+                    var sa = area.subAreas[sIdx];
+                    var saOpen = sa.collapsed === false ? ' open' : '';
+                    var saActive = (activeSubAreaId === sa.id && activeParentAreaId === area.id) ? ' active' : '';
+                    
+                    html += '<div class="sub-area-item' + saOpen + saActive + '">';
+                    html += '  <div class="sub-area-item-header" onclick="toggleSubAreaAccordion(' + area.id + ', ' + sa.id + ')">';
+                    html += '    <div class="sub-area-item-title">' + (sa.name || 'Khu vực con ' + (sIdx + 1)) + (sa.isValid === false ? ' <i class="fas fa-exclamation-circle" style="color:#ef4444;" title="Vị trí phải thuộc khu vực cha"></i>' : '') + '</div>';
+                    html += '    <i class="fas fa-chevron-down sub-area-chevron"></i>';
+                    html += '  </div>';
+                    
+                    html += '  <div class="sub-area-item-content">';
+                    
+                    // Row 1: Code & Name
+                    html += '    <div class="sub-area-row">';
+                    html += '      <div class="sub-area-field">';
+                    html += '        <label class="sub-area-field-label">Mã khu vực con</label>';
+                    html += '        <div class="sub-area-field-value"><input type="text" value="' + escapeHtml(sa.code || '') + '" oninput="updateSubAreaField(' + area.id + ', ' + sa.id + ', \'code\', this.value)" placeholder="Nhập mã..." ' + (isReadonly ? 'disabled' : '') + '></div>';
+                    html += '      </div>';
+                    html += '      <div class="sub-area-field">';
+                    html += '        <label class="sub-area-field-label">Tên khu vực con</label>';
+                    html += '        <div class="sub-area-field-value"><input type="text" value="' + escapeHtml(sa.name || '') + '" oninput="updateSubAreaField(' + area.id + ', ' + sa.id + ', \'name\', this.value)" placeholder="Nhập tên..." ' + (isReadonly ? 'disabled' : '') + '></div>';
+                    html += '      </div>';
+                    html += '    </div>';
+
+                    // Row 2: Product (Combobox)
+                    var saProd = sa.selectedProduct || null;
+                    var saProdDisplay = saProd ? '[' + saProd.code + '] ' + saProd.name : '';
+                    html += '    <div class="sub-area-field">';
+                    html += '      <label class="sub-area-field-label">Sản phẩm</label>';
+                    html += '      <div class="init-equipment-search-wrapper' + (saProd ? ' has-selection' : '') + '">';
+                    html += '        <div class="init-equipment-search" style="height:32px;">';
+                    html += '          <i class="fas fa-search search-icon" style="font-size:11px;"></i>';
+                    html += '          <input type="text" id="saProductSearch-' + area.id + '-' + sa.id + '" value="' + saProdDisplay + '" placeholder="Tìm sản phẩm..." onfocus="showSubAreaProductList(' + area.id + ', ' + sa.id + ')" oninput="filterSubAreaProductList(' + area.id + ', ' + sa.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (saProd ? 'readonly' : '') + ' style="font-size:12px; height:30px;">';
+                    if (saProd && !isReadonly) {
+                        var saBadgeClass = 'badge-' + (saProd.quyTac || 'FIFO').toLowerCase();
+                        html += '          <span class="badge-spec ' + saBadgeClass + '" style="margin-right: 5px;">' + (saProd.quyTac || 'FIFO') + '</span>';
+                        html += '          <i class="fas fa-times clear-icon" onclick="removeSubAreaProduct(' + area.id + ', ' + sa.id + ')" style="font-size:10px;"></i>';
+                    }
+                    html += '          <i class="fas fa-chevron-down toggle-icon" onclick="' + (isReadonly ? '' : 'toggleSubAreaProductList(' + area.id + ', ' + sa.id + ')') + '" style="font-size:10px;"></i>';
+                    html += '        </div>';
+                    html += '        <div class="init-equipment-list" id="saProductList-' + area.id + '-' + sa.id + '" style="max-height: 150px; border-radius:4px;"></div>';
+                    html += '      </div>';
+                    html += '    </div>';
+
+                    // Row 3: Positions (Redesigned)
+                    var saPosCount = sa.positions ? sa.positions.length : 0;
+                    html += '    <div class="sub-area-field">';
+                    html += '      <div class="sub-area-pos-header">';
+                    html += '        <div class="sub-area-pos-title">Vị trí (' + saPosCount + ')</div>';
+                    if (!isReadonly) {
+                        html += '        <div class="sub-area-pos-actions">';
+                        html += '          <button class="btn-edit-sub-pos" onclick="editSubArea(' + area.id + ', ' + sa.id + ')" title="Chọn vị trí"><i class="fas fa-pen"></i></button>';
+                        html += '        </div>';
+                    }
+                    html += '      </div>';
+                    html += '      <div class="sub-area-tags-container">';
+                    html += '        <div class="sub-area-tags-list">';
+                    if (sa.positions && sa.positions.length > 0) {
+                        for (var k = 0; k < sa.positions.length; k++) {
+                            html += '<span class="sub-area-tag">' + sa.positions[k] + '<span class="sub-area-tag-remove" onclick="' + (isReadonly ? '' : 'removeSubAreaTag(' + area.id + ', ' + sa.id + ', \'' + sa.positions[k] + '\')') + '">&times;</span></span>';
+                        }
+                    } else {
+                        html += '<span style="color:#94a3b8; font-size:11px; font-style:italic;">Chưa chọn</span>';
+                    }
+                    html += '        </div>';
+                    if (sa.positions && sa.positions.length > 0 && !isReadonly) {
+                        html += '        <div class="sub-area-footer">';
+                        html += '          <button class="btn-clear-sub-pos" onclick="clearSubAreaPositions(' + area.id + ', ' + sa.id + ')"><i class="fas fa-trash-alt"></i> Xóa tất cả</button>';
+                        html += '        </div>';
+                    }
+                    html += '      </div>';
+                    if (sa.isValid === false) {
+                        html += '      <div style="font-size:10px; color:#ef4444; margin-top:4px;">Vị trí con phải thuộc khu vực cha!</div>';
+                    }
+                    html += '    </div>';
+                    
+                    html += '  </div>'; // end item-content
+
+                    // Delete action inside accordion
+                    html += '  <div class="sub-area-item-actions">';
+                    html += '    <button class="btn-delete-sub-item" onclick="deleteSubArea(' + area.id + ', ' + sa.id + ')"><i class="fas fa-trash-alt"></i> Xóa khu vực con</button>';
+                    html += '  </div>';
+
+                    html += '</div>'; // end sub-area-item
+                }
+            } else {
+                html += '<div style="text-align:center; padding:10px; font-size:12px; color:#94a3b8; font-style:italic; border:1px dashed #e2e8f0; border-radius:6px;">Chưa có khu vực con</div>';
+            }
+            html += '  </div>'; // end sub-area-accordion
+            html += '</div>'; // end sub-area-section
 
         // Chiều nhập
         var directionOptions = [
@@ -2219,7 +2762,9 @@
             html += '<button class="area-action-btn delete" onclick="deleteArea(' + area.id + ')" title="Xóa"><i class="fas fa-trash-alt"></i></button>';
             
             html += '</div>'; // end area-card-actions
-            
+
+
+
             html += '</div>'; // end area-card
         }
         
@@ -2271,6 +2816,10 @@
             positions: [],
             direction: '',
             rule: 'FIFO',
+            subAreas: [
+                { id: Date.now(), code: '', name: 'Khu vực con 1', positions: [], collapsed: false }
+            ],
+            selectedModule: null,
             collapsed: false,
             isActive: true
         });
@@ -2526,10 +3075,8 @@
             
             list.innerHTML = results.map(function(item) {
                 var isSelected = selectedCodes.indexOf(item.code) > -1;
-                var badgeClass = 'badge-' + (item.quyTac || 'FIFO').toLowerCase();
                 return '<div class="item ' + (isSelected ? 'selected' : '') + '" onclick="selectAreaProduct(' + areaId + ', \'' + item.code + '\', \'' + item.name + '\')">' + 
                        '[' + item.code + '] ' + item.name + 
-                       '<span class="badge-spec ' + badgeClass + '">' + (item.quyTac || 'FIFO') + '</span>' +
                        (isSelected ? ' <i class="fas fa-check" style="color: #076EB8; margin-left: 8px;"></i>' : '') +
                        '</div>';
             }).join('');
@@ -2547,10 +3094,8 @@
             productData.map(function(group, gIdx) {
                 var itemsHtml = group.items.map(function(item) {
                     var isSelected = selectedCodes.indexOf(item.code) > -1;
-                    var badgeClass = 'badge-' + (item.quyTac || 'FIFO').toLowerCase();
                     return '<div class="accordion-item ' + (isSelected ? 'selected' : '') + '" style="display:flex;align-items:center;gap:6px;" onclick="selectAreaProduct(' + areaId + ', \'' + item.code + '\', \'' + item.name + '\'); event.stopPropagation();">' +
                            '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">[' + item.code + '] ' + item.name + '</span>' +
-                           '<span class="badge-spec ' + badgeClass + '">' + (item.quyTac || 'FIFO') + '</span>' +
                            (isSelected ? '<i class="fas fa-check" style="color:#076EB8;font-size:10px;flex-shrink:0;margin-left:auto;"></i>' : '') +
                            '</div>';
                 }).join('');
@@ -2641,7 +3186,9 @@
      */
     function editArea(areaId) {
         activeAreaId = areaId;
-        activeLocationId = null; // Clear location conflict
+        activeLocationId = null; 
+        activeSubAreaId = null;
+        activeParentAreaId = null;
         
         // Find the area
         var area = null;
@@ -2658,8 +3205,9 @@
             config.selected = {};
             
             // Load types from tags back to selection
-            // Positions are stored as "floor-ColRow" (e.g. "1-A1") or legacy "ColRow" (e.g. "A1")
-            area.positions.forEach(function(pos) {
+            // Positions should be an array; safety check added
+            var posArray = Array.isArray(area.positions) ? area.positions : [];
+            posArray.forEach(function(pos) {
                 for (var r = 0; r < config.rows; r++) {
                     for (var c = 0; c < config.cols; c++) {
                         var cellLabel = getColName(c) + (r + 1);
@@ -2730,6 +3278,316 @@
             window.showToast('Đã lưu cấu hình khu vực thành công!', 'success');
         } else {
             alert('Đã lưu cấu hình khu vực thành công!');
+        }
+    }
+
+    // ===== AREA MODULE SELECTION =====
+    window.showAreaModuleList = function(areaId) {
+        var list = document.getElementById('areaModuleList-' + areaId);
+        if (list) {
+            list.classList.add('show');
+            renderAreaModuleOptions(areaId);
+        }
+    };
+
+    window.filterAreaModuleList = function(areaId) {
+        var input = document.getElementById('areaModuleSearch-' + areaId);
+        var list = document.getElementById('areaModuleList-' + areaId);
+        if (!input || !list) return;
+
+        var term = input.value.toLowerCase().trim();
+        var filtered = moduleData.filter(function(m) {
+            return m.code.toLowerCase().includes(term) || m.name.toLowerCase().includes(term);
+        });
+
+        if (filtered.length === 0) {
+            list.innerHTML = '<div class="item">Không tìm thấy module</div>';
+        } else {
+            var html = filtered.map(function(m) {
+                return '<div class="item" onclick="selectAreaModule(' + areaId + ', ' + m.id + ')">' + m.code + ' - ' + m.name + '</div>';
+            }).join('');
+            list.innerHTML = html;
+        }
+    };
+
+    window.renderAreaModuleOptions = function(areaId) {
+        var list = document.getElementById('areaModuleList-' + areaId);
+        if (!list) return;
+
+        if (moduleData.length === 0) {
+            list.innerHTML = '<div class="item">Chưa có module nào được định nghĩa</div>';
+            return;
+        }
+
+        var html = moduleData.map(function(m) {
+            return '<div class="item" onclick="selectAreaModule(' + areaId + ', ' + m.id + ')">' + m.code + ' - ' + m.name + '</div>';
+        }).join('');
+        list.innerHTML = html;
+    };
+
+    window.selectAreaModule = function(areaId, moduleId) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        var mod = moduleData.find(function(m) { return m.id === moduleId; });
+        if (area && mod) {
+            area.selectedModule = { id: mod.id, code: mod.code, name: mod.name };
+            renderAreaCards();
+        }
+    };
+
+    window.toggleAreaModuleList = function(areaId) {
+        var list = document.getElementById('areaModuleList-' + areaId);
+        if (list) list.classList.toggle('show');
+    };
+
+    window.removeAreaModule = function(areaId) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area) {
+            area.selectedModule = null;
+            renderAreaCards();
+        }
+    };
+
+    // ===== SUB-AREA MANAGEMENT FUNCTIONS =====
+
+    function addSubArea(areaId) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (!area) return;
+        
+        if (!area.subAreas) area.subAreas = [];
+        
+        var nextId = 1;
+        areaData.forEach(function(a) {
+            if (a.subAreas) {
+                a.subAreas.forEach(function(sa) {
+                    if (sa.id >= nextId) nextId = sa.id + 1;
+                });
+            }
+        });
+        
+        area.subAreas.push({
+            id: nextId,
+            code: '',
+            name: '',
+            selectedProduct: null,
+            positions: [],
+            collapsed: false,
+            isValid: true
+        });
+        
+        // Expand parent if adding sub-area
+        area.collapsed = false;
+        renderAreaCards();
+    }
+
+    function deleteSubArea(areaId, subId) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area && area.subAreas) {
+            area.subAreas = area.subAreas.filter(function(sa) { return sa.id !== subId; });
+            if (activeSubAreaId === subId && activeParentAreaId === areaId) {
+                activeSubAreaId = null;
+                activeParentAreaId = null;
+                var config = floorConfigs[currentFloor];
+                if (config) config.selected = {};
+                refreshVisuals();
+            }
+            renderAreaCards();
+        }
+    }
+
+    function updateSubAreaField(areaId, subId, field, value) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area && area.subAreas) {
+            var subArea = area.subAreas.find(function(sa) { return sa.id === subId; });
+            if (subArea) {
+                subArea[field] = value;
+                if (field === 'name' || field === 'code') renderAreaCards();
+            }
+        }
+    }
+
+    function toggleSubAreaAccordion(areaId, subId) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area && area.subAreas) {
+            var subArea = area.subAreas.find(function(sa) { return sa.id === subId; });
+            if (subArea) {
+                subArea.collapsed = !subArea.collapsed;
+                renderAreaCards();
+            }
+        }
+    }
+
+    function editSubArea(areaId, subId) {
+        activeAreaId = null;
+        activeLocationId = null;
+        activeSubAreaId = subId;
+        activeParentAreaId = areaId;
+        
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area && area.subAreas) {
+            var subArea = area.subAreas.find(function(sa) { return sa.id === subId; });
+            if (subArea) {
+                var config = floorConfigs[currentFloor];
+                config.selected = {};
+                
+                subArea.positions.forEach(function(pos) {
+                    for (var r = 0; r < config.rows; r++) {
+                        for (var c = 0; c < config.cols; c++) {
+                            var cellLabel = getColName(c) + (r + 1);
+                            var cellLabelWithFloor = currentFloor + '-' + cellLabel;
+                            if (cellLabelWithFloor === pos || cellLabel === pos) {
+                                addSelection(config.selected, r + '-' + c);
+                                break;
+                            }
+                        }
+                    }
+                });
+                
+                subArea.collapsed = false;
+                refreshVisuals();
+                renderAreaCards();
+            }
+        }
+    }
+
+    function removeSubAreaTag(areaId, subId, pos) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area && area.subAreas) {
+            var subArea = area.subAreas.find(function(sa) { return sa.id === subId; });
+            if (subArea) {
+                var idx = subArea.positions.indexOf(pos);
+                if (idx > -1) {
+                    subArea.positions.splice(idx, 1);
+                    
+                    if (activeSubAreaId === subId && activeParentAreaId === areaId) {
+                        var config = floorConfigs[currentFloor];
+                        for (var r = 0; r < config.rows; r++) {
+                            for (var c = 0; c < config.cols; c++) {
+                                var cellLabelWithFloor = currentFloor + '-' + getColName(c) + (r + 1);
+                                if (cellLabelWithFloor === pos) {
+                                    removeSelection(config.selected, r + '-' + c);
+                                    break;
+                                }
+                            }
+                        }
+                        refreshVisuals();
+                    }
+                    renderAreaCards();
+                }
+            }
+        }
+    }
+
+    function showSubAreaProductList(areaId, subId) {
+        var list = document.getElementById('saProductList-' + areaId + '-' + subId);
+        if (list) {
+            list.classList.add('show');
+            renderSubAreaProductAccordion(areaId, subId);
+        }
+    }
+
+    function toggleSubAreaProductList(areaId, subId) {
+        var list = document.getElementById('saProductList-' + areaId + '-' + subId);
+        if (list) {
+            if (list.classList.contains('show')) {
+                list.classList.remove('show');
+            } else {
+                showSubAreaProductList(areaId, subId);
+            }
+        }
+    }
+
+    function filterSubAreaProductList(areaId, subId) {
+        var input = document.getElementById('saProductSearch-' + areaId + '-' + subId);
+        var list = document.getElementById('saProductList-' + areaId + '-' + subId);
+        if (!input || !list) return;
+
+        var term = input.value.toLowerCase().trim();
+        if (term === '') {
+            renderSubAreaProductAccordion(areaId, subId);
+            return;
+        }
+
+        var results = [];
+        productData.forEach(function(group) {
+            group.items.forEach(function(item) {
+                if (item.code.toLowerCase().includes(term) || item.name.toLowerCase().includes(term)) {
+                    results.push(item);
+                }
+            });
+        });
+
+        if (results.length === 0) {
+            list.innerHTML = '<div style="padding:10px; font-size:12px; color:#64748b; text-align:center;">Không tìm thấy</div>';
+        } else {
+            list.innerHTML = results.map(function(item) {
+                var badgeClass = 'badge-' + (item.quyTac || 'FIFO').toLowerCase();
+                return '<div class="item" onclick="selectSubAreaProduct(' + areaId + ', ' + subId + ', \'' + item.code + '\', \'' + item.name + '\', \'' + (item.quyTac || 'FIFO') + '\')">' + 
+                       '<span style="flex:1;">[' + item.code + '] ' + item.name + '</span>' +
+                       '<span class="badge-spec ' + badgeClass + '">' + (item.quyTac || 'FIFO') + '</span>' +
+                       '</div>';
+            }).join('');
+        }
+    }
+
+    function renderSubAreaProductAccordion(areaId, subId) {
+        var container = document.getElementById('saProductList-' + areaId + '-' + subId);
+        if (!container) return;
+
+        var html = '<div class="init-equipment-accordion" style="border:none; border-radius:0;">' + 
+            productData.map(function(group, gIdx) {
+                var itemsHtml = group.items.map(function(item) {
+                    var badgeClass = 'badge-' + (item.quyTac || 'FIFO').toLowerCase();
+                    return '<div class="accordion-item" style="display:flex;align-items:center;gap:6px;" onclick="selectSubAreaProduct(' + areaId + ', ' + subId + ', \'' + item.code + '\', \'' + item.name + '\', \'' + (item.quyTac || 'FIFO') + '\'); event.stopPropagation();">' +
+                           '<span style="flex:1;">[' + item.code + '] ' + item.name + '</span>' +
+                           '<span class="badge-spec ' + badgeClass + '">' + (item.quyTac || 'FIFO') + '</span>' +
+                           '</div>';
+                }).join('');
+
+                return '<div class="accordion-group open">' +
+                       '<div class="accordion-header"><span>' + group.group + '</span></div>' +
+                       '<div class="accordion-content" style="display:block;">' + itemsHtml + '</div>' +
+                       '</div>';
+            }).join('') +
+            '</div>';
+
+        container.innerHTML = html;
+    }
+
+    function selectSubAreaProduct(areaId, subId, code, name, quyTac) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area && area.subAreas) {
+            var subArea = area.subAreas.find(function(sa) { return sa.id === subId; });
+            if (subArea) {
+                subArea.selectedProduct = { code: code, name: name, quyTac: quyTac || 'FIFO' };
+                renderAreaCards();
+            }
+        }
+    }
+
+    function removeSubAreaProduct(areaId, subId) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area && area.subAreas) {
+            var subArea = area.subAreas.find(function(sa) { return sa.id === subId; });
+            if (subArea) {
+                subArea.selectedProduct = null;
+                renderAreaCards();
+            }
+        }
+    }
+
+    function clearSubAreaPositions(areaId, subId) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area && area.subAreas) {
+            var subArea = area.subAreas.find(function(sa) { return sa.id === subId; });
+            if (subArea) {
+                subArea.positions = [];
+                if (activeSubAreaId === subId && activeParentAreaId === areaId) {
+                    var config = floorConfigs[currentFloor];
+                    if (config) config.selected = {};
+                    refreshVisuals();
+                }
+                renderAreaCards();
+            }
         }
     }
 
@@ -3396,6 +4254,30 @@
     window.selectAreaDirection = selectAreaDirection;
     window.toggleAreaRuleDropdown = toggleAreaRuleDropdown;
     window.selectAreaRule = selectAreaRule;
+
+    // Sub-area Exports
+    window.addSubArea = addSubArea;
+    window.deleteSubArea = deleteSubArea;
+    window.updateSubAreaField = updateSubAreaField;
+    window.toggleSubAreaAccordion = toggleSubAreaAccordion;
+    window.editSubArea = editSubArea;
+    window.removeSubAreaTag = removeSubAreaTag;
+    window.showSubAreaProductList = showSubAreaProductList;
+    window.toggleSubAreaProductList = toggleSubAreaProductList;
+    window.filterSubAreaProductList = filterSubAreaProductList;
+    window.selectSubAreaProduct = selectSubAreaProduct;
+    window.removeSubAreaProduct = removeSubAreaProduct;
+    window.clearSubAreaPositions = clearSubAreaPositions;
+
+    // Module Exports
+    window.updateModuleField = updateModuleField;
+    window.toggleModuleCollapse = toggleModuleCollapse;
+    window.editModule = editModule;
+    window.removeModuleTag = removeModuleTag;
+    window.saveModuleTab = saveModuleTab;
+    window.renderModuleEqList = renderModuleEqList;
+    window.setModuleEqFilter = setModuleEqFilter;
+    window.assignModuleEq = assignModuleEq;
 
     // Auto-init if DOM is ready
     if (document.readyState === 'loading') {

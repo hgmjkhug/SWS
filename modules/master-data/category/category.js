@@ -7,37 +7,40 @@
 
 
     // Mock Data - Kho Cơ Khí (Expanded to 30 items) with updated Warehouse codes
+    // Mock Data - Kho Cơ Khí (Expanded to 45 items)
     var categories = [
-        { id: 1, code: 'KC01', name: 'Kim khí & sản phẩm phụ', description: 'Bulong, ốc vít, long đen, đinh, tán rivets...' },
-        { id: 2, code: 'KC02', name: 'Dụng cụ Cắt gọt', description: 'Mũi khoan, dao phay, đá mài, lưỡi cưa, taro...' },
-        { id: 3, code: 'KC03', name: 'Dụng cụ Cầm tay', description: 'Kìm, búa, cờ lê, mỏ lết, tuốc nơ vít, kìm bấm...' },
-        { id: 4, code: 'KC04', name: 'sản phẩm Hàn', description: 'Que hàn, dây hàn, thuốc hàn, bép hàn...' },
-        { id: 5, code: 'KC05', name: 'Thiết bị Đo lường', description: 'Thước kẹp, panme, đồng hồ so, thước cuộn, thước lá...' },
-        { id: 6, code: 'KC06', name: 'Vòng bi & Bạc đạn', description: 'Vòng bi cầu, vòng bi côn, gối đỡ, bạc đạn...' },
-        { id: 7, code: 'KC07', name: 'Dầu mỡ & Hóa chất', description: 'Dầu bôi trơn, mỡ bò, dầu chống gỉ, dung dịch tẩy rửa...' },
-        { id: 8, code: 'KC08', name: 'Thiết bị điện cầm tay', description: 'Máy khoan, máy mài, máy cắt, máy chà nhám...' },
-        { id: 9, code: 'KC09', name: 'sản phẩm Bảo hộ', description: 'Găng tay, kính, giày, mũ, nút tai chống ồn...' },
-        { id: 10, code: 'KC10', name: 'Phụ tùng máy công cụ', description: 'Chấu kẹp, mũi tâm, collet, dao tiện...' },
-        { id: 11, code: 'KC11', name: 'Thép hình & Thép tấm', description: 'Thép V, U, I, thép tấm, thép tròn trơn...' },
-        { id: 12, code: 'KC12', name: 'Nhôm định hình', description: 'Nhôm 3030, 4040, ke góc, nắp bịt...' },
-        { id: 13, code: 'KC13', name: 'Ống & Phụ kiện ống', description: 'Ống thép, co, tê, van, bích, măng sông...' },
-        { id: 14, code: 'KC14', name: 'Van công nghiệp', description: 'Van bi, van bướm, van một chiều, van cổng...' },
-        { id: 15, code: 'KC15', name: 'Gioăng & Phớt làm kín', description: 'O-ring, phớt thủy lực, gioăng cao su, amiang...' },
-        { id: 16, code: 'KC16', name: 'Dây Curoa & Băng tải', description: 'Dây curoa A, B, C, timing belt, băng tải PVC...' },
-        { id: 17, code: 'KC17', name: 'Xích & Bánh nhông', description: 'Xích công nghiệp 40, 50, 60, nhông xích...' },
-        { id: 18, code: 'KC18', name: 'Lò xo công nghiệp', description: 'Lò xo nén, lò xo kéo, lò xo xoắn...' },
-        { id: 19, code: 'KC19', name: 'Bánh xe đẩy & Con lăn', description: 'Bánh xe PU, cao su, con lăn băng tải...' },
-        { id: 20, code: 'KC20', name: 'Khuôn mẫu & Linh kiện', description: 'Chốt dẫn hướng, lò xo khuôn, ty lói...' },
-        { id: 21, code: 'KC21', name: 'sản phẩm mài mòn', description: 'Giấy nhám, đá mài, đá cắt, nỉ đánh bóng...' },
-        { id: 22, code: 'KC22', name: 'Keo & Băng keo', description: 'Keo 502, keo khóa ren, băng keo chịu nhiệt...' },
-        { id: 23, code: 'KC23', name: 'Sơn & Dung môi', description: 'Sơn chống gỉ, sơn dầu, xăng thơm, dung môi...' },
-        { id: 24, code: 'KC24', name: 'Dụng cụ khí nén', description: 'Súng xịt hơi, dây hơi, đầu nối nhanh...' },
-        { id: 25, code: 'KC25', name: 'Dụng cụ thủy lực', description: 'Kích thủy lực, kìm ép cos, bơm tay...' },
-        { id: 26, code: 'KC26', name: 'Thiết bị nâng hạ', description: 'Pa lăng, xích cẩu, ma ní, cáp vải...' },
-        { id: 27, code: 'KC27', name: 'Đèn chiếu sáng', description: 'Đèn led nhà xưởng, bóng đèn huỳnh quang...' },
-        { id: 28, code: 'KC28', name: 'Quạt & Thông gió', description: 'Quạt công nghiệp, quạt hút, ống gió...' },
-        { id: 29, code: 'KC29', name: 'sản phẩm đóng gói', description: 'Màng PE, dây đai, xốp hơi...' },
-        { id: 30, code: 'KC30', name: 'Văn phòng phẩm xưởng', description: 'Bút viết, sổ ghi chép, kẹp hồ sơ...' }
+        // Chuối Trung Quốc/ Chinese bananas
+        { id: 1, code: 'A456', name: 'Chuối Trung Quốc/Chinese bananas - A456', productLine: 'Chuối Trung Quốc/ Chinese bananas', description: 'Mô tả nhóm sản phẩm Chuối Trung Quốc/Chinese bananas - A456' },
+        { id: 2, code: 'A789', name: 'Chuối Trung Quốc/Chinese bananas - A789', productLine: 'Chuối Trung Quốc/ Chinese bananas', description: 'Mô tả nhóm sản phẩm Chuối Trung Quốc/Chinese bananas - A789' },
+        { id: 3, code: 'B456', name: 'Chuối Trung Quốc/Chinese bananas - B456', productLine: 'Chuối Trung Quốc/ Chinese bananas', description: 'Mô tả nhóm sản phẩm Chuối Trung Quốc/Chinese bananas - B456' },
+        { id: 4, code: 'B789', name: 'Chuối Trung Quốc/Chinese bananas - B789', productLine: 'Chuối Trung Quốc/ Chinese bananas', description: 'Mô tả nhóm sản phẩm Chuối Trung Quốc/Chinese bananas - B789' },
+        { id: 5, code: 'CL', name: 'Chuối Trung Quốc/Chinese bananas - CL', productLine: 'Chuối Trung Quốc/ Chinese bananas', description: 'Mô tả nhóm sản phẩm Chuối Trung Quốc/Chinese bananas - CL' },
+        { id: 6, code: '16CP', name: 'Chuối Trung Quốc/Chinese bananas - 16CP', productLine: 'Chuối Trung Quốc/ Chinese bananas', description: 'Mô tả nhóm sản phẩm Chuối Trung Quốc/Chinese bananas - 16CP' },
+        { id: 7, code: 'CP', name: 'Chuối Trung Quốc/Chinese bananas - CP', productLine: 'Chuối Trung Quốc/ Chinese bananas', description: 'Mô tả nhóm sản phẩm Chuối Trung Quốc/Chinese bananas - CP' },
+
+        // Chuối Nhật Bản/Japanese bananas
+        { id: 8, code: '14CP', name: 'Chuối Nhật Bản/Japanese bananas - 14CP', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 14CP' },
+        { id: 9, code: '16CP', name: 'Chuối Nhật Bản/Japanese bananas - 16CP', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 16CP' },
+        { id: 10, code: '26CP', name: 'Chuối Nhật Bản/Japanese bananas - 26CP', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 26CP' },
+        { id: 11, code: '35CLD', name: 'Chuối Nhật Bản/Japanese bananas - 35CLD', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 35CLD' },
+        { id: 12, code: '18CP', name: 'Chuối Nhật Bản/Japanese bananas - 18CP', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 18CP' },
+        { id: 13, code: '28CP', name: 'Chuối Nhật Bản/Japanese bananas - 28CP', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 28CP' },
+        { id: 14, code: '30CP', name: 'Chuối Nhật Bản/Japanese bananas - 30CP', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 30CP' },
+        { id: 15, code: '36CP', name: 'Chuối Nhật Bản/Japanese bananas - 36CP', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 36CP' },
+        { id: 16, code: '38CP', name: 'Chuối Nhật Bản/Japanese bananas - 38CP', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 38CP' },
+        { id: 17, code: '40CP', name: 'Chuối Nhật Bản/Japanese bananas - 40CP', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 40CP' },
+        { id: 18, code: '43CP', name: 'Chuối Nhật Bản/Japanese bananas - 43CP', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 43CP' },
+        { id: 19, code: 'B5', name: 'Chuối Nhật Bản/Japanese bananas - B5', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - B5' },
+        { id: 20, code: 'B6', name: 'Chuối Nhật Bản/Japanese bananas - B6', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - B6' },
+        { id: 21, code: '33CP', name: 'Chuối Nhật Bản/Japanese bananas - 33CP', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 33CP' },
+        { id: 22, code: '28LY', name: 'Chuối Nhật Bản/Japanese bananas - 28LY', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 28LY' },
+        { id: 23, code: '35CP', name: 'Chuối Nhật Bản/Japanese bananas - 35CP', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 35CP' },
+        { id: 24, code: 'RCL', name: 'Chuối Nhật Bản/Japanese bananas - RCL', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - RCL' },
+        { id: 25, code: '6 NẢI', name: 'Chuối Nhật Bản/Japanese bananas - 6 NẢI', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 6 NẢI' },
+        { id: 26, code: '7 NẢI', name: 'Chuối Nhật Bản/Japanese bananas - 7 NẢI', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 7 NẢI' },
+        { id: 27, code: '8 NẢI', name: 'Chuối Nhật Bản/Japanese bananas - 8 NẢI', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 8 NẢI' },
+        { id: 28, code: '10CP', name: 'Chuối Nhật Bản/Japanese bananas - 10CP', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 10CP' },
+        { id: 29, code: '28H', name: 'Chuối Nhật Bản/Japanese bananas - 28H', productLine: 'Chuối Nhật Bản/Japanese bananas', description: 'Mô tả nhóm sản phẩm Chuối Nhật Bản/Japanese bananas - 28H' }
     ];
 
 
@@ -100,7 +103,7 @@
         updatePagination();
 
         if (pageData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px; color: #64748b;">Không tìm thấy dữ liệu</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 20px; color: #64748b;">Không tìm thấy dữ liệu</td></tr>';
             return;
         }
 
@@ -109,8 +112,10 @@
             tr.innerHTML = `
             <td><input type="checkbox" class="cat-check" value="${item.id}" onchange="checkSelection()"></td>
             <td>${start + idx + 1}</td>
-            <td><div style="font-weight: 500; color: #0f172a;">${item.name}</div></td>
-            <td>${item.description}</td>
+            <td style="font-weight: 500; color: #0f172a;">${item.code}</td>
+            <td><div class="text-truncate" style="font-weight: 500; color: #0f172a;" title="${item.name}">${item.name}</div></td>
+            <td style="color: #64748b;">${item.productLine || ''}</td>
+            <td><div class="text-truncate" style="color: #64748b;" title="${item.description}">${item.description}</div></td>
             <td>
                 <div style="display: flex; gap: 4px; justify-content: center;">
                     <div class="action-icon" title="Sửa" onclick="openCategoryModal(${item.id})"><i class="fas fa-edit"></i></div>
@@ -186,11 +191,17 @@
 
     // Filter
     function filterCategories() {
-        const search = document.getElementById('category-search').value.toLowerCase();
+        const searchInput = document.getElementById('category-search');
+        const productLineFilter = document.getElementById('filter-product-line');
+        if (!searchInput || !productLineFilter) return;
+        
+        const search = searchInput.value.toLowerCase();
+        const productLine = productLineFilter.value;
 
         filteredData = categories.filter(c => {
-            const matchName = c.name.toLowerCase().includes(search);
-            return matchName;
+            const matchSearch = c.name.toLowerCase().includes(search) || c.code.toLowerCase().includes(search);
+            const matchProductLine = !productLine || c.productLine === productLine;
+            return matchSearch && matchProductLine;
         });
 
         currentPage = 1;
@@ -220,7 +231,9 @@
             if (item) {
                 title.innerText = 'Cập nhật nhóm sản phẩm';
                 document.getElementById('cat-id').value = item.id;
+                document.getElementById('cat-code').value = item.code;
                 document.getElementById('cat-name').value = item.name;
+                document.getElementById('cat-product-line').value = item.productLine || '';
                 document.getElementById('cat-desc').value = item.description;
             }
         } else {
@@ -232,22 +245,25 @@
     // ... (saveCategory) ...
     function saveCategory() {
         const idStr = document.getElementById('cat-id').value;
-        const codeEl = document.getElementById('cat-code');
-        const name = document.getElementById('cat-name').value;
-        const desc = document.getElementById('cat-desc').value;
+        const code = document.getElementById('cat-code').value.trim();
+        const name = document.getElementById('cat-name').value.trim();
+        const productLine = document.getElementById('cat-product-line').value;
+        let desc = document.getElementById('cat-desc').value.trim();
 
-        if (!name) {
-            alert('Vui lòng nhập tên nhóm sản phẩm');
+        if (!name || !code || !productLine) {
+            alert('Vui lòng nhập đầy đủ thông tin bắt buộc (*)');
             return;
         }
 
-        let code = codeEl ? codeEl.value : `NV${Math.floor(Math.random() * 1000)}`;
+        if (!desc) {
+            desc = `Mô tả nhóm sản phẩm ${name}`;
+        }
 
         if (idStr) {
             const id = parseInt(idStr);
             const idx = categories.findIndex(c => c.id === id);
             if (idx !== -1) {
-                categories[idx] = { ...categories[idx], code, name, description: desc };
+                categories[idx] = { ...categories[idx], code, name, productLine, description: desc };
             }
         } else {
             const newId = categories.length > 0 ? Math.max(...categories.map(c => c.id)) + 1 : 1;
@@ -255,6 +271,7 @@
                 id: newId,
                 code,
                 name,
+                productLine,
                 description: desc
             });
         }
@@ -324,6 +341,7 @@
             btn.innerHTML = `<i class="fas fa-trash"></i> Xóa (${selected.length})`;
         }
     }
+
 
     function deleteSelected() {
         const selected = Array.from(document.querySelectorAll('.cat-check:checked')).map(chk => parseInt(chk.value));

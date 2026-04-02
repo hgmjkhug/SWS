@@ -20,7 +20,7 @@
         let areaCounter = 1;
         // Duyệt qua từng tầng để đảm bảo mỗi tầng đều có khu vực
         for (let f = 1; f <= floors; f++) {
-            // Tạo khu vực đầu tiên cho mỗi tầng
+            // Tạo duy nhất 1 khu vực cho mỗi tầng để tránh làm rối UI cấu hình
             const product = products[Math.floor(Math.random() * products.length)];
             areas.push({
                 id: areaCounter++,
@@ -29,22 +29,11 @@
                 areaName: `Khu vực ${String.fromCharCode(64 + areaCounter)}`,
                 positions: Math.floor(Math.random() * 50) + 20,
                 product: `${product.code} - ${product.name}`,
-                specification: specs[Math.floor(Math.random() * specs.length)]
+                specification: specs[Math.floor(Math.random() * specs.length)],
+                subAreas: [
+                    { id: Date.now() + 1, code: '', name: 'Khu vực con 1', positions: [], collapsed: false }
+                ]
             });
-
-            // Ngẫu nhiên thêm khu vực thứ 2 cho cùng tầng đó (tỉ lệ 40%)
-            if (Math.random() > 0.6) {
-                const product2 = products[Math.floor(Math.random() * products.length)];
-                areas.push({
-                    id: areaCounter++,
-                    floor: `Tầng ${f}`,
-                    areaCode: `KV-${warehouseId}-${areaCounter}`,
-                    areaName: `Khu vực ${String.fromCharCode(64 + areaCounter)}`,
-                    positions: Math.floor(Math.random() * 30) + 10,
-                    product: `${product2.code} - ${product2.name}`,
-                    specification: specs[Math.floor(Math.random() * specs.length)]
-                });
-            }
         }
         return areas;
     }
@@ -662,7 +651,7 @@
     window.toggleBulkDeleteBtn = toggleBulkDeleteBtn;
 
     function saveWarehouses() {
-        localStorage.setItem('wms_warehouses_v6', JSON.stringify(warehouses));
+        localStorage.setItem('wms_warehouses_v7', JSON.stringify(warehouses));
     }
 
     function updateStatus(id, newStatus) {

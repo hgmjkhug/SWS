@@ -4,12 +4,12 @@ html, body {
 }
 
 .category-container {
-    padding: 10px 24px 24px 24px;
-    background-color: #f8fafc;
+    padding: 24px;
+    background-color: #ffffff;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
 }
 
 /* Actions Toolbar */
@@ -52,6 +52,23 @@ html, body {
 
 .category-search-input::placeholder {
     color: #94a3b8;
+}
+
+.category-select {
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    background: #fff;
+    cursor: pointer;
+    width: 240px;
+    color: #1e293b;
+}
+
+.category-select:focus {
+    border-color: #076EB8;
 }
 
 /* Custom Filter Dropdown */
@@ -184,9 +201,10 @@ html, body {
 /* Table Wrapper */
 .table-wrapper {
     background: white;
-    border-radius: 8px 8px 0 0;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    max-height: 70vh;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    max-height: 75vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -235,31 +253,41 @@ html, body {
 
 
 .category-table th, .category-table td {
-    padding: 14px 16px;
+    padding: 18px 24px;
     text-align: left;
     border-bottom: 1px solid #f1f5f9;
-    /* vertical-align: middle; */
 }
 
 .category-table th {
-    background-color: #1e88e5;
+    background-color: #f8fafc;
     font-weight: 600;
-    color: #ffffff;
-    font-size: 13px;
-    border-bottom: 2px solid #1565c0;
+    color: #475569;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #f1f5f9;
+    white-space: nowrap;
 }
 
 /* Explicit Column Widths — pixel cố định để thead/tbody 2 table luôn khớp */
-/* Checkbox (1), STT (2), Name (3), Desc (4), Action (5) */
-.category-table th:nth-child(1), .category-table td:nth-child(1) { width: 50px;  min-width: 50px;  max-width: 50px;  text-align: center; }
-.category-table th:nth-child(2), .category-table td:nth-child(2) { width: 60px;  min-width: 60px;  max-width: 60px;  text-align: center; }
-.category-table th:nth-child(3), .category-table td:nth-child(3) { width: 280px; min-width: 280px; max-width: 280px; text-align: left; }
-.category-table th:nth-child(4), .category-table td:nth-child(4) { width: auto;  min-width: 200px; text-align: left; }
-.category-table th:nth-child(5), .category-table td:nth-child(5) { width: 110px; min-width: 110px; max-width: 110px; text-align: center; }
+/* Text Alignment — Độ rộng đã được colgroup trong HTML xử lý */
+.category-table th:nth-child(1), .category-table td:nth-child(1) { text-align: center; }
+.category-table th:nth-child(2), .category-table td:nth-child(2) { text-align: center; }
+.category-table th:nth-child(3), .category-table td:nth-child(3) { text-align: left; }
+.category-table th:nth-child(4), .category-table td:nth-child(4) { text-align: left; }
+.category-table th:nth-child(5), .category-table td:nth-child(5) { text-align: left; }
+.category-table th:nth-child(6), .category-table td:nth-child(6) { text-align: left; }
+.category-table th:nth-child(7), .category-table td:nth-child(7) { text-align: center; }
 
 
 .category-table tbody tr:hover {
     background-color: #f8fafc;
+}
+
+.category-table td {
+    font-size: 14px;
+    color: #1e293b;
+    line-height: 1.5;
 }
 
 /* Action Icons */
@@ -387,6 +415,12 @@ input[type="text"], textarea, select {
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
+    color: #1e293b;
+    background: #fff;
+}
+
+.modal-select {
+    cursor: pointer;
 }
 
 textarea {
@@ -399,9 +433,9 @@ textarea {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
+    padding: 16px 24px;
     background: white;
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 12px 12px;
     border-top: 1px solid #f1f5f9;
     font-size: 14px;
     color: #64748b;
@@ -547,4 +581,13 @@ textarea {
 
 .selected-placeholder {
     color: #94a3b8;
+}
+
+/* Utils */
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
 }

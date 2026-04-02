@@ -8,71 +8,72 @@
     // let products = []; // Removed duplicate declaration
 
     // Mock Data categories (sync with category.js)
+    // Mock Data categories (sync with the fruit theme)
     var categoryData = [
-        { code: 'KC01', name: 'Kim khí & Vật tư phụ' },
-        { code: 'KC02', name: 'Dụng cụ Cắt gọt' },
-        { code: 'KC03', name: 'Dụng cụ Cầm tay' },
-        { code: 'KC04', name: 'Vật tư Hàn' },
-        { code: 'KC05', name: 'Thiết bị Đo lường' },
-        { code: 'KC06', name: 'Vòng bi & Bạc đạn' },
-        { code: 'KC07', name: 'Dầu mỡ & Hóa chất' },
-        { code: 'KC08', name: 'Thiết bị điện cầm tay' },
-        { code: 'KC09', name: 'Vật tư Bảo hộ' },
-        { code: 'KC10', name: 'Phụ tùng máy công cụ' }
+        { code: 'NS01', name: 'Chuối tươi nội địa' },
+        { code: 'NS02', name: 'Chuối xuất khẩu' },
+        { code: 'NS03', name: 'Chuối sấy & Chế biến' },
+        { code: 'NS04', name: 'Chuối giống & Kiểng' },
+        { code: 'NS05', name: 'Phụ phẩm từ chuối' }
     ];
 
 
     // Mock Data - Mechanical Products
     // Products mapping to categories: KC01 (Kim khí), KC02 (Cắt gọt), KC03 (Cầm tay), KC04 (Hàn), etc.
-    let products = [
-        // KC01 - Kim khí
-        { id: 'uuid-1', code: 'VT001', name: 'Bulong lục giác M8x50', group: 'KC01', unit: 'Cái', weight: 0.05, exportMethod: 'FIFO', description: 'Thép mạ kẽm, DIN 933', status: 1, qr_code: 'QR001' },
-        { id: 'uuid-2', code: 'VT002', name: 'Đai ốc M10', group: 'KC01', unit: 'Cái', weight: 0.02, exportMethod: 'FIFO', description: 'Inox 304', status: 1, qr_code: 'QR002' },
-        { id: 'uuid-3', code: 'VT003', name: 'Long đen phẳng M12', group: 'KC01', unit: 'Cái', weight: 0.01, exportMethod: 'FIFO', description: 'Thép đen', status: 1, qr_code: 'QR003' },
-        { id: 'uuid-4', code: 'VT004', name: 'Vít gỗ đầu bằng 4x30', group: 'KC01', unit: 'Cái', weight: 0.01, exportMethod: 'FIFO', description: 'Mạ vàng', status: 1, qr_code: 'QR004' },
+    // Mock Data - Agricultural Products (Exact List)
+    const productNames = [
+        "TROPICAL", "TROPICAL", "TROPICAL", "TROPICAL", "TROPICAL",
+        "TROPICAL 18KG", "TROPICAL LẺ", "TROPICAL LẺ",
+        "SOFIA", "SOFIA", "SOFIA", "SOFIA", "SOFIA",
+        "FRUIT WHARF", "FRUIT WHARF", "FRUIT WHARF", "FRUIT WHARF", "FRUIT WHARF",
+        "DASANG LẺ", "DASANG LẺ", "DASANG", "DASANG", "DASANG", "DASANG", "DASANG",
+        "SUN BANANA", "SUN BANANA", "SUN BANANA", "SUN BANANA", "SUN BANANA",
+        "SISTER", "SISTER", "SISTER", "SISTER", "SISTER",
+        "JIHAO", "JIHAO", "JIHAO", "JIHAO", "JIHAO",
+        "GAIER", "GAIER", "GAIER", "GAIER", "GAIER",
+        "XINFADIN 14CP", "XINFADIN 16CP", "XINFADIN 26CP", "XINFADIN 35CLD",
+        "SEIKA 16CP", "SEIKA 18CP", "SEIKA 26CP", "SEIKA 28CP", "SEIKA 30CP",
+        "SEIKA 36CP", "SEIKA 38CP", "SEIKA 40CP", "SEIKA 43CP",
+        "SEIKA 13KG (5 NẢI)", "SEIKA 13KG (6 NẢI)", "SEIKA 13KG (28 CP)", "SEIKA 13KG (33 CP)",
+        "DEL MONTE 28LY", "DEL MONTE 28CP", "DEL MONTE 30CP", "DEL MONTE 33CP",
+        "DEL MONTE 35CP", "DEL MONTE 38CP", "DEL MONTE RCL",
+        "DELMONTE 13KG (6 NẢI)", "DELMONTE 13KG (7 NẢI)", "DELMONTE 13KG (8 NẢI)",
+        "DEL MONTE 10CP", "DEL MONTE 28H",
+        "NHẬT TRƠN 40CP", "TAITO 40CP", "SHIMIZU 38CP", "MAINICHI 43CP",
+        "XINFADIN 14CP", "XINFADIN 16CP", "XINFADIN 26CP", "XINFADIN 35CLD",
+        "SEIKA 16CP", "SEIKA 18CP", "SEIKA 26CP", "SEIKA 28CP", "SEIKA 30CP",
+        "SEIKA 36CP", "SEIKA 38CP", "SEIKA 40CP", "SEIKA 43CP",
+        "SEIKA 13KG (5 NẢI)", "SEIKA 13KG (6 NẢI)", "SEIKA 13KG (28 CP)", "SEIKA 13KG (33 CP)",
+        "DEL MONTE 28LY", "DEL MONTE 28CP", "DEL MONTE 30CP", "DEL MONTE 33CP",
+        "DEL MONTE 35CP", "DEL MONTE 38CP", "DEL MONTE RCL",
+        "DELMONTE 13KG (6 NẢI)", "DELMONTE 13KG (7 NẢI)", "DELMONTE 13KG (8 NẢI)",
+        "DEL MONTE 10CP", "DEL MONTE 28H",
+        "NHẬT TRƠN 40CP", "TAITO 40CP", "SHIMIZU 38CP", "MAINICHI 43CP"
+    ];
 
-        // KC02 - Cắt gọt
-        { id: 'uuid-5', code: 'VT005', name: 'Mũi khoan sắt 5.0mm', group: 'KC02', unit: 'Cái', weight: 0.10, exportMethod: 'FIFO', description: 'NACHI HSS', status: 1, qr_code: 'QR005' },
-        { id: 'uuid-6', code: 'VT006', name: 'Mũi taro M6x1.0', group: 'KC02', unit: 'Cái', weight: 0.10, exportMethod: 'FIFO', description: 'YAMAWA', status: 1, qr_code: 'QR006' },
-        { id: 'uuid-7', code: 'VT007', name: 'Đá mài 100x6x16', group: 'KC02', unit: 'Viên', weight: 0.20, exportMethod: 'FEFO', description: 'Resibon xanh', status: 1, qr_code: 'QR007' },
-        { id: 'uuid-8', code: 'VT008', name: 'Đá cắt 355mm', group: 'KC02', unit: 'Viên', weight: 0.50, exportMethod: 'FEFO', description: 'Tailin', status: 1, qr_code: 'QR008' },
-        { id: 'uuid-9', code: 'VT009', name: 'Dao phay ngón D10', group: 'KC02', unit: 'Cái', weight: 0.15, exportMethod: 'FIFO', description: 'Hợp kim 4 me', status: 1, qr_code: 'QR009' },
-
-        // KC03 - Cầm tay
-        { id: 'uuid-10', code: 'VT010', name: 'Kìm điện 8 inch', group: 'KC03', unit: 'Cái', weight: 0.30, exportMethod: 'FIFO', description: 'Fujiya', status: 1, qr_code: 'QR010' },
-        { id: 'uuid-11', code: 'VT011', name: 'Cờ lê vòng miệng 13mm', group: 'KC03', unit: 'Cái', weight: 0.15, exportMethod: 'FIFO', description: 'Yeti', status: 1, qr_code: 'QR011' },
-        { id: 'uuid-12', code: 'VT012', name: 'Bộ lục giác 9 cây', group: 'KC03', unit: 'Bộ', weight: 0.4, exportMethod: 'LIFO', description: '1.5-10mm', status: 1, qr_code: 'QR012' },
-        { id: 'uuid-13', code: 'VT013', name: 'Tuốc nơ vít 4 cạnh PH2', group: 'KC03', unit: 'Cái', weight: 0.1, exportMethod: 'FIFO', description: 'Vessel', status: 1, qr_code: 'QR013' },
-
-        // KC04 - Hàn
-        { id: 'uuid-14', code: 'VT014', name: 'Que hàn KT-421 3.2mm', group: 'KC04', unit: 'Thùng', weight: 20, exportMethod: 'FEFO', description: 'Kim Tín (20kg/thùng)', status: 1, qr_code: 'QR014' },
-        { id: 'uuid-15', code: 'VT015', name: 'Dây hàn CO2 0.8mm', group: 'KC04', unit: 'Cuộn', weight: 15, exportMethod: 'FEFO', description: 'GM-70S', status: 1, qr_code: 'QR015' },
-        { id: 'uuid-16', code: 'VT016', name: 'Thuốc hàn dán', group: 'KC04', unit: 'Hộp', weight: 0.5, exportMethod: 'FEFO', description: '', status: 1, qr_code: 'QR016' },
-
-        // KC05 - Đo lường
-        { id: 'uuid-17', code: 'VT017', name: 'Thước kẹp 150mm', group: 'KC05', unit: 'Cái', weight: 0.2, exportMethod: 'FIFO', description: 'Mitutoyo 530-104', status: 1, qr_code: 'QR017' },
-        { id: 'uuid-18', code: 'VT018', name: 'Panme đo ngoài 0-25mm', group: 'KC05', unit: 'Cái', weight: 0.3, exportMethod: 'FIFO', description: 'Cơ khí', status: 1, qr_code: 'QR018' },
-        { id: 'uuid-19', code: 'VT019', name: 'Thước cuộn 5M', group: 'KC05', unit: 'Cái', weight: 0.2, exportMethod: 'FIFO', description: 'Stanley', status: 1, qr_code: 'QR019' },
-
-        // KC06 - Vòng bi
-        { id: 'uuid-20', code: 'VT020', name: 'Vòng bi 6204-ZZ', group: 'KC06', unit: 'Cái', weight: 0.1, exportMethod: 'FIFO', description: 'Koyo', status: 1, qr_code: 'QR020' },
-        { id: 'uuid-21', code: 'VT021', name: 'Vòng bi 6305-2RS', group: 'KC06', unit: 'Cái', weight: 0.2, exportMethod: 'FIFO', description: 'NSK', status: 1, qr_code: 'QR021' },
-        { id: 'uuid-22', code: 'VT022', name: 'Gối đỡ UCP 205', group: 'KC06', unit: 'Cái', weight: 0.5, exportMethod: 'LIFO', description: 'LK', status: 1, qr_code: 'QR022' },
-
-        // KC07 - Dầu mỡ
-        { id: 'uuid-23', code: 'VT023', name: 'Dầu thủy lực 68', group: 'KC07', unit: 'Phuy', weight: 200, exportMethod: 'FEFO', description: 'Castrol Hyspin AWS 68', status: 1, qr_code: 'QR023' },
-        { id: 'uuid-24', code: 'VT024', name: 'Mỡ bôi trơn EP2', group: 'KC07', unit: 'Lon', weight: 1, exportMethod: 'FEFO', description: 'Shell Gadus', status: 1, qr_code: 'QR024' },
-        { id: 'uuid-25', code: 'VT025', name: 'RP7 chai lớn', group: 'KC07', unit: 'Chai', weight: 0.35, exportMethod: 'FEFO', description: 'Selleys', status: 1, qr_code: 'QR025' },
-
-        // KC08 - Thiết bị điện cầm tay
-        { id: 'uuid-26', code: 'VT026', name: 'Máy mài góc 100mm', group: 'KC08', unit: 'Cái', weight: 1.8, exportMethod: 'FIFO', description: 'Makita 9553NB', status: 1, qr_code: 'QR026' },
-        { id: 'uuid-27', code: 'VT027', name: 'Máy khoan động lực 13mm', group: 'KC08', unit: 'Cái', weight: 2.1, exportMethod: 'FIFO', description: 'Bosch GSB 13 RE', status: 1, qr_code: 'QR027' }
-    ].map(p => ({
-        ...p,
-        is_deleted: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-    }));
+    let products = productNames.map((name, idx) => {
+        const id = (idx + 1).toString().padStart(3, '0');
+        const groups = ['NS01', 'NS02', 'NS03', 'NS04', 'NS05'];
+        const group = groups[idx % groups.length];
+        const units = ['Thùng', 'Kg', 'Nải', 'Cái'];
+        const unit = units[idx % units.length];
+        
+        return {
+            id: `uuid-prod-${id}`,
+            code: `VT${id}`,
+            name: name,
+            group: group,
+            unit: unit,
+            weight: (Math.random() * 0.5 + 0.1),
+            exportMethod: 'FIFO',
+            description: `Sản phẩm ${name} chất lượng cao`,
+            status: 1,
+            qr_code: `QR${id}`,
+            is_deleted: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+    });
 
     function getCurrentWarehouse() {
         try {

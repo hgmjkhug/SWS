@@ -1,11 +1,3 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nhóm sản phẩm - Smart Warehouse</title>
-  </head>
-
   <body>
     <!-- Relative path so script.js handles base correctly. Version param forces update. -->
     <link rel="stylesheet" href="category.css?v=115" />
@@ -21,6 +13,11 @@
               placeholder="Tìm theo tên nhóm sản phẩm"
               oninput="filterCategories()"
             />
+            <select id="filter-product-line" class="category-select" onchange="filterCategories()">
+              <option value="">Tất cả dòng sản phẩm</option>
+              <option value="Chuối Trung Quốc/ Chinese bananas">Chuối Trung Quốc/ Chinese bananas</option>
+              <option value="Chuối Nhật Bản/Japanese bananas">Chuối Nhật Bản/Japanese bananas</option>
+            </select>
           </div>
           <div class="action-buttons">
             <button
@@ -52,21 +49,41 @@
         <div class="table-wrapper">
           <div class="table-scroll-head">
             <table class="category-table">
+              <colgroup>
+                <col style="width: 50px;" />
+                <col style="width: 60px;" />
+                <col style="width: 200px;" />
+                <col style="width: 320px;" />
+                <col style="width: 280px;" />
+                <col style="width: 400px;" />
+                <col style="width: 120px;" />
+              </colgroup>
               <thead>
                 <tr>
-                  <th style="width:50px; min-width:50px; text-align:center">
+                  <th style="text-align:center">
                     <input type="checkbox" id="check-all" onchange="toggleAll(this)" />
                   </th>
-                  <th style="width:60px; min-width:60px; text-align:center">STT</th>
-                  <th style="width:280px; min-width:280px; text-align:left">Tên nhóm sản phẩm</th>
-                  <th style="text-align:left">Mô tả</th>
-                  <th style="width:110px; min-width:110px; text-align:center">Thao tác</th>
+                  <th style="text-align:center">STT</th>
+                  <th>Mã nhóm sản phẩm</th>
+                  <th>Tên nhóm sản phẩm</th>
+                  <th>Dòng sản phẩm</th>
+                  <th>Mô tả</th>
+                  <th style="text-align:center">Thao tác</th>
                 </tr>
               </thead>
             </table>
           </div>
           <div class="table-scroll-body">
             <table class="category-table">
+              <colgroup>
+                <col style="width: 50px;" />
+                <col style="width: 60px;" />
+                <col style="width: 200px;" />
+                <col style="width: 320px;" />
+                <col style="width: 280px;" />
+                <col style="width: 400px;" />
+                <col style="width: 120px;" />
+              </colgroup>
               <tbody id="category-table-body">
                 <!-- Data rendered by JS -->
               </tbody>
@@ -117,6 +134,16 @@
           <form id="category-form">
             <input type="hidden" id="cat-id" />
             <div class="form-group">
+              <label>Mã nhóm sản phẩm <span class="required">*</span></label>
+              <input
+                type="text"
+                id="cat-code"
+                required
+                placeholder="Ví dụ: A456"
+              />
+            </div>
+
+            <div class="form-group">
               <label>Tên nhóm sản phẩm <span class="required">*</span></label>
               <input
                 type="text"
@@ -124,6 +151,15 @@
                 required
                 placeholder="Ví dụ: sản phẩm kim khí"
               />
+            </div>
+
+            <div class="form-group">
+              <label>Dòng sản phẩm <span class="required">*</span></label>
+              <select id="cat-product-line" class="modal-select" required>
+                <option value="">Chọn dòng sản phẩm...</option>
+                <option value="Chuối Trung Quốc/ Chinese bananas">Chuối Trung Quốc/ Chinese bananas</option>
+                <option value="Chuối Nhật Bản/Japanese bananas">Chuối Nhật Bản/Japanese bananas</option>
+              </select>
             </div>
 
             <div class="form-group">
