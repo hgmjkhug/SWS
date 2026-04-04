@@ -45,6 +45,9 @@
     var moduleData = [];
     var moduleIdCounter = 1;
     var activeModuleId = null;
+    var towerFloorData = [];
+    var towerFloorIdCounter = 1;
+    var activeTowerFloorId = null;
 
 
     // Initialize selected as empty objects (using object instead of Set for ES5 compatibility)
@@ -504,6 +507,24 @@
             }
             renderModuleCards();
         }
+
+        // Sync back to Tower Floor tab if we have an active tower floor
+        if (activeTowerFloorId !== null) {
+            for (var tf = 0; tf < towerFloorData.length; tf++) {
+                if (towerFloorData[tf].id === activeTowerFloorId) {
+                    towerFloorData[tf].positions = getSelectionKeys(config.selected).sort(function(a, b) {
+                        var pa = a.split('-').map(Number), pb = b.split('-').map(Number);
+                        if (pa[0] !== pb[0]) return pa[0] - pb[0];
+                        return pa[1] - pb[1];
+                    }).map(function(key) {
+                        var pts = key.split('-').map(Number);
+                        return currentFloor + '-' + getColName(pts[1]) + (pts[0] + 1);
+                    });
+                    break;
+                }
+            }
+            renderTowerFloorCards();
+        }
     }
 
     function handleMouseDown(e, r, c) {
@@ -559,7 +580,16 @@
         for (var lp = 0; lp < locationData[l].positions.length; lp++) {
             var pos = locationData[l].positions[lp];
             allLocPositions[pos] = true;
-            locDirectionMap[pos] = locationData[l].directions || (locationData[l].direction ? [locationData[l].direction] : []);
+            locDirectionMap[pos] = locationData[l].directions || (locationData[l].directions ? [locationData[l].directions] : []);
+        }
+    }
+
+    var allTfPositions = {};
+    for (var t = 0; t < towerFloorData.length; t++) {
+        if (towerFloorData[t].positions) {
+            for (var tp = 0; tp < towerFloorData[t].positions.length; tp++) {
+                allTfPositions[towerFloorData[t].positions[tp]] = true;
+            }
         }
     }
 
@@ -625,6 +655,14 @@
             if (directionWrapper) {
                 directionWrapper.style.display = 'none';
             }
+        }
+
+        // 4. Check Assigned Tower Floor
+        var isTfAssigned = !!allTfPositions[posLabelWithFloor] || !!allTfPositions[posLabel];
+        if (isTfAssigned) {
+            node.classList.add('is-module'); // Use is-module style for tower floor for now
+        } else {
+            node.classList.remove('is-module');
         }
 
         // 3.5. Area Visualization (Override generic dot color)
@@ -1078,6 +1116,18 @@
             locationData.forEach(function(l) { if (l.id > maxLocId) maxLocId = l.id; });
             locationIdCounter = maxLocId + 1;
         } else {
+            // Default at least one location card
+            locationData = [
+                {
+                    id: Date.now(),
+                    name: 'Cấu hình vị trí 1',
+                    locationType: 'Vị trí ô trống',
+                    qrCodes: [''],
+                    positions: [],
+                    directions: ['Trên'],
+                    collapsed: false
+                }
+            ];
             locationIdCounter = 2;
         }
 
@@ -1088,13 +1138,47 @@
             moduleData.forEach(function(m) { if (m.id > maxModId) maxModId = m.id; });
             moduleIdCounter = maxModId + 1;
             
-            var modInput = document.getElementById('initWarehouseModules');
-            if (modInput) modInput.value = moduleData.length;
+            // Migration: Rename MOD-x to TL-x and Tháp x to Tầng tháp x
+            moduleData.forEach(function(m) {
+                if (m.code && m.code.indexOf('MOD-') === 0) {
+                    m.code = m.code.replace('MOD-', 'TL-');
+                }
+                if (m.name && m.name.indexOf('Tháp ') === 0) {
+                    m.name = m.name.replace('Tháp ', 'Tầng tháp ');
+                }
+            });
+            
+            
+            // SYNC with towerCount from list if mismatch
+            var targetCount = currentWarehouse.towerCount || 0;
+            if (moduleData.length !== targetCount && targetCount > 0) {
+                updateModuleDataCount(targetCount);
+            }
         } else {
-            // Default 4 modules if none exist
-            updateModuleDataCount(4);
-            // Ensure first module is expanded
-            if (moduleData.length > 0) moduleData[0].collapsed = false;
+            // Default based on warehouse towerCount
+            updateModuleDataCount(currentWarehouse.towerCount || 4);
+        }
+
+        // Restore Tower Floor Data if available
+        if (currentWarehouse && currentWarehouse.towerFloors && currentWarehouse.towerFloors.length > 0) {
+            towerFloorData = currentWarehouse.towerFloors;
+            var maxTfId = 0;
+            towerFloorData.forEach(function(tf) { if (tf.id > maxTfId) maxTfId = tf.id; });
+            towerFloorIdCounter = maxTfId + 1;
+        } else {
+            // Default at least one tower floor card
+            towerFloorData = [
+                {
+                    id: Date.now(),
+                    moduleId: null, // Select from moduleData
+                    code: '',
+                    name: '',
+                    equipmentAssignment: {},
+                    eqFilterMode: 'all',
+                    collapsed: false
+                }
+            ];
+            towerFloorIdCounter = 2;
         }
     }
 
@@ -1189,7 +1273,7 @@
            configContent.style.visibility = 'hidden';
         }
         
-        if (savedTabId && savedTabId !== 'floor') {
+        if (savedTabId && savedTabId !== 'floor' && savedTabId !== 'init') {
             // Restore from saved state
             var targetBtn = null;
             var buttons = document.querySelectorAll('.segment-btn');
@@ -1200,17 +1284,24 @@
                     break;
                 }
             }
-            setConfigTab(savedTabId, targetBtn || activeBtn);
+            if (targetBtn) {
+                setConfigTab(savedTabId, targetBtn);
+            } else {
+                setConfigTab('module', activeBtn);
+            }
         } else if (activeBtn) {
-            // Default logic if no saved state
-            var tabId = 'init'; // Default
+            // Default logic if no saved state or saved state is 'init'
+            var tabId = 'module'; // Default
             var defaultOnClick = activeBtn.getAttribute('onclick') || '';
             if (defaultOnClick.includes("('area'")) tabId = 'area';
             else if (defaultOnClick.includes("('location'")) tabId = 'location';
+            else if (defaultOnClick.includes("('module'")) tabId = 'module';
+            else if (defaultOnClick.includes("('towerFloor'")) tabId = 'towerFloor';
+            
             setConfigTab(tabId, activeBtn);
         } else {
             // Fallback if no DOM button found yet
-            setConfigTab('init', null);
+            setConfigTab('module', null);
         }
 
         
@@ -1477,11 +1568,13 @@
         // Clear active selection states across all tabs
         activeAreaId = null;
         activeLocationId = null;
+        activeTowerFloorId = null;
+        activeModuleId = null;
         
         // Show the matching tab content
         var configContent = document.querySelector('.config-content');
         if (configContent) {
-            if (tab === 'init') {
+            if (tab === 'init' || tab === 'module') {
                 configContent.classList.add('grid-hidden');
             } else {
                 configContent.classList.remove('grid-hidden');
@@ -1492,7 +1585,7 @@
         // Toggle header actions visibility based on tab (only show on area and location)
         var headerActions = document.querySelector('.header-actions');
         if (headerActions) {
-            if (tab === 'init') {
+            if (tab === 'init' || tab === 'module') {
                 headerActions.style.display = 'none';
             } else {
                 headerActions.style.display = 'flex';
@@ -1521,10 +1614,18 @@
             var moduleTab = document.getElementById('tabContentModule');
             if (moduleTab) moduleTab.classList.add('active');
             renderModuleCards();
+        } else if (tab === 'towerFloor') {
+            var towerFloorTab = document.getElementById('tabContentTowerFloor');
+            if (towerFloorTab) towerFloorTab.classList.add('active');
+            renderTowerFloorCards();
+        } else if (tab === 'areaType') {
+            var areaTypeTab = document.getElementById('tabContentAreaType');
+            if (areaTypeTab) areaTypeTab.classList.add('active');
+            renderSubAreaCards();
         }
         
-        // Refresh grid visualization to show all assigned areas/locations
-        if (tab === 'area' || tab === 'location') {
+        // Refresh grid visualization to show all assigned areas/locations/sub-areas
+        if (tab === 'area' || tab === 'location' || tab === 'towerFloor' || tab === 'areaType') {
             initGrid(); // Ensure grid is rendered
             refreshVisuals();
         }
@@ -1569,14 +1670,15 @@
             while (moduleData.length < count) {
                 moduleData.push({
                     id: moduleIdCounter++,
-                    code: 'MOD-' + (moduleData.length + 1),
-                    name: 'Module ' + (moduleData.length + 1),
+                    code: 'TL-' + (moduleData.length + 1),
+                    name: 'Tầng tháp ' + (moduleData.length + 1),
                     positions: [],
                     equipmentAssignment: {},
                     selectedEqCodes: {},
                     eqFilterMode: 'all',
                     isActive: true,
-                    collapsed: true
+                    collapsed: true,
+                    towerType: 'Tháp mặt sàn di chuyển'
                 });
             }
         } else if (moduleData.length > count) {
@@ -1593,7 +1695,7 @@
         if (!container) return;
         
         if (moduleData.length === 0) {
-            container.innerHTML = '<div style="padding: 40px; text-align: center; color: #94a3b8;"><i class="fas fa-cubes" style="font-size: 40px; opacity: 0.2; margin-bottom: 15px; display: block;"></i>Chưa có module nào. Vui lòng nhập số module ở tab Khai báo.</div>';
+            container.innerHTML = '<div style="padding: 40px; text-align: center; color: #94a3b8;"><i class="fas fa-cubes" style="font-size: 40px; opacity: 0.2; margin-bottom: 15px; display: block;"></i>Chưa có tầng tháp nào. Vui lòng nhập số tầng tháp ở tab Khai báo.</div>';
             return;
         }
 
@@ -1603,40 +1705,41 @@
             var isActive = (activeModuleId === mod.id) ? ' active' : '';
             
             html += '<div class="area-card' + isCollapsed + isActive + '" data-module-id="' + mod.id + '">';
-            html += '<div class="card-number-label-container"><span class="card-number-label">Module ' + (idx + 1) + '</span></div>';
+            html += '<div class="card-number-label-container"><span class="card-number-label">Tầng tháp ' + (idx + 1) + '</span></div>';
             html += '<div class="area-card-body">';
             
-            // Mã module
+            // Mã tháp
             html += '<div class="area-field">';
-            html += '<span class="area-field-label">Mã module<span class="required-star">*</span></span>';
+            html += '<span class="area-field-label">Mã tầng tháp<span class="required-star">*</span></span>';
             html += '<div class="area-field-value">';
-            html += '<input type="text" value="' + escapeHtml(mod.code) + '" onchange="updateModuleField(' + mod.id + ', \'code\', this.value)" placeholder="Nhập mã module...">';
+            html += '<input type="text" value="' + escapeHtml(mod.code) + '" onchange="updateModuleField(' + mod.id + ', \'code\', this.value)" placeholder="Nhập mã tầng tháp...">';
             html += '</div></div>';
             
-            // Tên module
+            // Tên tháp
             html += '<div class="area-field">';
-            html += '<span class="area-field-label">Tên module<span class="required-star">*</span></span>';
+            html += '<span class="area-field-label">Tên tầng tháp<span class="required-star">*</span></span>';
             html += '<div class="area-field-value">';
-            html += '<input type="text" value="' + escapeHtml(mod.name) + '" onchange="updateModuleField(' + mod.id + ', \'name\', this.value)" placeholder="Nhập tên module...">';
+            html += '<input type="text" value="' + escapeHtml(mod.name) + '" onchange="updateModuleField(' + mod.id + ', \'name\', this.value)" placeholder="Nhập tên tầng tháp...">';
             html += '</div></div>';
 
-            // Vị trí
-            var modPositionsCount = mod.positions ? mod.positions.length : 0;
-            html += '<div class="area-field area-position">';
-            html += '<span class="area-field-label">Vị trí<span class="required-star">*</span></span>';
+            // Loại tháp
+            var towerType = mod.towerType || 'Tháp mặt sàn di chuyển';
+            html += '<div class="area-field">';
+            html += '<span class="area-field-label">Loại tháp<span class="required-star">*</span></span>';
             html += '<div class="area-field-value">';
-            html += '<label style="font-size: 13px; display: block; margin-bottom: 5px;">Đã chọn: <strong style="color: #076eb8">' + modPositionsCount + '</strong> vị trí</label>';
-            html += '<div class="area-tags" style="overflow-y: auto; max-height: 120px; cursor: pointer;" onclick="editModule(' + mod.id + ')">';
-            if (mod.positions && mod.positions.length > 0) {
-                mod.positions.forEach(function(pos) {
-                    html += '<span class="tag-item">' + pos + '<span class="tag-remove" onclick="removeModuleTag(' + mod.id + ', \'' + pos + '\', event)">&times;</span></span>';
-                });
-            } else {
-                html += '<span style="color: #94a3b8; font-size: 13px; font-style: italic; display: inline-block; padding: 5px;">Chưa chọn vị trí nào</span>';
-            }
-            html += '</div></div></div>';
+            html += '  <div class="init-dropdown" id="towerTypeDropdown-' + mod.id + '" style="width: 100%;">';
+            html += '    <div class="init-dropdown-toggle" onclick="toggleTowerTypeDropdown(' + mod.id + ')">';
+            html += '      <span id="towerTypeDisplay-' + mod.id + '">' + escapeHtml(towerType) + '</span>';
+            html += '      <i class="fas fa-chevron-down" style="font-size: 12px; color: #8c8c8c"></i>';
+            html += '    </div>';
+            html += '    <div class="init-dropdown-menu" id="towerTypeMenu-' + mod.id + '">';
+            html += '      <div class="init-dropdown-item" onclick="selectTowerType(' + mod.id + ', \'Tháp mặt sàn di chuyển\')">Tháp mặt sàn di chuyển</div>';
+            html += '      <div class="init-dropdown-item" onclick="selectTowerType(' + mod.id + ', \'Tháp lưu trữ hàng hóa\')">Tháp lưu trữ hàng hóa</div>';
+            html += '    </div>';
+            html += '  </div>';
+            html += '</div></div>';
 
-            // Sử dụng field (Moved from Area tab)
+            // Sử dụng field
             html += '<div class="area-field" style="align-items: center; margin-top: 0px;">';
             html += '<span class="area-field-label" style="padding-top: 0;">Sử dụng<span style="color: red;">*</span></span>';
             html += '<div class="area-field-value">';
@@ -1646,42 +1749,15 @@
             html += '</label>';
             html += '</div></div>';
 
-            // THIẾT BỊ SECTION (Per Module)
-            html += '<div class="init-info-row init-equipment-section" style="padding: 10px 0 0 0; border-top: 1px solid #f1f5f9; margin-top: 0px;">';
-            html += '<label class="area-field-label" style="width: 100px;">Thiết bị <span style="color: red;">*</span></label>';
-            html += '<div class="init-equipment-container" style="flex: 1;">';
-            
-            // Search & Filters
-            html += '  <div class="eq-search-bar" style="margin-bottom: 10px;">';
-            html += '    <i class="fas fa-search" style="color:#94a3b8; font-size:12px;"></i>';
-            html += '    <input type="text" id="eqSearchInput-' + mod.id + '" placeholder="Tìm thiết bị..." oninput="renderModuleEqList(' + mod.id + ')" style="font-size: 13px;">';
-            html += '  </div>';
-            
-            html += '  <div class="eq-filter-tabs" style="margin-bottom: 10px;">';
-            ['all', 'nhap', 'xuat', 'danang', 'unset'].forEach(function(f) {
-                var label = f === 'all' ? 'Tất cả' : f === 'unset' ? 'Chưa gán' : EQ_LABELS[f];
-                var active = mod.eqFilterMode === f ? ' active' : '';
-                html += '<button class="eq-filter-btn' + active + '" onclick="setModuleEqFilter(' + mod.id + ', \'' + f + '\')" style="font-size: 11px; padding: 4px 8px;">' + label + '</button>';
-            });
-            html += '  </div>';
 
-            // Device list
-            html += '  <div class="eq-device-list" id="eqDeviceList-' + mod.id + '" style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;">';
-            // Populated by renderModuleEqList
-            html += '  </div>';
 
-            html += '</div></div>'; // end equipment section
+
 
             html += '</div>'; // end area-card-body
             
-            // Actions
-            html += '<div class="area-card-actions">';
-            html += '<button class="area-action-btn' + (activeModuleId === mod.id ? ' active' : '') + '" onclick="editModule(' + mod.id + ')" title="Chọn vị trí trên bản đồ"><i class="fas fa-th"></i></button>';
-            html += '</div>';
-
-            // Collapse Toggle
-            html += '<div class="location-toggle" onclick="toggleModuleCollapse(' + mod.id + ')">';
-            html += '<i class="fas fa-chevron-down"></i>';
+            // Toggle arrow
+            html += '<div class="area-toggle" onclick="toggleModuleCollapse(' + mod.id + ')" style="cursor: pointer; margin-top: 10px;">';
+            html += '  <i class="fas fa-chevron-' + (mod.collapsed ? 'down' : 'up') + '" style="color: #94a3b8; font-size: 14px;"></i>';
             html += '</div>';
 
             html += '</div>'; // end area-card
@@ -1689,88 +1765,45 @@
 
         container.innerHTML = html;
         
-        // Render equipment lists for all expanded modules
-        moduleData.forEach(function(mod) {
-            if (!mod.collapsed) {
-                renderModuleEqList(mod.id);
-            }
-        });
+
     }
 
-    function renderModuleEqList(modId) {
-        var mod = moduleData.find(function(m) { return m.id === modId; });
-        if (!mod) return;
-        
-        var container = document.getElementById('eqDeviceList-' + modId);
-        if (!container) return;
-        
-        var searchEl = document.getElementById('eqSearchInput-' + modId);
-        var searchTerm = searchEl ? searchEl.value.toLowerCase().trim() : '';
-        var html = '';
-
-        equipmentData.forEach(function(group, gIdx) {
-            var filteredItems = group.items.filter(function(item) {
-                if (searchTerm && item.toLowerCase().indexOf(searchTerm) === -1) return false;
-                var assigned = mod.equipmentAssignment[item] || null;
-                if (mod.eqFilterMode === 'all') return true;
-                if (mod.eqFilterMode === 'unset') return !assigned;
-                return assigned === mod.eqFilterMode;
+    window.toggleTowerTypeDropdown = function(modId) {
+        var menu = document.getElementById('towerTypeMenu-' + modId);
+        if (menu) {
+            document.querySelectorAll('.init-dropdown-menu.show').forEach(function(m) {
+                if (m !== menu) m.classList.remove('show');
             });
-            
-            if (filteredItems.length === 0) return;
-
-            html += '<div class="eq-group-header" style="font-size: 12px; padding: 6px 10px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">';
-            html += '<span>' + group.group + '</span>';
-            html += '<span style="background: #fff; padding: 1px 6px; border-radius: 10px; font-size: 10px; color: #64748b;">' + filteredItems.length + '</span></div>';
-            
-            filteredItems.forEach(function(item) {
-                var assigned = mod.equipmentAssignment[item] || null;
-                html += '<div class="eq-device-row" style="padding: 6px 10px; border-bottom: 1px dotted #e2e8f0; display: flex; align-items: center; gap: 8px;">';
-                html += '<span style="flex: 1; font-size: 13px; font-weight: 500; color: #1e293b;">' + item + '</span>';
-                html += '<div class="eq-type-pills" style="display: flex; gap: 4px;">';
-                ['nhap', 'xuat', 'danang'].forEach(function(type) {
-                    var isActive = assigned === type;
-                    var colors = {
-                        nhap: { bg: '#fff7ed', text: '#c2410c', border: '#ffedd5' },
-                        xuat: { bg: '#f0fdf4', text: '#15803d', border: '#dcfce7' },
-                        danang: { bg: '#eff6ff', text: '#1d4ed8', border: '#dbeafe' }
-                    }[type];
-                    var style = isActive ? 
-                        ('background: ' + colors.bg + '; color: ' + colors.text + '; border: 1px solid ' + colors.text + ';') : 
-                        ('background: #fff; color: #94a3b8; border: 1px solid #e2e8f0;');
-                    html += '<button onclick="assignModuleEq(' + modId + ', \'' + item + '\', \'' + type + '\')" style="padding: 2px 6px; font-size: 10px; border-radius: 4px; cursor: pointer; ' + style + ' transition: all 0.2s;">' + EQ_LABELS[type] + '</button>';
-                });
-                html += '</div></div>';
-            });
-        });
-
-        if (!html) html = '<div style="padding: 15px; text-align: center; color: #94a3b8; font-size: 12px;">Không có thiết bị phù hợp</div>';
-        container.innerHTML = html;
-    }
-
-    window.assignModuleEq = function(modId, item, type) {
-        var mod = moduleData.find(function(m) { return m.id === modId; });
-        if (!mod) return;
-        
-        if (mod.equipmentAssignment[item] === type) {
-            delete mod.equipmentAssignment[item];
-        } else {
-            mod.equipmentAssignment[item] = type;
+            menu.classList.toggle('show');
         }
-        renderModuleEqList(modId);
     };
 
-    window.setModuleEqFilter = function(modId, filter) {
+    window.selectTowerType = function(modId, type) {
         var mod = moduleData.find(function(m) { return m.id === modId; });
         if (mod) {
-            mod.eqFilterMode = filter;
+            mod.towerType = type;
             renderModuleCards();
+            saveWarehouseConfig();
+        }
+    };
+
+    window.toggleModuleActive = function(modId, isActive) {
+        var mod = moduleData.find(function(m) { return m.id === modId; });
+        if (mod) {
+            mod.isActive = isActive;
+            saveWarehouseConfig();
+            if (window.showToast) {
+                window.showToast((isActive ? 'Đã kích hoạt' : 'Đã ngưng') + ' sử dụng tầng tháp', 'success');
+            }
         }
     };
 
     function updateModuleField(id, field, value) {
         var mod = moduleData.find(function(m) { return m.id === id; });
-        if (mod) mod[field] = value;
+        if (mod) {
+            mod[field] = value;
+            saveWarehouseConfig();
+        }
     }
 
     function toggleModuleCollapse(id) {
@@ -1780,15 +1813,24 @@
         renderModuleCards();
     }
 
-    window.toggleModuleActive = function(id, isActive) {
-        var mod = moduleData.find(function(m) { return m.id === id; });
-        if (mod) mod.isActive = isActive;
+
+    window.toggleTowerTypeDropdown = function(id) {
+        var menu = document.getElementById('towerTypeMenu-' + id);
+        if (menu) {
+            var isOpen = menu.classList.contains('show');
+            // Close all first
+            document.querySelectorAll('.init-dropdown-menu').forEach(function(m) { m.classList.remove('show'); });
+            if (!isOpen) menu.classList.add('show');
+        }
     };
 
-    window.toggleModuleActive = function(id, isActive) {
-        moduleData.forEach(function(mod) {
-            if (mod.id === id) mod.isActive = isActive;
-        });
+    window.selectTowerType = function(id, value) {
+        var mod = moduleData.find(function(m) { return m.id === id; });
+        if (mod) mod.towerType = value;
+        var display = document.getElementById('towerTypeDisplay-' + id);
+        if (display) display.innerText = value;
+        var menu = document.getElementById('towerTypeMenu-' + id);
+        if (menu) menu.classList.remove('show');
     };
 
     function editModule(id) {
@@ -1801,13 +1843,7 @@
         if (activeModuleId !== null) {
             var mod = moduleData.find(function(m) { return m.id === activeModuleId; });
             if (mod && mod.positions) {
-                // Pre-select positions on grid if they belong to current floor
-                mod.positions.forEach(function(pos) {
-                    if (pos.indexOf(currentFloor + '-') === 0) {
-                        var idOnGrid = pos.replace(currentFloor + '-', '').split(':'); // Need to handle parsing label to r-c
-                        // Actually, I should store r-c IDs or have a reverse lookup
-                    }
-                });
+                // Positions are already handled by refreshVisuals
             }
         }
         
@@ -1851,6 +1887,334 @@
         if (window.showToast) window.showToast('Đã lưu cấu hình module thành công!', 'success');
         else alert('Đã lưu cấu hình module thành công!');
     }
+
+    // ---- Tầng tháp MANAGEMENT ----
+    function renderTowerFloorCards() {
+        var container = document.getElementById('towerFloorCardList');
+        if (!container) return;
+        
+        if (towerFloorData.length === 0) {
+            container.innerHTML = '<div style="padding: 40px; text-align: center; color: #94a3b8;"><i class="fas fa-layer-group" style="font-size: 40px; opacity: 0.2; margin-bottom: 15px; display: block;"></i>Chưa có tầng tháp nào. Nhấn + để thêm mới.</div>';
+            return;
+        }
+
+        var html = '';
+        towerFloorData.forEach(function(tf, idx) {
+            var isCollapsed = tf.collapsed ? ' collapsed' : '';
+            var activeModule = moduleData.find(function(m) { return m.id === tf.moduleId; });
+            var moduleDisplay = activeModule ? (activeModule.code + ' - ' + activeModule.name) : 'Chọn tháp';
+            
+            html += '<div class="area-card' + isCollapsed + '" data-tower-floor-id="' + tf.id + '">';
+            html += '<div class="card-number-label-container"><span class="card-number-label">Tầng tháp ' + (idx + 1) + '</span></div>';
+            html += '<div class="area-card-body">';
+            
+            // Searchable Combobox: Tháp
+            html += '<div class="area-field">';
+            html += '<span class="area-field-label">Tháp<span class="required-star">*</span></span>';
+            html += '<div class="area-field-value">';
+            html += '  <div class="init-dropdown" id="tfModuleDropdown-' + tf.id + '" style="width: 100%;">';
+            html += '    <div class="init-dropdown-toggle" onclick="toggleTfModuleDropdown(' + tf.id + ')">';
+            html += '      <span id="tfModuleDisplay-' + tf.id + '">' + escapeHtml(moduleDisplay) + '</span>';
+            html += '      <i class="fas fa-chevron-down" style="font-size: 12px; color: #8c8c8c"></i>';
+            html += '    </div>';
+            html += '    <div class="init-dropdown-menu" id="tfModuleMenu-' + tf.id + '" style="max-height: 250px; overflow-y: auto;">';
+            html += '      <div class="dropdown-search-wrapper" style="padding: 8px; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; background: #fff;">';
+            html += '        <input type="text" placeholder="Tìm tháp..." oninput="filterTfModuleOptions(' + tf.id + ', this.value)" style="width: 100%; padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 13px;">';
+            html += '      </div>';
+            html += '      <div class="dropdown-options-list" id="tfModuleOptions-' + tf.id + '">';
+            // Optinos populated by renderTfModuleOptions
+            html += '      </div>';
+            html += '    </div>';
+            html += '  </div>';
+            html += '</div></div>';
+            
+            // Mã tầng tháp
+            html += '<div class="area-field">';
+            html += '<span class="area-field-label">Mã tầng tháp<span class="required-star">*</span></span>';
+            html += '<div class="area-field-value">';
+            html += '<input type="text" value="' + escapeHtml(tf.code) + '" onchange="updateTowerFloorField(' + tf.id + ', \'code\', this.value)" placeholder="Nhập mã tầng tháp...">';
+            html += '</div></div>';
+            
+            // Tên tầng tháp
+            html += '<div class="area-field">';
+            html += '<span class="area-field-label">Tên tầng tháp<span class="required-star">*</span></span>';
+            html += '<div class="area-field-value">';
+            html += '<input type="text" value="' + escapeHtml(tf.name) + '" onchange="updateTowerFloorField(' + tf.id + ', \'name\', this.value)" placeholder="Nhập tên tầng tháp...">';
+            html += '</div></div>';
+
+            // Vị trí
+            var tfPositionsCount = tf.positions ? tf.positions.length : 0;
+            html += '<div class="area-field area-position">';
+            html += '<span class="area-field-label">Vị trí<span class="required-star">*</span></span>';
+            html += '<div class="area-field-value">';
+            html += '<label style="font-size: 13px; display: block; margin-bottom: 5px;">Đã chọn: <strong style="color: #076eb8">' + tfPositionsCount + '</strong> vị trí</label>';
+            html += '<div class="area-tags" style="overflow-y: auto; max-height: 120px; cursor: pointer;" onclick="editTowerFloor(' + tf.id + ')">';
+            if (tf.positions && tf.positions.length > 0) {
+                tf.positions.forEach(function(pos) {
+                    html += '<span class="tag-item">' + pos + '<span class="tag-remove" onclick="removeTowerFloorTag(' + tf.id + ', \'' + pos + '\', event)">&times;</span></span>';
+                });
+            } else {
+                html += '<span style="color: #94a3b8; font-size: 13px; font-style: italic; display: inline-block; padding: 5px;">Chưa chọn vị trí nào</span>';
+            }
+            html += '</div></div></div>';
+            
+            // THIẾT BỊ SECTION (Reuse Module logic)
+            html += '<div class="init-info-row init-equipment-section" style="padding: 10px 0 0 0; border-top: 1px solid #f1f5f9; margin-top: 0px;">';
+            html += '<label class="area-field-label" style="width: 100px;">Thiết bị <span style="color: red;">*</span></label>';
+            html += '<div class="init-equipment-container" style="flex: 1;">';
+            
+            // Search & Filters
+            html += '  <div class="eq-search-bar" style="margin-bottom: 10px;">';
+            html += '    <i class="fas fa-search" style="color:#94a3b8; font-size:12px;"></i>';
+            html += '    <input type="text" id="tfEqSearchInput-' + tf.id + '" placeholder="Tìm thiết bị..." oninput="renderTowerFloorEqList(' + tf.id + ')" style="font-size: 13px;">';
+            html += '  </div>';
+            
+            html += '  <div class="eq-filter-tabs" style="margin-bottom: 10px;">';
+            ['all', 'nhap', 'xuat', 'danang', 'unset'].forEach(function(f) {
+                var label = f === 'all' ? 'Tất cả' : f === 'unset' ? 'Chưa gán' : EQ_LABELS[f];
+                var active = tf.eqFilterMode === f ? ' active' : '';
+                html += '<button class="eq-filter-btn' + active + '" onclick="setTowerFloorEqFilter(' + tf.id + ', \'' + f + '\')" style="font-size: 11px; padding: 4px 8px;">' + label + '</button>';
+            });
+            html += '  </div>';
+            
+            html += '  <div class="eq-device-list" id="tfEqDeviceList-' + tf.id + '" style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff;">';
+            html += '  </div>';
+            html += '</div></div>';
+
+            html += '</div>'; // card body
+            
+            // Actions
+            html += '<div class="area-card-actions">';
+            html += '<button class="area-action-btn' + (activeTowerFloorId === tf.id ? ' active' : '') + '" onclick="editTowerFloor(' + tf.id + ')" title="Chọn vị trí trên bản đồ"><i class="fas fa-th"></i></button>';
+            html += '<button class="area-action-btn delete" onclick="deleteTowerFloor(' + tf.id + ')" title="Xóa"><i class="fas fa-trash-alt"></i></button>';
+            html += '</div>';
+
+            // Toggle
+            html += '<div class="area-toggle" onclick="toggleTowerFloorCollapse(' + tf.id + ')" style="cursor: pointer; margin-top: 10px;">';
+            html += '  <i class="fas fa-chevron-' + (tf.collapsed ? 'down' : 'up') + '" style="color: #94a3b8; font-size: 14px;"></i>';
+            html += '</div>';
+            
+            html += '</div>';
+        });
+
+        container.innerHTML = html;
+        
+        // Render sub-elements
+        towerFloorData.forEach(function(tf) {
+            renderTfModuleOptions(tf.id, '');
+            if (!tf.collapsed) {
+                renderTowerFloorEqList(tf.id);
+            }
+        });
+    }
+
+    function renderTfModuleOptions(tfId, term) {
+        var container = document.getElementById('tfModuleOptions-' + tfId);
+        if (!container) return;
+        
+        var tf = towerFloorData.find(function(t) { return t.id === tfId; });
+        var searchTerm = term.toLowerCase().trim();
+        
+        var filteredModules = moduleData.filter(function(m) {
+            return m.code.toLowerCase().indexOf(searchTerm) > -1 || m.name.toLowerCase().indexOf(searchTerm) > -1;
+        });
+        
+        if (filteredModules.length === 0) {
+            container.innerHTML = '<div class="init-dropdown-item" style="color: #94a3b8; font-style: italic;">Không tìm thấy tháp</div>';
+            return;
+        }
+        
+        var html = '';
+        filteredModules.forEach(function(m) {
+            var selected = (tf && tf.moduleId === m.id) ? ' active' : '';
+            html += '<div class="init-dropdown-item' + selected + '" onclick="selectTowerFloorModule(' + tfId + ', ' + m.id + ')">' + escapeHtml(m.code + ' - ' + m.name) + '</div>';
+        });
+        container.innerHTML = html;
+    }
+
+    window.toggleTfModuleDropdown = function(tfId) {
+        var menu = document.getElementById('tfModuleMenu-' + tfId);
+        if (menu) {
+            // Close other dropdowns
+            document.querySelectorAll('.init-dropdown-menu.show').forEach(function(m) {
+                if (m !== menu) m.classList.remove('show');
+            });
+            menu.classList.toggle('show');
+            // If opening, focus search
+            if (menu.classList.contains('show')) {
+                var input = menu.querySelector('input');
+                if (input) {
+                    input.value = '';
+                    input.focus();
+                    renderTfModuleOptions(tfId, '');
+                }
+            }
+        }
+    };
+
+    window.filterTfModuleOptions = function(tfId, term) {
+        renderTfModuleOptions(tfId, term);
+    };
+
+    window.selectTowerFloorModule = function(tfId, moduleId) {
+        var tf = towerFloorData.find(function(t) { return t.id === tfId; });
+        if (tf) {
+            tf.moduleId = moduleId;
+            var mod = moduleData.find(function(m) { return m.id === moduleId; });
+            var display = document.getElementById('tfModuleDisplay-' + tfId);
+            if (display && mod) display.textContent = mod.code + ' - ' + mod.name;
+        }
+        var menu = document.getElementById('tfModuleMenu-' + tfId);
+        if (menu) menu.classList.remove('show');
+    };
+
+    function renderTowerFloorEqList(tfId) {
+        var tf = towerFloorData.find(function(t) { return t.id === tfId; });
+        if (!tf) return;
+        
+        var container = document.getElementById('tfEqDeviceList-' + tfId);
+        if (!container) return;
+        
+        var searchEl = document.getElementById('tfEqSearchInput-' + tfId);
+        var searchTerm = searchEl ? searchEl.value.toLowerCase().trim() : '';
+        var html = '';
+
+        equipmentData.forEach(function(group) {
+            var filteredItems = group.items.filter(function(item) {
+                if (searchTerm && item.toLowerCase().indexOf(searchTerm) === -1) return false;
+                var assigned = tf.equipmentAssignment[item] || null;
+                if (tf.eqFilterMode === 'all') return true;
+                if (tf.eqFilterMode === 'unset') return !assigned;
+                return assigned === tf.eqFilterMode;
+            });
+            
+            if (filteredItems.length === 0) return;
+
+            html += '<div class="eq-group-header" style="font-size: 12px; padding: 6px 10px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">';
+            html += '<span>' + group.group + '</span>';
+            html += '<span style="background: #fff; padding: 1px 6px; border-radius: 10px; font-size: 10px; color: #64748b;">' + filteredItems.length + '</span></div>';
+            
+            filteredItems.forEach(function(item) {
+                var assigned = tf.equipmentAssignment[item] || null;
+                html += '<div class="eq-device-row" style="padding: 6px 10px; border-bottom: 1px dotted #e2e8f0; display: flex; align-items: center; gap: 8px;">';
+                html += '<span style="flex: 1; font-size: 13px; font-weight: 500; color: #1e293b;">' + item + '</span>';
+                html += '<div class="eq-type-pills" style="display: flex; gap: 4px;">';
+                ['nhap', 'xuat', 'danang'].forEach(function(type) {
+                    var isActive = assigned === type;
+                    var colors = {
+                        nhap: { bg: '#fff7ed', text: '#c2410c' },
+                        xuat: { bg: '#f0fdf4', text: '#15803d' },
+                        danang: { bg: '#eff6ff', text: '#1d4ed8' }
+                    }[type];
+                    var style = isActive ? 
+                        ('background: ' + colors.bg + '; color: ' + colors.text + '; border: 1px solid ' + colors.text + ';') : 
+                        ('background: #fff; color: #94a3b8; border: 1px solid #e2e8f0;');
+                    html += '<button onclick="assignTowerFloorEq(' + tfId + ', \'' + item + '\', \'' + type + '\')" style="padding: 2px 6px; font-size: 10px; border-radius: 4px; cursor: pointer; ' + style + '">' + EQ_LABELS[type] + '</button>';
+                });
+                html += '</div></div>';
+            });
+        });
+
+        if (!html) html = '<div style="padding: 15px; text-align: center; color: #94a3b8; font-size: 12px;">Không có thiết bị phù hợp</div>';
+        container.innerHTML = html;
+    }
+
+    window.assignTowerFloorEq = function(tfId, item, type) {
+        var tf = towerFloorData.find(function(t) { return t.id === tfId; });
+        if (!tf) return;
+        if (tf.equipmentAssignment[item] === type) delete tf.equipmentAssignment[item];
+        else tf.equipmentAssignment[item] = type;
+        renderTowerFloorEqList(tfId);
+    };
+
+    window.setTowerFloorEqFilter = function(tfId, filter) {
+        var tf = towerFloorData.find(function(t) { return t.id === tfId; });
+        if (tf) {
+            tf.eqFilterMode = filter;
+            renderTowerFloorCards();
+        }
+    };
+
+    function updateTowerFloorField(id, field, value) {
+        var tf = towerFloorData.find(function(t) { return t.id === id; });
+        if (tf) tf[field] = value;
+    }
+
+    function toggleTowerFloorCollapse(id) {
+        towerFloorData.forEach(function(tf) {
+            if (tf.id === id) tf.collapsed = !tf.collapsed;
+        });
+        renderTowerFloorCards();
+    }
+
+    window.addTowerFloor = function() {
+        towerFloorData.push({
+            id: Date.now(),
+            moduleId: null,
+            code: '',
+            name: '',
+            equipmentAssignment: {},
+            eqFilterMode: 'all',
+            collapsed: false
+        });
+        renderTowerFloorCards();
+        // Scroll to bottom
+        var container = document.querySelector('#tabContentTowerFloor .module-scroll-section');
+        if (container) {
+            setTimeout(function() { container.scrollTop = container.scrollHeight; }, 50);
+        }
+    };
+
+    window.deleteTowerFloor = function(id) {
+        window.showCustomConfirm('Xác nhận xóa', 'Bạn có chắc chắn muốn xóa tầng tháp này?', function() {
+            towerFloorData = towerFloorData.filter(function(tf) { return tf.id !== id; });
+            renderTowerFloorCards();
+        });
+    };
+
+    window.saveTowerFloorTab = function() {
+        if (!currentWarehouse) return;
+        currentWarehouse.towerFloors = JSON.parse(JSON.stringify(towerFloorData));
+        try {
+            var stored = localStorage.getItem('wms_warehouses_v7');
+            if (stored) {
+                var list = JSON.parse(stored);
+                var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
+                if (idx !== -1) {
+                    list[idx] = currentWarehouse;
+                    localStorage.setItem('wms_warehouses_v7', JSON.stringify(list));
+                }
+            }
+        } catch (e) {
+            alert('Lỗi lưu tầng tháp: ' + e.message);
+            return;
+        }
+        if (window.showToast) window.showToast('Đã lưu cấu hình tầng tháp thành công!', 'success');
+        else alert('Đã lưu cấu hình tầng tháp thành công!');
+    };
+
+    window.editTowerFloor = function(id) {
+        activeTowerFloorId = (activeTowerFloorId === id) ? null : id;
+        
+        // Reset grid selection
+        var config = floorConfigs[currentFloor];
+        if (config) config.selected = {};
+        
+        renderTowerFloorCards();
+        refreshVisuals();
+    }
+
+    window.removeTowerFloorTag = function(tfId, pos, event) {
+        if (event) event.stopPropagation();
+        var tf = towerFloorData.find(function(t) { return t.id === tfId; });
+        if (tf) {
+            tf.positions = tf.positions.filter(function(p) { return p !== pos; });
+            renderTowerFloorCards();
+            refreshVisuals();
+        }
+    }
+
+    // ---- Filter ----
 
     // ---- Filter ----
     function setEqFilter(mode, btn) {
@@ -2401,29 +2765,9 @@
                 var list = JSON.parse(stored);
                 var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
                 if (idx !== -1) {
-                    list[idx].locationTypes = floorTypeData;
+                    // Update locationTypes with current locationData, not floorTypeData
+                    list[idx].locationTypes = locationData;
                     localStorage.setItem('wms_warehouses_v7', JSON.stringify(list));
-                }
-            }
-        } catch (e) {
-            alert('Lỗi lưu loại vị trí: ' + e.message);
-        }
-
-        currentWarehouse.warehouseType = warehouseType;
-        currentWarehouse.equipmentAssignment = equipmentAssignment;
-        saveEqAssignmentToStorage();
-
-        currentWarehouse.configData = floorConfigs; // Save grid config
-
-        // Save to localStorage
-        try {
-            var stored = localStorage.getItem('wms_warehouses_v6');
-            if (stored) {
-                var list = JSON.parse(stored);
-                var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
-                if (idx !== -1) {
-                    list[idx] = currentWarehouse;
-                    localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
                 }
             }
         } catch (e) {
@@ -2462,6 +2806,9 @@
     /**
      * Render area cards into the area card list
      */
+    /**
+     * Render area cards into the area card list
+     */
     function renderAreaCards() {
         var container = document.getElementById('areaCardList');
         if (!container) return;
@@ -2477,18 +2824,18 @@
             html += '<div class="card-number-label-container"><span class="card-number-label">Khu vực ' + (i + 1) + '</span></div>';
             html += '<div class="area-card-body">';
 
-            // Module (New field)
-            var selectedModule = area.selectedModule || null;
-            var displayModule = selectedModule ? selectedModule.code + ' - ' + selectedModule.name : '';
+            // Tầng tháp (Searchable Combobox)
+            var selectedModule = area.selectedModule || (area.moduleId !== null ? moduleData.find(function(m) { return m.id === area.moduleId; }) : null);
+            var displayModule = selectedModule ? (selectedModule.code + ' - ' + selectedModule.name) : '';
             var hasModuleSelection = selectedModule ? ' has-selection' : '';
 
-            html += '<div class="init-info-row init-equipment-section" style="padding: 0; margin-bottom: 8px;">';
-            html += '<label class="area-field-label" style="padding-top: 10px; width: 100px;">Module<span style="color: red;">*</span></label>';
+            html += '<div class="area-field init-equipment-section" style="padding: 0; margin-bottom: 12px;">';
+            html += '<span class="area-field-label" style="padding-top: 10px;">Tầng tháp<span style="color: red;">*</span></span>';
             html += '<div class="init-equipment-container" style="flex: 1;">';
             html += '  <div class="init-equipment-search-wrapper' + hasModuleSelection + '">';
             html += '    <div class="init-equipment-search">';
             html += '      <i class="fas fa-search search-icon"></i>';
-            html += '      <input type="text" id="areaModuleSearch-' + area.id + '" value="' + displayModule + '" placeholder="Chọn module..." onfocus="showAreaModuleList(' + area.id + ')" oninput="filterAreaModuleList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selectedModule ? 'readonly' : '') + '>';
+            html += '      <input type="text" id="areaModuleSearch-' + area.id + '" value="' + displayModule + '" placeholder="Chọn tầng tháp..." onfocus="showAreaModuleList(' + area.id + ')" oninput="filterAreaModuleList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selectedModule ? 'readonly' : '') + '>';
             
             if (selectedModule && !isReadonly) {
                 html += '      <i class="fas fa-times clear-icon" title="Xóa" onclick="removeAreaModule(' + area.id + ')"></i>';
@@ -2497,234 +2844,66 @@
             html += '    </div>';
             html += '    <div class="init-equipment-list" id="areaModuleList-' + area.id + '" style="max-height: 200px; overflow-y: auto;"></div>';
             html += '  </div>';
-            html += '</div>';
-            html += '</div>';
-
-            // Loại khu vực (Searchable combobox)
-            var selectedAreaType = area.selectedAreaType || null;
-            var displayType = selectedAreaType ? '[' + selectedAreaType.code + '] ' + selectedAreaType.name : '';
-            var hasTypeSelection = selectedAreaType ? ' has-selection' : '';
-
-            html += '<div class="init-info-row init-equipment-section" style="padding: 0;">';
-            html += '<label class="area-field-label" style="padding-top: 10px; width: 100px;">Loại khu vực<span style="color: red;">*</span></label>';
-            html += '<div class="init-equipment-container" style="flex: 1;">';
-            html += '  <div class="init-equipment-search-wrapper' + hasTypeSelection + '">';
-            html += '    <div class="init-equipment-search">';
-            html += '      <i class="fas fa-search search-icon"></i>';
-            html += '      <input type="text" id="areaTypeSearch-' + area.id + '" value="' + displayType + '" placeholder="Tìm theo mã hoặc tên loại..." onfocus="showAreaTypeList(' + area.id + ')" oninput="filterAreaTypeList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selectedAreaType ? 'readonly' : '') + '>';
-            
-            if (selectedAreaType && !isReadonly) {
-                html += '      <i class="fas fa-times clear-icon" title="Xóa" onclick="removeAreaType(' + area.id + ')"></i>';
-            }
-            html += '      <i class="fas fa-chevron-down toggle-icon" onclick="' + (isReadonly ? '' : 'toggleAreaTypeList(' + area.id + ')') + '"></i>';
-            html += '    </div>';
-            html += '    <div class="init-equipment-list" id="areaTypeList-' + area.id + '" style="max-height: 200px; overflow-y: auto;"></div>';
-            html += '  </div>';
-            html += '</div>';
-            html += '</div>';
-            
-            // Mã khu vực
-            html += '<div class="area-field area-code">';
-            html += '<span class="area-field-label">Mã khu vực</span>';
-            html += '<div class="area-field-value">';
-            html += '<input type="text" value="' + escapeHtml(area.code || '') + '" onchange="updateAreaField(' + area.id + ', \'code\', this.value)" placeholder="Nhập mã khu vực..." ' + (isReadonly ? 'disabled' : '') + '>';
             html += '</div></div>';
-            
+
             // Tên khu vực
             html += '<div class="area-field">';
             html += '<span class="area-field-label">Tên khu vực<span style="color: red;">*</span></span>';
             html += '<div class="area-field-value">';
-            html += '<input type="text" value="' + escapeHtml(area.name || '') + '" onchange="updateAreaField(' + area.id + ', \'name\', this.value)" placeholder="Nhập tên khu vực..." ' + (isReadonly ? 'disabled' : '') + '>';
+            html += '<input type="text" value="' + escapeHtml(area.areaName || '') + '" onchange="updateAreaField(' + area.id + ', \'areaName\', this.value)" placeholder="Nhập tên khu vực..." ' + (isReadonly ? 'disabled' : '') + '>';
             html += '</div></div>';
             
-            // Màu sắc (Compact Edition)
-            var colorType = area.colorType || 'default';
-            html += '<div class="area-field" style="align-items: center; display: none;">';
-            html += '<span class="area-field-label" style="padding-top: 0;">Màu sắc</span>';
-            html += '<div class="area-field-value">';
-            html += '<div class="area-color-options" style="display: flex; align-items: center; gap: 15px;">';
-            
-            // Default Option
-            html += '<label class="color-option-item" style="display: flex; align-items: center; gap: 4px; margin: 0; cursor: pointer;">';
-            html += '<input type="radio" name="areaColorType-' + area.id + '" value="default" ' + (colorType === 'default' ? 'checked' : '') + ' onchange="updateAreaField(' + area.id + ', \'colorType\', \'default\')" ' + (isReadonly ? 'disabled' : '') + ' style="margin: 0;">';
-            html += '<span style="font-size: 13px;">Mặc định</span>';
-            html += '</label>';
-            
-            // Custom Option
-            html += '<label class="color-option-item" style="display: flex; align-items: center; gap: 4px; margin: 0; cursor: pointer;">';
-            html += '<input type="radio" name="areaColorType-' + area.id + '" value="custom" ' + (colorType === 'custom' ? 'checked' : '') + ' onchange="updateAreaField(' + area.id + ', \'colorType\', \'custom\')" ' + (isReadonly ? 'disabled' : '') + ' style="margin: 0;">';
-            html += '<span style="font-size: 13px;">Tùy chỉnh</span>';
-            html += '</label>';
-            
-            // Compact Color Picker (only if custom is selected)
-            if (colorType === 'custom') {
-                html += '<input type="color" class="area-color-input" value="' + (area.color || '#38A0F0') + '" oninput="updateAreaField(' + area.id + ', \'color\', this.value)" ' + (isReadonly ? 'disabled' : '') + '>';
-            }
-            
-            html += '</div></div></div>';
-            
-            // Check if selected type should display conditional fields
-            var shouldShowConditionalFields = false;
-            if (selectedAreaType && (selectedAreaType.code === 'LKV02' || selectedAreaType.code === 'LKV03' || selectedAreaType.code === 'LKV04')) {
-                shouldShowConditionalFields = true;
-            }
+            // Nhóm sản phẩm (Searchable Combobox)
+            var selProduct = area.selectedProduct || null;
+            var displayProduct = selProduct ? ('[' + selProduct.code + '] ' + selProduct.name) : '';
+            var hasProductSelection = selProduct ? ' has-selection' : '';
 
-            var conditionalDisplay = shouldShowConditionalFields ? '' : ' style="display: none;"';
-
-            // Sản phẩm (In-bar selection display)
-            var selectedProduct = (area.selectedProducts && area.selectedProducts.length > 0) ? area.selectedProducts[0] : null;
-            var displayValue = selectedProduct ? '[' + selectedProduct.code + '] ' + selectedProduct.name : '';
-            var hasSelectionClass = selectedProduct ? ' has-selection' : '';
-
-            html += '<div class="init-info-row init-equipment-section" style="padding: 0;' + (shouldShowConditionalFields ? '' : ' display: none;') + '">';
-            html += '<label class="area-field-label" style="padding-top: 10px;">Nhóm sản phẩm <span style="color: red;">*</span></label>';
-            html += '<div class="init-equipment-container">';
-            html += '  <div class="init-equipment-search-wrapper' + hasSelectionClass + '">';
+            html += '<div class="area-field init-equipment-section" style="padding: 0; margin-top: 12px; margin-bottom: 2px;">';
+            html += '<span class="area-field-label" style="padding-top: 10px;">Nhóm sản phẩm<span style="color: red;">*</span></span>';
+            html += '<div class="init-equipment-container" style="flex: 1;">';
+            html += '  <div class="init-equipment-search-wrapper' + hasProductSelection + '">';
             html += '    <div class="init-equipment-search">';
             html += '      <i class="fas fa-search search-icon"></i>';
-            html += '      <input type="text" id="areaProductSearch-' + area.id + '" value="' + displayValue + '" placeholder="Tìm theo mã hoặc tên nhóm sản phẩm..." onfocus="showAreaProductList(' + area.id + ')" oninput="filterAreaProductList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selectedProduct ? 'readonly' : '') + '>';
+            html += '      <input type="text" id="areaProductSearch-' + area.id + '" value="' + displayProduct + '" placeholder="Tìm nhóm sản phẩm..." onfocus="showAreaProductList(' + area.id + ')" oninput="filterAreaProductList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selProduct ? 'readonly' : '') + '>';
             
-            // No rule badge for main product group as requested
-
-            if (selectedProduct && !isReadonly) {
-                html += '      <i class="fas fa-times clear-icon" title="Xóa sản phẩm" onclick="removeAreaProduct(' + area.id + ', 0)"></i>';
+            if (selProduct && !isReadonly) {
+                html += '      <i class="fas fa-times clear-icon" title="Xóa" onclick="removeAreaProduct(' + area.id + ')"></i>';
             }
             html += '      <i class="fas fa-chevron-down toggle-icon" onclick="' + (isReadonly ? '' : 'toggleAreaProductList(' + area.id + ')') + '"></i>';
             html += '    </div>';
-            html += '    <div class="init-equipment-list" id="areaProductList-' + area.id + '"></div>';
+            html += '    <div class="init-equipment-list" id="areaProductList-' + area.id + '" style="max-height: 200px; overflow-y: auto;"></div>';
             html += '  </div>';
-            html += '</div>';
-            html += '</div>';
-            
-            // Vị trí (Quy cách field removed per user request)
+            html += '</div></div>';
+
+
+
+            // Vị trí
             var areaPositionsCount = area.positions ? area.positions.length : 0;
-            html += '<div class="area-field area-position">';
+            html += '<div class="area-field area-position" style="margin-top: 10px;">';
             html += '<span class="area-field-label">Vị trí<span style="color: red;">*</span></span>';
             html += '<div class="area-field-value">';
             html += '<label style="font-size: 13px; display: block; margin-bottom: 5px;">Đã chọn: <strong style="color: #076eb8">' + areaPositionsCount + '</strong> vị trí</label>';
-            html += '<div class="area-tags" style="overflow-y: auto; max-height: 120px;">';
-        if (area.positions && area.positions.length > 0) {
-            for (var j = 0; j < area.positions.length; j++) {
-                var pos = area.positions[j];
-                html += '<span class="tag-item">' + pos + '<span class="tag-remove" onclick="' + (isReadonly ? '' : 'removeAreaTag(' + area.id + ', \'' + pos + '\')') + '">&times;</span></span>';
-            }
-        } else {
-            html += '<span style="color: #9cb3c9; font-size: 13px; font-style: italic; display: inline-block; padding: 5px;">Chưa chọn vị trí nào</span>';
-        }
-        html += '</div></div></div>';
-
-
-            // --- Sub-area Section (Moved here) ---
-            html += '<div class="sub-area-section">';
-            html += '  <div class="sub-area-header">';
-            html += '    <div class="sub-area-title"><i class="fas fa-sitemap"></i> Khu vực con</div>';
-            html += '    <button class="btn-add-sub-area" onclick="' + (isReadonly ? '' : 'addSubArea(' + area.id + ')') + '"><i class="fas fa-plus"></i> Thêm khu vực con</button>';
-            html += '  </div>';
-            
-            html += '  <div class="sub-area-accordion">';
-            if (area.subAreas && area.subAreas.length > 0) {
-                for (var sIdx = 0; sIdx < area.subAreas.length; sIdx++) {
-                    var sa = area.subAreas[sIdx];
-                    var saOpen = sa.collapsed === false ? ' open' : '';
-                    var saActive = (activeSubAreaId === sa.id && activeParentAreaId === area.id) ? ' active' : '';
-                    
-                    html += '<div class="sub-area-item' + saOpen + saActive + '">';
-                    html += '  <div class="sub-area-item-header" onclick="toggleSubAreaAccordion(' + area.id + ', ' + sa.id + ')">';
-                    html += '    <div class="sub-area-item-title">' + (sa.name || 'Khu vực con ' + (sIdx + 1)) + (sa.isValid === false ? ' <i class="fas fa-exclamation-circle" style="color:#ef4444;" title="Vị trí phải thuộc khu vực cha"></i>' : '') + '</div>';
-                    html += '    <i class="fas fa-chevron-down sub-area-chevron"></i>';
-                    html += '  </div>';
-                    
-                    html += '  <div class="sub-area-item-content">';
-                    
-                    // Row 1: Code & Name
-                    html += '    <div class="sub-area-row">';
-                    html += '      <div class="sub-area-field">';
-                    html += '        <label class="sub-area-field-label">Mã khu vực con</label>';
-                    html += '        <div class="sub-area-field-value"><input type="text" value="' + escapeHtml(sa.code || '') + '" oninput="updateSubAreaField(' + area.id + ', ' + sa.id + ', \'code\', this.value)" placeholder="Nhập mã..." ' + (isReadonly ? 'disabled' : '') + '></div>';
-                    html += '      </div>';
-                    html += '      <div class="sub-area-field">';
-                    html += '        <label class="sub-area-field-label">Tên khu vực con</label>';
-                    html += '        <div class="sub-area-field-value"><input type="text" value="' + escapeHtml(sa.name || '') + '" oninput="updateSubAreaField(' + area.id + ', ' + sa.id + ', \'name\', this.value)" placeholder="Nhập tên..." ' + (isReadonly ? 'disabled' : '') + '></div>';
-                    html += '      </div>';
-                    html += '    </div>';
-
-                    // Row 2: Product (Combobox)
-                    var saProd = sa.selectedProduct || null;
-                    var saProdDisplay = saProd ? '[' + saProd.code + '] ' + saProd.name : '';
-                    html += '    <div class="sub-area-field">';
-                    html += '      <label class="sub-area-field-label">Sản phẩm</label>';
-                    html += '      <div class="init-equipment-search-wrapper' + (saProd ? ' has-selection' : '') + '">';
-                    html += '        <div class="init-equipment-search" style="height:32px;">';
-                    html += '          <i class="fas fa-search search-icon" style="font-size:11px;"></i>';
-                    html += '          <input type="text" id="saProductSearch-' + area.id + '-' + sa.id + '" value="' + saProdDisplay + '" placeholder="Tìm sản phẩm..." onfocus="showSubAreaProductList(' + area.id + ', ' + sa.id + ')" oninput="filterSubAreaProductList(' + area.id + ', ' + sa.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (saProd ? 'readonly' : '') + ' style="font-size:12px; height:30px;">';
-                    if (saProd && !isReadonly) {
-                        var saBadgeClass = 'badge-' + (saProd.quyTac || 'FIFO').toLowerCase();
-                        html += '          <span class="badge-spec ' + saBadgeClass + '" style="margin-right: 5px;">' + (saProd.quyTac || 'FIFO') + '</span>';
-                        html += '          <i class="fas fa-times clear-icon" onclick="removeSubAreaProduct(' + area.id + ', ' + sa.id + ')" style="font-size:10px;"></i>';
-                    }
-                    html += '          <i class="fas fa-chevron-down toggle-icon" onclick="' + (isReadonly ? '' : 'toggleSubAreaProductList(' + area.id + ', ' + sa.id + ')') + '" style="font-size:10px;"></i>';
-                    html += '        </div>';
-                    html += '        <div class="init-equipment-list" id="saProductList-' + area.id + '-' + sa.id + '" style="max-height: 150px; border-radius:4px;"></div>';
-                    html += '      </div>';
-                    html += '    </div>';
-
-                    // Row 3: Positions (Redesigned)
-                    var saPosCount = sa.positions ? sa.positions.length : 0;
-                    html += '    <div class="sub-area-field">';
-                    html += '      <div class="sub-area-pos-header">';
-                    html += '        <div class="sub-area-pos-title">Vị trí (' + saPosCount + ')</div>';
-                    if (!isReadonly) {
-                        html += '        <div class="sub-area-pos-actions">';
-                        html += '          <button class="btn-edit-sub-pos" onclick="editSubArea(' + area.id + ', ' + sa.id + ')" title="Chọn vị trí"><i class="fas fa-pen"></i></button>';
-                        html += '        </div>';
-                    }
-                    html += '      </div>';
-                    html += '      <div class="sub-area-tags-container">';
-                    html += '        <div class="sub-area-tags-list">';
-                    if (sa.positions && sa.positions.length > 0) {
-                        for (var k = 0; k < sa.positions.length; k++) {
-                            html += '<span class="sub-area-tag">' + sa.positions[k] + '<span class="sub-area-tag-remove" onclick="' + (isReadonly ? '' : 'removeSubAreaTag(' + area.id + ', ' + sa.id + ', \'' + sa.positions[k] + '\')') + '">&times;</span></span>';
-                        }
-                    } else {
-                        html += '<span style="color:#94a3b8; font-size:11px; font-style:italic;">Chưa chọn</span>';
-                    }
-                    html += '        </div>';
-                    if (sa.positions && sa.positions.length > 0 && !isReadonly) {
-                        html += '        <div class="sub-area-footer">';
-                        html += '          <button class="btn-clear-sub-pos" onclick="clearSubAreaPositions(' + area.id + ', ' + sa.id + ')"><i class="fas fa-trash-alt"></i> Xóa tất cả</button>';
-                        html += '        </div>';
-                    }
-                    html += '      </div>';
-                    if (sa.isValid === false) {
-                        html += '      <div style="font-size:10px; color:#ef4444; margin-top:4px;">Vị trí con phải thuộc khu vực cha!</div>';
-                    }
-                    html += '    </div>';
-                    
-                    html += '  </div>'; // end item-content
-
-                    // Delete action inside accordion
-                    html += '  <div class="sub-area-item-actions">';
-                    html += '    <button class="btn-delete-sub-item" onclick="deleteSubArea(' + area.id + ', ' + sa.id + ')"><i class="fas fa-trash-alt"></i> Xóa khu vực con</button>';
-                    html += '  </div>';
-
-                    html += '</div>'; // end sub-area-item
+            html += '<div class="area-tags" style="overflow-y: auto; max-height: 120px; min-height: 48px; border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px; background: #F8FAFC; cursor: pointer;" onclick="editArea(' + area.id + ')">';
+            if (area.positions && area.positions.length > 0) {
+                for (var j = 0; j < area.positions.length; j++) {
+                    var pos = area.positions[j];
+                    html += '<span class="tag-item">' + pos + '<span class="tag-remove" onclick="removeAreaTag(' + area.id + ', \'' + pos + '\', event)">&times;</span></span>';
                 }
             } else {
-                html += '<div style="text-align:center; padding:10px; font-size:12px; color:#94a3b8; font-style:italic; border:1px dashed #e2e8f0; border-radius:6px;">Chưa có khu vực con</div>';
+                html += '<span style="color: #9cb3c9; font-size: 13px; font-style: italic; display: inline-block; padding: 5px;">Chưa chọn vị trí nào</span>';
             }
-            html += '  </div>'; // end sub-area-accordion
-            html += '</div>'; // end sub-area-section
+            html += '</div></div></div>';
 
-        // Chiều nhập
-        var directionOptions = [
-            { value: '', label: 'Chọn chiều nhập' }, // Placeholder option
-            { value: 'top-down', label: 'Trên xuống dưới' },
-            { value: 'bottom-up', label: 'Dưới lên trên' },
-            { value: 'left-right', label: 'Trái sang phải' },
-            { value: 'right-left', label: 'Phải sang trái' }
-        ];
-        
-        var currentDirectionLabel = 'Chọn chiều nhập';
+            // Chiều nhập
+            var directionOptions = [
+                { value: '', label: 'Chọn chiều nhập' },
+                { value: 'top-down', label: 'Trên xuống dưới' },
+                { value: 'bottom-up', label: 'Dưới lên trên' },
+                { value: 'left-right', label: 'Trái sang phải' },
+                { value: 'right-left', label: 'Phải sang trái' }
+            ];
+            
+            var currentDirectionLabel = 'Chọn chiều nhập';
             for (var d = 0; d < directionOptions.length; d++) {
                 if (directionOptions[d].value === area.direction) {
                     currentDirectionLabel = directionOptions[d].label;
@@ -2732,7 +2911,7 @@
                 }
             }
 
-            html += '<div class="area-field area-direction" style="' + (shouldShowConditionalFields ? '' : ' display: none;') + '">';
+            html += '<div class="area-field area-direction" style="margin-top: 15px;">';
             html += '<span class="area-field-label">Chiều nhập<span style="color: red;">*</span></span>';
             html += '<div class="area-field-value">';
             html += '<div class="area-dropdown' + (isReadonly ? ' disabled' : '') + '" id="areaDirectionDropdown-' + area.id + '">';
@@ -2743,7 +2922,7 @@
             html += '<div class="area-dropdown-menu">';
             for (var dIdx = 0; dIdx < directionOptions.length; dIdx++) {
                 var opt = directionOptions[dIdx];
-                if (opt.value === '') continue; // Skip placeholder in the list
+                if (opt.value === '') continue;
                 html += '<div class="area-dropdown-item' + (area.direction === opt.value ? ' selected' : '') + '" onclick="selectAreaDirection(' + area.id + ', \'' + opt.value + '\')">' + opt.label + '</div>';
             }
             html += '</div></div>';
@@ -2751,41 +2930,35 @@
             
             html += '</div>'; // end area-card-body
             
-            // Toggle link
-            html += '<div class="area-toggle">';
-            html += '<a onclick="toggleAreaCollapse(' + area.id + ')">' + (area.collapsed ? 'Hiện thêm' : 'Ẩn bớt') + '</a>';
-            html += '</div>';
-            
             // Actions
-            html += '<div class="area-card-actions">';
-            html += '<button class="area-action-btn edit" onclick="editArea(' + area.id + ')" title="Sửa"><i class="fas fa-pen"></i></button>';
+            html += '<div class="area-card-actions" style="margin-top: 10px; border-top: 1px solid #f1f5f9; padding-top: 10px;">';
+            html += '<button class="area-action-btn edit' + (activeAreaId === area.id ? ' active' : '') + '" onclick="editArea(' + area.id + ')" title="Chọn vị trí"><i class="fas fa-th"></i></button>';
             html += '<button class="area-action-btn delete" onclick="deleteArea(' + area.id + ')" title="Xóa"><i class="fas fa-trash-alt"></i></button>';
-            
-            html += '</div>'; // end area-card-actions
+            html += '</div>';
 
-
+            // Toggle arrow
+            html += '<div class="area-toggle" onclick="toggleAreaCollapse(' + area.id + ')" style="cursor: pointer; margin-top: 10px;">';
+            html += '  <i class="fas fa-chevron-' + (area.collapsed ? 'down' : 'up') + '" style="color: #94a3b8; font-size: 14px;"></i>';
+            html += '</div>';
 
             html += '</div>'; // end area-card
         }
-        
-        container.innerHTML = html;
 
-        // Post-render completed
+        container.innerHTML = html;
+        
+        // Initial render for lists (actual lists rendered on focus)
     }
+
 
     /**
      * Handlers for Rule dropdown
      */
     function toggleAreaRuleDropdown(areaId) {
-        var dropdowns = document.querySelectorAll('.area-dropdown');
-        dropdowns.forEach(function(d) {
-            if (d.id !== 'areaRuleDropdown-' + areaId) {
-                d.classList.remove('open');
-            }
-        });
-        
         var dropdown = document.getElementById('areaRuleDropdown-' + areaId);
         if (dropdown && !dropdown.classList.contains('disabled')) {
+            document.querySelectorAll('.area-dropdown.open').forEach(function(d) {
+                if (d !== dropdown) d.classList.remove('open');
+            });
             dropdown.classList.toggle('open');
         }
     }
@@ -2795,391 +2968,665 @@
         if (area) {
             area.rule = rule;
             renderAreaCards();
-            var dropdown = document.getElementById('areaRuleDropdown-' + areaId);
-            if (dropdown) dropdown.classList.remove('open');
             saveWarehouseConfig();
         }
     }
 
-    /**
-     * Add a new empty area
-     */
     function addArea() {
         areaData.push({
             id: areaIdCounter++,
             areaCode: '',
-            productType: '',
-            selectedProducts: [],
             areaName: '',
-            colorType: 'default',
-            color: '#38A0F0',
+            selectedModule: null,
+            selectedProduct: null,
             positions: [],
             direction: '',
             rule: 'FIFO',
-            subAreas: [
-                { id: Date.now(), code: '', name: 'Khu vực con 1', positions: [], collapsed: false }
-            ],
-            selectedModule: null,
+            subAreas: [],
             collapsed: false,
             isActive: true
         });
         renderAreaCards();
+        saveWarehouseConfig();
     }
 
-    /**
-     * Toggle area active state
-     */
     window.toggleAreaActive = function(areaId, isActive) {
-        for (var i = 0; i < areaData.length; i++) {
-            if (areaData[i].id === areaId) {
-                areaData[i].isActive = isActive;
-                break;
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area) {
+            area.isActive = isActive;
+            refreshVisuals();
+            if (window.showToast) {
+                window.showToast((isActive ? 'Kích hoạt' : 'Ngưng') + ' sử dụng khu vực thành công', 'success');
             }
-        }
-        
-        // Refresh grid visuals immediately
-        refreshVisuals();
-        
-        // Visual feedback if needed
-        if (window.showToast) {
-            window.showToast((isActive ? 'Kích hoạt' : 'Ngưng') + ' sử dụng khu vực thành công', 'success');
         }
     };
 
-    /**
-     * Delete an area by ID
-     */
     function deleteArea(areaId) {
-        for (var i = 0; i < areaData.length; i++) {
-            if (areaData[i].id === areaId) {
-                areaData.splice(i, 1);
-                break;
+        window.showCustomConfirm('Xác nhận xóa', 'Bạn có chắc chắn muốn xóa khu vực này?', function() {
+            var idx = areaData.findIndex(function(a) { return a.id === areaId; });
+            if (idx !== -1) {
+                areaData.splice(idx, 1);
+                if (activeAreaId === areaId) activeAreaId = null;
+                if (areaData.length === 0) addArea();
+                else renderAreaCards();
+                saveWarehouseConfig();
+                refreshVisuals();
             }
-        }
-        if (areaData.length === 0) {
-            addArea();
-        } else {
-            renderAreaCards();
-        }
+        });
     }
 
-    /**
-     * Remove a position tag from an area
-     */
-    function removeAreaTag(areaId, position) {
-        for (var i = 0; i < areaData.length; i++) {
-            if (areaData[i].id === areaId) {
-                var idx = areaData[i].positions.indexOf(position);
-                if (idx > -1) {
-                    areaData[i].positions.splice(idx, 1);
-                    
-                    // If this is the active area, also update the grid selection
-                    if (activeAreaId === areaId) {
-                        var config = floorConfigs[currentFloor];
-                        // We need to find which node ID matches this position string
-                        // e.g. "A1" -> "0-0"
-                        var foundId = null;
-                        for (var r = 0; r < config.rows; r++) {
-                            for (var c = 0; c < config.cols; c++) {
-                                if ((currentFloor + '-' + getColName(c) + (r + 1)) === position) {
-                                    foundId = r + '-' + c;
-                                    break;
-                                }
-                            }
-                            if (foundId) break;
-                        }
-                        
-                        if (foundId) {
-                            removeSelection(config.selected, foundId);
-                            refreshVisuals();
+    function removeAreaTag(areaId, pos, event) {
+        if (event) event.stopPropagation();
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area) {
+            area.positions = area.positions.filter(function(p) { return p !== pos; });
+            if (activeAreaId === areaId) {
+                var config = floorConfigs[currentFloor];
+                for (var r = 0; r < config.rows; r++) {
+                    for (var c = 0; c < config.cols; c++) {
+                        if ((currentFloor + '-' + getColName(c) + (r + 1)) === pos) {
+                            removeSelection(config.selected, r + '-' + c);
                         }
                     }
                 }
-                break;
+                refreshVisuals();
             }
-        }
-        renderAreaCards();
-    }
-
-    /**
-     * Toggle collapse/expand for an area card
-     */
-    function toggleAreaCollapse(areaId) {
-        for (var i = 0; i < areaData.length; i++) {
-            if (areaData[i].id === areaId) {
-                areaData[i].collapsed = !areaData[i].collapsed;
-                break;
-            }
-        }
-        renderAreaCards();
-    }
-
-    /**
-     * Update a field on an area
-     */
-    function updateAreaField(areaId, field, value) {
-        for (var i = 0; i < areaData.length; i++) {
-            if (areaData[i].id === areaId) {
-                areaData[i][field] = value;
-                break;
-            }
-        }
-        renderAreaCards();
-        // Refresh grid visuals if color details changed
-        if (field === 'color' || field === 'colorType' || field === 'areaName') {
-            refreshVisuals();
-        }
-    }
-
-    // Helper to convert HEX to RGBA
-    function hexToRgba(hex, alpha) {
-        var r = 0, g = 0, b = 0;
-        // 3 digits
-        if (hex.length == 4) {
-            r = "0x" + hex[1] + hex[1];
-            g = "0x" + hex[2] + hex[2];
-            b = "0x" + hex[3] + hex[3];
-        // 6 digits
-        } else if (hex.length == 7) {
-            r = "0x" + hex[1] + hex[2];
-            g = "0x" + hex[3] + hex[4];
-            b = "0x" + hex[5] + hex[6];
-        }
-        return "rgba(" + +r + "," + +g + "," + +b + "," + alpha + ")";
-    }
-
-    function toggleAreaProductList(areaId) {
-        var list = document.getElementById('areaProductList-' + areaId);
-        if (list) {
-            var isShowing = list.classList.toggle('show');
-            if (isShowing) {
-                renderAreaProductAccordion(areaId);
-            }
-        }
-    }
-
-    window.showAreaTypeList = function(areaId) {
-        var list = document.getElementById('areaTypeList-' + areaId);
-        if (list) {
-            list.classList.add('show');
-            renderAreaTypeListHTML(areaId, areaTypeData);
-        }
-    }
-
-    window.toggleAreaTypeList = function(areaId) {
-        var list = document.getElementById('areaTypeList-' + areaId);
-        if (list) {
-            if (list.classList.contains('show')) {
-                list.classList.remove('show');
-            } else {
-                showAreaTypeList(areaId);
-            }
-        }
-    }
-
-    window.filterAreaTypeList = function(areaId) {
-        var input = document.getElementById('areaTypeSearch-' + areaId);
-        var term = input ? input.value.toLowerCase().trim() : '';
-
-        if (term === '') {
-            renderAreaTypeListHTML(areaId, areaTypeData);
-            return;
-        }
-
-        var results = areaTypeData.filter(function(item) {
-            return (item.name && item.name.toLowerCase().indexOf(term) > -1) ||
-                   (item.code && item.code.toLowerCase().indexOf(term) > -1);
-        });
-        
-        renderAreaTypeListHTML(areaId, results);
-    }
-
-    function renderAreaTypeListHTML(areaId, listData) {
-        var list = document.getElementById('areaTypeList-' + areaId);
-        if (!list) return;
-
-        if (listData.length === 0) {
-            list.innerHTML = '<div style="padding: 10px; text-align: center; color: #64748b; font-size: 13px;">Không tìm thấy loại khu vực</div>';
-            return;
-        }
-
-        var html = '';
-        html += '<div class="init-equipment-items">';
-        listData.forEach(function(item) {
-            html += '<div class="init-equipment-item" onclick="selectAreaType(' + areaId + ', \'' + item.code + '\', \'' + item.name + '\')" style="padding: 8px 12px; cursor: pointer;">';
-            html += '<div style="flex: 1">';
-            html += '<div class="eq-name" style="font-weight: 500; color: #1e293b; font-size: 13px;">' + item.name + '</div>';
-            html += '<div class="eq-code" style="color: #64748b; font-size: 11px;">' + item.code + '</div>';
-            html += '</div></div>';
-        });
-        html += '</div>';
-        
-        list.innerHTML = html;
-    }
-
-    window.selectAreaType = function(areaId, code, name) {
-        for (var i = 0; i < areaData.length; i++) {
-            if (areaData[i].id === areaId) {
-                areaData[i].selectedAreaType = { code: code, name: name };
-                break;
-            }
-        }
-        var list = document.getElementById('areaTypeList-' + areaId);
-        if (list) list.classList.remove('show');
-        renderAreaCards();
-    }
-
-    window.removeAreaType = function(areaId) {
-        for (var i = 0; i < areaData.length; i++) {
-            if (areaData[i].id === areaId) {
-                areaData[i].selectedAreaType = null;
-                break;
-            }
-        }
-        renderAreaCards();
-    }
-
-    function showAreaProductList(areaId) {
-        var list = document.getElementById('areaProductList-' + areaId);
-        if (list) {
-            list.classList.add('show');
-            renderAreaProductAccordion(areaId);
-        }
-    }
-
-    function filterAreaProductList(areaId) {
-        var input = document.getElementById('areaProductSearch-' + areaId);
-        var list = document.getElementById('areaProductList-' + areaId);
-        if (!input || !list) return;
-
-        var term = input.value.toLowerCase().trim();
-        if (term === '') {
-            renderAreaProductAccordion(areaId);
-            return;
-        }
-
-        var results = [];
-        productData.forEach(function(group) {
-            group.items.forEach(function(item) {
-                if (item.code.toLowerCase().includes(term) || item.name.toLowerCase().includes(term)) {
-                    results.push(item);
-                }
-            });
-        });
-
-        if (results.length === 0) {
-            list.innerHTML = '<div class="init-equipment-list"><div class="item">Không tìm thấy sản phẩm</div></div>';
-        } else {
-            var area = areaData.find(function(a) { return a.id === areaId; });
-            var selectedCodes = (area && area.selectedProducts) ? area.selectedProducts.map(function(p){return p.code;}) : [];
-            
-            list.innerHTML = results.map(function(item) {
-                var isSelected = selectedCodes.indexOf(item.code) > -1;
-                return '<div class="item ' + (isSelected ? 'selected' : '') + '" onclick="selectAreaProduct(' + areaId + ', \'' + item.code + '\', \'' + item.name + '\')">' + 
-                       '[' + item.code + '] ' + item.name + 
-                       (isSelected ? ' <i class="fas fa-check" style="color: #076EB8; margin-left: 8px;"></i>' : '') +
-                       '</div>';
-            }).join('');
-        }
-    }
-
-    function renderAreaProductAccordion(areaId) {
-        var container = document.getElementById('areaProductList-' + areaId);
-        if (!container) return;
-
-        var area = areaData.find(function(a) { return a.id === areaId; });
-        var selectedCodes = (area && area.selectedProducts) ? area.selectedProducts.map(function(p){return p.code;}) : [];
-
-        var html = '<div class="init-equipment-accordion" style="border:none; border-radius:0;">' + 
-            productData.map(function(group, gIdx) {
-                var itemsHtml = group.items.map(function(item) {
-                    var isSelected = selectedCodes.indexOf(item.code) > -1;
-                    return '<div class="accordion-item ' + (isSelected ? 'selected' : '') + '" style="display:flex;align-items:center;gap:6px;" onclick="selectAreaProduct(' + areaId + ', \'' + item.code + '\', \'' + item.name + '\'); event.stopPropagation();">' +
-                           '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">[' + item.code + '] ' + item.name + '</span>' +
-                           (isSelected ? '<i class="fas fa-check" style="color:#076EB8;font-size:10px;flex-shrink:0;margin-left:auto;"></i>' : '') +
-                           '</div>';
-                }).join('');
-
-                return '<div class="accordion-group open" id="area-group-' + areaId + '-' + gIdx + '">' +
-                       '<div class="accordion-header" onclick="toggleAreaGroup(' + areaId + ', ' + gIdx + '); event.stopPropagation();">' +
-                       '<span>' + group.group + '</span>' +
-                       '<i class="fas fa-chevron-down"></i>' +
-                       '</div>' +
-                       '<div class="accordion-content" style="display:block;">' + itemsHtml + '</div>' +
-                       '</div>';
-            }).join('') +
-            '</div>';
-
-        container.innerHTML = html;
-    }
-
-    function toggleAreaGroup(areaId, gIdx) {
-        var group = document.getElementById('area-group-' + areaId + '-' + gIdx);
-        if (group) group.classList.toggle('open');
-    }
-
-    function selectAreaProduct(areaId, code, name) {
-        var area = areaData.find(function(a) { return a.id === areaId; });
-        if (!area) return;
-        
-        if (!area.selectedProducts) area.selectedProducts = [];
-        
-        var existingIdx = -1;
-        for (var i = 0; i < area.selectedProducts.length; i++) {
-            if (area.selectedProducts[i].code === code) {
-                existingIdx = i;
-                break;
-            }
-        }
-
-        if (existingIdx === -1) {
-            var quyTac = '';
-            productData.forEach(function(group) {
-                group.items.forEach(function(item) {
-                    if (item.code === code) quyTac = item.quyTac || '';
-                });
-            });
-            // Single selection: Replace any existing choices
-            area.selectedProducts = [{ code: code, name: name, quyTac: quyTac }];
-            // Automatically update area rule based on product specification
-            if (quyTac) {
-                area.rule = quyTac;
-            }
-        }
-        
-        renderAreaCards(); // Re-render to show selection in bar
-        if (typeof saveWarehouseConfig === 'function') {
+            renderAreaCards();
             saveWarehouseConfig();
         }
     }
 
-
-    function removeAreaProduct(areaId, idx) {
+    function toggleAreaCollapse(areaId) {
         var area = areaData.find(function(a) { return a.id === areaId; });
-        if (area && area.selectedProducts) {
-            area.selectedProducts.splice(idx, 1);
+        if (area) {
+            area.collapsed = !area.collapsed;
             renderAreaCards();
         }
     }
 
-    function toggleAreaDirectionDropdown(areaId) {
-        var dropdown = document.getElementById('areaDirectionDropdown-' + areaId);
-        if (dropdown) {
-            var menu = dropdown.querySelector('.area-dropdown-menu');
-            if (menu) {
-                // Close other area dropdowns first
-                var allMenus = document.querySelectorAll('.area-dropdown-menu');
-                allMenus.forEach(function(m) {
-                    if (m !== menu) m.classList.remove('show');
+    function updateAreaField(areaId, field, value) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area) {
+            area[field] = value;
+            if (field === 'areaName') refreshVisuals();
+            saveWarehouseConfig();
+        }
+    }
+
+    function editArea(areaId) {
+        activeAreaId = (activeAreaId === areaId) ? null : areaId;
+        activeLocationId = null;
+        activeModuleId = null;
+        activeTowerFloorId = null;
+        activeSubAreaId = null;
+        activeParentAreaId = null;
+        
+        var config = floorConfigs[currentFloor];
+        if (config) config.selected = {};
+
+        if (activeAreaId !== null) {
+            var area = areaData.find(function(a) { return a.id === areaId; });
+            if (area && area.positions) {
+                area.positions.forEach(function(pos) {
+                    for (var r = 0; r < config.rows; r++) {
+                        for (var c = 0; c < config.cols; c++) {
+                            if ((currentFloor + '-' + getColName(c) + (r + 1)) === pos) {
+                                addSelection(config.selected, r + '-' + c);
+                            }
+                        }
+                    }
                 });
-                menu.classList.toggle('show');
+            }
+        }
+        
+        renderAreaCards();
+        refreshVisuals();
+    }
+
+    function saveWarehouseConfig() {
+        if (!currentWarehouse) return;
+        currentWarehouse.areas = JSON.parse(JSON.stringify(areaData));
+        try {
+            var stored = localStorage.getItem('wms_warehouses_v7');
+            if (stored) {
+                var list = JSON.parse(stored);
+                var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
+                if (idx !== -1) {
+                    list[idx] = currentWarehouse;
+                    localStorage.setItem('wms_warehouses_v7', JSON.stringify(list));
+                }
+            }
+        } catch (e) {
+            console.error('Save error:', e);
+        }
+    }
+
+    function saveAreaTab() {
+        saveWarehouseConfig();
+        if (window.showToast) window.showToast('Đã lưu cấu hình khu vực thành công!', 'success');
+        renderAreaCards();
+        refreshVisuals();
+    }
+
+
+    function toggleAreaDirectionDropdown(areaId) {
+        var menu = document.querySelector('#areaDirectionDropdown-' + areaId + ' .area-dropdown-menu');
+        if (menu) {
+            document.querySelectorAll('.area-dropdown-menu.show').forEach(function(m) { if (m !== menu) m.classList.remove('show'); });
+            menu.classList.toggle('show');
+        }
+    }
+
+    function selectAreaDirection(areaId, direction) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area) {
+            area.direction = direction;
+            renderAreaCards();
+            saveWarehouseConfig();
+        }
+    }
+
+    // ==========================================
+    // SEARCHABLE COMBOBOX LOGIC (Standardized)
+    // ==========================================
+
+    // --- Area: Tower Floor (Module) ---
+    window.showAreaModuleList = function(areaId) {
+        var list = document.getElementById('areaModuleList-' + areaId);
+        if (list) { list.classList.add('show'); renderAreaModuleOptions(areaId, ''); }
+    };
+    window.filterAreaModuleList = function(areaId) {
+        var input = document.getElementById('areaModuleSearch-' + areaId);
+        renderAreaModuleOptions(areaId, input ? input.value : '');
+    };
+    window.toggleAreaModuleList = function(areaId) {
+        var list = document.getElementById('areaModuleList-' + areaId);
+        if (list && list.classList.contains('show')) list.classList.remove('show');
+        else showAreaModuleList(areaId);
+    };
+    function renderAreaModuleOptions(areaId, term) {
+        var list = document.getElementById('areaModuleList-' + areaId);
+        if (!list) return;
+        var searchTerm = (term || '').toLowerCase().trim();
+        var filtered = moduleData.filter(function(m) {
+            return m.code.toLowerCase().includes(searchTerm) || m.name.toLowerCase().includes(searchTerm);
+        });
+        if (filtered.length === 0) list.innerHTML = '<div class="item">Không tìm thấy tháp</div>';
+        else list.innerHTML = filtered.map(function(m) {
+            return '<div class="item" onclick="selectAreaModule(' + areaId + ', ' + m.id + ')">' + m.code + ' - ' + m.name + '</div>';
+        }).join('');
+    }
+    window.selectAreaModule = function(areaId, modId) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        var mod = moduleData.find(function(m) { return m.id === modId; });
+        if (area && mod) {
+            area.selectedModule = { id: mod.id, code: mod.code, name: mod.name };
+            area.moduleId = mod.id;
+            renderAreaCards();
+            saveWarehouseConfig();
+        }
+    };
+    window.removeAreaModule = function(areaId) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area) { area.selectedModule = null; area.moduleId = null; renderAreaCards(); saveWarehouseConfig(); }
+    };
+
+    // --- Area: Product Group ---
+    window.showAreaProductList = function(areaId) {
+        var list = document.getElementById('areaProductList-' + areaId);
+        if (list) { list.classList.add('show'); renderAreaProductAccordion(areaId, ''); }
+    };
+    window.filterAreaProductList = function(areaId) {
+        var input = document.getElementById('areaProductSearch-' + areaId);
+        renderAreaProductAccordion(areaId, input ? input.value : '');
+    };
+    window.toggleAreaProductList = function(areaId) {
+        var list = document.getElementById('areaProductList-' + areaId);
+        if (list && list.classList.contains('show')) list.classList.remove('show');
+        else showAreaProductList(areaId);
+    };
+    function renderAreaProductAccordion(areaId, term) {
+        var list = document.getElementById('areaProductList-' + areaId);
+        if (!list) return;
+        var searchTerm = (term || '').toLowerCase().trim();
+        var currentArea = areaData.find(function(a) { return a.id === areaId; });
+        var selectedProductCode = currentArea && currentArea.selectedProduct ? currentArea.selectedProduct.code : null;
+
+        if (searchTerm === '') {
+            var html = '<div class="init-equipment-accordion" style="border:none;">';
+            productData.forEach(function(group, gIdx) {
+                var itemsHtml = group.items.map(function(item) {
+                    var isSelected = (selectedProductCode === item.code);
+                    return '<div class="accordion-item ' + (isSelected ? 'selected' : '') + '" onclick="selectAreaProduct(' + areaId + ', \'' + item.code + '\', \'' + item.name.replace(/'/g, "\\'") + '\')">' + 
+                           '[' + item.code + '] ' + item.name + 
+                           (isSelected ? ' <i class="fas fa-check" style="color:#076EB8; font-size:10px; margin-left:auto;"></i>' : '') +
+                           '</div>';
+                }).join('');
+                html += '<div class="accordion-group open"><div class="accordion-header" onclick="toggleAreaGroup(' + areaId + ', ' + gIdx + ')"><span>' + group.group + '</span><i class="fas fa-chevron-down"></i></div><div class="accordion-content" style="display:block;">' + itemsHtml + '</div></div>';
+            });
+            html += '</div>';
+            list.innerHTML = html;
+        } else {
+            var results = [];
+            productData.forEach(function(g) { g.items.forEach(function(i) { if (i.name.toLowerCase().includes(searchTerm) || i.code.toLowerCase().includes(searchTerm)) results.push(i); }); });
+            if (results.length === 0) list.innerHTML = '<div class="item">Không tìm thấy nhóm sản phẩm</div>';
+            else list.innerHTML = results.map(function(i) { 
+                var isSelected = (selectedProductCode === i.code);
+                return '<div class="item ' + (isSelected ? 'selected' : '') + '" onclick="selectAreaProduct(' + areaId + ', \'' + i.code + '\', \'' + i.name.replace(/'/g, "\\'") + '\')">' + 
+                       '[' + i.code + '] ' + i.name + 
+                       (isSelected ? ' <i class="fas fa-check" style="color:#076EB8; font-size:10px; margin-left:auto;"></i>' : '') +
+                       '</div>';
+            }).join('');
+        }
+    }
+    window.selectAreaProduct = function(areaId, code, name) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area) { area.selectedProduct = { code: code, name: name }; renderAreaCards(); saveWarehouseConfig(); }
+    };
+    window.removeAreaProduct = function(areaId) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area) { area.selectedProduct = null; renderAreaCards(); saveWarehouseConfig(); }
+    };
+
+    window.toggleAreaGroup = function(areaId, gIdx) {
+        var list = document.getElementById('areaProductList-' + areaId);
+        if (!list) return;
+        var groups = list.querySelectorAll('.accordion-group');
+        if (groups[gIdx]) {
+            groups[gIdx].classList.toggle('open');
+            var content = groups[gIdx].querySelector('.accordion-content');
+            if (content) content.style.display = groups[gIdx].classList.contains('open') ? 'block' : 'none';
+        }
+    };
+
+
+    /**
+     * SUB-AREA MANAGEMENT SECTION
+     */
+    function renderSubAreaCards() {
+        var container = document.getElementById('subAreaCardList');
+        if (!container) return;
+        
+        var html = '';
+        var subAreaCount = 0;
+        for (var i = 0; i < areaData.length; i++) {
+            var parentArea = areaData[i];
+            if (!parentArea.subAreas) continue;
+            for (var j = 0; j < parentArea.subAreas.length; j++) {
+                var sa = parentArea.subAreas[j];
+                subAreaCount++;
+                var isCollapsed = sa.collapsed ? ' collapsed' : '';
+                var isSAActive = (activeSubAreaId === sa.id && activeParentAreaId === parentArea.id);
+                var activeClass = isSAActive ? ' active' : '';
+
+                html += '<div class="area-card' + isCollapsed + activeClass + '" data-subarea-id="' + sa.id + '" data-parent-id="' + parentArea.id + '">';
+                html += '<div class="card-number-label-container"><span class="card-number-label">Khu vực con ' + subAreaCount + '</span></div>';
+                html += '<div class="area-card-body">';
+
+                // Khu vực cha (Searchable Combobox)
+                var displayParent = parentArea ? (parentArea.areaName || parentArea.areaCode || 'Khu vực ' + (i+1)) : '';
+                var hasParentSelection = parentArea ? ' has-selection' : '';
+
+                html += '<div class="area-field init-equipment-section" style="padding: 0; margin-bottom: 15px;">';
+                html += '<span class="area-field-label" style="padding-top: 10px;">Khu vực<span style="color: red;">*</span></span>';
+                html += '<div class="init-equipment-container" style="flex: 1;">';
+                html += '  <div class="init-equipment-search-wrapper' + hasParentSelection + '">';
+                html += '    <div class="init-equipment-search">';
+                html += '      <i class="fas fa-search search-icon"></i>';
+                html += '      <input type="text" id="saParentSearch-' + sa.id + '" value="' + displayParent + '" placeholder="Chọn khu vực cha..." onfocus="showSubAreaParentList(' + sa.id + ')" oninput="filterSubAreaParentList(' + sa.id + ')" ' + (parentArea ? 'readonly' : '') + '>';
+                
+                if (parentArea) {
+                    html += '      <i class="fas fa-times clear-icon" title="Xóa" onclick="removeSubAreaParent(' + sa.id + ')"></i>';
+                }
+                html += '      <i class="fas fa-chevron-down toggle-icon" onclick="toggleSubAreaParentList(' + sa.id + ')"></i>';
+                html += '    </div>';
+                html += '    <div class="init-equipment-list" id="saParentList-' + sa.id + '" style="max-height: 200px; overflow-y: auto;"></div>';
+                html += '  </div>';
+                html += '</div></div>';
+
+                // Tên khu vực con
+                html += '<div class="area-field">';
+                html += '<span class="area-field-label">Tên khu vực con<span style="color: red;">*</span></span>';
+                html += '<div class="area-field-value">';
+                html += '<input type="text" value="' + escapeHtml(sa.name || '') + '" onchange="updateSubAreaField(' + parentArea.id + ', ' + sa.id + ', \'name\', this.value)" placeholder="Nhập tên khu vực con...">';
+                html += '</div></div>';
+
+                // Nhóm sản phẩm (Searchable Combobox)
+                var selProd = sa.selectedProduct || null;
+                var displayProd = selProd ? ('[' + selProd.code + '] ' + selProd.name) : '';
+                var hasProdSelection = selProd ? ' has-selection' : '';
+
+                html += '<div class="area-field init-equipment-section" style="padding: 0; margin-top: 15px; margin-bottom: 2px;">';
+                html += '<span class="area-field-label" style="padding-top: 10px;">Sản phẩm<span style="color: red;">*</span></span>';
+                html += '<div class="init-equipment-container" style="flex: 1;">';
+                html += '  <div class="init-equipment-search-wrapper' + hasProdSelection + '">';
+                html += '    <div class="init-equipment-search">';
+                html += '      <i class="fas fa-search search-icon"></i>';
+                html += '      <input type="text" id="saProductSearch-' + sa.id + '" value="' + displayProd + '" placeholder="Tìm sản phẩm..." onfocus="showSubAreaProductList(' + parentArea.id + ', ' + sa.id + ')" oninput="filterSubAreaProductList(' + parentArea.id + ', ' + sa.id + ')" ' + (selProd ? 'readonly' : '') + '>';
+                
+                if (selProd) {
+                    html += '      <i class="fas fa-times clear-icon" title="Xóa" onclick="removeSubAreaProduct(' + parentArea.id + ', ' + sa.id + ')"></i>';
+                }
+                html += '      <i class="fas fa-chevron-down toggle-icon" onclick="toggleSubAreaProductList(' + parentArea.id + ', ' + sa.id + ')"></i>';
+                html += '    </div>';
+                html += '    <div class="init-equipment-list" id="saProductList-' + sa.id + '" style="max-height: 200px; overflow-y: auto;"></div>';
+                html += '  </div>';
+                html += '</div></div>';
+
+
+
+                // Vị trí
+                var saPosCount = sa.positions ? sa.positions.length : 0;
+                html += '<div class="area-field area-position" style="margin-top: 15px;">';
+                html += '<span class="area-field-label">Vị trí<span style="color: red;">*</span></span>';
+                html += '<div class="area-field-value">';
+                html += '<label style="font-size: 13px; display: block; margin-bottom: 5px;">Đã chọn: <strong style="color: #076eb8">' + saPosCount + '</strong> vị trí</label>';
+                html += '<div class="area-tags" style="overflow-y: auto; max-height: 120px; min-height: 48px; border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px; background: #F8FAFC; cursor: pointer;" onclick="editSubArea(' + parentArea.id + ', ' + sa.id + ')">';
+                if (sa.positions && sa.positions.length > 0) {
+                    sa.positions.forEach(function(pos) {
+                        html += '<span class="tag-item">' + pos + '<span class="tag-remove" onclick="removeSubAreaTag(' + parentArea.id + ', ' + sa.id + ', \'' + pos + '\', event)">&times;</span></span>';
+                    });
+                } else {
+                    html += '<span style="color: #9cb3c9; font-size: 13px; font-style: italic; display: inline-block; padding: 5px;">Chưa chọn vị trí nào</span>';
+                }
+                html += '</div></div></div>';
+
+                html += '</div>'; // end area-card-body
+                html += '<div class="area-card-actions" style="margin-top: 10px; border-top: 1px solid #f1f5f9; padding-top: 10px;">';
+                html += '  <button class="area-action-btn edit' + (isSAActive ? ' active' : '') + '" onclick="editSubArea(' + parentArea.id + ', ' + sa.id + ')" title="Chọn vị trí"><i class="fas fa-th"></i></button>';
+                html += '  <button class="area-action-btn delete" onclick="deleteSubArea(' + parentArea.id + ', ' + sa.id + ')" title="Xóa"><i class="fas fa-trash-alt"></i></button>';
+                html += '</div>';
+
+                // Toggle
+                html += '<div class="area-toggle" onclick="toggleSubAreaCollapse(' + sa.id + ')" style="cursor: pointer; margin-top: 10px;">';
+                html += '  <i class="fas fa-chevron-' + (sa.collapsed ? 'down' : 'up') + '" style="color: #94a3b8; font-size: 14px;"></i>';
+                html += '</div>';
+
+                html += '</div>';
+            }
+        }
+        
+        if (subAreaCount === 0) {
+            container.innerHTML = '<div style="padding: 40px; text-align: center; color: #94a3b8;"><i class="fas fa-sitemap" style="font-size: 40px; opacity: 0.2; margin-bottom: 15px; display: block;"></i>Chưa có khu vực con nào.</div>';
+        } else {
+            container.innerHTML = html;
+        }
+    }
+
+    function addSubArea(targetParentId) {
+        var parent = targetParentId ? areaData.find(function(a) { return a.id === targetParentId; }) : (areaData.length > 0 ? areaData[0] : null);
+        if (!parent) { alert('Cần tạo khu vực trước!'); return; }
+        if (!parent.subAreas) parent.subAreas = [];
+        parent.subAreas.push({ id: Date.now(), name: 'Khu vực con ' + (parent.subAreas.length + 1), code: '', selectedProduct: null, positions: [], collapsed: false });
+        renderSubAreaCards();
+        saveWarehouseConfig();
+    }
+
+    function deleteSubArea(parentId, saId) {
+        window.showCustomConfirm('Xác nhận xóa', 'Xóa khu vực con này?', function() {
+            var area = areaData.find(function(a) { return a.id === parentId; });
+            if (area) {
+                area.subAreas = area.subAreas.filter(function(s) { return s.id !== saId; });
+                if (activeSubAreaId === saId) activeSubAreaId = null;
+                renderSubAreaCards();
+                saveWarehouseConfig();
+                refreshVisuals();
+            }
+        });
+    }
+
+    function editSubArea(parentId, saId) {
+        if (activeSubAreaId === saId && activeParentAreaId === parentId) {
+            activeSubAreaId = null; activeParentAreaId = null;
+        } else {
+            activeSubAreaId = saId; activeParentAreaId = parentId;
+            activeAreaId = null; activeLocationId = null;
+            activeModuleId = null; activeTowerFloorId = null;
+        }
+        var config = floorConfigs[currentFloor];
+        if (config) config.selected = {};
+        if (activeSubAreaId) {
+            var area = areaData.find(function(a) { return a.id === parentId; });
+            var sa = area ? area.subAreas.find(function(s) { return s.id === saId; }) : null;
+            if (sa) {
+                sa.positions.forEach(function(pos) {
+                    for (var r = 0; r < config.rows; r++) {
+                        for (var c = 0; c < config.cols; c++) {
+                            if ((currentFloor + '-' + getColName(c) + (r + 1)) === pos) addSelection(config.selected, r + '-' + c);
+                        }
+                    }
+                });
+            }
+        }
+        renderSubAreaCards();
+        refreshVisuals();
+    }
+
+    function updateSubAreaField(parentId, saId, field, val) {
+        var area = areaData.find(function(a) { return a.id === parentId; });
+        var sa = area ? area.subAreas.find(function(s) { return s.id === saId; }) : null;
+        if (sa) { sa[field] = val; saveWarehouseConfig(); }
+    }
+
+    function removeSubAreaTag(parentId, saId, pos, event) {
+        if (event) event.stopPropagation();
+        var area = areaData.find(function(a) { return a.id === parentId; });
+        var sa = area ? area.subAreas.find(function(s) { return s.id === saId; }) : null;
+        if (sa) {
+            sa.positions = sa.positions.filter(function(p) { return p !== pos; });
+            if (activeSubAreaId === saId) {
+                var config = floorConfigs[currentFloor];
+                for (var r = 0; r < config.rows; r++) {
+                    for (var c = 0; c < config.cols; c++) {
+                        if ((currentFloor + '-' + getColName(c) + (r + 1)) === pos) removeSelection(config.selected, r + '-' + c);
+                    }
+                }
+                refreshVisuals();
+            }
+            renderSubAreaCards();
+            saveWarehouseConfig();
+        }
+    }
+
+    window.toggleSubAreaParentList = function(saId) {
+        var list = document.getElementById('saParentList-' + saId);
+        if (list) {
+            if (list.classList.contains('show')) list.classList.remove('show');
+            else showSubAreaParentList(saId);
+        }
+    };
+
+    window.showSubAreaParentList = function(saId) {
+        var list = document.getElementById('saParentList-' + saId);
+        if (list) {
+            list.classList.add('show');
+            renderSubAreaParentOptions(saId);
+        }
+    };
+
+    window.filterSubAreaParentList = function(saId) {
+        var input = document.getElementById('saParentSearch-' + saId);
+        var list = document.getElementById('saParentList-' + saId);
+        if (!input || !list) return;
+
+        var term = input.value.toLowerCase().trim();
+        var filteredAreas = areaData.filter(function(a) {
+            var name = a.areaName || '';
+            var code = a.areaCode || '';
+            return name.toLowerCase().includes(term) || code.toLowerCase().includes(term);
+        });
+
+        if (filteredAreas.length === 0) {
+            list.innerHTML = '<div class="item">Không tìm thấy khu vực</div>';
+        } else {
+            var html = filteredAreas.map(function(a) {
+                return '<div class="item" onclick="selectSubAreaParent(' + saId + ', ' + a.id + ')">' + (a.areaName || a.areaCode || 'Khu vực ' + a.id) + '</div>';
+            }).join('');
+            list.innerHTML = html;
+        }
+    };
+
+    function renderSubAreaParentOptions(saId) {
+        var list = document.getElementById('saParentList-' + saId);
+        if (!list) return;
+
+        if (areaData.length === 0) {
+            list.innerHTML = '<div class="item">Không có khu vực nào</div>';
+            return;
+        }
+
+        var html = areaData.map(function(a) {
+            return '<div class="item" onclick="selectSubAreaParent(' + saId + ', ' + a.id + ')">' + (a.areaName || a.areaCode || 'Khu vực ' + a.id) + '</div>';
+        }).join('');
+        list.innerHTML = html;
+    }
+
+    window.selectSubAreaParent = function(saId, newParentId) {
+        // Find current parent
+        var oldParent = null;
+        var saObject = null;
+        var saIdx = -1;
+
+        for (var i = 0; i < areaData.length; i++) {
+            if (areaData[i].subAreas) {
+                saIdx = areaData[i].subAreas.findIndex(function(s) { return s.id === saId; });
+                if (saIdx !== -1) {
+                    oldParent = areaData[i];
+                    saObject = oldParent.subAreas.splice(saIdx, 1)[0];
+                    break;
+                }
+            }
+        }
+
+        if (saObject) {
+            var newParent = areaData.find(function(a) { return a.id === newParentId; });
+            if (newParent) {
+                if (!newParent.subAreas) newParent.subAreas = [];
+                newParent.subAreas.push(saObject);
+                if (activeSubAreaId === saId) activeParentAreaId = newParentId;
+                saveWarehouseConfig();
+                renderSubAreaCards();
+            }
+        }
+    };
+
+    window.removeSubAreaParent = function(saId) {
+        var input = document.getElementById('saParentSearch-' + saId);
+        if (input) {
+            input.value = '';
+            showSubAreaParentList(saId);
+        }
+    };
+
+    window.showSubAreaProductList = function(parentId, saId) {
+        var list = document.getElementById('saProductList-' + saId);
+        if (list) { 
+            list.classList.add('show'); 
+            renderSubAreaProductAccordion(parentId, saId, ''); 
+        }
+    };
+
+    window.toggleSubAreaProductList = function(parentId, saId) {
+        var list = document.getElementById('saProductList-' + saId);
+        if (list && list.classList.contains('show')) list.classList.remove('show');
+        else showSubAreaProductList(parentId, saId);
+    };
+
+    window.filterSubAreaProductList = function(parentId, saId) {
+        var input = document.getElementById('saProductSearch-' + saId);
+        renderSubAreaProductAccordion(parentId, saId, input ? input.value : '');
+    };
+
+    function renderSubAreaProductAccordion(parentId, saId, term) {
+        var list = document.getElementById('saProductList-' + saId);
+        if (!list) return;
+        
+        var area = areaData.find(function(a) { return a.id === parentId; });
+        var subArea = area ? area.subAreas.find(function(s) { return s.id === saId; }) : null;
+        var selectedProductCode = subArea && subArea.selectedProduct ? subArea.selectedProduct.code : null;
+        var searchTerm = (term || '').toLowerCase().trim();
+        
+        if (searchTerm === '') {
+            var html = '<div class="init-equipment-accordion" style="border:none;">';
+            productData.forEach(function(group, gIdx) {
+                var itemsHtml = group.items.map(function(item) {
+                    var isSelected = (selectedProductCode === item.code);
+                    return '<div class="accordion-item ' + (isSelected ? 'selected' : '') + '" onclick="selectSubAreaProduct(' + parentId + ', ' + saId + ', \'' + item.code + '\', \'' + item.name.replace(/'/g, "\\'") + '\')">' + 
+                           '[' + item.code + '] ' + item.name + 
+                           (isSelected ? ' <i class="fas fa-check" style="color:#076EB8; font-size:10px; margin-left:auto;"></i>' : '') +
+                           '</div>';
+                }).join('');
+                html += '<div class="accordion-group open"><div class="accordion-header" onclick="toggleSubAreaGroup(' + saId + ', ' + gIdx + ')"><span>' + group.group + '</span><i class="fas fa-chevron-down"></i></div><div class="accordion-content" style="display:block;">' + itemsHtml + '</div></div>';
+            });
+            html += '</div>';
+            list.innerHTML = html;
+        } else {
+            var results = [];
+            productData.forEach(function(g) { 
+                g.items.forEach(function(i) { 
+                    if (i.name.toLowerCase().includes(searchTerm) || i.code.toLowerCase().includes(searchTerm)) {
+                        results.push(i); 
+                    }
+                }); 
+            });
+            
+            if (results.length === 0) {
+                list.innerHTML = '<div class="item">Không tìm thấy nhóm sản phẩm</div>';
+            } else {
+                list.innerHTML = results.map(function(i) { 
+                    var isSelected = (selectedProductCode === i.code);
+                    return '<div class="item ' + (isSelected ? 'selected' : '') + '" onclick="selectSubAreaProduct(' + parentId + ', ' + saId + ', \'' + i.code + '\', \'' + i.name.replace(/'/g, "\\'") + '\')">' + 
+                           '[' + i.code + '] ' + i.name + 
+                           (isSelected ? ' <i class="fas fa-check" style="color:#076EB8; font-size:10px; margin-left:auto;"></i>' : '') +
+                           '</div>';
+                }).join('');
             }
         }
     }
 
-    function selectAreaDirection(areaId, value) {
-        updateAreaField(areaId, 'direction', value);
+
+    window.selectSubAreaProduct = function(parentId, saId, code, name) {
+        var area = areaData.find(function(a) { return a.id === parentId; });
+        var sa = area ? area.subAreas.find(function(s) { return s.id === saId; }) : null;
+        if (sa) { 
+            sa.selectedProduct = { code: code, name: name }; 
+            renderSubAreaCards(); 
+            saveWarehouseConfig(); 
+        }
+    };
+
+    window.removeSubAreaProduct = function(parentId, saId) {
+        var area = areaData.find(function(a) { return a.id === parentId; });
+        var sa = area ? area.subAreas.find(function(s) { return s.id === saId; }) : null;
+        if (sa) { 
+            sa.selectedProduct = null; 
+            renderSubAreaCards(); 
+            saveWarehouseConfig(); 
+        }
+    };
+
+
+    window.toggleSubAreaCollapse = function(saId) {
+        for (var i = 0; i < areaData.length; i++) {
+            if (areaData[i].subAreas) {
+                var sa = areaData[i].subAreas.find(function(s) { return s.id === saId; });
+                if (sa) { sa.collapsed = !sa.collapsed; break; }
+            }
+        }
+        renderSubAreaCards();
+    };
+
+    function saveAreaTypeTab() { saveWarehouseConfig(); if (window.showToast) window.showToast('Lưu cấu hình khu vực con thành công', 'success'); }
+
+    // Helper to convert HEX to RGBA
+    function hexToRgba(hex, alpha) {
+        var r = 0, g = 0, b = 0;
+        if (hex.length == 4) { r = "0x" + hex[1] + hex[1]; g = "0x" + hex[2] + hex[2]; b = "0x" + hex[3] + hex[3]; }
+        else if (hex.length == 7) { r = "0x" + hex[1] + hex[2]; g = "0x" + hex[3] + hex[4]; b = "0x" + hex[5] + hex[6]; }
+        return "rgba(" + +r + "," + +g + "," + +b + "," + alpha + ")";
     }
+
+
 
     /**
      * Edit area (placeholder - can be extended)
@@ -3249,14 +3696,13 @@
 
         // Save to localStorage
         try {
-            var stored = localStorage.getItem('wms_warehouses_v6');
-            // ...
+            var stored = localStorage.getItem('wms_warehouses_v7');
             if (stored) {
                 var list = JSON.parse(stored);
                 var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
                 if (idx !== -1) {
                     list[idx] = currentWarehouse;
-                    localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
+                    localStorage.setItem('wms_warehouses_v7', JSON.stringify(list));
                 }
             }
         } catch (e) {
@@ -3281,71 +3727,38 @@
         }
     }
 
-    // ===== AREA MODULE SELECTION =====
-    window.showAreaModuleList = function(areaId) {
-        var list = document.getElementById('areaModuleList-' + areaId);
-        if (list) {
-            list.classList.add('show');
-            renderAreaModuleOptions(areaId);
-        }
-    };
-
-    window.filterAreaModuleList = function(areaId) {
-        var input = document.getElementById('areaModuleSearch-' + areaId);
-        var list = document.getElementById('areaModuleList-' + areaId);
-        if (!input || !list) return;
-
-        var term = input.value.toLowerCase().trim();
-        var filtered = moduleData.filter(function(m) {
-            return m.code.toLowerCase().includes(term) || m.name.toLowerCase().includes(term);
-        });
-
-        if (filtered.length === 0) {
-            list.innerHTML = '<div class="item">Không tìm thấy module</div>';
-        } else {
-            var html = filtered.map(function(m) {
-                return '<div class="item" onclick="selectAreaModule(' + areaId + ', ' + m.id + ')">' + m.code + ' - ' + m.name + '</div>';
-            }).join('');
-            list.innerHTML = html;
-        }
-    };
-
-    window.renderAreaModuleOptions = function(areaId) {
-        var list = document.getElementById('areaModuleList-' + areaId);
+    /**
+     * Toggles visibility of product category accordion groups in Area tab
+     */
+    window.toggleAreaGroup = function(areaId, gIdx) {
+        var list = document.getElementById('areaProductList-' + areaId);
         if (!list) return;
-
-        if (moduleData.length === 0) {
-            list.innerHTML = '<div class="item">Chưa có module nào được định nghĩa</div>';
-            return;
-        }
-
-        var html = moduleData.map(function(m) {
-            return '<div class="item" onclick="selectAreaModule(' + areaId + ', ' + m.id + ')">' + m.code + ' - ' + m.name + '</div>';
-        }).join('');
-        list.innerHTML = html;
-    };
-
-    window.selectAreaModule = function(areaId, moduleId) {
-        var area = areaData.find(function(a) { return a.id === areaId; });
-        var mod = moduleData.find(function(m) { return m.id === moduleId; });
-        if (area && mod) {
-            area.selectedModule = { id: mod.id, code: mod.code, name: mod.name };
-            renderAreaCards();
+        var groups = list.querySelectorAll('.accordion-group');
+        if (groups[gIdx]) {
+            groups[gIdx].classList.toggle('open');
+            var content = groups[gIdx].querySelector('.accordion-content');
+            if (content) {
+                content.style.display = groups[gIdx].classList.contains('open') ? 'block' : 'none';
+            }
         }
     };
 
-    window.toggleAreaModuleList = function(areaId) {
-        var list = document.getElementById('areaModuleList-' + areaId);
-        if (list) list.classList.toggle('show');
-    };
-
-    window.removeAreaModule = function(areaId) {
-        var area = areaData.find(function(a) { return a.id === areaId; });
-        if (area) {
-            area.selectedModule = null;
-            renderAreaCards();
+    /**
+     * Toggles visibility of product category accordion groups in Sub-area tab
+     */
+    window.toggleSubAreaGroup = function(saId, gIdx) {
+        var list = document.getElementById('saProductList-' + saId);
+        if (!list) return;
+        var groups = list.querySelectorAll('.accordion-group');
+        if (groups[gIdx]) {
+            groups[gIdx].classList.toggle('open');
+            var content = groups[gIdx].querySelector('.accordion-content');
+            if (content) {
+                content.style.display = groups[gIdx].classList.contains('open') ? 'block' : 'none';
+            }
         }
     };
+
 
     // ===== SUB-AREA MANAGEMENT FUNCTIONS =====
 
@@ -3610,13 +4023,14 @@
             html += '<div class="card-number-label-container"><span class="card-number-label">Vị trí ' + (i + 1) + '</span></div>';
             html += '<div class="location-card-body">';
             
-            // // Mã vị trí
+            // Mã vị trí
             // html += '<div class="location-field">';
             // html += '<span class="location-field-label">Mã vị trí <span style="color: red;">*</span></span>';
             // html += '<div class="location-field-value">';
             // html += '<input type="text" value="' + (loc.code || '') + '" oninput="updateLocationField(' + loc.id + ', \'code\', this.value)" placeholder="Nhập mã vị trí...">';
             // html += '</div></div>';
-            
+
+
             // Tên vị trí
             html += '<div class="location-field">';
             html += '<span class="location-field-label">Tên vị trí <span style="color: red;">*</span></span>';
@@ -4019,6 +4433,72 @@
         }
     }
 
+    // ===== LOCATION MODULE SELECTION (Reused from Area) =====
+    window.showLocationModuleList = function(locId) {
+        var list = document.getElementById('locationModuleList-' + locId);
+        if (list) {
+            list.classList.add('show');
+            renderLocationModuleOptions(locId);
+        }
+    };
+
+    window.filterLocationModuleList = function(locId) {
+        var input = document.getElementById('locationModuleSearch-' + locId);
+        var list = document.getElementById('locationModuleList-' + locId);
+        if (!input || !list) return;
+
+        var term = input.value.toLowerCase().trim();
+        var filtered = moduleData.filter(function(m) {
+            return m.code.toLowerCase().includes(term) || m.name.toLowerCase().includes(term);
+        });
+
+        if (filtered.length === 0) {
+            list.innerHTML = '<div class="item">Không tìm thấy tầng tháp</div>';
+        } else {
+            var html = filtered.map(function(m) {
+                return '<div class="item" onclick="selectLocationModule(' + locId + ', ' + m.id + ')">' + m.code + ' - ' + m.name + '</div>';
+            }).join('');
+            list.innerHTML = html;
+        }
+    };
+
+    function renderLocationModuleOptions(locId) {
+        var list = document.getElementById('locationModuleList-' + locId);
+        if (!list) return;
+
+        if (moduleData.length === 0) {
+            list.innerHTML = '<div class="item">Chưa có tầng tháp nào được định nghĩa</div>';
+            return;
+        }
+
+        var html = moduleData.map(function(m) {
+            return '<div class="item" onclick="selectLocationModule(' + locId + ', ' + m.id + ')">' + m.code + ' - ' + m.name + '</div>';
+        }).join('');
+        list.innerHTML = html;
+    }
+
+    window.selectLocationModule = function(locId, moduleId) {
+        var loc = locationData.find(function(l) { return l.id === locId; });
+        var mod = moduleData.find(function(m) { return m.id === moduleId; });
+        if (loc && mod) {
+            loc.selectedModule = { id: mod.id, code: mod.code, name: mod.name };
+            renderLocationCards();
+        }
+    };
+
+    window.toggleLocationModuleList = function(locId) {
+        var list = document.getElementById('locationModuleList-' + locId);
+        if (list) list.classList.toggle('show');
+    };
+
+    window.removeLocationModule = function(locId) {
+        var loc = locationData.find(function(l) { return l.id === locId; });
+        if (loc) {
+            loc.selectedModule = null;
+            renderLocationCards();
+        }
+    };
+
     function getLocationIconSVG(directions, isForGrid) {
         // Handle both single string (legacy) and array
         var dirs = Array.isArray(directions) ? directions : [directions];
@@ -4095,13 +4575,13 @@
         }
 
         try {
-            var stored = localStorage.getItem('wms_warehouses_v6');
+            var stored = localStorage.getItem('wms_warehouses_v7');
             if (stored) {
                 var list = JSON.parse(stored);
                 var idx = list.findIndex(function(w) { return w.id === currentWarehouseId; });
                 if (idx !== -1) {
                     list[idx] = currentWarehouse;
-                    localStorage.setItem('wms_warehouses_v6', JSON.stringify(list));
+                    localStorage.setItem('wms_warehouses_v7', JSON.stringify(list));
                 }
             }
         } catch (e) {
@@ -4254,12 +4734,13 @@
     window.selectAreaDirection = selectAreaDirection;
     window.toggleAreaRuleDropdown = toggleAreaRuleDropdown;
     window.selectAreaRule = selectAreaRule;
+    window.toggleAreaGroup = window.toggleAreaGroup; // Already assigned above as window.toggleAreaGroup
+    window.toggleSubAreaGroup = window.toggleSubAreaGroup; // Already assigned above as window.toggleSubAreaGroup
 
     // Sub-area Exports
     window.addSubArea = addSubArea;
     window.deleteSubArea = deleteSubArea;
     window.updateSubAreaField = updateSubAreaField;
-    window.toggleSubAreaAccordion = toggleSubAreaAccordion;
     window.editSubArea = editSubArea;
     window.removeSubAreaTag = removeSubAreaTag;
     window.showSubAreaProductList = showSubAreaProductList;
@@ -4267,7 +4748,25 @@
     window.filterSubAreaProductList = filterSubAreaProductList;
     window.selectSubAreaProduct = selectSubAreaProduct;
     window.removeSubAreaProduct = removeSubAreaProduct;
-    window.clearSubAreaPositions = clearSubAreaPositions;
+    window.renderSubAreaCards = renderSubAreaCards;
+    window.toggleSubAreaParentList = toggleSubAreaParentList;
+    window.showSubAreaParentList = showSubAreaParentList;
+    window.filterSubAreaParentList = filterSubAreaParentList;
+    window.selectSubAreaParent = selectSubAreaParent;
+    window.removeSubAreaParent = removeSubAreaParent;
+    window.toggleSubAreaCollapse = toggleSubAreaCollapse;
+    window.toggleSubAreaGroup = window.toggleSubAreaGroup;
+
+    // Area Module search
+    window.showAreaModuleList = showAreaModuleList;
+    window.filterAreaModuleList = filterAreaModuleList;
+    window.toggleAreaModuleList = toggleAreaModuleList;
+    window.selectAreaModule = selectAreaModule;
+    window.removeAreaModule = removeAreaModule;
+
+    // Location Module search logic was removed as requested
+
+
 
     // Module Exports
     window.updateModuleField = updateModuleField;
@@ -4275,9 +4774,11 @@
     window.editModule = editModule;
     window.removeModuleTag = removeModuleTag;
     window.saveModuleTab = saveModuleTab;
-    window.renderModuleEqList = renderModuleEqList;
-    window.setModuleEqFilter = setModuleEqFilter;
-    window.assignModuleEq = assignModuleEq;
+    window.toggleModuleActive = toggleModuleActive;
+    window.toggleTowerTypeDropdown = toggleTowerTypeDropdown;
+    window.selectTowerType = selectTowerType;
+
+
 
     // Auto-init if DOM is ready
     if (document.readyState === 'loading') {

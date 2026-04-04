@@ -66,14 +66,7 @@
         { id: 24, code: 'R&D', type: 'Kho Flat', name: 'TRUNG TÂM R&D - INDUSTRIES', floors: 2, status: 'Mới tạo' }
     ];
 
-    // Initialize areas for mock data if not present
-    warehouses.forEach(w => {
-        if (!w.areas) {
-            w.areas = generateMockAreas(w.id, w.floors);
-        }
-        // Constraint: Total positions = sum of positions in areas
-        w.totalLocations = w.areas.reduce((sum, area) => sum + area.positions, 0);
-    });
+
 
     // Initialize from LocalStorage if available
     const storedWarehouses = localStorage.getItem('wms_warehouses_v7');
@@ -91,6 +84,24 @@
     } else {
         localStorage.setItem('wms_warehouses_v7', JSON.stringify(warehouses));
     }
+
+    // Ensure all warehouses have areas and towerCount
+    warehouses.forEach(w => {
+        if (!w.areas) {
+            w.areas = generateMockAreas(w.id, w.floors);
+        }
+        // Add towerCount: 4 if status is 'Mới tạo', otherwise random 1-10
+        if (w.status === 'Mới tạo') {
+            w.towerCount = 4;
+        } else if (w.towerCount === undefined || w.towerCount === null) {
+            w.towerCount = Math.floor(Math.random() * 10) + 1;
+        }
+        
+        // Constraint: Total positions = sum of positions in areas
+        w.totalLocations = w.areas.reduce((sum, area) => sum + area.positions, 0);
+    });
+    // Save back to ensure new fields are stored
+    localStorage.setItem('wms_warehouses_v7', JSON.stringify(warehouses));
 
     let pendingToggleId = null;
     let currentPage = 1;
@@ -174,7 +185,7 @@
         warehouseBody.innerHTML = '';
 
         if (data.length === 0) {
-            warehouseBody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 20px;">Không tìm thấy dữ liệu</td></tr>';
+            warehouseBody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 20px;">Không tìm thấy dữ liệu</td></tr>';
             renderPagination(0);
             return;
         }
@@ -208,6 +219,7 @@
                     <span class="badge ${getTypeBadgeClass(item.type)}">${item.type}</span>
                 </td>
                 <td style="text-align: center;">${item.floors}</td>
+                <td style="text-align: center;">${item.towerCount || '-'}</td>
                 <td style="text-align: center;">${totalPos.toLocaleString()}</td>
                 <td style="text-align: center;">
                     <span class="badge badge-status ${getStatusBadgeClass(item.status)}">${item.status}</span>
@@ -451,7 +463,7 @@
         }
 
         detailRow.innerHTML = `
-            <td colspan="9" style="padding: 0;">
+            <td colspan="10" style="padding: 0;">
                 <div class="detail-container">
                     <table class="detail-table">
                         <thead>
@@ -490,6 +502,7 @@
         document.getElementById('modal-type-display').textContent = 'Chọn loại kho';
         document.getElementById('warehouseLength').value = '';
         document.getElementById('warehouseWidth').value = '';
+        document.getElementById('towerCount').value = 4;
         
         // Hide status field when creating (auto-set to 'Mới tạo')
         document.getElementById('statusFormGroup').style.display = 'none';
@@ -529,6 +542,8 @@
         } else {
             document.getElementById('floors').readOnly = false;
         }
+
+        document.getElementById('towerCount').value = item.towerCount || 0;
 
         // Show status field when editing
         document.getElementById('statusFormGroup').style.display = '';
@@ -575,6 +590,7 @@
         let floors = parseInt(document.getElementById('floors').value) || 0;
         const warehouseLength = parseInt(document.getElementById('warehouseLength').value) || 0;
         const warehouseWidth = parseInt(document.getElementById('warehouseWidth').value) || 0;
+        const towerCount = parseInt(document.getElementById('towerCount').value) || 0;
         const status = document.getElementById('warehouseStatus').value;
 
         // Enforce 2 floors for 'Mới tạo'
@@ -609,14 +625,15 @@
                 // Keep existing totalLocations or update based on areas
                 const areas = warehouses[index].areas || generateMockAreas(id, floors);
                 const totalLocations = areas.reduce((sum, a) => sum + a.positions, 0);
-                warehouses[index] = { ...warehouses[index], type, name, floors, warehouseLength, warehouseWidth, totalLocations, status, areas };
+                
+                warehouses[index] = { ...warehouses[index], type, name, floors, towerCount, warehouseLength, warehouseWidth, totalLocations, status, areas };
             }
         } else {
             // Create
             const newId = warehouses.length > 0 ? Math.max(...warehouses.map(w => w.id)) + 1 : 1;
             const areas = generateMockAreas(newId, floors);
             const totalLocations = areas.reduce((sum, a) => sum + a.positions, 0);
-            warehouses.push({ id: newId, type, name, floors, warehouseLength, warehouseWidth, totalLocations, status: 'Mới tạo', areas });
+            warehouses.push({ id: newId, type, name, floors, towerCount, warehouseLength, warehouseWidth, totalLocations, status: 'Mới tạo', areas });
         }
 
         saveWarehouses();

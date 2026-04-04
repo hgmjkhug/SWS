@@ -1816,19 +1816,22 @@
 
 .init-equipment-search-wrapper {
     position: relative;
-    margin-bottom: 12px;
+    margin-bottom: 0px;
 }
 
 .init-equipment-search {
     display: flex;
     align-items: center;
-    background: #F8FAFC;
+    background: #FFFFFF;
     border: 1px solid #E2E8F0;
     border-radius: 8px;
     padding: 8px 12px;
     gap: 8px;
-    transition: border-color 0.2s;
+    transition: all 0.2s;
+    height: 48px;
+    box-sizing: border-box;
 }
+
 
 .init-equipment-search:focus-within {
     border-color: #076EB8;
@@ -2969,4 +2972,56 @@ input:checked+.slider:before {
     display: flex;
     align-items: center;
     gap: 6px;
+}
+
+/* ===== SUB-AREA (KHU VỰC CON) TAB STYLES ===== */
+#subAreaCardList .area-card {
+    border: 1px solid #E2E8F0;
+    margin-bottom: 16px;
+    background: #FFFFFF;
+}
+
+#subAreaCardList .area-toggle {
+    margin-top: 12px;
+}
+
+#subAreaCardList .area-card-actions {
+    padding-top: 8px;
+    border-top: 1px dashed #E2E8F0;
+    margin-top: 8px;
+}
+
+.subarea-parent-selector {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+}
+
+.subarea-parent-selector:hover {
+    border-color: #076EB8;
+}
+
+.subarea-parent-label {
+    font-size: 13px;
+    color: #64748B;
+    font-weight: 500;
+}
+
+.subarea-parent-value {
+    flex: 1;
+    font-size: 14px;
+    color: #1E293B;
+    font-weight: 600;
+}
+
+.subarea-parent-value.empty {
+    color: #94A3B8;
+    font-weight: 400;
 }

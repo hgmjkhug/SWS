@@ -29,14 +29,17 @@
     <div class="config-left-panel">
       <!-- Segment buttons: Khai báo, Khu vực, Vị trí -->
       <div class="config-segment-control" id="configTabControl">
-        <button class="segment-btn active" onclick="setConfigTab('init', this)">
-          Khai báo
-        </button>
         <button class="segment-btn active" onclick="setConfigTab('module', this)">
-          Module
+          Tháp
+        </button>
+        <button class="segment-btn" onclick="setConfigTab('towerFloor', this)">
+          Tầng tháp
         </button>
         <button class="segment-btn" onclick="setConfigTab('area', this)">
           Khu vực
+        </button>
+         <button class="segment-btn" onclick="setConfigTab('areaType', this)">
+          Khu vực con
         </button>
         <button
           class="segment-btn"
@@ -46,8 +49,8 @@
         </button>
       </div>
 
-      <!-- Tab Content: Khai báo (default visible) -->
-      <div id="tabContentInit" class="tab-content active">
+      <!-- Tab Content: Khai báo -->
+      <div id="tabContentInit" class="tab-content">
 
         <!-- Scrollable form area -->
         <div class="init-info-form">
@@ -102,9 +105,30 @@
 
 
 
+      <!-- Tab Content: Tower Floor -->
+      <div id="tabContentTowerFloor" class="tab-content" style="height: 100%; gap: 16px;">
+        <div class="area-scroll-section">
+          <div class="module-card-list" id="towerFloorCardList">
+            <!-- Tower floor cards will be rendered by JS -->
+          </div>
+        </div>
+
+        <div class="location-add-wrapper" style="padding: 12px 0 8px 0; border-top: 1px solid #f1f5f9; background: #fff; display: flex; justify-content: center;">
+          <button class="btn-add-location" onclick="addTowerFloor()" style="width: 40px; height: 40px; background: #076eb8; color: white; border: none; border-radius: 50%; cursor: pointer;">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+
+        <div class="init-action-buttons">
+          <button class="init-btn-back" onclick="window.history.back()">Quay về</button>
+          <button class="init-btn-save" onclick="saveTowerFloorTab()">Lưu</button>
+        </div>
+      </div>
+
+
       <!-- Tab Content: Module -->
       <div id="tabContentModule" class="tab-content" style="height: 100%; gap: 16px;">
-        <div class="module-scroll-section" style="flex: 1; overflow-y: auto; padding-right: 4px;">
+        <div class="area-scroll-section">
           <div class="module-card-list" id="moduleCardList">
             <!-- Module cards will be rendered by JS -->
           </div>
@@ -202,6 +226,28 @@
         <div class="area-add-fixed-wrapper">
           <div class="area-add-wrapper" style="padding: 8px 0 0 0; border-top: 1px solid #f1f5f9; background: #fff; display: flex; justify-content: center;">
             <button class="btn-add-area" onclick="addArea()" style="width: 40px; height: 40px; background: #076eb8; color: white; border: none; border-radius: 50%; cursor: pointer;">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="init-action-buttons">
+          <button class="init-btn-back" onclick="window.history.back()">Quay về</button>
+          <button class="init-btn-save" onclick="saveAreaTab()">Lưu</button>
+        </div>
+      </div>
+
+      <!-- Tab Content: Khu vực con (Sub-area) -->
+      <div id="tabContentAreaType" class="tab-content" style="height: 100%;">
+        <div class="area-scroll-section" style="flex: 1; overflow-y: auto; padding-right: 4px;">
+          <div class="area-card-list" id="subAreaCardList">
+            <!-- Sub-area cards will be rendered by JS -->
+          </div>
+        </div>
+        
+        <div class="area-add-fixed-wrapper">
+          <div class="area-add-wrapper" style="padding: 8px 0 0 0; border-top: 1px solid #f1f5f9; background: #fff; display: flex; justify-content: center;">
+            <button class="btn-add-area" onclick="addSubArea()" style="width: 40px; height: 40px; background: #076eb8; color: white; border: none; border-radius: 50%; cursor: pointer;">
               <i class="fas fa-plus"></i>
             </button>
           </div>
