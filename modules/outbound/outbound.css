@@ -1789,7 +1789,7 @@ button:disabled {
 /* Checked states */
 .priority-toggle-switch input:checked + .priority-toggle-slider,
 .priority-toggle-switch input:checked + .priority-toggle-slider-popup {
-    background-color: #22C55E;
+    background-color: #95E3B2;
 }
 
 .priority-toggle-switch input:checked + .priority-toggle-slider:before,
@@ -1800,6 +1800,11 @@ button:disabled {
 /* Disabled state */
 .priority-toggle-switch input:disabled + .priority-toggle-slider,
 .priority-toggle-switch input:disabled + .priority-toggle-slider-popup {
+    opacity: 0.8;
+}
+.priority-toggle-switch input:checked:disabled + .priority-toggle-slider,
+.priority-toggle-switch input:checked:disabled + .priority-toggle-slider-popup {
+    background-color: #95E3B2;
     opacity: 0.8;
 }
 

@@ -16,6 +16,8 @@
 
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
+    // Close any open flyout before toggling
+    if (typeof closeCollapsedFlyout === 'function') closeCollapsedFlyout();
     sidebar.classList.toggle('collapsed');
     // Persist sidebar state
     try {
@@ -67,14 +69,119 @@ document.addEventListener('DOMContentLoaded', function () {
 function toggleSubmenu(element) {
     const sidebar = document.getElementById('sidebar');
     if (sidebar.classList.contains('collapsed')) {
-        sidebar.classList.remove('collapsed');
-        // Update storage when expanding via submenu
-        try { localStorage.setItem('sidebar_collapsed', 'false'); } catch (e) { }
+        // Show flyout popup instead of expanding sidebar
+        showCollapsedFlyout(element);
+        return;
     }
     const parent = element.parentElement;
     const submenu = parent.querySelector('.submenu');
     parent.classList.toggle('open');
     submenu.style.maxHeight = parent.classList.contains('open') ? submenu.scrollHeight + "px" : null;
+}
+
+/**
+ * Shows a flyout popup next to the clicked menu item when sidebar is collapsed.
+ */
+function showCollapsedFlyout(menuLinkElement) {
+    // Remove any existing flyout
+    closeCollapsedFlyout();
+
+    const menuItem = menuLinkElement.parentElement;
+    const submenu = menuItem.querySelector('.submenu');
+    if (!submenu) return;
+
+    // Get the submenu links (visible ones only)
+    const links = Array.from(submenu.querySelectorAll('a')).filter(a => a.style.display !== 'none');
+    if (links.length === 0) return;
+
+    // Get module title
+    const linkText = menuLinkElement.querySelector('.link-text');
+    const title = linkText ? linkText.innerText.trim() : '';
+
+    // Create flyout container
+    const flyout = document.createElement('div');
+    flyout.className = 'sidebar-flyout';
+    flyout.id = 'sidebar-flyout';
+
+    // Title
+    const titleEl = document.createElement('div');
+    titleEl.className = 'sidebar-flyout-title';
+    titleEl.textContent = title;
+    flyout.appendChild(titleEl);
+
+    // Links
+    links.forEach(link => {
+        const item = document.createElement('div');
+        item.className = 'sidebar-flyout-item';
+        if (link.classList.contains('sub-active')) {
+            item.classList.add('active');
+        }
+
+        // Clone icon
+        const icon = link.querySelector('i');
+        if (icon) {
+            item.appendChild(icon.cloneNode(true));
+        }
+
+        const span = document.createElement('span');
+        span.textContent = link.innerText.trim();
+        item.appendChild(span);
+
+        // Click handler
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeCollapsedFlyout();
+            link.click();
+        });
+
+        flyout.appendChild(item);
+    });
+
+    // Position the flyout next to the menu item
+    const sidebar = document.getElementById('sidebar');
+    const sidebarRect = sidebar.getBoundingClientRect();
+    const itemRect = menuLinkElement.getBoundingClientRect();
+
+    flyout.style.position = 'fixed';
+    flyout.style.left = (sidebarRect.right + 10) + 'px';
+    flyout.style.top = itemRect.top + 'px';
+    flyout.style.zIndex = '2000';
+
+    document.body.appendChild(flyout);
+
+    // Adjust if flyout overflows viewport bottom
+    requestAnimationFrame(() => {
+        const flyoutRect = flyout.getBoundingClientRect();
+        if (flyoutRect.bottom > window.innerHeight - 10) {
+            flyout.style.top = Math.max(10, window.innerHeight - flyoutRect.height - 10) + 'px';
+        }
+    });
+
+    // Mark the menu item as having an active flyout
+    menuLinkElement.classList.add('flyout-active');
+
+    // Close flyout when clicking outside
+    setTimeout(() => {
+        document.addEventListener('click', _closeFlyoutOnClickOutside);
+    }, 10);
+}
+
+function _closeFlyoutOnClickOutside(e) {
+    const flyout = document.getElementById('sidebar-flyout');
+    if (flyout && !flyout.contains(e.target)) {
+        // Also check if clicking another menu-link in collapsed mode (will open new flyout)
+        const isMenuLink = e.target.closest('.menu-link');
+        if (!isMenuLink) {
+            closeCollapsedFlyout();
+        }
+    }
+}
+
+function closeCollapsedFlyout() {
+    const existing = document.getElementById('sidebar-flyout');
+    if (existing) existing.remove();
+    document.querySelectorAll('.menu-link.flyout-active').forEach(el => el.classList.remove('flyout-active'));
+    document.removeEventListener('click', _closeFlyoutOnClickOutside);
 }
 
 /**

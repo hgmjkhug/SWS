@@ -47,6 +47,94 @@ body {
 .search-icon-collapsed { display: none; width: 40px; height: 40px; align-items: center; justify-content: center; color: #076EB8; font-size: 18px; cursor: pointer; border-radius: 8px; transition: all 0.2s; }
 .search-icon-collapsed:hover { background: rgba(7, 110, 184, 0.1); }
 
+/* Flyout menu for collapsed sidebar */
+.sidebar-flyout {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+    min-width: 250px;
+    max-width: 300px;
+    padding: 8px 0;
+    animation: flyoutIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+@keyframes flyoutIn {
+    from {
+        opacity: 0;
+        transform: translateX(-8px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+.sidebar-flyout-title {
+    padding: 10px 16px 8px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #076EB8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-flyout-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    position: relative;
+}
+
+.sidebar-flyout-item:hover {
+    background-color: rgba(7, 110, 184, 0.08);
+    color: #076EB8;
+}
+
+.sidebar-flyout-item.active {
+    color: #076EB8;
+    font-weight: 600;
+    background-color: rgba(7, 110, 184, 0.1);
+}
+
+.sidebar-flyout-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 3px;
+    background: #076EB8;
+    border-radius: 0 3px 3px 0;
+}
+
+.sidebar-flyout-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    color: inherit;
+}
+
+/* Highlight the menu-link that has an active flyout */
+.sidebar.collapsed .menu-link.flyout-active {
+    background-color: rgba(7, 110, 184, 0.12);
+    border-left-color: #076EB8;
+}
+
 .sidebar-header { height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background-color: transparent; border-bottom: 1px solid #e2e8f0; }
 .brand-logo { font-size: 18px; font-weight: 700; color: #076EB8; display: flex; align-items: center; gap: 10px; white-space: nowrap; overflow: hidden; }
 .brand-logo i { color: #076EB8; flex-shrink: 0; }

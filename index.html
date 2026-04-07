@@ -86,6 +86,21 @@
         </div>
       </div>
 
+      <!-- Quản lý đơn hàng -->
+       <div class="menu-item" data-module="OUTBOUND">
+        <div class="menu-link" onclick="toggleSubmenu(this)">
+          <div class="link-content">
+           <i class="fa-solid fa-gift"></i>
+            <span class="link-text">Quản lý đơn hàng</span>
+          </div>
+          <i class="fas fa-chevron-right arrow-icon"></i>
+        </div>
+        <div class="submenu">
+          <a href="#" onclick="loadPage('Lệnh xuất kho')" data-code="OUTBOUND_ORDER"><i class="fa-solid fa-arrow-right-to-bracket"></i>Đơn hàng nhập</a>
+          <a href="#" onclick="loadPage('Lệnh xuất kho')" data-code="OUTBOUND_ORDER"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đơn hàng xuất</a>
+        </div>
+      </div>
+
       <!-- Layout Kho (2D) - Active -->
       <div class="menu-item" data-module="WAREHOUSE">
         <div class="menu-link" onclick="toggleSubmenu(this)">
@@ -207,6 +222,8 @@
             chứa</a>
           <a href="#" onclick="loadPage('Đơn vị tính')" data-code="UNIT_OF_MEASURE"><i class="fas fa-ruler"></i>Đơn vị
             tính</a>
+          <a href="#" onclick="loadPage('Thị trường')" data-code="MARKET"><i class="fa-solid fa-shop"></i>Thị trường</a>
+          <a href="#" onclick="loadPage('Khách hàng')" data-code="CUSTOMER"><i class="fa-solid fa-money-bill-1-wave"></i>Khách hàng</a>
           <a href="#" onclick="loadPage('Loại khu vực')" data-code="LOCATION_TYPE"><i
               class="fas fa-map-marker-alt"></i>Loại khu vực</a>
         </div>

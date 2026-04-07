@@ -1905,7 +1905,7 @@ input, button, select, textarea {
     box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 .priority-toggle-switch input:checked + .priority-toggle-slider {
-    background-color: #22C55E;
+    background-color: #95E3B2;
 }
 .priority-toggle-switch input:checked + .priority-toggle-slider:before {
     transform: translateX(22px);
@@ -1915,6 +1915,10 @@ input, button, select, textarea {
     cursor: not-allowed;
     background-color: #e2e8f0;
     opacity: 0.7;
+}
+.priority-toggle-switch input:checked:disabled + .priority-toggle-slider {
+    background-color: #95E3B2;
+    opacity: 0.8;
 }
 .priority-toggle-switch input:disabled + .priority-toggle-slider:before {
     box-shadow: none;
