@@ -373,6 +373,8 @@ const COLS = 55;
     grid.appendChild(modB);
     grid.appendChild(modC);
 
+    let activeAnimationTimeout;
+
     // Shuttle Animation Logic
     function createShuttle() {
         const wrapper = document.getElementById('new-layout-grid-scaler');
@@ -470,11 +472,11 @@ const COLS = 55;
         await new Promise(r => setTimeout(r, moveDelay));
 
         // Repeat animation
-        setTimeout(animateShuttle, 1000);
+        activeAnimationTimeout = setTimeout(animateShuttle, 1000);
         shuttle.remove();
     }
 
-    setTimeout(animateShuttle, 2000);
+    activeAnimationTimeout = setTimeout(animateShuttle, 2000);
 
     // Zoom Logic
     let currentScale = 1;
@@ -632,6 +634,12 @@ const COLS = 55;
         // Initial sync
         updateMapVisibility();
     }
+
+    // Register cleanup function
+    window.destroyModule = function() {
+        console.log('Cleaning up New Layout module...');
+        if (activeAnimationTimeout) clearTimeout(activeAnimationTimeout);
+    };
 
     // Close all when clicking outside
     document.addEventListener('click', () => {

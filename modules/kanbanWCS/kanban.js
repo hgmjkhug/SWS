@@ -13,33 +13,33 @@
     ];
 
     const mockTasks = [
-        // --- PENDING ---
-        { id: 'NK-20231024-001', type: 'Nhập kho', status: 'pending', warehouse: 'Kho A', device: 'AGV-01', step: 'Di chuyển đến vị trí nhận', batchCode: 'BATCH-001', logs: [{ time: '08:00', msg: 'Tạo lệnh nhập kho' }, { time: '08:05', msg: 'Đang chờ thiết bị' }] },
-        { id: 'NK-20231024-005', type: 'Nhập kho', status: 'pending', warehouse: 'Kho B', device: 'Forklift 05', step: 'Chờ xác nhận', batchCode: 'BATCH-002', logs: [{ time: '12:00', msg: 'Yêu cầu nhập kho thủ công' }] },
-        { id: 'NK-20231024-008', type: 'Nhập kho', status: 'pending', warehouse: 'Kho A', device: 'AGV-03', step: 'Đang xếp hàng chờ', batchCode: 'BATCH-001', logs: [{ time: '08:10', msg: 'Xe đang đợi tại vùng đệm' }] },
-        { id: 'XK-20231024-012', type: 'Xuất kho', status: 'pending', warehouse: 'Kho C', device: 'Conveyor 02', step: 'Chờ lệnh xuất', batchCode: 'BATCH-003', logs: [{ time: '09:00', msg: 'Đơn hàng tạo mới' }] },
-        { id: 'NK-20231024-015', type: 'Nhập kho', status: 'pending', warehouse: 'Kho B', device: 'Stacker 01', step: 'Kiểm tra vị trí trống', batchCode: 'BATCH-004', logs: [{ time: '10:30', msg: 'Hệ thống đang quét vị trí' }] },
+        // --- PENDING --- Chỉ có 13 Shuttle + 03 Lifter
+        { id: 'NK-20231024-001', type: 'Nhập kho', status: 'pending', warehouse: 'Kho A', device: 'Shuttle 001', step: 'Di chuyển đến vị trí nhận', batchCode: 'BATCH-001', logs: [{ time: '08:00', msg: 'Tạo lệnh nhập kho' }, { time: '08:05', msg: 'Đang chờ thiết bị' }] },
+        { id: 'NK-20231024-005', type: 'Nhập kho', status: 'pending', warehouse: 'Kho B', device: 'Lifter 001', step: 'Chờ xác nhận', batchCode: 'BATCH-002', logs: [{ time: '12:00', msg: 'Yêu cầu nhập kho thủ công' }] },
+        { id: 'NK-20231024-008', type: 'Nhập kho', status: 'pending', warehouse: 'Kho A', device: 'Shuttle 002', step: 'Đang xếp hàng chờ', batchCode: 'BATCH-001', logs: [{ time: '08:10', msg: 'Xe đang đợi tại vùng đệm' }] },
+        { id: 'XK-20231024-012', type: 'Xuất kho', status: 'pending', warehouse: 'Kho C', device: 'Shuttle 003', step: 'Chờ lệnh xuất', batchCode: 'BATCH-003', logs: [{ time: '09:00', msg: 'Đơn hàng tạo mới' }] },
+        { id: 'NK-20231024-015', type: 'Nhập kho', status: 'pending', warehouse: 'Kho B', device: 'Lifter 002', step: 'Kiểm tra vị trí trống', batchCode: 'BATCH-004', logs: [{ time: '10:30', msg: 'Hệ thống đang quét vị trí' }] },
 
         // --- IN PROGRESS ---
-        { id: 'XK-20231024-002', type: 'Xuất kho', status: 'in_progress', warehouse: 'Kho B', device: 'Stacker Crane 02', step: 'Nâng pallet lên kệ', batchCode: 'BATCH-001', logs: [{ time: '09:15', msg: 'Xe đang di chuyển' }, { time: '09:20', msg: 'Đang nâng hàng' }] },
-        { id: 'NK-20231024-006', type: 'Nhập kho', status: 'in_progress', warehouse: 'Kho A', device: 'AGV-02', step: 'Đang di chuyển', batchCode: 'BATCH-005', logs: [{ time: '13:05', msg: 'Đang di chuyển đến vùng đệm' }, { time: '13:10', msg: 'Cập nhật vị trí: Zone B' }] },
-        { id: 'XK-20231024-011', type: 'Xuất kho', status: 'in_progress', warehouse: 'Kho A', device: 'Conveyor 01', step: 'Vận chuyển ra cổng', batchCode: 'BATCH-002', logs: [{ time: '14:00', msg: 'Hàng đã lên băng tải' }] },
-        { id: 'NK-20231024-019', type: 'Nhập kho', status: 'in_progress', warehouse: 'Kho C', device: 'Forklift 02', step: 'Đưa hàng vào kệ', batchCode: 'BATCH-003', logs: [{ time: '15:20', msg: 'Đang thao tác tại Line 3' }] },
-        { id: 'NK-20231024-021', type: 'Nhập kho', status: 'in_progress', warehouse: 'Kho B', device: 'AGV-04', step: 'Di chuyển về sạc', batchCode: 'BATCH-004', logs: [{ time: '16:00', msg: 'Pin yếu, về trạm sạc' }] },
-        { id: 'XK-20231024-025', type: 'Xuất kho', status: 'in_progress', warehouse: 'Kho A', device: 'Stacker Crane 01', step: 'Lấy hàng tầng 3', batchCode: 'BATCH-001', logs: [{ time: '11:45', msg: 'Đang hạ càng nâng' }] },
+        { id: 'XK-20231024-002', type: 'Xuất kho', status: 'in_progress', warehouse: 'Kho B', device: 'Shuttle 004', step: 'Nâng pallet lên kệ', batchCode: 'BATCH-001', logs: [{ time: '09:15', msg: 'Xe đang di chuyển' }, { time: '09:20', msg: 'Đang nâng hàng' }] },
+        { id: 'NK-20231024-006', type: 'Nhập kho', status: 'in_progress', warehouse: 'Kho A', device: 'Shuttle 005', step: 'Đang di chuyển', batchCode: 'BATCH-005', logs: [{ time: '13:05', msg: 'Đang di chuyển đến vùng đệm' }, { time: '13:10', msg: 'Cập nhật vị trí: Zone B' }] },
+        { id: 'XK-20231024-011', type: 'Xuất kho', status: 'in_progress', warehouse: 'Kho A', device: 'Shuttle 006', step: 'Vận chuyển ra cổng', batchCode: 'BATCH-002', logs: [{ time: '14:00', msg: 'Hàng đã lên băng tải' }] },
+        { id: 'NK-20231024-019', type: 'Nhập kho', status: 'in_progress', warehouse: 'Kho C', device: 'Shuttle 007', step: 'Đưa hàng vào kệ', batchCode: 'BATCH-003', logs: [{ time: '15:20', msg: 'Đang thao tác tại Line 3' }] },
+        { id: 'NK-20231024-021', type: 'Nhập kho', status: 'in_progress', warehouse: 'Kho B', device: 'Shuttle 008', step: 'Di chuyển về sạc', batchCode: 'BATCH-004', logs: [{ time: '16:00', msg: 'Pin yếu, về trạm sạc' }] },
+        { id: 'XK-20231024-025', type: 'Xuất kho', status: 'in_progress', warehouse: 'Kho A', device: 'Shuttle 009', step: 'Lấy hàng tầng 3', batchCode: 'BATCH-001', logs: [{ time: '11:45', msg: 'Đang hạ càng nâng' }] },
 
         // --- COMPLETE ---
-        { id: 'NK-20231024-003', type: 'Nhập kho', status: 'complete', warehouse: 'Kho A', device: 'AGV-03', step: 'Hoàn thành', batchCode: 'BATCH-002', logs: [{ time: '10:00', msg: 'Tạo lệnh' }, { time: '10:30', msg: 'Hoàn thành nhập kho' }] },
-        { id: 'XK-20231024-010', type: 'Xuất kho', status: 'complete', warehouse: 'Kho C', device: 'Forklift 01', step: 'Đã xuất kho', batchCode: 'BATCH-005', logs: [{ time: '08:30', msg: 'Xe tải đã nhận hàng' }] },
-        { id: 'NK-20231024-014', type: 'Nhập kho', status: 'complete', warehouse: 'Kho B', device: 'AGV-02', step: 'Về vị trí đỗ', batchCode: 'BATCH-001', logs: [{ time: '17:00', msg: 'Nhiệm vụ hoàn tất' }] },
-        { id: 'NK-20231024-022', type: 'Nhập kho', status: 'complete', warehouse: 'Kho A', device: 'Stacker Crane 03', step: 'Kiểm kê xong', batchCode: 'BATCH-003', logs: [{ time: '18:15', msg: 'Dữ liệu đã đồng bộ' }] },
-        { id: 'XK-20231024-030', type: 'Xuất kho', status: 'complete', warehouse: 'Kho B', device: 'Conveyor 03', step: 'Dừng băng tải', batchCode: 'BATCH-004', logs: [{ time: '19:00', msg: 'Hết ca làm việc' }] },
+        { id: 'NK-20231024-003', type: 'Nhập kho', status: 'complete', warehouse: 'Kho A', device: 'Shuttle 003', step: 'Hoàn thành', batchCode: 'BATCH-002', logs: [{ time: '10:00', msg: 'Tạo lệnh' }, { time: '10:30', msg: 'Hoàn thành nhập kho' }] },
+        { id: 'XK-20231024-010', type: 'Xuất kho', status: 'complete', warehouse: 'Kho C', device: 'Shuttle 001', step: 'Đã xuất kho', batchCode: 'BATCH-005', logs: [{ time: '08:30', msg: 'Xe tải đã nhận hàng' }] },
+        { id: 'NK-20231024-014', type: 'Nhập kho', status: 'complete', warehouse: 'Kho B', device: 'Shuttle 002', step: 'Về vị trí đỗ', batchCode: 'BATCH-001', logs: [{ time: '17:00', msg: 'Nhiệm vụ hoàn tất' }] },
+        { id: 'NK-20231024-022', type: 'Nhập kho', status: 'complete', warehouse: 'Kho A', device: 'Lifter 003', step: 'Kiểm kê xong', batchCode: 'BATCH-003', logs: [{ time: '18:15', msg: 'Dữ liệu đã đồng bộ' }] },
+        { id: 'XK-20231024-030', type: 'Xuất kho', status: 'complete', warehouse: 'Kho B', device: 'Shuttle 004', step: 'Dừng băng tải', batchCode: 'BATCH-004', logs: [{ time: '19:00', msg: 'Hết ca làm việc' }] },
 
         // --- BUG ---
-        { id: 'XK-20231024-004', type: 'Xuất kho', status: 'bug', warehouse: 'Kho C', device: 'Conveyor 01', step: 'Lỗi cảm biến', batchCode: 'BATCH-001', logs: [{ time: '11:00', msg: 'Bắt đầu băng tải' }, { time: '11:05', msg: 'Cảnh báo: Kẹt hàng tại vị trí C1' }] },
-        { id: 'NK-20231024-007', type: 'Nhập kho', status: 'bug', warehouse: 'Kho A', device: 'Stacker Crane 01', step: 'Mất kết nối', batchCode: 'BATCH-002', logs: [{ time: '09:45', msg: 'Không tìm thấy tín hiệu điều khiển' }] },
-        { id: 'XK-20231024-018', type: 'Xuất kho', status: 'bug', warehouse: 'Kho B', device: 'AGV-05', step: 'Va chạm vật cản', batchCode: 'BATCH-005', logs: [{ time: '14:30', msg: 'Cảm biến va chạm kích hoạt' }] },
-        { id: 'NK-20231024-029', type: 'Nhập kho', status: 'bug', warehouse: 'Kho C', device: 'Forklift 03', step: 'Lỗi động cơ', batchCode: 'BATCH-001', logs: [{ time: '10:15', msg: 'Quá nhiệt động cơ nâng' }] },
+        { id: 'XK-20231024-004', type: 'Xuất kho', status: 'bug', warehouse: 'Kho C', device: 'Shuttle 001', step: 'Lỗi cảm biến', batchCode: 'BATCH-001', logs: [{ time: '11:00', msg: 'Bắt đầu băng tải' }, { time: '11:05', msg: 'Cảnh báo: Kẹt hàng tại vị trí C1' }] },
+        { id: 'NK-20231024-007', type: 'Nhập kho', status: 'bug', warehouse: 'Kho A', device: 'Lifter 001', step: 'Mất kết nối', batchCode: 'BATCH-002', logs: [{ time: '09:45', msg: 'Không tìm thấy tín hiệu điều khiển' }] },
+        { id: 'XK-20231024-018', type: 'Xuất kho', status: 'bug', warehouse: 'Kho B', device: 'Shuttle 005', step: 'Va chạm vật cản', batchCode: 'BATCH-005', logs: [{ time: '14:30', msg: 'Cảm biến va chạm kích hoạt' }] },
+        { id: 'NK-20231024-029', type: 'Nhập kho', status: 'bug', warehouse: 'Kho C', device: 'Lifter 002', step: 'Lỗi động cơ', batchCode: 'BATCH-001', logs: [{ time: '10:15', msg: 'Quá nhiệt động cơ nâng' }] },
         { id: 'NK-20231024-033', type: 'Nhập kho', status: 'bug', warehouse: 'Kho A', device: 'System', step: 'Lỗi dữ liệu', batchCode: 'BATCH-004', logs: [{ time: '15:50', msg: 'Không thể đồng bộ tồn kho' }] }
     ];
 

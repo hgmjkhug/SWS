@@ -670,6 +670,7 @@ ${cargoSVG}
     }
 
     const reservedShelves = new Set();
+    const activeTimeouts = [];
 
     function animateShuttle(shuttleEl, totalMissions, startPos, shuttleId, role, startDelay = 0) {
         let fullPath = [];
@@ -788,7 +789,7 @@ ${cargoSVG}
                 shuttleEl.style.transition = 'none';
                 // SH-001 (Priority) waits less, SH-002 (Secondary) waits more to break deadlocks
                 const baseWait = (shuttleId === 'shuttle-1' ? 400 : 1200);
-                setTimeout(move, baseWait + Math.random() * 400);
+                activeTimeouts.push(setTimeout(move, baseWait + Math.random() * 400));
                 return;
             }
 
@@ -806,14 +807,21 @@ ${cargoSVG}
             const color = (p.action === 'park' || p.action === 'charge') ? '#F9F1E2' : '#076EB8';
             shuttleEl.innerHTML = getShuttleSVG(isLoaded, p.action === 'charge', color);
             idx++;
-            setTimeout(move, p.action === 'charge' ? 30000 : duration);
+            activeTimeouts.push(setTimeout(move, p.action === 'charge' ? 30000 : duration));
         }
         
-        setTimeout(move, startDelay);
+        activeTimeouts.push(setTimeout(move, startDelay));
     }
 
     animateShuttle(shuttleEl1, 10, { r: 6, c: 14 }, 'shuttle-1', 'inbound');
     animateShuttle(shuttleEl2, 10, { r: 2, c: 0 }, 'shuttle-2', 'outbound', 5000);
+
+    // Register cleanup function
+    window.destroyModule = function() {
+        console.log('Cleaning up TraceIO module...');
+        activeTimeouts.forEach(t => clearTimeout(t));
+        activeTimeouts.length = 0;
+    };
 
 })();
 

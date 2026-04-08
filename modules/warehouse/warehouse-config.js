@@ -1634,9 +1634,7 @@
     // ===== KHAI BÁO TAB LOGIC =====
     var equipmentData = [
         { group: 'Lifter',        items: ['LIFT-001', 'LIFT-002', 'LIFT-003'] },
-        { group: 'Transfer',      items: ['TRANS-001', 'TRANS-002', 'TRANS-003'] },
-        { group: 'Stacker Crane', items: ['STACKER-001', 'STACKER-002', 'STACKER-003'] },
-        { group: 'AMR',           items: ['AMR-001', 'AMR-002', 'AMR-003'] }
+        { group: 'SHUTTLE',      items: ['SHUTTLE-001', 'SHUTTLE-002', 'SHUTTLE-003', 'SHUTTLE-004', 'SHUTTLE-005', 'SHUTTLE-006', 'SHUTTLE-007', 'SHUTTLE-008', 'SHUTTLE-009', 'SHUTTLE-010', 'SHUTTLE-011', 'SHUTTLE-012', 'SHUTTLE-013'] }
     ];
 
     // equipmentAssignment: { 'LIFT-001': 'nhap' | 'xuat' | 'danang' }

@@ -301,6 +301,8 @@ function loadPage(title) {
         'Nhóm vật chứa': 'modules/master-data/container-group/container-group.html',
         'Loại xe': 'modules/bus/bus.html',
         'Dòng sản phẩm': 'modules/product-line/line.html',
+        'Khách hàng': 'modules/customer/customer.html',
+        'Thị trường': 'modules/market/market.html',
         // add more mappings here as modules are created
     };
 
@@ -475,6 +477,18 @@ window.updateSidebarVisibility = updateSidebarVisibility;
 async function loadModule(path) {
     const mainView = document.getElementById('main-view');
     if (!mainView) return;
+
+    // --- Cleanup Mechanism ---
+    // If the previous module registered a cleanup function, call it now.
+    // This prevents background loops, intervals, and memory leaks.
+    if (typeof window.destroyModule === 'function') {
+        try {
+            window.destroyModule();
+        } catch (e) {
+            console.warn('Error during module cleanup:', e);
+        }
+        window.destroyModule = null;
+    }
 
     // cleanup previously injected module assets
     document.querySelectorAll('[data-module-asset]').forEach(n => n.remove());

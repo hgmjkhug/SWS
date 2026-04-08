@@ -27,6 +27,7 @@ var DATA = {
 };
 
 /* ── CLOCK ────────────────────────────────────────── */
+var clockInterval;
 (function startClock() {
   const days = ['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
   function tick() {
@@ -38,7 +39,7 @@ var DATA = {
     if(de) de.textContent = d;
   }
   tick();
-  setInterval(tick, 1000);
+  clockInterval = setInterval(tick, 1000);
 })();
 
 /* ── SYNC ─────────────────────────────────────────── */
@@ -128,6 +129,12 @@ function renderOcc() {
     el.querySelectorAll('.occ-fill').forEach(b=>b.style.width=b.dataset.w);
   },80);
 }
+
+// Register cleanup function
+window.destroyModule = function() {
+  console.log('Cleaning up General Dashboard module...');
+  if (clockInterval) clearInterval(clockInterval);
+};
 
 /* ── OEE TABLE ────────────────────────────────────── */
 function renderOEE() {

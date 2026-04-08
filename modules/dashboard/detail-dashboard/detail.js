@@ -101,6 +101,7 @@ var DATA = {
 };
 
 /* ── CLOCK ─────────────────────────────────────────── */
+var detailClockInterval;
 (function startClock() {
   const days = ['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
   function tick() {
@@ -110,7 +111,8 @@ var DATA = {
     const te=document.getElementById('rt-time'), de=document.getElementById('rt-date');
     if(te) te.textContent=t; if(de) de.textContent=d;
   }
-  tick(); setInterval(tick,1000);
+  tick(); 
+  detailClockInterval = setInterval(tick,1000);
 })();
 
 /* ── SYNC ──────────────────────────────────────────── */
@@ -512,3 +514,12 @@ function initAll() {
 
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initAll);
 else initAll();
+
+// Register cleanup function
+window.destroyModule = function() {
+  console.log('Cleaning up Detail Dashboard module...');
+  if (detailClockInterval) clearInterval(detailClockInterval);
+  if (typeof slaTimers === 'object') {
+    Object.values(slaTimers).forEach(clearInterval);
+  }
+};

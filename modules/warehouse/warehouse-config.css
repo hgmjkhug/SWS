@@ -2429,9 +2429,9 @@
   color: #475569;
   line-height: 1.6;
   white-space: pre-wrap;
-  background: #f8fafc;
-  border-top: 1px solid #f1f5f9;
-  border-bottom: 1px solid #f1f5f9;
+  background: none;
+  border-top: none;
+  border-bottom: none;
   text-align: center;
 }
 
