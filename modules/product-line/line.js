@@ -42,6 +42,7 @@
 
     let pendingDeleteId = null;
     let isBulkDelete = false;
+    let lineMutationObserver = null;
 
     // Initialization
     function init() {
@@ -49,12 +50,12 @@
         renderTable();
         
         // Use MutationObserver to re-sync if content is re-injected
-        const observer = new MutationObserver(() => {
+        lineMutationObserver = new MutationObserver(() => {
             if (document.getElementById('line-table-body')) {
                 renderTable();
             }
         });
-        observer.observe(document.body, { childList: true, subtree: true });
+        lineMutationObserver.observe(document.body, { childList: true, subtree: true });
     }
 
     // Render Table
@@ -287,6 +288,15 @@
         closeConfirmModal();
         handleSearch();
     }
+
+    // Register cleanup function
+    window.destroyModule = function() {
+        console.log('Cleaning up Product Line module...');
+        if (lineMutationObserver) {
+            lineMutationObserver.disconnect();
+            lineMutationObserver = null;
+        }
+    };
 
     // Initial load
     init();

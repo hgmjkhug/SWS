@@ -51,6 +51,14 @@
 
     observer.observe(document.body, { childList: true, subtree: true });
 
+    // Register cleanup function
+    window.destroyModule = function() {
+        console.log('Cleaning up Device Type module...');
+        if (observer) {
+            observer.disconnect();
+        }
+    };
+
     // Initial check
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initDeviceTypeModule);

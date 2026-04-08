@@ -1,2 +1,4 @@
 LICENSE
 /node_modules
+/.github
+/.vscode

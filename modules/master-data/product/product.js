@@ -198,6 +198,14 @@
         setTimeout(initProductModule, 300);
     }
 
+    // Register cleanup function
+    window.destroyModule = function() {
+        console.log('Cleaning up Product module...');
+        if (productObserver) {
+            productObserver.disconnect();
+        }
+    };
+
     function renderProducts() {
         const tbody = document.getElementById('product-table-body');
         if (!tbody) return;

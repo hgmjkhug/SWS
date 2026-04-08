@@ -44,6 +44,14 @@
 
     observer.observe(document.body, { childList: true, subtree: true });
 
+    // Register cleanup function
+    window.destroyModule = function() {
+        console.log('Cleaning up Node Type module...');
+        if (observer) {
+            observer.disconnect();
+        }
+    };
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initNodeTypeModule);
     } else {

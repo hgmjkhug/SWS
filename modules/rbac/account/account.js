@@ -290,6 +290,14 @@ if (!document.getElementById('account-data-table')) {
     setTimeout(initAccountModule, 300);
 }
 
+// Register cleanup function
+window.destroyModule = function() {
+    console.log('Cleaning up Account module...');
+    if (accountObserver) {
+        accountObserver.disconnect();
+    }
+};
+
 function renderAccounts() {
     const table = document.getElementById('account-data-table');
     if (!table) return;
