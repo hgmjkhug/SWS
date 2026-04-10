@@ -6,7 +6,7 @@
       <input
         type="text"
         id="container-group-search"
-        placeholder="Tìm kiếm loại vật chứa..."
+        placeholder="Tìm kiếm mã, tên loại vật chứa..."
         oninput="filterContainerGroups()"
       />
     </div>
@@ -24,21 +24,32 @@
     <div class="table-scroll-head">
       <table class="data-table">
         <colgroup>
-          <col style="width: 60px;" />
-          <col style="width: 80px;" />
-          <col style="width: 320px;" />
-          <col style="width: auto;" />
-          <col style="width: 120px;" />
+          <col style="width: 3.5%;" />
+          <col style="width: 4%;" />
+          <col style="width: 14%;" />
+          <col style="width: 24%;" />
+          <col style="width: 7%;" />
+          <col style="width: 7%;" />
+          <col style="width: 7%;" />
+          <col style="width: 350px;" />
+          <col style="width: 7.5%;" />
         </colgroup>
         <thead>
           <tr>
-            <th style="text-align: center">
+            <th rowspan="2" style="text-align: center">
               <input type="checkbox" id="cg-select-all" class="cg-header-checkbox" onchange="toggleAllContainerGroups(this)" />
             </th>
-            <th style="text-align: center">STT</th>
-            <th>Tên loại vật chứa</th>
-            <th>Mô tả</th>
-            <th style="text-align: center">Thao tác</th>
+            <th rowspan="2" style="text-align: center">STT</th>
+            <th rowspan="2">Mã loại</th>
+            <th rowspan="2">Tên loại vật chứa</th>
+            <th colspan="3" style="text-align: center; border-bottom: 1px solid rgba(255,255,255,0.3);">Quy cách vật chứa</th>
+            <th rowspan="2">Mô tả</th>
+            <th rowspan="2" style="text-align: center">Thao tác</th>
+          </tr>
+          <tr>
+            <th style="text-align: center">Dài</th>
+            <th style="text-align: center">Rộng</th>
+            <th style="text-align: center">Cao</th>
           </tr>
         </thead>
       </table>
@@ -46,11 +57,15 @@
     <div class="table-scroll-body" id="container-group-scroll-body">
       <table class="data-table">
         <colgroup>
-          <col style="width: 60px;" />
-          <col style="width: 80px;" />
-          <col style="width: 320px;" />
-          <col style="width: auto;" />
-          <col style="width: 120px;" />
+          <col style="width: 3.5%;" />
+          <col style="width: 4%;" />
+          <col style="width: 14%;" />
+          <col style="width: 24%;" />
+          <col style="width: 7%;" />
+          <col style="width: 7%;" />
+          <col style="width: 7%;" />
+          <col style="width: 350px;" />
+          <col style="width: 7.5%;" />
         </colgroup>
         <tbody id="container-group-table-body">
           <!-- Data rendered by JS -->
@@ -86,10 +101,33 @@
     </div>
     <div class="modal-body">
       <input type="hidden" id="container-group-id" />
-      <div class="form-group">
-        <label>Tên loại vật chứa <span class="text-danger">*</span></label>
-        <input type="text" id="container-group-name" placeholder="Nhập tên loại vật chứa" />
-        <small class="error-message" id="container-group-name-error"></small>
+      
+      <div class="form-row" style="display: flex; gap: 16px;">
+        <div class="form-group" style="flex: 1;">
+          <label>Mã loại vật chứa <span class="text-danger">*</span></label>
+          <input type="text" id="container-group-code" placeholder="Nhập mã loại" />
+          <small class="error-message" id="container-group-code-error"></small>
+        </div>
+        <div class="form-group" style="flex: 2;">
+          <label>Tên loại vật chứa <span class="text-danger">*</span></label>
+          <input type="text" id="container-group-name" placeholder="Nhập tên loại vật chứa" />
+          <small class="error-message" id="container-group-name-error"></small>
+        </div>
+      </div>
+
+      <div class="form-row" style="display: flex; gap: 16px;">
+        <div class="form-group" style="flex: 1;">
+          <label>Dài (mm)</label>
+          <input type="number" id="container-group-length" placeholder="Dài" min="0" />
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label>Rộng (mm)</label>
+          <input type="number" id="container-group-width" placeholder="Rộng" min="0" />
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label>Cao (mm)</label>
+          <input type="number" id="container-group-height" placeholder="Cao" min="0" />
+        </div>
       </div>
 
       <div class="form-group">

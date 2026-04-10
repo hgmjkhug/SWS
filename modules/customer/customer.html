@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khách hàng - Smart Warehouse</title>
+</head>
+<body>
+    <link rel="stylesheet" href="customer.css?v=1.1">
+    <div id="main-view">
+        <div class="customer-container">
+            <div class="customer-actions">
+                <div class="customer-filters">
+                    <div class="filter-group" style="width: 250px;">
+                        <input type="text" id="customer-search" class="customer-search-input" 
+                               placeholder="Tìm theo mã/tên khách hàng..." oninput="filterCustomers()">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-title">Thị trường</label>
+                        <div class="custom-dropdown" id="market-dropdown">
+                            <div class="custom-dropdown-toggle" onclick="toggleMarketDropdown()">
+                                <span id="market-filter-display">Tất cả thị trường</span>
+                                <i class="fas fa-chevron-down" style="font-size: 12px; color: #64748b"></i>
+                            </div>
+                            <div class="custom-dropdown-menu" id="market-filter-menu">
+                                <div class="custom-dropdown-item selected" onclick="selectMarket('', 'Tất cả thị trường')">Tất cả thị trường</div>
+                                <div class="custom-dropdown-item" onclick="selectMarket('Trung Quốc', 'Trung Quốc')">Trung Quốc</div>
+                                <div class="custom-dropdown-item" onclick="selectMarket('Nhật Bản', 'Nhật Bản')">Nhật Bản</div>
+                            </div>
+                            <input type="hidden" id="market-filter" value="">
+                        </div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button id="delete-selected-btn" class="btn btn-danger" onclick="deleteSelected()" disabled>
+                        <i class="fas fa-trash"></i> Xóa (0)
+                    </button>
+                    <button class="btn btn-primary" onclick="openCustomerModal()">
+                        <i class="fas fa-plus"></i> Thêm mới
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <div class="table-scroll-head">
+                    <table class="customer-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="check-all" onchange="toggleAll(this)"></th>
+                                <th>STT</th>
+                                <th>Mã khách hàng</th>
+                                <th>Tên khách hàng</th>
+                                <th>Thị trường</th>
+                                <th>Mô tả</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="table-scroll-body" id="customer-table-scroll-body">
+                    <table class="customer-table">
+                        <tbody id="customer-table-body">
+                            <!-- Data rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="pagination-bar">
+                <span id="pagination-info">Hiển thị 0 - 0 trong 0</span>
+                <div class="pagination-controls">
+                    <button class="page-btn" id="prev-page" onclick="prevPage()" disabled>&lt;</button>
+                    <div id="page-numbers" class="page-numbers"></div>
+                    <button class="page-btn" id="next-page" onclick="nextPage()">&gt;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Thêm/Sửa Khách hàng -->
+    <div id="customer-modal" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-btn" onclick="closeCustomerModal()"><i class="fas fa-times"></i></button>
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">Thêm mới khách hàng</h3>
+            </div>
+            <div class="modal-body">
+                <form id="customer-form">
+                    <input type="hidden" id="customer-id">
+                    <div class="form-group">
+                        <label>Mã khách hàng <span class="required">*</span></label>
+                        <input type="text" id="customer-code" required placeholder="Nhập mã khách hàng">
+                    </div>
+                    <div class="form-group">
+                        <label>Tên khách hàng <span class="required">*</span></label>
+                        <input type="text" id="customer-name" required placeholder="Nhập tên khách hàng">
+                    </div>
+                    <div class="form-group">
+                        <label>Thị trường <span class="required">*</span></label>
+                        <div class="custom-dropdown" id="modal-market-dropdown">
+                            <div class="custom-dropdown-toggle" onclick="toggleModalMarketDropdown()">
+                                <span id="modal-market-display">-- Chọn thị trường --</span>
+                                <i class="fas fa-chevron-down" style="font-size: 12px; color: #64748b"></i>
+                            </div>
+                            <div class="custom-dropdown-menu" id="modal-market-menu">
+                                <div class="custom-dropdown-item" onclick="selectModalMarket('Trung Quốc', 'Trung Quốc')">Trung Quốc</div>
+                                <div class="custom-dropdown-item" onclick="selectModalMarket('Nhật Bản', 'Nhật Bản')">Nhật Bản</div>
+                            </div>
+                            <input type="hidden" id="customer-market" value="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <textarea id="customer-desc" placeholder="Nhập mô tả khách hàng..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCustomerModal()">Hủy</button>
+                <button class="btn btn-primary" onclick="saveCustomer()">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation -->
+    <div id="delete-confirm-modal" class="modal-confirm">
+        <div class="confirm-content">
+            <div class="confirm-icon-box"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3 class="confirm-title">Xác nhận xóa</h3>
+            <p class="confirm-message" id="confirm-delete-message">
+                Bạn có chắc chắn muốn xóa khách hàng này không?
+            </p>
+            <div class="confirm-actions">
+                <button onclick="closeDeleteConfirm()" class="btn btn-secondary">Hủy</button>
+                <button onclick="confirmDeleteCustomer()" class="btn btn-danger">Xóa</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="customer.js?v=1.1"></script>
+    <script>
+        // Sync horizontal scroll: tbody scrolls, thead follows
+        document.addEventListener('DOMContentLoaded', function () {
+            const scrollBody = document.getElementById('customer-table-scroll-body');
+            const scrollHead = document.querySelector('.customer-container .table-scroll-head');
+            if (scrollBody && scrollHead) {
+                scrollBody.addEventListener('scroll', function () {
+                    scrollHead.scrollLeft = scrollBody.scrollLeft;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

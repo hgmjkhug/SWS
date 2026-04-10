@@ -6,78 +6,102 @@ var permissionData = [
         id: 1,
         name: 'Theo dõi & Giám sát',
         children: [
-            { id: 101, name: 'Dashboard tổng quan' },
-            { id: 102, name: 'Dashboard chi tiết' },
-            { id: 103, name: 'Giám sát hoạt động' }
+            { id: 101, name: 'Dashboard chi tiết' },
+            { id: 102, name: 'Giám sát hoạt động' },
+            { id: 103, name: 'Giao diện kho mới' }
         ]
     },
     {
         id: 2,
-        name: 'Quản lý Kho',
+        name: 'Quản lý đơn hàng',
         children: [
-            { id: 201, name: 'Danh sách Kho' },
-            { id: 202, name: 'Quy cách sản phẩm' },
-            { id: 203, name: 'Quản lý vật chứa' },
-            { id: 204, name: 'Quản lý bảo trì' }
+            { id: 201, name: 'Đơn hàng nhập' },
+            { id: 202, name: 'Đơn hàng xuất' }
         ]
     },
     {
         id: 3,
-        name: 'Quản lý điều phối WCS',
+        name: 'Quản lý Kho',
         children: [
-            { id: 301, name: 'Kanban WCS' }
+            { id: 301, name: 'Danh sách Kho' },
+            { id: 302, name: 'Quản lý lô hàng' },
+            { id: 303, name: 'Quản lý tồn kho' },
+            { id: 304, name: 'Quy cách sản phẩm' },
+            { id: 305, name: 'Quản lý vật chứa' },
+            { id: 306, name: 'Quản lý bảo trì' },
+            { id: 307, name: 'Biên bản bàn giao' }
         ]
     },
     {
         id: 4,
-        name: 'Nhập kho',
+        name: 'Quản lý điều phối WCS',
         children: [
-            { id: 401, name: 'Lệnh nhập kho' }
+            { id: 401, name: 'Kanban WCS' }
         ]
     },
     {
         id: 5,
-        name: 'Xuất kho',
+        name: 'Nhập kho',
         children: [
-            { id: 501, name: 'Lệnh xuất kho' }
+            { id: 501, name: 'Lệnh nhập kho' }
         ]
     },
     {
         id: 6,
-        name: 'Quản lý quy trình',
+        name: 'Xuất kho',
         children: [
-            { id: 601, name: 'Quản lý quy trình' }
+            { id: 601, name: 'Lệnh xuất kho' }
         ]
     },
     {
         id: 7,
-        name: 'Danh mục chung',
+        name: 'Quản lý quy trình',
         children: [
-            { id: 701, name: 'Nhóm thiết bị' },
-            { id: 702, name: 'Thiết bị' },
-            { id: 703, name: 'Nhóm sản phẩm' },
-            { id: 704, name: 'Sản phẩm' },
-            { id: 705, name: 'Quy cách' },
-            { id: 706, name: 'Vật chứa' },
-            { id: 707, name: 'Đơn vị tính' },
-            { id: 708, name: 'Loại khu vực' }
+            { id: 701, name: 'Quản lý quy trình' }
         ]
     },
     {
         id: 8,
-        name: 'Báo cáo thống kê',
+        name: 'Danh mục chung',
         children: [
-            { id: 801, name: 'Báo cáo Nhập/Xuất' }
+            { id: 801, name: 'Nhóm thiết bị' },
+            { id: 802, name: 'Thiết bị' },
+            { id: 803, name: 'Dòng sản phẩm' },
+            { id: 804, name: 'Nhóm sản phẩm' },
+            { id: 805, name: 'Sản phẩm' },
+            { id: 806, name: 'Quy cách' },
+            { id: 807, name: 'Loại xe' },
+            { id: 808, name: 'Nhóm vật chứa' },
+            { id: 809, name: 'Vật chứa' },
+            { id: 810, name: 'Đơn vị tính' },
+            { id: 811, name: 'Thị trường' },
+            { id: 812, name: 'Khách hàng' },
+            { id: 813, name: 'Loại khu vực' }
         ]
     },
     {
         id: 9,
+        name: 'Báo cáo thống kê',
+        children: [
+            { id: 901, name: 'Báo cáo Nhập/Xuất' }
+        ]
+    },
+    {
+        id: 10,
         name: 'Hệ thống',
         children: [
-            { id: 901, name: 'Tài khoản' },
-            { id: 902, name: 'Vai trò' },
-            { id: 903, name: 'Chức năng' },
-            { id: 904, name: 'Tài nguyên' }
+            { id: 1001, name: 'Tài khoản' },
+            { id: 1002, name: 'Vai trò' },
+            { id: 1003, name: 'Chức năng' },
+            { id: 1004, name: 'Tài nguyên' }
+        ]
+    },
+    {
+        id: 11,
+        name: 'Tài liệu',
+        children: [
+            { id: 1101, name: 'Tài liệu hướng dẫn' },
+            { id: 1102, name: 'Quy trình vận hành' }
         ]
     }
 ];

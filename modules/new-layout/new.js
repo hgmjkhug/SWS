@@ -1,28 +1,60 @@
-function getPathSVG(top = true, bottom = true, left = true, right = true) {
+function getPathSVG(top = true, bottom = true, left = true, right = true, showNode = true) {
     return `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect width="30" height="30" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
     ${top ? '<path d="M15 0V15" stroke="#7C8DB5" stroke-opacity="0.7"/>' : ''}
     ${bottom ? '<path d="M15 15V30" stroke="#7C8DB5" stroke-opacity="0.7"/>' : ''}
     ${left ? '<path d="M0 15H15" stroke="#7C8DB5" stroke-opacity="0.7"/>' : ''}
     ${right ? '<path d="M15 15H30" stroke="#7C8DB5" stroke-opacity="0.7"/>' : ''}
-    <ellipse cx="2" cy="1.97531" rx="2" ry="1.97531" transform="matrix(-1 0 0 1 17 13)" fill="#677594"/>
+    ${showNode ? '<ellipse cx="2" cy="1.97531" rx="2" ry="1.97531" transform="matrix(-1 0 0 1 17 13)" fill="#677594"/>' : ''}
     </svg>`;
 }
 
-function getRailSVG(hasVertical = false, hasLeft = true, hasRight = true) {
+function getRailSVG(hasVertical = false, hasLeft = true, hasRight = true, vertType = 'full') {
     const xStart = hasLeft ? 0 : 15;
     const xEnd = hasRight ? 30 : 15;
+    const vLine = hasVertical ? (vertType === 'top' ? '<path d="M15 0V15" stroke="#7C8DB5" stroke-opacity="0.7"/>' : '<path d="M15 0V30" stroke="#7C8DB5" stroke-opacity="0.7"/>') : '';
     return `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="30" height="30" fill="#DFF0FF" fill-opacity="0.3"/>
-    <path d="M${xStart} 15H${xEnd}" stroke="#7C8DB5" stroke-opacity="0.8" stroke-width="1"/>
-    ${hasVertical ? '<path d="M15 0V30" stroke="#7C8DB5" stroke-opacity="0.7"/>' : ''}
+    <rect width="30" height="30" fill="#DFF0FF" fill-opacity="0.5"/>
+    <path d="M${xStart} 15H${xEnd}" stroke="#7C8DB5" stroke-opacity="0.7" stroke-width="1"/>
+    ${vLine}
     <circle cx="15" cy="15" r="1.5" fill="#677594"/>
     </svg>`;
 }
 
+const SVG_RAIL_CROSS = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="30" height="30" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
+    <path d="M0 14.9999H15" stroke="#7C8DB5" stroke-opacity="0.7"/>
+    <path d="M15 14.9999H30" stroke="#7C8DB5" stroke-opacity="0.7"/>
+    <path d="M15 0V14.8148" stroke="#7C8DB5" stroke-opacity="0.7"/>
+    <path d="M15 14.8148V30" stroke="#7C8DB5" stroke-opacity="0.7"/>
+    <ellipse cx="15" cy="14.8148" rx="1.5" ry="1.48148" fill="#677594"/>
+    </svg>`;
+
+const SVG_CORNER_TOP_RIGHT_DOT = `
+<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_86_427)">
+<rect width="30" height="30" fill="#EFF7FF"/>
+<path d="M0 15H15" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M15 15V30" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<ellipse cx="15" cy="14.7531" rx="2" ry="1.97531" fill="#677594"/>
+</g>
+<rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
+<defs>
+<clipPath id="clip0_86_427">
+<rect width="30" height="30"/>
+</clipPath>
+</defs>
+</svg>
+
+`;
+
 const SVG_EMPTY = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect width="30" height="30" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
     <ellipse cx="2" cy="1.97531" rx="2" ry="1.97531" transform="matrix(-1 0 0 1 17 13)" fill="#677594"/>
+    </svg>`;
+
+const SVG_SPACE = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="30" height="30" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>
     </svg>`;
 
 const SVG_WALL_V = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -85,90 +117,158 @@ const SVG_SHELF = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" x
 </svg>`;
 
 const SVG_INBOUND = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_86_962)">
 <rect width="30" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
 <path d="M15 0V10" stroke="#7C8DB5" stroke-opacity="0.7"/>
-<path d="M15 30V20" stroke="#7C8DB5" stroke-opacity="0.7"/>
-<path d="M0 15H10" stroke="#7C8DB5" stroke-opacity="0.7"/>
-<path d="M8.97198 16.4757L8.97198 12.8543C8.97198 10.1273 10.1384 8.96088 12.8655 8.96088H12.9377C15.4037 8.96088 16.5923 9.93286 16.7978 12.1101C16.8145 12.3323 16.6478 12.5433 16.4201 12.5655C16.1924 12.5877 15.9869 12.4211 15.9647 12.1878C15.8036 10.4438 14.9816 9.794 12.9321 9.794H12.8599C10.5994 9.794 9.79955 10.5938 9.79955 12.8543L9.79955 16.4757C9.79955 18.7362 10.5994 19.536 12.8599 19.536H12.9321C14.9927 19.536 15.8147 18.8751 15.9647 17.0977C15.9869 16.87 16.1868 16.6978 16.4146 16.72C16.6423 16.7423 16.8145 16.9367 16.7922 17.1699C16.6034 19.3805 15.4093 20.3691 12.9265 20.3691H12.8543C10.1384 20.3691 8.97198 19.2028 8.97198 16.4757Z" fill="#076EB8"/>
-<path d="M12.5822 14.665C12.5822 14.4373 12.771 14.2484 12.9988 14.2484L19.3194 14.2484C19.5471 14.2484 19.736 14.4373 19.736 14.665C19.736 14.8927 19.5471 15.0816 19.3194 15.0816L12.9988 15.0816C12.771 15.0816 12.5822 14.8927 12.5822 14.665Z" fill="#076EB8"/>
-<path d="M17.6642 16.5257C17.6642 16.4201 17.7031 16.3146 17.7864 16.2313L19.3527 14.665L17.7864 13.0987C17.6253 12.9377 17.6253 12.6711 17.7864 12.51C17.9474 12.3489 18.214 12.3489 18.3751 12.51L20.2358 14.3706C20.3968 14.5317 20.3968 14.7983 20.2358 14.9594L18.3751 16.82C18.214 16.9811 17.9474 16.9811 17.7864 16.82C17.7031 16.7423 17.6642 16.6312 17.6642 16.5257Z" fill="#076EB8"/>
+<path d="M15 20V30" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M2.38419e-07 15L9 15" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M20.9792 13.0983V16.9017C20.9792 19.7658 19.7542 20.9908 16.89 20.9908H16.8142C14.2242 20.9908 12.9758 19.97 12.76 17.6833C12.7425 17.45 12.9175 17.2283 13.1567 17.205C13.3958 17.1817 13.6117 17.3567 13.635 17.6017C13.8042 19.4333 14.6675 20.1158 16.82 20.1158H16.8958C19.27 20.1158 20.11 19.2758 20.11 16.9017V13.0983C20.11 10.7242 19.27 9.88418 16.8958 9.88418H16.82C14.6558 9.88418 13.7925 10.5783 13.635 12.445C13.6117 12.6842 13.4017 12.865 13.1625 12.8417C12.9233 12.8183 12.7425 12.6142 12.7658 12.3692C12.9642 10.0475 14.2183 9.00918 16.8258 9.00918H16.9017C19.7542 9.00918 20.9792 10.2342 20.9792 13.0983Z" fill="#076EB8"/>
+<path d="M17.1175 15C17.1175 15.2392 16.9191 15.4375 16.68 15.4375H9.16663C8.92746 15.4375 8.72913 15.2392 8.72913 15C8.72913 14.7608 8.92746 14.5625 9.16663 14.5625H16.68C16.925 14.5625 17.1175 14.7608 17.1175 15Z" fill="#076EB8"/>
+<path d="M17.7708 15C17.7708 15.1108 17.73 15.2217 17.6425 15.3092L15.6883 17.2633C15.5192 17.4325 15.2392 17.4325 15.07 17.2633C14.9008 17.0942 14.9008 16.8142 15.07 16.645L16.715 15L15.07 13.355C14.9008 13.1858 14.9008 12.9058 15.07 12.7367C15.2392 12.5675 15.5192 12.5675 15.6883 12.7367L17.6425 14.6908C17.73 14.7783 17.7708 14.8892 17.7708 15Z" fill="#076EB8"/>
+</g>
 <rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
-</svg>`;
+<defs>
+<clipPath id="clip0_86_962">
+<rect width="30" height="30"/>
+</clipPath>
+</defs>
+</svg>
+`;
 
 const SVG_OUTBOUND = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_86_1067)">
 <rect width="30" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
 <path d="M15 30V20" stroke="#7C8DB5" stroke-opacity="0.7"/>
-<path d="M20 15H30" stroke="#7C8DB5" stroke-opacity="0.7"/>
-<path d="M20.358 12.8543V16.4756C20.358 19.2027 19.1916 20.3691 16.4645 20.3691H16.3923C13.9262 20.3691 12.7377 19.3971 12.5322 17.2199C12.5155 16.9977 12.6821 16.7867 12.9098 16.7645C13.1376 16.7422 13.3431 16.9089 13.3653 17.1421C13.5263 18.8861 14.3484 19.536 16.3979 19.536H16.4701C18.7306 19.536 19.5304 18.7362 19.5304 16.4756V12.8543C19.5304 10.5938 18.7306 9.79398 16.4701 9.79398H16.3979C14.3373 9.79398 13.5152 10.4549 13.3653 12.2323C13.3431 12.46 13.1431 12.6322 12.9154 12.6099C12.6877 12.5877 12.5155 12.3933 12.5377 12.1601C12.7265 9.94949 13.9207 8.96085 16.4034 8.96085H16.4756C19.1916 8.96085 20.358 10.1272 20.358 12.8543Z" fill="#076EB8"/>
-<path d="M16.6811 14.665C16.6811 14.8927 16.4923 15.0815 16.2645 15.0815H9.11078C8.88306 15.0815 8.69421 14.8927 8.69421 14.665C8.69421 14.4373 8.88306 14.2484 9.11078 14.2484H16.2645C16.4978 14.2484 16.6811 14.4373 16.6811 14.665Z" fill="#076EB8"/>
-<path d="M17.3032 14.665C17.3032 14.7705 17.2643 14.876 17.181 14.9593L15.3204 16.82C15.1593 16.9811 14.8927 16.9811 14.7316 16.82C14.5706 16.6589 14.5706 16.3923 14.7316 16.2313L16.2979 14.665L14.7316 13.0987C14.5706 12.9376 14.5706 12.671 14.7316 12.51C14.8927 12.3489 15.1593 12.3489 15.3204 12.51L17.181 14.3706C17.2643 14.4539 17.3032 14.5594 17.3032 14.665Z" fill="#076EB8"/>
-<rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
-</svg>`;
-
-const SVG_DOOR = `
-<svg width="90" height="30" viewBox="0 0 90 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clip-path="url(#clip0_128_188)">
-<rect width="90" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
-<path d="M0 15H12.5H25" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
-<path d="M65 15H90" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
-<path d="M26 8V16" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
-<path d="M64 8V16" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
-<path d="M45 0V30" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M15 10V-1" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M20 15H30.5" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M9.02084 16.9017V13.0983C9.02084 10.2342 10.2458 9.00916 13.11 9.00916H13.1858C15.7758 9.00916 17.0242 10.03 17.24 12.3167C17.2575 12.55 17.0825 12.7717 16.8433 12.795C16.6042 12.8183 16.3883 12.6433 16.365 12.3983C16.1958 10.5667 15.3325 9.88416 13.18 9.88416H13.1042C10.73 9.88416 9.89001 10.7242 9.89001 13.0983V16.9017C9.89001 19.2758 10.73 20.1158 13.1042 20.1158H13.18C15.3442 20.1158 16.2075 19.4217 16.365 17.555C16.3883 17.3158 16.5983 17.135 16.8375 17.1583C17.0767 17.1817 17.2575 17.3858 17.2342 17.6308C17.0358 19.9525 15.7817 20.9908 13.1742 20.9908H13.0983C10.2458 20.9908 9.02084 19.7658 9.02084 16.9017Z" fill="#076EB8"/>
+<path d="M12.8125 15C12.8125 14.7608 13.0108 14.5625 13.25 14.5625L19.8883 14.5625C20.1275 14.5625 20.3258 14.7608 20.3258 15C20.3258 15.2392 20.1275 15.4375 19.8883 15.4375L13.25 15.4375C13.0108 15.4375 12.8125 15.2392 12.8125 15Z" fill="#076EB8"/>
+<path d="M18.15 16.9542C18.15 16.8433 18.1908 16.7325 18.2783 16.645L19.9233 15L18.2783 13.355C18.1091 13.1858 18.1091 12.9058 18.2783 12.7367C18.4475 12.5675 18.7275 12.5675 18.8966 12.7367L20.8508 14.6908C21.02 14.86 21.02 15.14 20.8508 15.3092L18.8966 17.2633C18.7275 17.4325 18.4475 17.4325 18.2783 17.2633C18.1908 17.1817 18.15 17.065 18.15 16.9542Z" fill="#076EB8"/>
 </g>
-<rect x="0.25" y="0.25" width="89.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
+<rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
 <defs>
-<clipPath id="clip0_128_188">
-<rect width="90" height="30" fill="white"/>
+<clipPath id="clip0_86_1067">
+<rect width="30" height="30"/>
 </clipPath>
 </defs>
 </svg>
 `;
 
-
-const SVG_CLSDOOR = `
-<svg width="90" height="30" viewBox="0 0 90 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clip-path="url(#clip0_128_188)">
-<rect width="90" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
-<path d="M0 15H12.5H25" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
-<path d="M65 15H90" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
-<path d="M26 8V16" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
-<path d="M64 8V16" stroke="#076EB8" stroke-opacity="0.7" stroke-width="2"/>
-<path d="M45 0V30" stroke="#7C8DB5" stroke-opacity="0.7"/>
-</g>
-<rect x="0.25" y="0.25" width="89.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
-<defs>
-<clipPath id="clip0_128_188">
-<rect width="90" height="30" fill="white"/>
-</clipPath>
-</defs>
-</svg>
-`;
-
-const SVG_WAITING = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+const SVG_P_PORT_LEFT = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_86_962)">
 <rect width="30" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
-<rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
-<path d="M15.0004 0V8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
-<path d="M15.0004 30V21.75" stroke="#7C8DB5" stroke-opacity="0.7"/>
-<path d="M0 15H8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
-<g clip-path="url(#clip0_130_214)">
-<path d="M21.5938 14.5C21.5937 16.1162 20.9517 17.6661 19.8089 18.8089C18.6661 19.9517 17.1162 20.5938 15.5 20.5938C13.8838 20.5938 12.3339 19.9517 11.1911 18.8089C10.0483 17.6661 9.40625 16.1162 9.40625 14.5C9.40625 12.8838 10.0483 11.3339 11.1911 10.1911C12.3339 9.04827 13.8838 8.40625 15.5 8.40625C17.1162 8.40625 18.6661 9.04827 19.8089 10.1911C20.9517 11.3339 21.5938 12.8838 21.5938 14.5ZM8 14.5C8 16.4891 8.79018 18.3968 10.1967 19.8033C11.6032 21.2098 13.5109 22 15.5 22C17.4891 22 19.3968 21.2098 20.8033 19.8033C22.2098 18.3968 23 16.4891 23 14.5C23 12.5109 22.2098 10.6032 20.8033 9.1967C19.3968 7.79018 17.4891 7 15.5 7C13.5109 7 11.6032 7.79018 10.1967 9.1967C8.79018 10.6032 8 12.5109 8 14.5ZM14.7969 10.5156V14.5C14.7969 14.7344 14.9141 14.9541 15.1104 15.0859L17.9229 16.9609C18.2451 17.1777 18.6816 17.0898 18.8984 16.7646C19.1152 16.4395 19.0273 16.0059 18.7021 15.7891L16.2031 14.125V10.5156C16.2031 10.126 15.8896 9.8125 15.5 9.8125C15.1104 9.8125 14.7969 10.126 14.7969 10.5156Z" fill="#076EB8"/>
-</g>
-<defs>
-<clipPath id="clip0_130_214">
-<rect width="15" height="15" fill="white" transform="translate(8 7)"/>
-</clipPath>
-</defs>
-</svg>`;
-
-const SVG_P_PORT = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="30" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
-<rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
-<path d="M15.0004 0V8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
-<path d="M15.0004 30V21.75" stroke="#7C8DB5" stroke-opacity="0.7"/>
-<path d="M0 15H8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
-<circle cx="15.5" cy="14.5" r="6.9" fill="white" stroke="#076EB8" stroke-width="1.2"/>
+<path d="M15 0V10" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M15 20V30" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M2.38419e-07 15L9 15" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<circle cx="15.5" cy="14.5" r="6.9" stroke="#076EB8" stroke-width="1.2"/>
 <path d="M14.0682 19C13.6209 19 13.25 18.6779 13.25 18.2895V10.7105C13.25 10.3221 13.6209 10 14.0682 10H16.25C17.9082 10 19.25 11.1653 19.25 12.6053C19.25 14.0453 17.9082 15.2105 16.25 15.2105H14.8864V18.2895C14.8864 18.6779 14.5155 19 14.0682 19ZM14.8864 13.7895H16.25C17.0027 13.7895 17.6136 13.2589 17.6136 12.6053C17.6136 11.9516 17.0027 11.4211 16.25 11.4211H14.8864V13.7895Z" fill="#076EB8"/>
+</g>
+<rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
+<defs>
+<clipPath id="clip0_86_962">
+<rect width="30" height="30"/>
+</clipPath>
+</defs>
 </svg>`;
+
+const SVG_P_PORT_RIGHT = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_86_1213)">
+<rect width="30" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
+<path d="M15.0004 0V8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M15.0004 30V21.75" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M23 15H31.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<circle cx="15.5" cy="14.5" r="6.9" stroke="#076EB8" stroke-width="1.2"/>
+<path d="M14.0682 19C13.6209 19 13.25 18.6779 13.25 18.2895V10.7105C13.25 10.3221 13.6209 10 14.0682 10H16.25C17.9082 10 19.25 11.1653 19.25 12.6053C19.25 14.0453 17.9082 15.2105 16.25 15.2105H14.8864V18.2895C14.8864 18.6779 14.5155 19 14.0682 19ZM14.8864 13.7895H16.25C17.0027 13.7895 17.6136 13.2589 17.6136 12.6053C17.6136 11.9516 17.0027 11.4211 16.25 11.4211H14.8864V13.7895Z" fill="#076EB8"/>
+</g>
+<rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
+<defs>
+<clipPath id="clip0_86_1213">
+<rect width="30" height="30"/>
+</clipPath>
+</defs>
+</svg>`;
+
+const SVG_WAITING_LEFT = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
+<path d="M15.0004 0V8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M15.0004 30V21.75" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M0 15H8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<g clip-path="url(#clip1_130_214)">
+<path d="M21.5938 14.5C21.5938 16.1162 20.9517 17.6661 19.8089 18.8089C18.6661 19.9517 17.1162 20.5938 15.5 20.5938C13.8838 20.5938 12.3339 19.9517 11.1911 18.8089C10.0483 17.6661 9.40625 16.1162 9.40625 14.5C9.40625 12.8838 10.0483 11.3339 11.1911 10.1911C12.3339 9.04827 13.8838 8.40625 15.5 8.40625C17.1162 8.40625 18.6661 9.04827 19.8089 10.1911C20.9517 11.3339 21.5938 12.8838 21.5938 14.5ZM8 14.5C8 16.4891 8.79018 18.3968 10.1967 19.8033C11.6032 21.2098 13.5109 22 15.5 22C17.4891 22 19.3968 21.2098 20.8033 19.8033C22.2098 18.3968 23 16.4891 23 14.5C23 12.5109 22.2098 10.6032 20.8033 9.1967C19.3968 7.79018 17.4891 7 15.5 7C13.5109 7 11.6032 7.79018 10.1967 9.1967C8.79018 10.6032 8 12.5109 8 14.5ZM14.7969 10.5156V14.5C14.7969 14.7344 14.9141 14.9541 15.1104 15.0859L17.9229 16.9609C18.2451 17.1777 18.6816 17.0898 18.8984 16.7646C19.1152 16.4395 19.0273 16.0059 18.7021 15.7891L16.2031 14.125V10.5156C16.2031 10.126 15.8896 9.8125 15.5 9.8125C15.1104 9.8125 14.7969 10.126 14.7969 10.5156Z" fill="#076EB8"/>
+</g>
+<rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
+<defs>
+<clipPath id="clip1_130_214">
+<rect width="15" height="15" transform="translate(8 7)"/>
+</clipPath>
+</defs>
+</svg>`;
+
+const SVG_WAITING_RIGHT = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
+<path d="M15.0004 0V8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M15.0004 30V21.75" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M22 15H30.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<g clip-path="url(#clip1_130_214_r)">
+<path d="M21.5938 14.5C21.5938 16.1162 20.9517 17.6661 19.8089 18.8089C18.6661 19.9517 17.1162 20.5938 15.5 20.5938C13.8838 20.5938 12.3339 19.9517 11.1911 18.8089C10.0483 17.6661 9.40625 16.1162 9.40625 14.5C9.40625 12.8838 10.0483 11.3339 11.1911 10.1911C12.3339 9.04827 13.8838 8.40625 15.5 8.40625C17.1162 8.40625 18.6661 9.04827 19.8089 10.1911C20.9517 11.3339 21.5938 12.8838 21.5938 14.5ZM8 14.5C8 16.4891 8.79018 18.3968 10.1967 19.8033C11.6032 21.2098 13.5109 22 15.5 22C17.4891 22 19.3968 21.2098 20.8033 19.8033C22.2098 18.3968 23 16.4891 23 14.5C23 12.5109 22.2098 10.6032 20.8033 9.1967C19.3968 7.79018 17.4891 7 15.5 7C13.5109 7 11.6032 7.79018 10.1967 9.1967C8.79018 10.6032 8 12.5109 8 14.5ZM14.7969 10.5156V14.5C14.7969 14.7344 14.9141 14.9541 15.1104 15.0859L17.9229 16.9609C18.2451 17.1777 18.6816 17.0898 18.8984 16.7646C19.1152 16.4395 19.0273 16.0059 18.7021 15.7891L16.2031 14.125V10.5156C16.2031 10.126 15.8896 9.8125 15.5 9.8125C15.1104 9.8125 14.7969 10.126 14.7969 10.5156Z" fill="#076EB8"/>
+</g>
+<rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
+<defs>
+<clipPath id="clip1_130_214_r">
+<rect width="15" height="15" transform="translate(8 7)"/>
+</clipPath>
+</defs>
+</svg>
+
+`;
+
+const SVG_WAITING_BOTTOM_T = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
+<path d="M15.0004 0V8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M0 15H8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M22 15H30.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<g clip-path="url(#clip_waiting_btm_t)">
+<path d="M21.5938 14.5C21.5938 16.1162 20.9517 17.6661 19.8089 18.8089C18.6661 19.9517 17.1162 20.5938 15.5 20.5938C13.8838 20.5938 12.3339 19.9517 11.1911 18.8089C10.0483 17.6661 9.40625 16.1162 9.40625 14.5C9.40625 12.8838 10.0483 11.3339 11.1911 10.1911C12.3339 9.04827 13.8838 8.40625 15.5 8.40625C17.1162 8.40625 18.6661 9.04827 19.8089 10.1911C20.9517 11.3339 21.5938 12.8838 21.5938 14.5ZM8 14.5C8 16.4891 8.79018 18.3968 10.1967 19.8033C11.6032 21.2098 13.5109 22 15.5 22C17.4891 22 19.3968 21.2098 20.8033 19.8033C22.2098 18.3968 23 16.4891 23 14.5C23 12.5109 22.2098 10.6032 20.8033 9.1967C19.3968 7.79018 17.4891 7 15.5 7C13.5109 7 11.6032 7.79018 10.1967 9.1967C8.79018 10.6032 8 12.5109 8 14.5ZM14.7969 10.5156V14.5C14.7969 14.7344 14.9141 14.9541 15.1104 15.0859L17.9229 16.9609C18.2451 17.1777 18.6816 17.0898 18.8984 16.7646C19.1152 16.4395 19.0273 16.0059 18.7021 15.7891L16.2031 14.125V10.5156C16.2031 10.126 15.8896 9.8125 15.5 9.8125C15.1104 9.8125 14.7969 10.126 14.7969 10.5156Z" fill="#076EB8"/>
+</g>
+<rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
+<defs>
+<clipPath id="clip_waiting_btm_t">
+<rect width="15" height="15" transform="translate(8 7)"/>
+</clipPath>
+</defs>
+</svg>`;
+
+const SVG_WAITING_TOP_T = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
+<path d="M15 21L15 30" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M0 15H8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M22 15H30.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<g clip-path="url(#clip_waiting_top_t)">
+<path d="M21.5938 14.5C21.5938 16.1162 20.9517 17.6661 19.8089 18.8089C18.6661 19.9517 17.1162 20.5938 15.5 20.5938C13.8838 20.5938 12.3339 19.9517 11.1911 18.8089C10.0483 17.6661 9.40625 16.1162 9.40625 14.5C9.40625 12.8838 10.0483 11.3339 11.1911 10.1911C12.3339 9.04827 13.8838 8.40625 15.5 8.40625C17.1162 8.40625 18.6661 9.04827 19.8089 10.1911C20.9517 11.3339 21.5938 12.8838 21.5938 14.5ZM8 14.5C8 16.4891 8.79018 18.3968 10.1967 19.8033C11.6032 21.2098 13.5109 22 15.5 22C17.4891 22 19.3968 21.2098 20.8033 19.8033C22.2098 18.3968 23 16.4891 23 14.5C23 12.5109 22.2098 10.6032 20.8033 9.1967C19.3968 7.79018 17.4891 7 15.5 7C13.5109 7 11.6032 7.79018 10.1967 9.1967C8.79018 10.6032 8 12.5109 8 14.5ZM14.7969 10.5156V14.5C14.7969 14.7344 14.9141 14.9541 15.1104 15.0859L17.9229 16.9609C18.2451 17.1777 18.6816 17.0898 18.8984 16.7646C19.1152 16.4395 19.0273 16.0059 18.7021 15.7891L16.2031 14.125V10.5156C16.2031 10.126 15.8896 9.8125 15.5 9.8125C15.1104 9.8125 14.7969 10.126 14.7969 10.5156Z" fill="#076EB8"/>
+</g>
+<rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
+<defs>
+<clipPath id="clip_waiting_top_t">
+<rect width="15" height="15" transform="translate(8 7)"/>
+</clipPath>
+</defs>
+</svg>`;
+
+const SVG_VERTICAL_PATH = `
+<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_206_237)">
+<rect width="30" height="30" fill="#EFF7FF"/>
+<path d="M15 16V31" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M15 15V-4.2084e-07" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<ellipse cx="15" cy="14.7531" rx="2" ry="1.97531" fill="#677594"/>
+</g>
+<defs>
+<clipPath id="clip0_206_237">
+<rect width="30" height="30"/>
+</clipPath>
+</defs>
+</svg>
+`;
 
 const SVG_SHUTTLE_LOADED = `<svg width="30" height="22" viewBox="0 0 30 22" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g filter="url(#filter0_i_112_208)">
@@ -245,7 +345,7 @@ const SVG_SHUTTLE_LOADED_V = `<svg width="22" height="30" viewBox="0 0 22 30" fi
 </svg>`;
 
 const ROWS = 17;
-const COLS = 55;
+const COLS = 58;
 
 (function initNewLayout() {
     const grid = document.getElementById('new-layout-grid');
@@ -256,48 +356,45 @@ const COLS = 55;
     for (let r = 0; r < ROWS; r++) {
         const row = [];
         for (let c = 0; c < COLS; c++) {
-            let type = 'path'; // Default to empty path
+            let type = 'path';
             
-            if (r >= 0 && r <= 13) {
-                const isWallCol = (c === 0 || c === 18 || c === 36 || c === 54);
-                const isWallRow = (r === 0 || r === 13);
+            // Warehouse Area (Now shifted by 2: Rows 2 to 15)
+            if (r >= 2 && r <= 15) {
+                const warehouseR = r - 2; // Map back to 0-13 warehouse logic
+                const isBoundaryCol = (c === 0 || c === 18 || c === 37 || c === 56);
+                const isBoundaryRow = (warehouseR === 0 || warehouseR === 13);
                 
-                if (isWallCol && isWallRow) {
-                    if (r === 0) {
-                        if (c === 0) type = 'wall-tl';
-                        else if (c === 54) type = 'wall-tr';
-                        else type = 'wall-t-top';
-                    } else { // r === 13
-                        if (c === 0) type = 'wall-bl';
-                        else if (c === 54) type = 'wall-br';
-                        else type = 'wall-t-bottom';
-                    }
-                } else if (isWallCol) {
-                    type = 'wall-v';
-                } else if (isWallRow) {
-                    if (r === 13 && (c === 9 || c === 27 || c === 45)) type = 'door';
-                    else type = 'wall-h';
-                } else {
-                    // Inside the module frame
-                    const modCol = (c < 18) ? c - 1 : (c < 36) ? c - 19 : c - 37;
-                    if (r === 12) {
-                        type = 'path';
-                    } else if (r === 1 || r === 11) {
-                        if (modCol === 0 && r === 1) type = 'outbound';
-                        else if (modCol === 16 && r === 11) type = 'inbound';
-                        else if (modCol === 0 || modCol === 16) type = 'path'; 
-                        else if (modCol >= 0 && modCol <= 16) type = 'shelf'; 
+                if (isBoundaryRow) {
+                    if (warehouseR === 0) {
+                        const mCol = (c < 19) ? c : (c < 38) ? c - 19 : c - 38;
+                        if (mCol === 0) type = 'outbound';
                         else type = 'path';
-                    } else if (r >= 2 && r <= 10) {
-                        if (modCol === 0 || modCol === 16) type = 'path';
-                        else if (modCol >= 0 && modCol <= 16) type = 'shelf';
-                        else type = 'empty';
+                    } else type = 'space';
+                } else if (isBoundaryCol) {
+                    if (warehouseR === 12 && c > 0) type = 'inbound';
+                    else if (c === 56 && warehouseR >= 1 && warehouseR <= 11) type = 'space';
+                    else type = 'path';
+                } else {
+                    const mCol = (c < 19) ? c : (c < 38) ? c - 19 : c - 38;
+                    if (warehouseR === 12) {
+                        if (mCol === 18) type = 'inbound';
+                        else type = 'path';
+                    } else if (warehouseR >= 1 && warehouseR <= 11) {
+                        if (mCol >= 2 && mCol <= 16) type = 'shelf';
+                        else type = 'path';
                     } else {
                         type = 'empty';
                     }
                 }
-            } else if (r >= 14) {
-                type = 'h-rail';
+            } 
+            // New extension rows (r < 2) - Full horizontal paths
+            else if (r < 2) {
+                type = 'path';
+            }
+            // Rail Area at bottom (r === 16)
+            else if (r >= 16) {
+                if (r === 16 && c <= 8) type = 'space';
+                else type = 'h-rail';
             }
 
             row.push(type);
@@ -313,27 +410,156 @@ const COLS = 55;
     const modC = document.createElement('div');
     modC.className = 'module-block mod-C';
 
+    let colCounter = 0;
+
     // Render the grid
     mapMatrix.forEach((row, r) => {
         row.forEach((type, c) => {
             const cell = document.createElement('div');
             cell.className = `map-cell cell-${type} r-${r} c-${c}`;
             
-            let svgContent = '';
-            if (type === 'path') {
-                const modCol = (c < 18) ? c - 1 : (c < 36) ? c - 19 : c - 37;
-                let top = (r !== 1);
-                let bottom = (r !== 12 || (c === 9 || c === 27 || c === 45));
-                let left = (modCol !== 0);
-                let right = (modCol !== 16);
+            // Add Row Labels (only for first column in modA)
+            if (c === 0) {
+                const labelRow = document.createElement('div');
+                labelRow.className = 'label-row';
+                labelRow.innerText = r + 1;
+                cell.appendChild(labelRow);
+            }
 
-                if (r === 12) {
-                    if (modCol !== 0 && modCol !== 16) top = false;
+            // Add Column Labels (only for first row)
+            if (r === 0) {
+                const labelCol = document.createElement('div');
+                labelCol.className = 'label-col';
+                labelCol.innerText = c + 1;
+                cell.appendChild(labelCol);
+            }
+
+            let svgContent = '';
+            if (r === 15 && (c === 19 || c === 38 || c === 57)) {
+                svgContent = SVG_VERTICAL_PATH;
+            }
+            else if (type === 'path') {
+                const modCol = (c < 19) ? c : (c < 38) ? c - 19 : c - 38;
+                
+                // Red Line Specific Logic
+                let topConn = false, bottomConn = false, leftConn = false, rightConn = false;
+
+                // Shifted logic: Warehouse rows are now 2 to 15
+                if (r === 2) { // Top horizontal horizontal
+                    if (modCol >= -1 && modCol <= 17) {
+                        leftConn = (modCol > -1);
+                        rightConn = (modCol < 17);
+                        bottomConn = (modCol === -1 || modCol === 0 || modCol === 16 || modCol === 17); 
+                        topConn = (modCol === -1 || modCol === 0 || modCol === 16 || modCol === 17); // Connect UP to new rows
+                    }
+                } else if (r === 14) { // Bottom horizontal
+                    if (modCol >= -1 && modCol <= 17) {
+                        leftConn = (modCol > -1);
+                        rightConn = (modCol < 17); 
+                        topConn = (modCol === -1 || modCol === 0 || modCol === 16 || modCol === 17); 
+                        bottomConn = (modCol === 17); 
+                    }
+                } else if (r < 2) { // New extension rows (Full Path)
+                    // Row 2: Remove horizontal rails as requested by user
+                    if (r === 1) {
+                        leftConn = false;
+                        rightConn = false;
+                    } else {
+                        const isBorder = (c === 0 || c === 19 || c === 38 || c === 57);
+                        leftConn = (c > 0 && !isBorder);
+                        rightConn = (c < COLS - 1);
+                    }
+                    // Only connect vertically at boundary corridors
+                    const isBoundaryCol = (c === 0 || c === 19 || c === 38 || c === 57);
+                    bottomConn = isBoundaryCol;
+                    topConn = (r === 1 && isBoundaryCol); // Row 2 connects to Row 1 only at boundaries
                 }
-                svgContent = getPathSVG(top, bottom, left, right);
+
+                else if (modCol === 0) { // Label 1
+                    if (r >= 0 && r <= 14) {
+                        topConn = (r > 0); 
+                        bottomConn = (r < 14);
+                        rightConn = true;
+                        leftConn = (r === 0 && c > 0); // Allow left connection only on Row 1 for index > 0
+                    }
+                } else if (modCol === 1) { // Column 2
+                    if (r >= 3 && r <= 14) {
+                        topConn = (r >= 3); // Now true at r=3 (Row 4) to connect up
+                        bottomConn = (r < 15); 
+                        if (r >= 3 && r <= 13) {
+                            leftConn = true;
+                            rightConn = true;
+                        }
+                    }
+                }
+                // Label 18 & 19 (Shaft Area) Consolidate
+                if (modCol === 17) { // Column 18
+                    if (r === 0) {
+                        rightConn = true; // Row 1 Corridor
+                        leftConn = true;
+                    }
+                    if (r >= 2 && r <= 14) {
+                        topConn = (r > 2); 
+                        bottomConn = (r < 14);
+                        leftConn = true;
+                        rightConn = true; // Force connect to shaft
+                    }
+                    if (r === 2) topConn = false; // Cleanup Row 3 top
+                }
+
+                if (modCol === 18) { // Column 19 (Main Shaft)
+                    if (r >= 0 && r <= 16) { 
+                        topConn = (r > 2); 
+                        bottomConn = (r < 16 && r !== 0 && r !== 1);
+                        leftConn = (r >= 2 && r <= 13 || r === 0); 
+                        rightConn = (r === 0); // Row 1 Corridor
+                    }
+                    if (r === 15 && (c === 18 || c === 37 || c === 56)) {
+                        topConn = true;
+                    }
+                }
+
+                // Final Overrides for Row 3/Shaft boundaries
+                if (r === 2) {
+                    if (modCol === 16) { topConn = false; bottomConn = false; }
+                    if (modCol === 17) { rightConn = true; topConn = false; }
+                    if (modCol === 18) { leftConn = true; topConn = false; }
+                }
+
+                // Final Overrides for Row 17 (Bottom Row)
+                if (r === 16) {
+                    bottomConn = false;
+                }
+
+                if (modCol === 16 && r >= 3 && r <= 13) {
+                    svgContent = SVG_RAIL_CROSS;
+                } else {
+                    // Hide nodes (dots) for Row 2 except for Column 1
+                    const showNode = !(r === 1 && c !== 0);
+                    svgContent = getPathSVG(topConn, bottomConn, leftConn, rightConn, showNode);
+                }
             }
             else if (type === 'empty') svgContent = SVG_EMPTY;
-            else if (type === 'shelf') svgContent = SVG_SHELF;
+            else if (type === 'space') {
+                const modCol = (c < 19) ? c : (c < 38) ? c - 19 : c - 38;
+                if (modCol === 17 && r === 0) {
+                    svgContent = SVG_CORNER_TOP_RIGHT_DOT;
+                } else {
+                    svgContent = SVG_SPACE;
+                }
+            }
+            else if (type === 'shelf') {
+                svgContent = SVG_SHELF;
+                const mCol = (c < 19) ? c : (c < 38) ? c - 19 : c - 38;
+                if (mCol === 0 && r >= 0 && r <= 12) {
+                    const overlay = getPathSVG(r > 0, r < 12, false, (r === 0 || r === 12));
+                    const pureRail = overlay.replace('<rect width="30" height="30" transform="matrix(-1 0 0 1 30 0)" fill="#DFF0FF" fill-opacity="0.5"/>', '');
+                    svgContent = `<div style="position:relative; width:30px; height:30px;">
+                        ${SVG_SHELF}
+                        <div style="position:absolute; top:0; left:0;">${pureRail}</div>
+                    </div>`;
+                }
+            }
             else if (type === 'inbound') svgContent = SVG_INBOUND;
             else if (type === 'outbound') svgContent = SVG_OUTBOUND;
             else if (type === 'wall-v') svgContent = SVG_WALL_V;
@@ -345,26 +571,57 @@ const COLS = 55;
             else if (type === 'wall-t-top') svgContent = SVG_WALL_T_TOP;
             else if (type === 'wall-t-bottom') svgContent = SVG_WALL_T_BOTTOM;
             else if (type === 'door') svgContent = SVG_CLSDOOR; // Default to closed
+            // Delete from here
             else if (type === 'h-rail') {
-                const vertCols = [0, 9, 18, 27, 36, 45, 54];
-                const hasLeft = (c !== 0);
+                const vertCols = [0, 18, 19, 37, 38, 56, 57]; // Chuyển Junction từ 9 sang 18 (Cột 19)
+                let hasLeft = (c !== 0);
+                let vType = 'full';
+                if (c === 9 || c === 28 || c === 47) {
+                    hasLeft = false; // Vẫn bắt đầu thanh rail từ Cột 10
+                }
+                if (c === 18 || c === 37 || c === 56) {
+                    if (r === 14) vType = 'top'; // Nối lên tại Cột 19
+                }
                 const hasRight = (c !== COLS - 1);
-                svgContent = getRailSVG(vertCols.includes(c), hasLeft, hasRight);
+                svgContent = getRailSVG(vertCols.includes(c), hasLeft, hasRight, vType);
             }
 
-            if (c === 17 && (r === 4 || r === 6)) {
-                svgContent = SVG_P_PORT;
-            }
+            // Shaft boundaries as manually set by user
+            const isShaftCol = (c === 19 || c === 38 || c === 57);
 
-            if (c === 17 && r === 8) {
-                svgContent = SVG_WAITING;
+            const waitingPositions = [
+                // Module 1 (Col 1-19)
+                { r: 2, c: 1 }, { r: 3, c: 0 }, { r: 13, c: 18 }, { r: 14, c: 17 },
+                // Module 2 (Col 20-38)
+                { r: 2, c: 20 }, { r: 3, c: 19 }, { r: 13, c: 37 }, { r: 14, c: 36 },
+                // Module 3 (Col 39-57)
+                { r: 2, c: 39 }, { r: 3, c: 38 }, { r: 13, c: 56 }, { r: 14, c: 55 }
+            ];
+
+            const isWaitingPos = waitingPositions.some(pos => pos.r === r && pos.c === c);
+            if (isWaitingPos) {
+                 if (r === 2 && (c === 1 || c === 19 || c === 38)) {
+                    svgContent = SVG_WAITING_TOP_T;
+                }
+                else {
+                    const needsRight = (r === 3 && c === 0) || (r === 14 && (c === 18 || c === 37 || c === 56));
+                    if (needsRight) {
+                        svgContent = SVG_WAITING_RIGHT;
+                    } else {
+                        svgContent = SVG_WAITING_LEFT;
+                    }
+                }
+            } else if (type === 'inbound') {
+                 svgContent = SVG_INBOUND;
+            } else if (type === 'outbound') {
+                svgContent = SVG_OUTBOUND;
             }
             
-            cell.innerHTML = svgContent;
+            cell.innerHTML += svgContent;
             
             // Append to appropriate module block
-            if (c <= 18) modA.appendChild(cell);
-            else if (c <= 36) modB.appendChild(cell);
+            if (c <= 19) modA.appendChild(cell);
+            else if (c <= 38) modB.appendChild(cell);
             else modC.appendChild(cell);
         });
     });
@@ -407,34 +664,22 @@ const COLS = 55;
 
     async function animateShuttle() {
         const shuttle = createShuttle();
-        const startR = 15;
-        const doorC = 9;
-        const inboundC = 17; // Corrected inbound column
+        const startR = 14;
+        const axisC = 18; // Vertical axis at Column 19
+        const inboundC = 17; // Inner path column (Label 18)
         const inboundR = 11;
-        const moveDelay = 2000; // Delay matching the 2s transition
+        const moveDelay = 2000; 
 
         // Position at start (Vertical)
-        setPosition(shuttle, startR, doorC, true);
-        
+        setPosition(shuttle, startR, axisC, true);
         await new Promise(r => setTimeout(r, moveDelay));
 
-        // Move to door area (r=14) (Vertical)
-        setPosition(shuttle, 14, doorC, true);
-        await new Promise(r => setTimeout(r, moveDelay));
-
-        // Open door
-        const doorCell = document.querySelector(`.r-13.c-${doorC}`);
-        if (doorCell) {
-            doorCell.innerHTML = SVG_DOOR;
-        }
-        await new Promise(r => setTimeout(r, 1000));
-
-        // Move through door (r=13) (Vertical)
-        setPosition(shuttle, 13, doorC, true);
+        // Move to r=13 (Vertical Junction)
+        setPosition(shuttle, 13, axisC, true);
         await new Promise(r => setTimeout(r, moveDelay));
 
         // Move to path (r=12) (Vertical)
-        setPosition(shuttle, 12, doorC, true);
+        setPosition(shuttle, 12, axisC, true);
         await new Promise(r => setTimeout(r, moveDelay));
 
         // Move horizontally to inbound col (c=17) (Horizontal)
@@ -446,31 +691,21 @@ const COLS = 55;
         await new Promise(r => setTimeout(r, 3000)); // Stay at inbound for 3s
 
         // Return: reverse the path
-        // From inbound (11, 17) to rail (12, 17) (Vertical)
         setPosition(shuttle, 12, inboundC, true);
         await new Promise(r => setTimeout(r, moveDelay));
 
-        // Move horizontally back to door col (c=9) (Horizontal)
-        setPosition(shuttle, 12, doorC, false);
+        // Move horizontally back to axis col (c=18) (Horizontal)
+        setPosition(shuttle, 12, axisC, false);
         await new Promise(r => setTimeout(r, moveDelay));
 
-        // Move down through door (r=13) (Vertical)
-        setPosition(shuttle, 13, doorC, true);
+        // Move down axis (r=13) (Vertical)
+        setPosition(shuttle, 13, axisC, true);
         await new Promise(r => setTimeout(r, moveDelay));
 
-        // Outside door (r=14) (Vertical)
-        setPosition(shuttle, 14, doorC, true);
+        // Back to start row (r=14) (Vertical)
+        setPosition(shuttle, 14, axisC, true);
         await new Promise(r => setTimeout(r, moveDelay));
         
-        // Close door
-        if (doorCell) {
-            doorCell.innerHTML = SVG_CLSDOOR;
-        }
-
-        // Back to start (r=15) (Vertical)
-        setPosition(shuttle, startR, doorC, true);
-        await new Promise(r => setTimeout(r, moveDelay));
-
         // Repeat animation
         activeAnimationTimeout = setTimeout(animateShuttle, 1000);
         shuttle.remove();

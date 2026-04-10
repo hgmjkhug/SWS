@@ -7,7 +7,7 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 40px; /* Increased from 15px to avoid overlap with absolute labels */
 }
 
 .layout-controls {
@@ -39,6 +39,7 @@
 }
 
 .custom-multiselect {
+    display:none;
     width: 200px;
 }
 
@@ -159,7 +160,7 @@
 /* Map Wrapper & Scaler */
 .map-wrapper {
     display: inline-block;
-    padding: 0px;
+    padding: 20px 0 0 40px; /* Added padding to make room for absolute labels */
     position: relative;
     overflow: visible;
     width: fit-content;
@@ -188,9 +189,9 @@
     transition: all 0.4s ease;
 }
 
-.mod-A { grid-template-columns: repeat(19, 30px); }
-.mod-B { grid-template-columns: repeat(18, 30px); }
-.mod-C { grid-template-columns: repeat(18, 30px); }
+.mod-A { grid-template-columns: repeat(20, 30px); }
+.mod-B { grid-template-columns: repeat(19, 30px); }
+.mod-C { grid-template-columns: repeat(19, 30px); }
 
 /* Module Visibility Filtering */
 .module-block.hidden-module {
@@ -243,7 +244,7 @@
     margin-top: 4px;
     border-top: 1px solid #e2e8f0;
     padding-top: 8px;
-    border-radius: 0 0 6px 6px;
+    border-radius: 6px;
     width: 36px;
     height: 40px;
 }
@@ -254,6 +255,34 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    box-sizing: border-box;
+    position: relative; /* Added for absolute labels */
+}
+
+.label-col {
+    position: absolute;
+    top: -39px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    width: 30px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.label-row {
+    position: absolute;
+    left: -54px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    width: 40px;
+    text-align: right;
+    pointer-events: none;
 }
 
 .map-cell svg {

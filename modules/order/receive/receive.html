@@ -1,0 +1,217 @@
+<body>
+    <link rel="stylesheet" href="receive.css?v=1.1">
+    <div id="main-view">
+        <div class="receive-container">
+            <div class="receive-search-row">
+                <div class="filter-group-search">
+                    <input type="text" id="receive-search" class="receive-search-input" 
+                           placeholder="Tìm theo mã hoặc tên đơn hàng..." oninput="filterOrders()">
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="openSyncModal()">
+                        <i class="fas fa-sync-alt"></i> Đồng bộ
+                    </button>
+                </div>
+            </div>
+            
+            <div class="receive-tabs-container">
+                <div class="main-tabs">
+                    <div class="main-tab active" id="tab-status-not-received" onclick="switchMainTab('Chưa tiếp nhận')">
+                        Chưa tiếp nhận
+                    </div>
+                    <div class="main-tab" id="tab-status-received" onclick="switchMainTab('Đã tiếp nhận')">
+                        Đã tiếp nhận
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <div class="table-scroll-head">
+                    <table class="receive-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="main-check-all" onchange="toggleAllMain(this)"></th>
+                                <th>STT</th>
+                                <th>Mã đơn hàng</th>
+                                <th>Tên đơn hàng</th>
+                                <th>Khách hàng</th>
+                                <th>Chú thích</th>
+                                <th>Thời gian tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="table-scroll-body" id="receive-table-scroll-body">
+                    <table class="receive-table">
+                        <tbody id="receive-table-body">
+                            <!-- Code will render here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="pagination-bar">
+                <span id="pagination-info">Hiển thị 0 - 0 trong 0</span>
+                <div class="pagination-controls">
+                    <button class="page-btn" id="prev-page" onclick="prevPage()" disabled>&lt;</button>
+                    <div id="page-numbers" class="page-numbers"></div>
+                    <button class="page-btn" id="next-page" onclick="nextPage()">&gt;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Đồng bộ ERP -->
+    <div id="sync-modal" class="modal-overlay">
+        <div class="modal-box modal-lg">
+            <button class="close-btn" onclick="closeSyncModal()"><i class="fas fa-times"></i></button>
+            <div class="modal-header">
+                <h3 class="modal-title">Danh sách đơn hàng từ ERP</h3>
+            </div>
+            <div class="modal-body">
+                <div class="sync-modal-header-actions">
+                    <div class="sync-modal-top-row">
+                        <div class="filter-group-search">
+                            <input type="text" id="erp-search" class="receive-search-input" 
+                                   placeholder="Tìm mã hoặc tên đơn hàng..." oninput="filterErpOrders()">
+                        </div>
+                        <div class="action-buttons">
+                            <button id="bulk-sync-btn" class="btn btn-primary" onclick="bulkSync()" disabled>
+                                <i class="fas fa-sync-alt"></i> Đồng bộ (0)
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-tabs">
+                        <div class="modal-tab active" id="tab-not-synced" onclick="switchSyncTab('not-synced')">
+                            Chưa đồng bộ: <span class="tab-count" id="count-not-synced">0</span>
+                        </div>
+                        <div class="modal-tab" id="tab-synced" onclick="switchSyncTab('synced')">
+                            Đã đồng bộ: <span class="tab-count" id="count-synced">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-wrapper erp-table-wrapper">
+                    <div class="table-scroll-head">
+                        <table class="receive-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="erp-check-all" onchange="toggleAllErp(this)"></th>
+                                    <th>STT</th>
+                                    <th>Mã đơn hàng</th>
+                                    <th>Tên đơn hàng</th>
+                                    <th>Khách hàng</th>
+                                    <th>Chú thích</th>
+                                    <th>Thời gian tạo</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <div class="table-scroll-body" id="erp-table-scroll-body">
+                        <table class="receive-table">
+                            <tbody id="erp-table-body">
+                                <!-- ERP data rendered here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeSyncModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Chi tiết sản phẩm -->
+    <div id="product-modal" class="modal-overlay" style="z-index: 1100;">
+        <div class="modal-box">
+            <button class="close-btn" onclick="closeProductModal()"><i class="fas fa-times"></i></button>
+            <div class="modal-header">
+                <h3 class="modal-title">Danh sách sản phẩm</h3>
+            </div>
+            <div class="modal-body">
+                <div class="order-info-summary" id="order-info-summary">
+                    <!-- Order summary header -->
+                </div>
+                <div class="table-wrapper" style="margin-top: 10px;">
+                    <table class="receive-table">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã sản phẩm</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Số lượng</th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-table-body">
+                            <!-- Product data rendered here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeProductModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Xác nhận (Modern Redesign) -->
+    <div id="confirm-modal" class="modal-overlay" style="z-index: 1200;">
+        <div class="modal-box confirm-modal-box scale-up">
+            <div class="modal-body confirm-modal-body">
+                <div class="confirm-icon-outer">
+                    <div class="confirm-icon-inner">
+                        <i class="fas fa-question"></i>
+                    </div>
+                </div>
+                <h3 class="confirm-title">Xác nhận thao tác</h3>
+                <p id="confirm-message" class="confirm-text"></p>
+                <div class="confirm-actions">
+                    <button class="btn-modern btn-cancel" onclick="closeConfirmModal(false)">Hủy bỏ</button>
+                    <button class="btn-modern btn-confirm" onclick="closeConfirmModal(true)">Đồng ý</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="receive.js?v=1.0"></script>
+    <script>
+        // Sync horizontal scroll
+        document.addEventListener('DOMContentLoaded', function () {
+            const tableHolders = [
+                { body: 'receive-table-scroll-body', head: '.receive-container .table-scroll-head' },
+                { body: 'erp-table-scroll-body', head: '#sync-modal .table-scroll-head' }
+            ];
+
+            tableHolders.forEach(item => {
+                const scrollBody = document.getElementById(item.body);
+                const scrollHead = document.querySelector(item.head);
+                if (scrollBody && scrollHead) {
+                    scrollBody.addEventListener('scroll', function () {
+                        scrollHead.scrollLeft = scrollBody.scrollLeft;
+                    });
+                }
+            });
+        });
+
+        function toggleDropdown(id) {
+            const menu = document.getElementById(id);
+            const allMenus = document.querySelectorAll('.custom-dropdown-menu');
+            allMenus.forEach(m => {
+                if (m.id !== id) m.classList.remove('show');
+            });
+            menu.classList.toggle('show');
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.closest('.custom-dropdown')) {
+                const menus = document.querySelectorAll('.custom-dropdown-menu');
+                menus.forEach(m => m.classList.remove('show'));
+            }
+        }
+    </script>
+</body>
+</html>

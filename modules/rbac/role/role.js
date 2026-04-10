@@ -260,11 +260,15 @@
     const resourceGroups = [
         {
             group: 'Theo dõi & Giám sát',
-            resources: ['Dashboard tổng quan', 'Dashboard chi tiết', 'Giám sát hoạt động']
+            resources: ['Dashboard chi tiết', 'Giám sát hoạt động', 'Giao diện kho mới']
+        },
+        {
+            group: 'Quản lý đơn hàng',
+            resources: ['Đơn hàng nhập', 'Đơn hàng xuất']
         },
         {
             group: 'Quản lý Kho',
-            resources: ['Quản lý Kho', 'Quy cách sản phẩm', 'Quản lý vật chứa', 'Quản lý bảo trì']
+            resources: ['Danh sách Kho', 'Quản lý lô hàng', 'Quản lý tồn kho', 'Quy cách sản phẩm', 'Quản lý vật chứa', 'Quản lý bảo trì', 'Biên bản bàn giao']
         },
         {
             group: 'Quản lý điều phối WCS',
@@ -284,7 +288,7 @@
         },
         {
             group: 'Danh mục chung',
-            resources: ['Nhóm thiết bị', 'Thiết bị', 'Nhóm sản phẩm', 'Sản phẩm', 'Quy cách', 'Vật chứa', 'Đơn vị tính', 'Loại khu vực']
+            resources: ['Nhóm thiết bị', 'Thiết bị', 'Dòng sản phẩm', 'Nhóm sản phẩm', 'Sản phẩm', 'Quy cách', 'Loại xe', 'Nhóm vật chứa', 'Vật chứa', 'ĐƠn vị tính', 'Thị trường', 'Khách hàng', 'Loại khu vực']
         },
         {
             group: 'Báo cáo thống kê',
@@ -293,6 +297,10 @@
         {
             group: 'Hệ thống',
             resources: ['Tài khoản', 'Vai trò', 'Chức năng', 'Tài nguyên']
+        },
+        {
+            group: 'Tài liệu',
+            resources: ['Tài liệu hướng dẫn', 'Quy trình vận hành']
         }
     ];
 
