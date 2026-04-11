@@ -2,125 +2,117 @@
     <link rel="stylesheet" href="new-cont.css">
     <div id="main-view">
         <div class="new-cont-container">
-            <!-- Header section -->
-            <div class="header-section">
-                <div class="header-left">
-                    <div class="search-group">
-                        <div class="search-input-wrapper">
-                            <i class="fa-solid fa-search"></i>
-                            <input type="text" id="pallet-search" placeholder="Tìm theo mã pallet..." oninput="filterPallets()">
+            <!-- Header section (renamed for design consistency) -->
+            <div class="unit-actions">
+                <div class="unit-filters">
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="pallet-search" class="unit-search-input" placeholder="Tìm theo mã vật chứa..." oninput="filterPallets()">
+                    </div>
+
+                    <!-- Filter by Container Type (Searchable Select Pattern) -->
+                    <div class="searchable-select" style="width: 280px;" id="type-filter-container">
+                        <div class="select-input-wrapper">
+                            <input type="text" id="type-filter-input" placeholder="Tất cả loại vật chứa" 
+                                   oninput="filterTypeFilterOptions(this)" 
+                                   onfocus="showTypeFilterDropdown()"
+                                   autocomplete="off">
+                        </div>
+                        <div class="select-dropdown" id="type-filter-dropdown" style="width: 100%;">
+                            <div id="type-filter-options-list">
+                                <!-- Options rendered by JS -->
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="filter-group">
-                        <div class="custom-combobox" id="batch-combobox">
-                            <div class="combobox-selected" onclick="toggleBatchDropdown()">
-                                <span id="selected-batch-text">Tất cả Đơn hàng & Lô</span>
-                                <i class="fa-solid fa-chevron-down" id="batch-combobox-icon"></i>
-                            </div>
-                            <div class="combobox-dropdown" id="batch-dropdown">
-                                <div class="dropdown-search">
-                                    <input type="text" id="batch-search-input" placeholder="Tìm mã đơn/lô, tên đơn/lô..." oninput="filterBatchDropdown()">
-                                </div>
-                                <div class="dropdown-content" id="batch-dropdown-list"></div>
-                            </div>
+                    <div class="status-filter">
+                        <div class="status-selected" onclick="toggleStatusDropdown()">
+                            <span id="selected-status-text">Tất cả trạng thái</span>
                         </div>
-                    </div>
-
-                    <div class="filter-group">
-                        <div class="status-filter">
-                            <div class="status-selected" onclick="toggleStatusDropdown()">
-                                <span id="selected-status-text">Tất cả trạng thái</span>
-                                <i class="fa-solid fa-filter"></i>
-                            </div>
-                            <div class="status-options" id="status-options-list">
-                                <div class="status-option active" data-value="all">Tất cả trạng thái</div>
-                                <div class="status-option" data-value="mới tạo">Mới tạo</div>
-                                <div class="status-option" data-value="đã sử dụng">Đã sử dụng</div>
-                            </div>
+                        <div class="status-options" id="status-options-list">
+                            <div class="status-option active" data-value="all">Tất cả trạng thái</div>
+                            <div class="status-option" data-value="mới tạo">Mới tạo</div>
+                            <div class="status-option" data-value="đã sử dụng">Đã sử dụng</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="header-right">
-                    <button class="btn btn-outline-danger" onclick="showBulkDeletePopover()" title="Xóa các mục đã chọn">
-                        <i class="fa-solid fa-trash-can"></i> Xóa
+                <div class="action-buttons">
+                    <button class="btn btn-outline-danger" id="delete-selected-btn" onclick="showBulkDeletePopover()" disabled>
+                        <i class="fa-solid fa-trash-can"></i> Xóa (0)
                     </button>
-                    <button class="btn btn-outline-primary" onclick="bulkPrint()" title="Bulk Print">
-                        <i class="fa-solid fa-print"></i> In
-                    </button>
-                    <div class="excel-dropdown-wrapper">
-                        <button class="btn btn-outline-secondary" onclick="toggleExcelDropdown()">
+                    
+                    <div class="dropdown-container">
+                        <button class="btn btn-outline-primary" onclick="toggleExcelDropdown()">
                             <i class="fa-solid fa-file-excel"></i> Nhập/Xuất
-                            <i class="fa-solid fa-caret-down"></i>
                         </button>
-                        <div class="excel-options" id="excel-options">
+                        <div class="dropdown-content" id="excel-options">
                             <a href="#" onclick="importExcel(); return false;"><i class="fa-solid fa-upload"></i> Nhập Excel</a>
                             <a href="#" onclick="exportExcel(); return false;"><i class="fa-solid fa-download"></i> Xuất Excel</a>
                         </div>
                     </div>
-                    <button class="btn btn-primary btn-add" onclick="openAddModal()">
+
+                    <button class="btn btn-primary" onclick="openAddModal()">
                         <i class="fa-solid fa-plus"></i> Thêm mới
                     </button>
                 </div>
             </div>
 
             <!-- Table section -->
-            <div class="table-container">
-                <div class="table-wrapper">
-                    <div class="table-scroll-head">
-                        <table>
-                            <colgroup>
-                                <col style="width: 40px;">
-                                <col style="width: 50px;">
-                                <col style="width: 150px;">
-                                <col style="width: 160px;">
-                                <col style="width: 250px;">
-                                <col style="width: 210px;">
-                                <col style="width: 130px;">
-                                <col style="width: 100px;">
-                            </colgroup>
-                            <thead>
-                                <tr>
-                                    <th><input type="checkbox" id="check-all" onchange="toggleAllPallets(this)"></th>
-                                    <th>STT</th>
-                                    <th>Mã pallet</th>
-                                    <th>Quy cách (DxRxC)</th>
-                                    <th>Đơn hàng</th>
-                                    <th>Lô hàng</th>
-                                    <th>Trạng thái</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                    <div class="table-scroll-body">
-                        <table id="pallet-table">
-                            <colgroup>
-                                <col style="width: 40px;">
-                                <col style="width: 50px;">
-                                <col style="width: 150px;">
-                                <col style="width: 160px;">
-                                <col style="width: 250px;">
-                                <col style="width: 210px;">
-                                <col style="width: 130px;">
-                                <col style="width: 100px;">
-                            </colgroup>
-                            <tbody id="pallet-table-body"></tbody>
-                        </table>
-                    </div>
+            <div class="table-wrapper">
+                <div class="table-scroll-head">
+                    <table class="unit-table">
+                        <colgroup>
+                            <col style="width: 40px;">
+                            <col style="width: 50px;">
+                            <col style="width: 200px;">
+                            <col style="width: 300px;">
+                            <col style="width: 200px;">
+                            <col style="width: 100px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="check-all" onchange="toggleAllPallets(this)"></th>
+                                <th>STT</th>
+                                <th>Mã vật chứa</th>
+                                <th>Loại vật chứa</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                    </table>
                 </div>
+                <div class="table-scroll-body">
+                    <table class="unit-table" id="pallet-table">
+                        <colgroup>
+                            <col style="width: 40px;">
+                            <col style="width: 50px;">
+                            <col style="width: 200px;">
+                            <col style="width: 300px;">
+                            <col style="width: 200px;">
+                            <col style="width: 100px;">
+                        </colgroup>
+                        <tbody id="pallet-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
 
-                <!-- Pagination -->
-                <div class="pagination-bar">
-                    <div class="pagination-info">
-                        Hiển thị <span id="range-start">0</span> – <span id="range-end">0</span> trong <span id="total-items">0</span> vật chứa
-                    </div>
-                    <div class="pagination-controls">
-                        <button class="page-btn" id="prev-page" onclick="changePage(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-                        <div id="page-numbers" class="page-numbers"></div>
-                        <button class="page-btn" id="next-page" onclick="changePage(1)"><i class="fa-solid fa-chevron-right"></i></button>
-                    </div>
+            <!-- Pagination Bar -->
+            <div class="pagination-bar">
+                <span id="pagination-info">Hiển thị 0 trên tổng 0</span>
+                <div class="pagination-controls">
+                    <button class="page-btn" id="prev-page" onclick="changePage(-1)" disabled>
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <div id="page-numbers" class="page-numbers"></div>
+                    <button class="page-btn" id="next-page" onclick="changePage(1)">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                    <span class="page-goto">
+                        Đến
+                        <input type="number" id="goto-page" min="1" value="1" onchange="gotoPage(this.value)" />
+                        trang
+                    </span>
                 </div>
             </div>
         </div>
@@ -130,7 +122,7 @@
     <div id="add-pallet-modal" class="modal-overlay">
         <div class="modal-box large-box">
             <div class="modal-header">
-                <h3 class="modal-title">Thêm mới Pallet</h3>
+                <h3 class="modal-title">Thêm mới Vật chứa</h3>
                 <button class="close-btn" onclick="closeAddModal()"><i class="fa-solid fa-times"></i></button>
             </div>
             <div class="modal-tabs">
@@ -141,59 +133,30 @@
             <div class="modal-content">
                 <!-- Automatic Tab -->
                 <div id="tab-auto" class="tab-panel active">
-                    <div class="form-grid">
+                    <div class="form-stack">
                         <div class="form-group">
-                            <label>Đơn hàng <span class="optional">(Tùy chọn)</span></label>
-                            <div class="searchable-select" id="order-select-auto">
+                            <label>Loại vật chứa <span class="required">*</span></label>
+                            <div class="searchable-select" id="type-select-auto">
                                 <div class="select-input-wrapper">
-                                    <input type="text" placeholder="Tìm theo mã/tên đơn hàng..." oninput="filterOrdersAuto(this)" onfocus="showOrderDropdownAuto()">
-                                    <button class="select-clear-btn" onclick="clearOrderAuto()" title="Xóa lựa chọn" style="display:none;" id="clear-order-auto"><i class="fa-solid fa-xmark"></i></button>
+                                    <input type="text" placeholder="Tìm loại vật chứa..." oninput="filterTypesAuto(this)" onfocus="showTypeDropdownAuto()">
                                 </div>
-                                <div class="select-dropdown" id="order-dropdown-auto"></div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Lô hàng <span class="required">*</span></label>
-                            <div class="searchable-select" id="batch-select-auto">
-                                <div class="select-input-wrapper">
-                                    <input type="text" placeholder="Tìm theo mã/tên lô..." oninput="filterBatchesAuto(this)" onfocus="showBatchDropdownAuto()">
-                                    <button class="select-clear-btn" onclick="clearBatchAuto()" title="Xóa lựa chọn" style="display:none;" id="clear-batch-auto"><i class="fa-solid fa-xmark"></i></button>
-                                </div>
-                                <div class="select-dropdown" id="batch-dropdown-auto"></div>
+                                <div class="select-dropdown" id="type-dropdown-auto"></div>
                             </div>
                         </div>
                         <div class="form-group">
                             <label>Số lượng Pallet <span class="required">*</span></label>
                             <div class="qty-control">
                                 <button type="button" onclick="adjustQty(-1)"><i class="fa-solid fa-minus"></i></button>
-                                <input type="number" id="auto-qty" value="1" min="1" oninput="generatePalletDivs()">
+                                <input type="number" id="auto-qty" value="1" min="1">
                                 <button type="button" onclick="adjustQty(1)"><i class="fa-solid fa-plus"></i></button>
                             </div>
                         </div>
-                        <div class="form-group-row">
-                            <div class="form-group">
-                                <label>Dài (mm) <span class="optional">(Tùy chọn)</span></label>
-                                <input type="number" id="auto-length" placeholder="Dài" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label>Rộng (mm)</label>
-                                <input type="number" id="auto-width" placeholder="Rộng" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label>Cao (mm)</label>
-                                <input type="number" id="auto-height" placeholder="Cao" min="0">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="visual-container" id="pallet-visual-container">
-                        <div class="visual-placeholder"><i class="fa-solid fa-pallet"></i><span>Nhập số lượng để xem trước</span></div>
                     </div>
                 </div>
 
                 <!-- Manual Tab -->
                 <div id="tab-manual" class="tab-panel">
-                    <div class="form-grid">
+                    <div class="form-stack">
                         <div class="form-group">
                             <label>Mã vật chứa <span class="required">*</span></label>
                             <input type="text" id="manual-code" placeholder="Nhập mã vật chứa">
@@ -207,28 +170,6 @@
                                 <div class="select-dropdown" id="type-dropdown-manual"></div>
                             </div>
                         </div>
-                        <div class="form-group-row">
-                            <div class="form-group">
-                                <label>Dài (mm)</label>
-                                <input type="number" id="manual-length" placeholder="Dài" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label>Rộng (mm)</label>
-                                <input type="number" id="manual-width" placeholder="Rộng" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label>Cao (mm)</label>
-                                <input type="number" id="manual-height" placeholder="Cao" min="0">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Số lượng</label>
-                            <div class="qty-control">
-                                <button type="button" onclick="adjustManualQty(-1)"><i class="fa-solid fa-minus"></i></button>
-                                <input type="number" id="manual-qty" value="1" min="1">
-                                <button type="button" onclick="adjustManualQty(1)"><i class="fa-solid fa-plus"></i></button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -236,13 +177,11 @@
             <div class="modal-footer">
                 <div id="footer-auto" class="footer-btns active">
                     <button class="btn btn-secondary" onclick="closeAddModal()">Hủy</button>
-                    <button class="btn btn-info" onclick="createPallets('auto', true)"><i class="fa-solid fa-print"></i> Tạo và In</button>
-                    <button class="btn btn-primary" onclick="createPallets('auto')"><i class="fa-solid fa-check"></i> Tạo</button>
-                    <button class="btn btn-outline-secondary" onclick="closeAddModal()">Đóng</button>
+                    <button class="btn btn-primary" onclick="createPallets('auto')"><i class="fa-solid fa-floppy-disk"></i> Lưu</button>
                 </div>
                 <div id="footer-manual" class="footer-btns">
                     <button class="btn btn-secondary" onclick="closeAddModal()">Hủy</button>
-                    <button class="btn btn-primary" onclick="createPallets('manual')"><i class="fa-solid fa-check"></i> Tạo</button>
+                    <button class="btn btn-primary" onclick="createPallets('manual')"><i class="fa-solid fa-floppy-disk"></i> Lưu</button>
                 </div>
             </div>
         </div>
@@ -252,48 +191,23 @@
     <div id="edit-pallet-modal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
-                <h3 class="modal-title">Chỉnh sửa Pallet</h3>
+                <h3 class="modal-title">Chỉnh sửa Vật chứa</h3>
                 <button class="close-btn" onclick="closeEditModal()"><i class="fa-solid fa-times"></i></button>
             </div>
             <div class="modal-content">
                 <input type="hidden" id="edit-pallet-id">
-                <div class="form-grid" style="grid-template-columns: 1fr;">
+                <div class="form-stack">
                     <div class="form-group">
-                        <label>Mã pallet</label>
-                        <input type="text" id="edit-pallet-code" readonly class="input-readonly">
+                        <label>Mã vật chứa <span class="required">*</span></label>
+                        <input type="text" id="edit-pallet-code" placeholder="Nhập mã vật chứa">
                     </div>
                     <div class="form-group">
-                        <label>Đơn hàng <span class="optional">(Tùy chọn)</span></label>
-                        <div class="searchable-select" id="order-select-edit">
+                        <label>Loại vật chứa <span class="required">*</span></label>
+                        <div class="searchable-select" id="type-select-edit">
                             <div class="select-input-wrapper">
-                                <input type="text" placeholder="Tìm theo mã/tên đơn hàng..." oninput="filterOrdersEdit(this)" onfocus="showOrderDropdownEdit()">
-                                <button class="select-clear-btn" onclick="clearOrderEdit()" title="Xóa lựa chọn" style="display:none;" id="clear-order-edit"><i class="fa-solid fa-xmark"></i></button>
+                                <input type="text" placeholder="Tìm loại vật chứa..." oninput="filterTypesEdit(this)" onfocus="showTypeDropdownEdit()">
                             </div>
-                            <div class="select-dropdown" id="order-dropdown-edit"></div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Lô hàng <span class="required">*</span></label>
-                        <div class="searchable-select" id="batch-select-edit">
-                            <div class="select-input-wrapper">
-                                <input type="text" placeholder="Tìm theo mã/tên lô..." oninput="filterBatchesEdit(this)" onfocus="showBatchDropdownEdit()">
-                                <button class="select-clear-btn" onclick="clearBatchEdit()" title="Xóa lựa chọn" style="display:none;" id="clear-batch-edit"><i class="fa-solid fa-xmark"></i></button>
-                            </div>
-                            <div class="select-dropdown" id="batch-dropdown-edit"></div>
-                        </div>
-                    </div>
-                    <div class="form-group-row" style="display: flex; gap: 16px;">
-                        <div class="form-group" style="flex:1;">
-                            <label>Dài (mm)</label>
-                            <input type="number" id="edit-length" placeholder="Dài" min="0">
-                        </div>
-                        <div class="form-group" style="flex:1;">
-                            <label>Rộng (mm)</label>
-                            <input type="number" id="edit-width" placeholder="Rộng" min="0">
-                        </div>
-                        <div class="form-group" style="flex:1;">
-                            <label>Cao (mm)</label>
-                            <input type="number" id="edit-height" placeholder="Cao" min="0">
+                            <div class="select-dropdown" id="type-dropdown-edit"></div>
                         </div>
                     </div>
                 </div>
@@ -307,34 +221,39 @@
         </div>
     </div>
 
-    <!-- Delete Single Popover -->
-    <div id="delete-single-popover" class="popover-confirm">
-        <div class="popover-content">
-            <div class="popover-icon danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
-            <h4>Xác nhận xóa</h4>
-            <p id="delete-single-message">Bạn có chắc chắn muốn xóa pallet này?</p>
-            <div class="popover-actions">
-                <button class="btn-popover-cancel" onclick="hideDeleteSinglePopover()">Hủy</button>
-                <button class="btn-popover-delete" onclick="confirmDeleteSingle()">Xóa</button>
+    <!-- Single Delete Confirmation -->
+    <div id="delete-confirm-modal" class="modal-confirm">
+        <div class="confirm-content">
+            <div class="confirm-icon-box">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="confirm-title">Xác nhận xóa</h3>
+            <p class="confirm-message" id="delete-single-message">
+                Bạn có chắc chắn muốn xóa vật chứa này không?<br />Hành động này không thể hoàn tác.
+            </p>
+            <div class="confirm-actions">
+                <button onclick="hideDeleteSinglePopover()" class="btn btn-secondary">Hủy</button>
+                <button onclick="confirmDeleteSingle()" class="btn btn-danger">Xóa</button>
             </div>
         </div>
     </div>
 
-    <!-- Bulk Delete Popover -->
-    <div id="bulk-delete-popover" class="popover-confirm">
-        <div class="popover-content">
-            <div class="popover-icon danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
-            <h4>Xác nhận xóa hàng loạt</h4>
-            <p id="bulk-delete-message">Bạn có chắc chắn muốn xóa những pallet đã chọn?</p>
-            <div class="popover-actions">
-                <button class="btn-popover-cancel" onclick="hideBulkDeletePopover()">Hủy</button>
-                <button class="btn-popover-delete" onclick="confirmBulkDelete()">Xóa</button>
+    <!-- Bulk Delete Confirmation -->
+    <div id="bulk-delete-confirm-modal" class="modal-confirm">
+        <div class="confirm-content">
+            <div class="confirm-icon-box">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="confirm-title">Xác nhận xóa hàng loạt</h3>
+            <p class="confirm-message" id="bulk-delete-message">
+                Bạn có chắc chắn muốn xóa các vật chứa đã chọn không?<br />Hành động này không thể hoàn tác.
+            </p>
+            <div class="confirm-actions">
+                <button onclick="hideBulkDeletePopover()" class="btn btn-secondary">Hủy</button>
+                <button onclick="confirmBulkDelete()" class="btn btn-danger">Xóa</button>
             </div>
         </div>
     </div>
-
-    <!-- Overlay for popovers -->
-    <div id="popover-backdrop" class="popover-backdrop" onclick="closeAllPopovers()"></div>
 
     <script src="new-cont.js"></script>
 </body>

@@ -284,7 +284,7 @@ function loadPage(title) {
         'Chức năng': 'modules/rbac/menu/menu.html',
         'Quản lý bảo trì': 'modules/maintenance/maintenance.html',
         'Quản lý Lệnh': 'modules/wcs/job/job.html',
-        'Vật chứa': 'modules/master-data/pallet-list/container.html',
+        'Vật chứa': 'modules/new-container/new-cont.html',
         'Tài nguyên': 'modules/rbac/resource/resource.html',
         'Loại khu vực': 'modules/master-data/node-type/node-type.html',
         'Thiết bị': 'modules/master-data/device-list/device-list.html',
@@ -305,7 +305,7 @@ function loadPage(title) {
         'Thị trường': 'modules/market/market.html',
         'Đơn hàng nhập': 'modules/order/receive/receive.html',
         'Đơn hàng xuất': 'modules/order/send/send.html',
-        'Vật chứa mới': 'modules/new-container/new-cont.html',
+        // 'Vật chứa mới': 'modules/new-container/new-cont.html',
         // add more mappings here as modules are created
     };
 
@@ -523,8 +523,15 @@ async function loadModule(path) {
             return base + assetPath; // Relative to module file
         };
 
-        // Load stylesheets
+        // Load stylesheets and scripts
         const linkNodes = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
+        const scriptNodes = Array.from(doc.querySelectorAll('script'));
+
+        // Strip link and script tags from the document to prevent the browser from 
+        // attempting to load them with incorrect relative paths when setting innerHTML.
+        // These assets are handled explicitly with resolved paths.
+        doc.querySelectorAll('link[rel="stylesheet"], script').forEach(el => el.remove());
+
         await Promise.all(linkNodes.map(link => {
             return new Promise(resolve => {
                 const href = link.getAttribute('href');
@@ -566,7 +573,6 @@ async function loadModule(path) {
         }
 
         // Execute Scripts
-        const scriptNodes = Array.from(doc.querySelectorAll('script'));
         for (const script of scriptNodes) {
             const s = document.createElement('script');
             if (script.src) {

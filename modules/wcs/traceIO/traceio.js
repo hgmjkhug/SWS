@@ -3,6 +3,7 @@
     if (!gridContainer) return;
     
     // 0 = Empty/Path, 1 = Wall, 2 = Shelf, 3 = Charging Shelf
+    const CELL_SIZE = 30;
     let currentFloor = 1;
     const mapMatrix = [
         [5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -42,7 +43,7 @@
         const isSpecialColumnT_Top = (c === 14 && r === 1);
 
         if (isSpecialColumnA) {
-            decor.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            decor.innerHTML = `<svg width="${CELL_SIZE}" height="${CELL_SIZE}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4025_17050)">
 <rect width="40" height="40" fill="#DFF0FF" fill-opacity="0.5"/>
 <path d="M20 20H40" stroke="#7C8DB5" stroke-opacity="0.7"/>
@@ -57,7 +58,7 @@
 </defs>
 </svg>`;
         } else if (isSpecialColumnT) {
-            decor.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            decor.innerHTML = `<svg width="${CELL_SIZE}" height="${CELL_SIZE}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4025_17051)">
 <rect width="40" height="40" fill="#DFF0FF" fill-opacity="0.5"/>
 <path d="M20 20H0" stroke="#7C8DB5" stroke-opacity="0.7"/>
@@ -72,7 +73,7 @@
 </defs>
 </svg>`;
         } else if (isSpecialColumnT_Top) {
-            decor.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            decor.innerHTML = `<svg width="${CELL_SIZE}" height="${CELL_SIZE}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_T_top)">
 <rect width="40" height="40" fill="#DFF0FF" fill-opacity="0.5"/>
 <path d="M20 20H0" stroke="#7C8DB5" stroke-opacity="0.7"/>
@@ -86,7 +87,7 @@
 </defs>
 </svg>`;
         } else {
-            decor.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            decor.innerHTML = `<svg width="${CELL_SIZE}" height="${CELL_SIZE}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4025_16985)">
 <rect width="40" height="40" fill="#DFF0FF80"/>
 <path d="M0 20H12" stroke="#7C8DB5" stroke-opacity="0.7"/>
@@ -129,7 +130,7 @@
                 cell.classList.add('charging');
                 const icon = document.createElement('div');
                 icon.className = 'charging-icon';
-                icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                icon.innerHTML = `<svg width="${CELL_SIZE}" height="${CELL_SIZE}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g clip-path="url(#clip0_4025_17542)">
 <rect width="40" height="40" fill="#DFF0FF80" fill-opacity="0.4"/>
 <path d="M0 20H12" stroke="#7C8DB5" stroke-opacity="0.7"/>
@@ -156,7 +157,7 @@
                 cell.classList.add('inbound');
                 const icon = document.createElement('div');
                 icon.className = 'inbound-icon';
-                icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                icon.innerHTML = `<svg width="${CELL_SIZE}" height="${CELL_SIZE}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4305_21571)">
 <rect width="40" height="40" fill="#A4D3FE" fill-opacity="0.4"/>
 <path d="M20 0V12" stroke="#7C8DB5" stroke-opacity="0.7"/>
@@ -178,7 +179,7 @@
                 cell.classList.add('outbound');
                 const icon = document.createElement('div');
                 icon.className = 'outbound-icon';
-                icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                icon.innerHTML = `<svg width="${CELL_SIZE}" height="${CELL_SIZE}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4305_21146)">
 <rect width="40" height="40" fill="#A4D3FE" fill-opacity="0.4"/>
 <path d="M20 40V28" stroke="#7C8DB5" stroke-opacity="0.7"/>
@@ -200,7 +201,7 @@
                 cell.classList.add('pallet-pos');
                 const icon = document.createElement('div');
                 icon.className = 'pallet-icon';
-                icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                icon.innerHTML = `<svg width="${CELL_SIZE}" height="${CELL_SIZE}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4025_17414)">
 <path d="M0 20H8.1" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M40 20L31 20" stroke="#7C8DB5" stroke-opacity="0.7"/>
@@ -234,7 +235,7 @@
                 cell.classList.add('parking-pos');
                 const icon = document.createElement('div');
                 icon.className = 'parking-icon';
-                icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                icon.innerHTML = `<svg width="${CELL_SIZE}" height="${CELL_SIZE}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4305_21463)">
 <path d="M20 0V11" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M20 40V29" stroke="#7C8DB5" stroke-opacity="0.7"/>
@@ -254,7 +255,7 @@
                 cell.classList.add('parking-pos');
                 const icon = document.createElement('div');
                 icon.className = 'parking-icon';
-                icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                icon.innerHTML = `<svg width="${CELL_SIZE}" height="${CELL_SIZE}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4305_21445)">
 <path d="M20 0V11" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M20 40V29" stroke="#7C8DB5" stroke-opacity="0.7"/>
@@ -275,7 +276,7 @@
                 cell.classList.add('empty');
                 const icon = document.createElement('div');
                 icon.className = 'empty-icon';
-                icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                icon.innerHTML = `<svg width="${CELL_SIZE}" height="${CELL_SIZE}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M20 20H40" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M20 0V19.7531" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <ellipse cx="20" cy="19.7531" rx="2" ry="1.97531" fill="#677594"/>
@@ -285,7 +286,7 @@
                 cell.classList.add('empty');
                 const icon = document.createElement('div');
                 icon.className = 'empty-icon';
-                icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                icon.innerHTML = `<svg width="${CELL_SIZE}" height="${CELL_SIZE}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M0 20H20" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <path d="M20 20H40" stroke="#7C8DB5" stroke-opacity="0.7"/>
 <ellipse cx="20" cy="19.7531" rx="2" ry="1.97531" fill="#677594"/>
@@ -295,7 +296,7 @@
                 cell.classList.add('empty');
                 const icon = document.createElement('div');
                 icon.className = 'empty-icon';
-                icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                icon.innerHTML = `<svg width="${CELL_SIZE}" height="${CELL_SIZE}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_4025_17043)">
 <rect width="40" height="40" fill="#DFF0FF" fill-opacity="0.5"/>
 <path d="M0 20H20" stroke="#7C8DB5" stroke-opacity="0.7"/>
@@ -327,18 +328,19 @@
 
     const cols = 15;
     const rows = 11;
+
     for (let c = 0; c < cols; c++) {
         const label = document.createElement('div');
         label.className = 'label-col';
         label.innerText = getColName(c);
-        label.style.left = (c * 40 + 20) + 'px';
+        label.style.left = (c * CELL_SIZE + CELL_SIZE / 2) + 'px';
         wrapper.appendChild(label);
     }
     for (let r = 0; r < rows; r++) {
         const label = document.createElement('div');
         label.className = `label-row row-label-${r + 1}`;
         label.innerText = r + 1;
-        label.style.top = (r * 40 + 20) + 'px';
+        label.style.top = (r * CELL_SIZE + CELL_SIZE / 2) + 'px';
         wrapper.appendChild(label);
     }
 
@@ -404,16 +406,16 @@
     // --- Shuttle implementation ---
     const getShuttleSVG = (loaded, isCharging, color = '#076EB8') => {
         const cargoSVG = loaded ? `
-<g transform="translate(0, 0)">
+<g transform="translate(-2, -3) scale(0.85)">
     <path d="M14 12 L20 9 L26 12 L20 15 L14 12Z" fill="#0367CC"/>
     <path d="M14 12 V18 L20 21 V15 L14 12Z" fill="#0367CC"/>
     <path d="M20 15 V21 L26 18 V12 L20 15Z" fill="#0367CC"/>
 </g>` : '';
 
-        const chargingIcon = isCharging ? `<i class="fa-sharp fa-regular fa-bolt fa-beat charging-bolt"></i>` : '';
+        const chargingIcon = isCharging ? `<i class="fa-sharp fa-regular fa-bolt fa-beat charging-bolt" style="font-size: 11px;"></i>` : '';
 
         return `
-<svg width="40" height="30" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="30" height="22" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g filter="url(#filter0_i_4025_17341)">
 <path d="M0 10C0 4.47715 4.47715 0 10 0H32C36.4183 0 40 3.58172 40 8V22C40 26.4183 36.4183 30 32 30H10C4.47715 30 0 25.5228 0 20V10Z" fill="${color}"/>
 <circle cx="20" cy="15" r="9.75" fill="white" stroke="#076EB8" stroke-width="0.5"/>
@@ -526,7 +528,7 @@ ${cargoSVG}
         // Add pallet icon
         const icon = document.createElement('div');
         icon.className = 'pallet-icon';
-        icon.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        icon.innerHTML = `<svg width="${CELL_SIZE}" height="${CELL_SIZE}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect width="40" height="40" fill="#DFF0FF80" fill-opacity="0.2"/>
 <path d="M0 20H8.1" stroke="#7C8DB5" stroke-opacity="0.3"/>
 <path d="M40 20L31 20" stroke="#7C8DB5" stroke-opacity="0.3"/>
@@ -682,8 +684,8 @@ ${cargoSVG}
         // Sync visual position immediately
         shuttleStates[shuttleId] = { r: currR, c: currC };
         shuttleEl.style.transition = 'none';
-        shuttleEl.style.top = (currR * 40 + 5) + 'px';
-        shuttleEl.style.left = (currC * 40) + 'px';
+        shuttleEl.style.top = (currR * CELL_SIZE + 4) + 'px';
+        shuttleEl.style.left = (currC * CELL_SIZE) + 'px';
         shuttleEl.style.transform = `rotate(${currAngle}deg)`;
         shuttleEl.offsetHeight;
 
@@ -796,8 +798,8 @@ ${cargoSVG}
             shuttleStates[shuttleId] = { r: p.r, c: p.c };
             const duration = p.duration || STEP;
             shuttleEl.style.transition = `all ${duration}ms linear`;
-            shuttleEl.style.top = (p.r * 40 + 5) + 'px';
-            shuttleEl.style.left = (p.c * 40) + 'px';
+            shuttleEl.style.top = (p.r * CELL_SIZE + 4) + 'px';
+            shuttleEl.style.left = (p.c * CELL_SIZE) + 'px';
             shuttleEl.style.transform = `rotate(${p.angle}deg)`;
 
             if (p.lifterUp) setLifterPosition('up');
@@ -1034,33 +1036,31 @@ ${cargoSVG}
         if (logBadge) logBadge.textContent = `${logEntries.length} sự kiện`;
         setTimeout(() => { logList.scrollTop = logList.scrollHeight; }, 100);
     }
-
-    // --- Toast Notification Helper ---
-    function showToast(message, type = 'success') {
-        let container = document.querySelector('.toast-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.className = 'toast-container';
-            document.body.appendChild(container);
-        }
-
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        
-        const icon = type === 'success' ? 
-            `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>` : '';
-
-        toast.innerHTML = `
-            <div class="toast-icon">${icon}</div>
-            <div class="toast-message">${message}</div>
-        `;
-
-        container.appendChild(toast);
-
-        // Auto remove
-        setTimeout(() => {
-            toast.classList.add('removing');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }
 })();
+
+
+function showToast(message, type = 'success') {
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    // Add icon for success if needed, or keep it simple as in the existing global version
+    const icon = type === 'success' ? 
+        `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>` : '';
+
+    toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-message">${message}</div>
+    `;
+
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.add('removing');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}

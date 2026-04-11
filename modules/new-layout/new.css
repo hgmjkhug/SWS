@@ -167,6 +167,7 @@
 }
 
 #new-layout-grid-scaler {
+    position: relative;
     transform-origin: top left;
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     background: white;
@@ -189,9 +190,9 @@
     transition: all 0.4s ease;
 }
 
-.mod-A { grid-template-columns: repeat(20, 30px); }
+.mod-A { grid-template-columns: repeat(19, 30px); }
 .mod-B { grid-template-columns: repeat(19, 30px); }
-.mod-C { grid-template-columns: repeat(19, 30px); }
+.mod-C { grid-template-columns: repeat(20, 30px); }
 
 /* Module Visibility Filtering */
 .module-block.hidden-module {
