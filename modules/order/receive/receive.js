@@ -72,6 +72,7 @@ let filteredErpOrders = [];
 let currentSyncTab = 'not-synced';
 let currentMainTab = 'Chưa tiếp nhận';
 let confirmCallback = null;
+let rejectingCode = null;
 
 // --- LocalStorage Logic ---
 function loadSyncedStatus() {
@@ -82,6 +83,7 @@ function loadSyncedStatus() {
         if (saved) {
             order.synced = true;
             order.status = saved.status || 'Chưa tiếp nhận';
+            order.rejectReason = saved.rejectReason || '';
         }
     });
 }
@@ -89,7 +91,8 @@ function loadSyncedStatus() {
 function saveSyncedStatus() {
     const syncedData = erpOrders.filter(o => o.synced).map(o => ({
         code: o.code,
-        status: o.status
+        status: o.status,
+        rejectReason: o.rejectReason || ''
     }));
     localStorage.setItem(SYNC_STORAGE_KEY, JSON.stringify(syncedData));
 }
@@ -106,7 +109,7 @@ function filterOrders() {
     filteredMainOrders = erpOrders.filter(o => 
         o.synced && 
         (o.code.toLowerCase().includes(keyword) || o.name.toLowerCase().includes(keyword)) &&
-        o.status === currentMainTab
+        (currentMainTab === 'Chưa tiếp nhận' ? o.status === 'Chưa tiếp nhận' : (o.status === 'Đã tiếp nhận' || o.status === 'Đã từ chối'))
     );
 
     currentPage = 1;
@@ -122,10 +125,14 @@ function renderMainTable() {
     tableBody.innerHTML = '';
 
     if (pageItems.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #94a3b8;">Không tìm thấy đơn hàng nào đã đồng bộ.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 40px; color: #94a3b8;">Không tìm thấy đơn hàng nào đã đồng bộ.</td></tr>';
     } else {
         pageItems.forEach((order, index) => {
             const row = document.createElement('tr');
+            const statusBadge = order.status === 'Đã tiếp nhận' 
+                ? '<span class="badge badge-success">Đã tiếp nhận</span>'
+                : (order.status === 'Đã từ chối' ? '<span class="badge badge-danger">Đã từ chối</span>' : '-');
+
             row.innerHTML = `
                 <td>${currentMainTab === 'Chưa tiếp nhận' ? `<input type="checkbox" class="main-checkbox" value="${order.code}" onchange="updateMainBulkBtn()">` : ''}</td>
                 <td>${start + index + 1}</td>
@@ -134,6 +141,8 @@ function renderMainTable() {
                 <td>${order.customer}</td>
                 <td title="${order.note}">${order.note || '-'}</td>
                 <td>${order.createdAt || '-'}</td>
+                <td>${statusBadge}</td>
+                <td title="${order.rejectReason || ''}">${order.rejectReason || '-'}</td>
                 <td>
                     <div style="display: flex; gap: 8px; justify-content: center;">
                         <button class="btn-icon" onclick="openProductModal('${order.code}')" title="Xem chi tiết">
@@ -142,6 +151,9 @@ function renderMainTable() {
                         ${order.status === 'Chưa tiếp nhận' ? `
                             <button class="btn-icon text-success" onclick="receiveOrder('${order.code}')" title="Tiếp nhận đơn hàng">
                                 <i class="fas fa-check-circle"></i>
+                            </button>
+                            <button class="btn-icon text-danger" onclick="openRejectModal('${order.code}')" title="Từ chối đơn hàng">
+                                <i class="fas fa-times-circle"></i>
                             </button>
                         ` : ''}
                     </div>
@@ -298,6 +310,49 @@ function closeConfirmModal(result) {
         confirmCallback();
     }
     confirmCallback = null;
+}
+
+// --- Reject Modal Logic ---
+function openRejectModal(code) {
+    rejectingCode = code;
+    document.getElementById('reject-order-code').textContent = code;
+    document.getElementById('reject-reason').value = '';
+    document.getElementById('reject-modal').classList.add('show');
+}
+
+function closeRejectModal() {
+    document.getElementById('reject-modal').classList.remove('show');
+    rejectingCode = null;
+}
+
+function confirmReject() {
+    const reason = document.getElementById('reject-reason').value.trim();
+    if (!reason) {
+        if (typeof showToast === 'function') {
+            showToast('Vui lòng nhập lý do từ chối', 'error');
+        } else {
+            alert('Vui lòng nhập lý do từ chối');
+        }
+        return;
+    }
+
+    const order = erpOrders.find(o => o.code === rejectingCode);
+    if (order) {
+        // Here you would typically send to API
+        // For now, we update local status and store reason if needed
+        order.status = 'Đã từ chối';
+        order.rejectReason = reason;
+        
+        const code = rejectingCode;
+        // Remove from current view since it's no longer 'Chưa tiếp nhận'
+        saveSyncedStatus();
+        filterOrders();
+        closeRejectModal();
+
+        if (typeof showToast === 'function') {
+            showToast(`Đã từ chối đơn hàng ${code} - ${order.name}`, 'success');
+        }
+    }
 }
 
 // --- Sync Modal Logic ---

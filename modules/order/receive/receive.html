@@ -37,6 +37,8 @@
                                 <th>Khách hàng</th>
                                 <th>Chú thích</th>
                                 <th>Thời gian tạo</th>
+                                <th>Tình trạng</th>
+                                <th>Ghi chú</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
@@ -154,6 +156,26 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeProductModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Lý do từ chối -->
+    <div id="reject-modal" class="modal-overlay" style="z-index: 1200;">
+        <div class="modal-box confirm-modal-box scale-up" style="width: 500px !important;">
+            <div class="modal-header">
+                <h3 class="modal-title">Lý do từ chối</h3>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <div style="margin-bottom: 12px; font-size: 14px; color: #475569;">
+                    Vui lòng nhập lý do từ chối đơn hàng <strong id="reject-order-code"></strong>:
+                </div>
+                <textarea id="reject-reason" class="reject-reason-area" 
+                          placeholder="Nhập lý do tại đây..."></textarea>
+            </div>
+            <div class="modal-footer" style="padding: 16px 20px;">
+                <button class="btn btn-secondary" onclick="closeRejectModal()">Đóng</button>
+                <button class="btn btn-primary" style="background-color: #ef4444;" onclick="confirmReject()">Xác nhận từ chối</button>
             </div>
         </div>
     </div>

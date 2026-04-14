@@ -104,6 +104,26 @@
     border-color: #3b82f6;
 }
 
+.reject-reason-area {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s;
+    outline: none;
+    background-color: white;
+    height: 120px;
+    resize: none;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.reject-reason-area:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
 /* Custom Dropdown */
 .custom-dropdown {
     position: relative;
@@ -267,21 +287,25 @@
 
 /* Specific Column Widths for Main Table - Final Perfect 8-Column Layout */
 .receive-container .receive-table th:nth-child(1), 
-.receive-container .receive-table td:nth-child(1) { width: 50px; min-width: 50px; text-align: center; }
+.receive-container .receive-table td:nth-child(1) { width: 45px; min-width: 45px; text-align: center; }
 .receive-container .receive-table th:nth-child(2), 
-.receive-container .receive-table td:nth-child(2) { width: 100px; min-width: 100px; text-align: center; }
+.receive-container .receive-table td:nth-child(2) { width: 55px; min-width: 55px; text-align: center; }
 .receive-container .receive-table th:nth-child(3), 
-.receive-container .receive-table td:nth-child(3) { width: 150px; min-width: 150px; }
+.receive-container .receive-table td:nth-child(3) { width: 110px; min-width: 110px; }
 .receive-container .receive-table th:nth-child(4), 
-.receive-container .receive-table td:nth-child(4) { width: auto; } /* Flexible name takes any extra space */
+.receive-container .receive-table td:nth-child(4) { width: 220px; min-width: 220px; }
 .receive-container .receive-table th:nth-child(5), 
-.receive-container .receive-table td:nth-child(5) { width: 220px; min-width: 220px; }
+.receive-container .receive-table td:nth-child(5) { width: 180px; min-width: 180px; }
 .receive-container .receive-table th:nth-child(6), 
-.receive-container .receive-table td:nth-child(6) { width: 220px; min-width: 220px; }
+.receive-container .receive-table td:nth-child(6) { width: 180px; min-width: 180px; }
 .receive-container .receive-table th:nth-child(7), 
-.receive-container .receive-table td:nth-child(7) { width: 220px; min-width: 220px; text-align: center; }
+.receive-container .receive-table td:nth-child(7) { width: 140px; min-width: 140px; text-align: center; }
 .receive-container .receive-table th:nth-child(8), 
-.receive-container .receive-table td:nth-child(8) { width: 150px; min-width: 150px; text-align: center; }
+.receive-container .receive-table td:nth-child(8) { width: 130px; min-width: 130px; text-align: center; }
+.receive-container .receive-table th:nth-child(9), 
+.receive-container .receive-table td:nth-child(9) { width: 200px; min-width: 200px; }
+.receive-container .receive-table th:nth-child(10), 
+.receive-container .receive-table td:nth-child(10) { width: 110px; min-width: 110px; text-align: center; }
 
 /* Specific Column Widths for ERP Sync Table - Optimized for Modal LG */
 .erp-table-wrapper .receive-table th:nth-child(1),
@@ -326,6 +350,7 @@
 
 .badge-success { background: #dcfce7; color: #166534; }
 .badge-warning { background: #fef9c3; color: #854d0e; }
+.badge-danger { background: #fee2e2; color: #991b1b; }
 
 /* Pagination */
 .pagination-bar {
