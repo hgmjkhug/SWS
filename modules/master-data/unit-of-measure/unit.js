@@ -6,7 +6,7 @@ var units = [
     { id: 4, code: 'BOX', name: 'Hộp', note: 'Đóng gói theo hộp', status: true },
     { id: 5, code: 'SET', name: 'Bộ', note: 'Tập hợp nhiều chi tiết', status: true },
     { id: 6, code: 'L', name: 'Lít', note: 'Đơn vị đo thể tích', status: true },
-    { id: 7, code: 'ROLL', name: 'Cuộn', note: 'Dùng cho băng keo, dây điện', status: true },
+    { id: 7, code: 'ROLL', name: 'Cuộn', note: 'Dùng cho màng quấn, băng keo', status: true },
     { id: 8, code: 'BAG', name: 'Bao', note: 'Đóng gói bao tải', status: true },
     { id: 9, code: 'CAN', name: 'Thùng', note: 'Đóng gói thùng carton', status: true },
     { id: 10, code: 'SHEET', name: 'Tấm', note: 'Dùng cho kim loại tấm', status: true },

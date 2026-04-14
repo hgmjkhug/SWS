@@ -829,11 +829,11 @@ ${cargoSVG}
 
 (function initPanels() {
     const commands = [
-        { id: 'CMD-20240801', type: 'in',  product: 'Thép tấm SS400 3.2mm',  sku: 'MAT-SS400-32', pallet: 'PLT-00142', status: 'active' },
-        { id: 'CMD-20240802', type: 'out', product: 'Ống thép hàn phi 60',    sku: 'MAT-OT-060',   pallet: 'PLT-00098', status: 'active' },
-        { id: 'CMD-20240803', type: 'in',  product: 'Thép hình I200',          sku: 'MAT-HI-200',   pallet: 'PLT-00201', status: 'wait'   },
-        { id: 'CMD-20240804', type: 'out', product: 'Tôn mạ kẽm 0.5mm',       sku: 'MAT-TM-005',   pallet: 'PLT-00055', status: 'wait'   },
-        { id: 'CMD-20240805', type: 'in',  product: 'Thép cuộn cán nóng HRC',  sku: 'MAT-CR-HRC',   pallet: 'PLT-00310', status: 'wait'   },
+        { id: 'CMD-20240801', type: 'in',  product: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL',  sku: 'MAT-001', pallet: 'PLT-00142', status: 'active' },
+        { id: 'CMD-20240802', type: 'out', product: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA',    sku: 'MAT-002',   pallet: 'PLT-00098', status: 'active' },
+        { id: 'CMD-20240803', type: 'in',  product: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL',          sku: 'MAT-003',   pallet: 'PLT-00201', status: 'wait'   },
+        { id: 'CMD-20240804', type: 'out', product: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE',       sku: 'MAT-004',   pallet: 'PLT-00055', status: 'wait'   },
+        { id: 'CMD-20240805', type: 'in',  product: 'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA',  sku: 'MAT-005',   pallet: 'PLT-00310', status: 'wait'   },
     ];
 
     const logEntries = [

@@ -1,11 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giao Diện Kho Mới</title>
-    <link rel="stylesheet" href="new.css">
-</head>
 <body>
     <div class="grid-container">
         <div class="layout-controls">
@@ -25,6 +17,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="control-group">
                 <div class="custom-multiselect" id="module-multiselect">
                     <div class="multiselect-header">
@@ -51,6 +44,11 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Nút Fullscreen ở cuối thanh công cụ -->
+            <button id="btn-fullscreen" class="layout-action-btn" title="Toàn màn hình">
+                <i class="fa-solid fa-expand"></i>
+            </button>
         </div>
 
         <div class="map-wrapper">
@@ -58,13 +56,55 @@
                 <div id="new-layout-grid"></div>
             </div>
             <div class="bottom-rail"></div>
-            <div class="zoom-controls">
+
+            <!-- Zoom controls nằm dọc ở góc dưới phải map -->
+            <div class="zoom-controls-vertical">
                 <button id="zoom-in" title="Phóng to"><i class="fa-solid fa-plus"></i></button>
                 <button id="zoom-out" title="Thu nhỏ"><i class="fa-solid fa-minus"></i></button>
+                <div class="zoom-divider-horizontal"></div>
                 <button id="zoom-reset" title="Đặt lại"><i class="fa-solid fa-arrows-rotate"></i></button>
             </div>
         </div>
+
+        <!-- 4 Dashboard Cards (reused from traceIO) -->
+        <div class="dashboard-cards-row">
+            <!-- Card 1: Danh sách lệnh thực hiện -->
+            <div class="nl-panel-card">
+                <div class="nl-panel-header">
+                    <span class="nl-panel-title">Danh sách lệnh thực hiện</span>
+                    <span class="nl-panel-badge" id="nlCmdBadge">5 lệnh</span>
+                </div>
+                <div class="nl-cmd-list" id="nlCmdList"></div>
+            </div>
+
+            <!-- Card 2: Log hệ thống -->
+            <div class="nl-panel-card">
+                <div class="nl-panel-header">
+                    <span class="nl-panel-title">Log hệ thống</span>
+                    <span class="nl-panel-badge" id="nlLogBadge">14 sự kiện</span>
+                </div>
+                <div class="nl-log-list" id="nlLogList"></div>
+            </div>
+
+            <!-- Card 3: Danh sách hoạt động -->
+            <div class="nl-panel-card">
+                <div class="nl-panel-header">
+                    <span class="nl-panel-title">Danh sách hoạt động</span>
+                    <span class="nl-panel-badge" id="nlActivityBadge">7 thiết bị</span>
+                </div>
+                <div class="nl-device-list" id="nlActivityList"></div>
+            </div>
+
+            <!-- Card 4: Thống kê loại lệnh -->
+            <div class="nl-panel-card">
+                <div class="nl-panel-header">
+                    <span class="nl-panel-title">Thống kê loại lệnh</span>
+                </div>
+                <div class="nl-stats-card" id="nlStatsCard"></div>
+            </div>
+        </div>
     </div>
+    <link rel="stylesheet" href="new.css">
     <script src="new.js"></script>
 </body>
 </html>

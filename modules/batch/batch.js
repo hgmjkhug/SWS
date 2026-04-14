@@ -24,11 +24,8 @@
     };
 
     var PRODUCT_TYPES = [
-        { id: 'PT01', name: 'Thép ống tròn' },
-        { id: 'PT02', name: 'Thép tấm' },
-        { id: 'PT03', name: 'Thép hình H' },
-        { id: 'PT04', name: 'Thép hình I' },
-        { id: 'PT05', name: 'Thép hộp' }
+        { id: 'PT01', name: 'Chuối Trung Quốc/ Chinese bananas' },
+        { id: 'PT02', name: 'Chuối Nhật Bản/ Japanese bananas' }
     ];
 
     var GRADES = [
@@ -72,7 +69,7 @@
     // --- GENERATE DATA ---
     function generateMockData() {
         var statusList = ['NEW', 'IMPORTING', 'INSTOCK', 'EXPORTING', 'OUTSTOCK'];
-        var codes = ['TH-HP', 'TH-TR', 'TH-TA', 'TH-H', 'TH-I'];
+        var codes = ['CN-BN', 'JP-BN'];
         return Array.from({ length: 120 }, function(_, i) {
             var status = statusList[i % 5];
             var typeIndex = i % PRODUCT_TYPES.length;
@@ -94,7 +91,7 @@
             return {
                 id: Date.now() + i,
                 code: codes[typeIndex] + '-' + String(1060 - i).padStart(4, '0'),
-                name: 'Lô thép ' + productType.name + ' - Đợt ' + (Math.floor(i / 5) + 1),
+                name: 'Lô ' + productType.name + ' - Đợt ' + (Math.floor(i / 5) + 1),
                 productType: productType.name,
                 grades: ['A', 'B'],
                 status: status,
@@ -621,7 +618,7 @@
         var name = document.getElementById('batch-name').value;
         if (!code || !name) { alert('Vui lòng điền đủ thông tin'); return; }
         MOCK_BATCHES.unshift({
-            id: Date.now(), code: code, name: name, productType: 'Thép ống tròn', grades: ['A'], status: 'NEW', createdAt: new Date(),
+            id: Date.now(), code: code, name: name, productType: 'Chuối Trung Quốc/ Chinese bananas', grades: ['A'], status: 'NEW', createdAt: new Date(),
             creator: STAFF_LIST[0]
         });
         saveBatches(); window.renderTable(); window.closeCreateModal();

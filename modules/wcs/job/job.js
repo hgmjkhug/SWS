@@ -5,14 +5,14 @@
     // --- Mock Data Constants ---
     // Use const here is fine because it's inside the IIFE function scope
     const MATERIALS = [
-        { code: 'MAT-001', name: 'Thép ống D60' },
-        { code: 'MAT-002', name: 'Xi măng Hà Tiên' },
-        { code: 'MAT-003', name: 'Gạch men 60x60' },
-        { code: 'MAT-004', name: 'Sơn Dulux Trong Nhà' },
-        { code: 'MAT-005', name: 'Bóng đèn LED Rạng Đông' },
-        { code: 'MAT-006', name: 'Dây điện Cadivi' },
-        { code: 'MAT-007', name: 'Ống nhựa Bình Minh' },
-        { code: 'MAT-008', name: 'Kính cường lực 10mm' }
+        { code: 'MAT-001', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL' },
+        { code: 'MAT-002', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA' },
+        { code: 'MAT-003', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL' },
+        { code: 'MAT-004', name: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE' },
+        { code: 'MAT-005', name: 'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA' },
+        { code: 'MAT-006', name: 'Chuối Trung Quốc/ Chinese bananas - CL - DASANG' },
+        { code: 'MAT-007', name: 'Chuối Nhật Bản/ Japanese bananas - 14CP - XINFADIN' },
+        { code: 'MAT-008', name: 'Chuối Nhật Bản/ Japanese bananas - 28LY - DEL MONTE' }
     ];
 
     const JOB_TYPES_MAP = {

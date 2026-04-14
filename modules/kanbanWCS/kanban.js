@@ -30,7 +30,7 @@
 
         // --- COMPLETE ---
         { id: 'NK-20231024-003', type: 'Nhập kho', status: 'complete', warehouse: 'Kho A', device: 'Shuttle 003', step: 'Hoàn thành', batchCode: 'BATCH-002', logs: [{ time: '10:00', msg: 'Tạo lệnh' }, { time: '10:30', msg: 'Hoàn thành nhập kho' }] },
-        { id: 'XK-20231024-010', type: 'Xuất kho', status: 'complete', warehouse: 'Kho C', device: 'Shuttle 001', step: 'Đã xuất kho', batchCode: 'BATCH-005', logs: [{ time: '08:30', msg: 'Xe tải đã nhận hàng' }] },
+        { id: 'XK-20231024-010', type: 'Xuất kho', status: 'complete', warehouse: 'Kho C', device: 'Shuttle 001', step: 'Đã xuất kho', batchCode: 'BATCH-005', logs: [{ time: '08:30', msg: 'Container đã nhận hàng' }] },
         { id: 'NK-20231024-014', type: 'Nhập kho', status: 'complete', warehouse: 'Kho B', device: 'Shuttle 002', step: 'Về vị trí đỗ', batchCode: 'BATCH-001', logs: [{ time: '17:00', msg: 'Nhiệm vụ hoàn tất' }] },
         { id: 'NK-20231024-022', type: 'Nhập kho', status: 'complete', warehouse: 'Kho A', device: 'Lifter 003', step: 'Kiểm kê xong', batchCode: 'BATCH-003', logs: [{ time: '18:15', msg: 'Dữ liệu đã đồng bộ' }] },
         { id: 'XK-20231024-030', type: 'Xuất kho', status: 'complete', warehouse: 'Kho B', device: 'Shuttle 004', step: 'Dừng băng tải', batchCode: 'BATCH-004', logs: [{ time: '19:00', msg: 'Hết ca làm việc' }] },

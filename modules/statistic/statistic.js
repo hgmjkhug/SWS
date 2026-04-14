@@ -12,21 +12,21 @@ const STAT_DATA = {
         out: [80, 150, 220, 300, 280, 410, 320]
     },
     categories: [
-        { name: 'Linh kiện xe du lịch', value: 5400, color: '#3b82f6' },
-        { name: 'Linh kiện xe tải', value: 3200, color: '#10b981' },
-        { name: 'Linh kiện xe bus', value: 2100, color: '#f59e0b' },
-        { name: 'Vật tư tiêu hao', value: 1750, color: '#ef4444' }
+        { name: 'Chuối Trung Quốc - A456', value: 5400, color: '#3b82f6' },
+        { name: 'Chuối Nhật Bản - 26CP', value: 3200, color: '#10b981' },
+        { name: 'Chuối Nhật Bản - 16CP', value: 2100, color: '#f59e0b' },
+        { name: 'Vật tư đóng gói (Roll)', value: 1750, color: '#ef4444' }
     ],
     details: [
-        { time: '2026-03-07 14:30', code: 'VT001', name: 'Trục khuỷu THACO', type: 'in', qty: 50, unit: 'Bộ', wh: 'TOMC', status: 'Duyệt' },
-        { time: '2026-03-07 13:15', code: 'VT009', name: 'Lốp xe du lịch K13', type: 'out', qty: 120, unit: 'Cái', wh: 'TOMC', status: 'Duyệt' },
-        { time: '2026-03-07 11:45', code: 'VT024', name: 'Thanh giằng ngang', type: 'in', qty: 30, unit: 'Thanh', wh: 'CSC', status: 'Duyệt' },
-        { time: '2026-03-07 09:20', code: 'VT102', name: 'Ốc vít M8x20', type: 'out', qty: 1000, unit: 'Con', wh: 'CSC', status: 'Duyệt' },
-        { time: '2026-03-06 16:10', code: 'VT056', name: 'Kính chắn gió front', type: 'in', qty: 45, unit: 'Tấm', wh: 'TOMC', status: 'Duyệt' },
-        { time: '2026-03-06 15:00', code: 'VT001', name: 'Trục khuỷu THACO', type: 'out', qty: 20, unit: 'Bộ', wh: 'TOMC', status: 'Duyệt' },
-        { time: '2026-03-06 10:30', code: 'VT012', name: 'Má phanh trước', type: 'in', qty: 100, unit: 'Cái', wh: 'TACB', status: 'Duyệt' },
-        { time: '2026-03-05 14:20', code: 'VT088', name: 'Dây đai cam', type: 'out', qty: 15, unit: 'Bộ', wh: 'TOMC', status: 'Duyệt' },
-        { time: '2026-03-05 09:10', code: 'VT201', name: 'Lọc dầu nhớt', type: 'in', qty: 200, unit: 'Cái', wh: 'TOMC', status: 'Duyệt' },
+        { time: '2026-03-07 14:30', code: 'MAT-001', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', type: 'in', qty: 50, unit: 'thùng', wh: 'KHO-BANANA', status: 'Duyệt' },
+        { time: '2026-03-07 13:15', code: 'MAT-002', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', type: 'out', qty: 120, unit: 'thùng', wh: 'KHO-BANANA', status: 'Duyệt' },
+        { time: '2026-03-07 11:45', code: 'MAT-010', name: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', type: 'in', qty: 30, unit: 'thùng', wh: 'KHO-BANANA', status: 'Duyệt' },
+        { time: '2026-03-07 09:20', code: 'MAT-015', name: 'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA', type: 'out', qty: 1000, unit: 'thùng', wh: 'KHO-BANANA', status: 'Duyệt' },
+        { time: '2026-03-06 16:10', code: 'MAT-003', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', type: 'in', qty: 45, unit: 'thùng', wh: 'KHO-BANANA', status: 'Duyệt' },
+        { time: '2026-03-06 15:00', code: 'MAT-001', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', type: 'out', qty: 20, unit: 'thùng', wh: 'KHO-BANANA', status: 'Duyệt' },
+        { time: '2026-03-06 10:30', code: 'MAT-012', name: 'Chuối Nhật Bản/ Japanese bananas - 38CP - SHIMIZU', type: 'in', qty: 100, unit: 'thùng', wh: 'KHO-BANANA', status: 'Duyệt' },
+        { time: '2026-03-05 14:20', code: 'MAT-011', name: 'Chuối Nhật Bản/ Japanese bananas - 28CP - DEL MONTE', type: 'out', qty: 15, unit: 'thùng', wh: 'KHO-BANANA', status: 'Duyệt' },
+        { time: '2026-03-05 09:10', code: 'MAT-020', name: 'Màng quấn Pallet (ROLL)', type: 'in', qty: 200, unit: 'Cuộn', wh: 'KHO-BANANA', status: 'Duyệt' },
     ]
 };
 

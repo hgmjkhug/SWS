@@ -69,14 +69,14 @@
             pallets.forEach(p => { if (!p.typeCode) p.typeCode = 'PL-STANDARD'; });
         } else {
             pallets = [];
-            const mockTimestamp = "080000";
-            for (let i = 1; i <= 50; i++) {
+            for (let i = 1; i <= 80; i++) {
                 const typeEntry = containerTypes[i % containerTypes.length];
+                const typeSeq = pallets.filter(p => p.typeCode === typeEntry.code).length + 1;
                 pallets.push({
                     id: i,
-                    code: `${typeEntry.code}-${mockTimestamp}-${i}`,
+                    code: `${typeEntry.code}_${typeSeq}`,
                     typeCode: typeEntry.code,
-                    status: i % 7 === 0 ? 'đã sử dụng' : 'mới tạo',
+                    status: i % 3 === 0 ? 'đã sử dụng' : 'mới tạo',
                     createdAt: new Date().toISOString()
                 });
             }
@@ -460,31 +460,49 @@
         if (qty <= 0) { showToast('Số lượng phải lớn hơn 0!', 'error'); return; }
 
         const now = new Date();
-        const timestamp = now.getHours().toString().padStart(2, '0') + 
-                          now.getMinutes().toString().padStart(2, '0') + 
-                          now.getSeconds().toString().padStart(2, '0');
+        const currentMaxId = pallets.length > 0 ? Math.max(...pallets.map(p => p.id)) : 0;
 
         if (!isAuto) {
             const manualInput = document.getElementById('manual-code').value.trim();
-            // If user provided a code, we can use it as prefix or just override. 
-            // User said: [typeCode]-[timestamp]-[seq]
-            const pCode = `${type.code}-${timestamp}-1`;
+            const pCode = manualInput || `${type.code}_${getNextSequenceForType(type.code)}`;
             
             if (pallets.some(x => x.code === pCode)) { 
-                showToast(`Mã ${pCode} đã tồn tại (trùng giây)! Đợi 1 giây rồi thử lại.`, 'error'); 
+                showToast(`Mã ${pCode} đã tồn tại!`, 'error'); 
                 return; 
             }
-            const nextId = pallets.length > 0 ? Math.max(...pallets.map(p => p.id)) + 1 : 1;
-            pallets.unshift({ id: nextId, code: pCode, typeCode: type.code, status: 'mới tạo', createdAt: now.toISOString() });
+            pallets.unshift({ id: currentMaxId + 1, code: pCode, typeCode: type.code, status: 'mới tạo', createdAt: now.toISOString() });
         } else {
+            let startSeq = getNextSequenceForType(type.code);
             for (let i = 0; i < qty; i++) {
-                const pCode = `${type.code}-${timestamp}-${i+1}`;
-                const nextId = pallets.length > 0 ? Math.max(...pallets.map(p => p.id)) + 1 : 1;
+                const pCode = `${type.code}_${startSeq + i}`;
+                const nextId = currentMaxId + i + 1;
                 pallets.unshift({ id: nextId, code: pCode, typeCode: type.code, status: 'mới tạo', createdAt: now.toISOString() });
             }
         }
         showToast(`Đã tạo ${qty} vật chứa thành công!`, 'success');
         savePallets(); closeAddModal(); filterPallets();
+    }
+
+    function getNextSequenceForType(typeCode) {
+        let max = 0;
+        pallets.forEach(p => {
+            if (p.typeCode === typeCode) {
+                // Try format TypeCode_Number
+                const parts = p.code.split('_');
+                if (parts.length === 2 && parts[0] === typeCode) {
+                    const seq = parseInt(parts[1]);
+                    if (!isNaN(seq) && seq > max) max = seq;
+                } else {
+                    // Try old format TypeCode-Timestamp-Number
+                    const oldParts = p.code.split('-');
+                    if (oldParts.length === 3 && oldParts[0] === typeCode) {
+                        const seq = parseInt(oldParts[2]);
+                        if (!isNaN(seq) && seq > max) max = seq;
+                    }
+                }
+            }
+        });
+        return max + 1;
     }
 
     function openEditModal(id) {

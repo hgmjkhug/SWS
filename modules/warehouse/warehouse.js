@@ -10,11 +10,8 @@
         const areas = [];
         const specs = ['FIFO', 'FEFO', 'LIFO'];
         const products = [
-            { code: 'SP001', name: 'Thép tấm' },
-            { code: 'SP002', name: 'Linh kiện nhựa' },
-            { code: 'SP003', name: 'Keo dán kính' },
-            { code: 'SP004', name: 'Khung gầm' },
-            { code: 'SP005', name: 'Động cơ' }
+            { code: 'BN-001', name: 'Chuối Trung Quốc/ Chinese bananas' },
+            { code: 'BN-002', name: 'Chuối Nhật Bản/ Japanese bananas' }
         ];
 
         let areaCounter = 1;
@@ -40,7 +37,7 @@
 
     // Mock Data
     let warehouses = [
-        { id: 1, code: 'CSC', type: 'Kho Tower', name: 'CÔNG TY THÉP', floors: 2, status: 'Đang sử dụng' },
+        { id: 1, code: 'KL-01', type: 'Kho Tower', name: 'KHO LẠNH CHUỐI 01', floors: 2, status: 'Đang sử dụng' },
         { id: 2, code: 'INDUSTRIES', type: 'Kho stacker crane', name: 'CÔNG TY TNHH TẬP ĐOÀN CÔNG NGHIỆP TRƯỜNG HẢI', floors: 3, status: 'Đang sử dụng' },
         { id: 3, code: 'VAM', type: 'Kho Flat', name: 'CÔNG TY TNHH SẢN XUẤT MÁY LẠNH Ô TÔ VINA', floors: 1, status: 'Đang bảo trì' },
         { id: 4, code: 'TACB', type: 'Kho Tower', name: 'CÔNG TY LINH KIỆN KHUNG THÂN VỎ Ô TÔ', floors: 2, status: 'Đang sử dụng' },

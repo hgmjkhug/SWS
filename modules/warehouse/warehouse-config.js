@@ -847,7 +847,7 @@
 
         // If no product found, use a demo one
         if (!product) {
-            product = { code: 'VT001', name: 'Thép tấm ống hộp', quyTac: 'FIFO' };
+            product = { code: 'VT001', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', quyTac: 'FIFO' };
         }
 
         var html = '';

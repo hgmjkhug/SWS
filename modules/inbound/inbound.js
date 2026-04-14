@@ -31,7 +31,7 @@ const mainPageSize = 20;
 let selectedPage = 1;
 
 // ── Persistence ─────────────────────────────────────────────
-const STORAGE_KEY = 'SWS_INBOUND_ORDERS';
+const STORAGE_KEY = 'SWS_INBOUND_ORDERS_V4';
 
 function saveInboundOrders() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_INBOUND_ORDERS)); }
@@ -56,19 +56,31 @@ function loadInboundOrders() {
 const MASTER_MATERIALS = Array.from({ length: 35 }, (_, i) => ({
     code: `MAT-${String(i + 1).padStart(3, '0')}`,
     name: [
-        'Thép ống D60', 'Thép tấm 5mm', 'Bulong M16', 'Ecu M16', 'Long đen',
-        'Sơn chống rỉ', 'Que hàn', 'Vòng bi SKF', 'Dây curoa', 'Băng tải PVC',
-        'Cảm biến quang', 'PLC Mitsubishi', 'Động cơ servo', 'Hộp giảm tốc', 'Nhông xích'
-    ][i % 15] + ` (Loại ${Math.floor(i / 15) + 1})`,
-    specs: `Quy cách tiêu chuẩn nhóm ${Math.floor(i / 5) + 1}`,
-    unit: i % 3 === 0 ? 'kg' : (i % 3 === 1 ? 'cái' : 'thùng'),
-    weight: [15, 8, 0.3, 0.2, 0.1, 12, 0.5, 2.5, 1.2, 8, 0.4, 6, 45, 30, 2.8][i % 15],
-    weightPerUnit: [15, 8, 0.3, 0.2, 0.1, 12, 0.5, 2.5, 1.2, 8, 0.4, 6, 45, 30, 2.8][i % 15],
+        'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', 
+        'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA',
+        'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL',
+        'Chuối Trung Quốc/ Chinese bananas - B456 - SOFIA',
+        'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE',
+        'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA',
+        'Chuối Nhật Bản/ Japanese bananas - 38CP - SHIMIZU',
+        'Chuối Nhật Bản/ Japanese bananas - B6 - SEIKA 13KG',
+        'Chuối Nhật Bản/ Japanese bananas - 40CP - TAITO',
+        'Chuối Nhật Bản/ Japanese bananas - 43CP - MAINICHI',
+        'Chuối Trung Quốc/ Chinese bananas - CL - DASANG',
+        'Chuối Nhật Bản/ Japanese bananas - 28CP - DEL MONTE',
+        'Chuối Nhật Bản/ Japanese bananas - 33CP - SEIKA 13KG',
+        'Chuối Nhật Bản/ Japanese bananas - 6 NẢI - DELMONTE 13KG',
+        'Chuối Nhật Bản/ Japanese bananas - 14CP - XINFADIN'
+    ][i % 15],
+    specs: `Tiêu chuẩn banana Group ${Math.floor(i / 5) + 1}`,
+    unit: 'thùng',
+    weight: 13,
+    weightPerUnit: 13,
     expiryDate: i % 4 === 0 ? null : `2026-${String((i % 12) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
     dimensions: {
-        length: [600, 250, 30, 25, 20, 300, 450, 80, 150, 400, 90, 200, 380, 320, 100][i % 15],
-        width: [60, 250, 16, 16, 20, 100, 450, 80, 25, 600, 60, 150, 280, 220, 60][i % 15],
-        height: [3, 5, 10, 10, 5, 100, 5, 40, 10, 5, 60, 80, 25, 30, 20][i % 15]
+        length: 400,
+        width: 300,
+        height: 200
     }
 }));
 
@@ -80,37 +92,30 @@ const STAFF_LIST = [
 
 const MOCK_PALLET_DATA = {
     'P-001': {
-        material: { code: 'MAT-001', name: 'Thep ong D60', totalQty: 1000 },
+        material: { code: 'MAT-001', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', totalQty: 1000 },
         maxCapacity: 2000,
         history: [{ code: 'P-011_MAT-001_200_251120', exported: 200, total: 1000, time: '2025-11-20 08:30' }]
     },
     'P-002': {
-        material: { code: 'MAT-005', name: 'Bong den LED Rang Dong', totalQty: 500 },
-        maxCapacity: 500,
-        history: [{ code: 'P-002_MAT-005_50_240115', exported: 50, total: 500, time: '2024-01-15 10:00' }]
-    },
-    'PL-1001': { maxCapacity: 1500, history: [] },
-    'PL-1002': { maxCapacity: 1000, history: [] },
-    'PL-1003': { maxCapacity: 800, history: [] },
-    'PL-2001': { maxCapacity: 2500, history: [] },
-    'PL-2002': { maxCapacity: 2000, history: [] },
+        material: { code: 'MAT-005', name: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', totalQty: 500 }
+    }
 };
 
 const MOCK_DESTINATIONS = [
-    { id: 'DEST-001', code: 'N01', name: 'Kho Thành Phẩm' },
-    { id: 'DEST-002', code: 'N02', name: 'Kho Bán Thành Phẩm' },
-    { id: 'DEST-003', code: 'N03', name: 'Xưởng Lắp Ráp' },
-    { id: 'DEST-004', code: 'N04', name: 'Nhà Máy Lắp Ráp Xe Tải' },
-    { id: 'DEST-005', code: 'N05', name: 'Kho Phụ Tùng Bảo Hành' }
+    { id: 'DEST-001', code: 'N01', name: 'Kho Chuối Nhật Bản 01' },
+    { id: 'DEST-002', code: 'N02', name: 'Kho Chuối Trung Quốc 01' },
+    { id: 'DEST-003', code: 'N03', name: 'Kho Lạnh Phân Loại' },
+    { id: 'DEST-004', code: 'N04', name: 'Kho Chuối Quốc Tế A' },
+    { id: 'DEST-005', code: 'N05', name: 'Kho Chuối Quốc Tế B' }
 ];
 
 const MOCK_PROCESS_DATA = [
-    { id: 1, code: 'WF-1000', name: 'Quy trình Nhập - Kho Phụ Tùng' },
-    { id: 2, code: 'WF-1001', name: 'Quy trình Xuất - Kho Phụ Tùng' },
-    { id: 3, code: 'WF-1002', name: 'Quy trình Kiểm kê - Kho Nguyên Liệu' },
-    { id: 4, code: 'WF-1003', name: 'Quy trình Nhập - Kho Phế Liệu' },
-    { id: 5, code: 'WF-1004', name: 'Quy trình Xuất - Kho Thành Phẩm' },
-    { id: 6, code: 'WF-1005', name: 'Quy trình Nhập - Kho Phụ Tùng 5' }
+    { id: 1, code: 'WF-1000', name: 'Quy trình Nhập - Kho Chuối' },
+    { id: 2, code: 'WF-1001', name: 'Quy trình Xuất - Kho Chuối' },
+    { id: 3, code: 'WF-1002', name: 'Quy trình Kiểm kê - Kho Lạnh' },
+    { id: 4, code: 'WF-1003', name: 'Quy trình Phân cấp - Đóng thùng' },
+    { id: 5, code: 'WF-1004', name: 'Quy trình Xuất khẩu' },
+    { id: 6, code: 'WF-1005', name: 'Quy trình Nhập nội địa' }
 ];
 
 const MOCK_USER_DATA = {
@@ -134,52 +139,36 @@ const MOCK_USER_DATA = {
 // ── Mock Orders ──────────────────────────────────────────────
 let MOCK_INBOUND_ORDERS = loadInboundOrders();
 
+// ── FORCE MIGRATION: Clear legacy mechanical data ─────────────
+if (MOCK_INBOUND_ORDERS && MOCK_INBOUND_ORDERS.some(o => 
+    o.materials?.some(m => m.name.includes('Thép') || m.name.includes('Xi măng') || m.name.includes('Linh kiện'))
+)) {
+    console.warn('Legacy mechanical data detected in Inbound module. Resetting to Banana Warehouse data...');
+    MOCK_INBOUND_ORDERS = null;
+    localStorage.removeItem(STORAGE_KEY);
+}
+// ─────────────────────────────────────────────────────────────
+
 if (!MOCK_INBOUND_ORDERS) {
     MOCK_INBOUND_ORDERS = [
-        { id: 1, code: 'P-A01-L3_MAT-001_500_25102025', materials: [{ code: 'MAT-001', name: 'Thép ống D60', qty: 500, unit: 'kg', specs: 'Φ60mm x 6m', weight: 500, expiryDate: '2025-10-25' }], batch: { code: 'LOT-2510-01', name: 'Lô hàng tháng 10 - Đợt 1' }, pallets: ['P-A01-L3'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', priority: true, creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2025-10-25T08:30:00') },
-        { id: 2, code: 'P-B01-L1_MAT-002_1000_26102025', materials: [{ code: 'MAT-002', name: 'Xi măng Hà Tiên', qty: 1000, unit: 'bao', specs: 'Bao 50kg', weight: 50000, expiryDate: '2025-06-15' }], batch: { code: 'LOT-2510-02', name: 'Lô hàng Hà Tiên 02' }, pallets: ['P-B01-L1'], bin: 'T1-F1-P2-A5', status: 'COMPLETED', priority: false, creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: new Date('2025-10-26T09:15:00') },
-        { id: 3, code: 'P-C01-L2_MAT-003_200_27102025', materials: [{ code: 'MAT-003', name: 'Gạch men 60x60', qty: 200, unit: 'thùng', specs: '600x600x10', weight: 4000, expiryDate: '2025-12-27' }], batch: { code: 'LOT-2510-03', name: 'Lô gạch men nhập khẩu' }, pallets: ['P-C01-L2'], bin: 'T2-F3-P1-A2', status: 'PROCESSING', creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: new Date('2025-10-27T14:00:00') },
-        { id: 4, code: 'P-A05-L1_MAT-004_50_05112025', materials: [{ code: 'MAT-004', name: 'Sơn Dulux Trong Nhà', qty: 50, unit: 'thùng', specs: '30x30x40', weight: 900, expiryDate: '2026-03-20' }], pallets: ['P-A05-L1'], bin: 'T1-F8-P3-A2', status: 'COMPLETED', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2025-11-05T10:30:00') },
-        { id: 5, code: 'P-D01-L2_MAT-005_500_12112025', materials: [{ code: 'MAT-005', name: 'Bóng đèn LED Rạng Đông', qty: 500, unit: 'cái', specs: '12x6x6', weight: 25, expiryDate: '2026-11-12' }], pallets: ['P-D01-L2'], bin: 'T3-F2-P5-A1', status: 'PENDING', creator: { id: 'US04', name: 'Phạm Minh Dũng' }, createdAt: new Date('2025-11-12T16:45:00') },
-        { id: 6, code: 'P-E01-L3_MAT-007_300_20112025', materials: [{ code: 'MAT-007', name: 'Ống nhựa Bình Minh D90', qty: 300, unit: 'cây', specs: '4000x90x90', weight: 450, expiryDate: '2025-11-20' }], pallets: ['P-E01-L3'], bin: 'T1-F5-P2-A4', status: 'CANCELLED', creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: new Date('2025-11-20T08:00:00') },
-        { id: 7, code: 'P-A10-L1_MAT-008_20_01122025', materials: [{ code: 'MAT-008', name: 'Máy khoan Bosch', qty: 20, unit: 'cái', specs: '35x25x15', weight: 60, expiryDate: '2026-12-01' }], pallets: ['P-A10-L1'], bin: 'T2-F2-P2-A2', status: 'COMPLETED', creator: { id: 'US05', name: 'Hoàng Tuấn Em' }, createdAt: new Date('2025-12-01T09:20:00') },
-        { id: 8, code: 'P-B05-L2_MAT-009_500_15122025', materials: [{ code: 'MAT-009', name: 'Đinh đóng gỗ 5cm', qty: 500, unit: 'kg', specs: '50x1.5x1.5', weight: 500, expiryDate: '2026-12-15' }], pallets: ['P-B05-L2'], bin: 'T1-F1-P9-A3', status: 'PROCESSING', creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: new Date('2025-12-15T11:10:00') },
-        { id: 9, code: 'P-C05-L3_MAT-010_50_20122025', materials: [{ code: 'MAT-010', name: 'Kính cường lực 10mm', qty: 50, unit: 'tấm', specs: '2400x1200x10', weight: 1500, expiryDate: '2027-12-20' }], pallets: ['P-C05-L3'], bin: 'T4-F4-P4-A4', status: 'COMPLETED', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2025-12-20T15:30:00') },
-        { id: 10, code: 'P-Z01-L1_MAT-012_20_28122025', materials: [{ code: 'MAT-012', name: 'Cát xây dựng', qty: 20, unit: 'm3', specs: 'Không quy cách', weight: 32000, expiryDate: '2025-12-28' }], pallets: ['P-Z01-L1'], bin: 'T1-F9-P1-A1', status: 'PENDING', priority: true, creator: { id: 'US04', name: 'Phạm Minh Dũng' }, createdAt: new Date('2025-12-28T07:45:00') },
-        { id: 11, code: 'P-F01-L1_MAT-013_10_05012024', materials: [{ code: 'MAT-013', name: 'Laptop Dell Latitude', qty: 10, unit: 'cái', specs: '38x26x2.5', weight: 18, expiryDate: '2028-01-05' }], pallets: ['P-F01-L1'], bin: 'T5-F1-P1-A1', status: 'COMPLETED', priority: true, creator: { id: 'US06', name: 'Vũ Thị Giang' }, createdAt: new Date('2024-01-05T08:15:00') },
-        { id: 12, code: 'P-F02-L1_MAT-014_15_10012024', materials: [{ code: 'MAT-014', name: 'Màn hình HP 24 inch', qty: 15, unit: 'cái', specs: '60x40x20', weight: 75, expiryDate: '2028-01-10' }], pallets: ['P-F02-L1'], bin: 'T5-F1-P1-A2', status: 'PROCESSING', creator: { id: 'US06', name: 'Vũ Thị Giang' }, createdAt: new Date('2024-01-10T10:00:00') },
-        { id: 13, code: 'P-F03-L2_MAT-015_50_15012024', materials: [{ code: 'MAT-015', name: 'Chuột Logitech', qty: 50, unit: 'cái', specs: '12x7x4', weight: 5, expiryDate: '2028-01-15' }], pallets: ['P-F03-L2'], bin: 'T5-F1-P2-A1', status: 'COMPLETED', creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: new Date('2024-01-15T13:20:00') },
-        { id: 14, code: 'P-G01-L1_MAT-017_500_02022024', materials: [{ code: 'MAT-017', name: 'Giấy in A4', qty: 500, unit: 'ram', specs: '29.7x21x5', weight: 1250, expiryDate: '2026-02-02' }], pallets: ['P-G01-L1'], bin: 'T2-F8-P1-A1', status: 'COMPLETED', creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: new Date('2024-02-02T09:00:00') },
-        { id: 15, code: 'P-G03-L2_MAT-018_2000_15022024', materials: [{ code: 'MAT-018', name: 'Bút bi Thiên Long', qty: 2000, unit: 'cây', specs: '14x1x1', weight: 10, expiryDate: '2026-02-15' }], pallets: ['P-G03-L2'], bin: 'T2-F8-P2-A3', status: 'PENDING', creator: { id: 'US05', name: 'Hoàng Tuấn Em' }, createdAt: new Date('2024-02-15T14:10:00') },
-        { id: 16, code: 'P-G04-L1_MAT-019_100_20022024', materials: [{ code: 'MAT-019', name: 'Bìa còng 7cm', qty: 100, unit: 'cái', specs: '32x26x7', weight: 80, expiryDate: '2026-02-20' }], pallets: ['P-G04-L1'], bin: 'T2-F8-P4-A1', status: 'CANCELLED', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2024-02-20T11:30:00') },
-        { id: 17, code: 'P-H01-L1_MAT-020_1000_01032024', materials: [{ code: 'MAT-020', name: 'Vải cotton trắng', qty: 1000, unit: 'mét', specs: '100x150', weight: 200, expiryDate: '2025-09-01' }], pallets: ['P-H01-L1'], bin: 'T6-F1-P1-A1', status: 'PROCESSING', creator: { id: 'US04', name: 'Phạm Minh Dũng' }, createdAt: new Date('2024-03-01T08:45:00') },
-        { id: 18, code: 'P-H04-L3_MAT-022_10000_10032024', materials: [{ code: 'MAT-022', name: 'Nút áo nhựa', qty: 10000, unit: 'cái', specs: '1x1x0.3', weight: 5, expiryDate: '2025-03-10' }], pallets: ['P-H04-L3'], bin: 'T6-F2-P1-A5', status: 'COMPLETED', creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: new Date('2024-03-10T15:20:00') },
-        { id: 19, code: 'P-H05-L2_MAT-023_2000_15032024', materials: [{ code: 'MAT-023', name: 'Khóa kéo YKK', qty: 2000, unit: 'cái', specs: '20x2x0.5', weight: 8, expiryDate: '2025-03-15' }], pallets: ['P-H05-L2'], bin: 'T6-F3-P2-A2', status: 'COMPLETED', creator: { id: 'US06', name: 'Vũ Thị Giang' }, createdAt: new Date('2024-03-15T10:15:00') },
-        { id: 20, code: 'P-K01-L1_MAT-024_5000_02042024', materials: [{ code: 'MAT-024', name: 'Hạt nhựa PP', qty: 5000, unit: 'kg', specs: 'Bao 25kg', weight: 5000, expiryDate: '2027-04-01' }], pallets: ['P-K01-L1'], bin: 'T8-F1-P1-A1', status: 'PROCESSING', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2024-04-02T09:30:00') },
-        { id: 21, code: 'P-K03-L1_MAT-025_200_05042024', materials: [{ code: 'MAT-025', name: 'Phụ gia tạo màu', qty: 200, unit: 'kg', specs: 'Thùng 20kg', weight: 200, expiryDate: '2026-08-15' }], pallets: ['P-K03-L1'], bin: 'T8-F1-P1-A2', status: 'PENDING', creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: new Date('2024-04-05T13:45:00') },
-        { id: 22, code: 'P-K04-L1_MAT-026_2_12042024', materials: [{ code: 'MAT-026', name: 'Khuôn ép nhựa', qty: 2, unit: 'bộ', specs: '100x80x50', weight: 150, expiryDate: '2026-04-12' }], pallets: ['P-K04-L1'], bin: 'T8-F2-P5-A1', status: 'COMPLETED', priority: true, creator: { id: 'US05', name: 'Hoàng Tuấn Em' }, createdAt: new Date('2024-04-12T11:00:00') },
-        { id: 23, code: 'P-L01-L0_MAT-027_20_01052024', materials: [{ code: 'MAT-027', name: 'Bàn làm việc gỗ', qty: 20, unit: 'cái', specs: '120x60x75', weight: 400, expiryDate: '2027-01-05' }], pallets: ['P-L01-L0'], bin: 'T9-F1-P1-A1', status: 'PROCESSING', creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: new Date('2024-05-01T08:10:00') },
-        { id: 24, code: 'P-L03-L0_MAT-029_10_10052024', materials: [{ code: 'MAT-029', name: 'Tủ hồ sơ sắt', qty: 10, unit: 'cái', specs: '90x40x185', weight: 350, expiryDate: '2027-01-05' }], pallets: ['P-L03-L0'], bin: 'T9-F1-P2-A2', status: 'COMPLETED', creator: { id: 'US04', name: 'Phạm Minh Dũng' }, createdAt: new Date('2024-05-10T14:30:00') },
-        { id: 25, code: 'P-L04-L2_MAT-030_50_20052024', materials: [{ code: 'MAT-030', name: 'Kệ sách treo tường', qty: 50, unit: 'cái', specs: '80x20x30', weight: 75, expiryDate: '2027-05-20' }], pallets: ['P-L04-L2'], bin: 'T9-F2-P1-A1', status: 'PENDING', creator: { id: 'US06', name: 'Vũ Thị Giang' }, createdAt: new Date('2024-05-20T16:20:00') },
-        { id: 26, code: 'P-M01-L1_MAT-031_100_01062024', materials: [{ code: 'MAT-031', name: 'Nước khoáng Lavie', qty: 100, unit: 'thùng', specs: '40x30x25', weight: 1900, expiryDate: '2026-12-01' }], pallets: ['P-M01-L1'], bin: 'T1-F2-P1-A1', status: 'COMPLETED', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2024-06-01T07:50:00') },
-        { id: 27, code: 'P-M02-L1_MAT-032_50_05062024', materials: [{ code: 'MAT-032', name: 'Cà phê hòa tan G7', qty: 50, unit: 'thùng', specs: '35x25x20', weight: 600, expiryDate: '2026-01-15' }], pallets: ['P-M02-L1'], bin: 'T1-F2-P1-A2', status: 'PROCESSING', creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: new Date('2024-06-05T09:40:00') },
-        { id: 28, code: 'P-M03-L2_MAT-033_200_10062024', materials: [{ code: 'MAT-033', name: 'Mì ly Modern', qty: 200, unit: 'thùng', specs: '50x35x30', weight: 1200, expiryDate: '2025-09-10' }], pallets: ['P-M03-L2'], bin: 'T1-F2-P2-A1', status: 'COMPLETED', creator: { id: 'US05', name: 'Hoàng Tuấn Em' }, createdAt: new Date('2024-06-10T11:15:00') },
-        { id: 29, code: 'P-M06-L1_MAT-035_60_15062024', materials: [{ code: 'MAT-035', name: 'Dầu ăn Neptune 1L', qty: 60, unit: 'thùng', specs: '40x30x30', weight: 720, expiryDate: '2026-06-15' }], pallets: ['P-M06-L1'], bin: 'T1-F2-P3-A4', status: 'DRAFT', creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: new Date('2024-06-15T13:50:00') },
-        { id: 30, code: 'P-M07-L0_MAT-036_500_20062024', materials: [{ code: 'MAT-036', name: 'Gạo ST25', qty: 500, unit: 'kg', specs: 'Bao 25kg', weight: 500, expiryDate: '2026-02-20' }], pallets: ['P-M07-L0'], bin: 'T1-F2-P4-A1', status: 'PENDING', exportMethod: 'FIFO', creator: { id: 'US04', name: 'Phạm Minh Dũng' }, createdAt: new Date('2024-06-20T08:30:00') },
-        { id: 31, code: 'P-N01-L1_MAT-001_100_TDAY', materials: [{ code: 'MAT-001', name: 'Thép ống D60', qty: 100, unit: 'kg', specs: 'Φ60mm x 6m', weight: 100, expiryDate: '2026-08-15' }], pallets: ['P-N01-L1'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', priority: true, creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: (() => { const d = new Date(); d.setHours(8, 30, 0, 0); return d; })() },
-        { id: 32, code: 'P-N02-L2_MAT-002_200_TDAY', materials: [{ code: 'MAT-002', name: 'Xi măng Hà Tiên', qty: 200, unit: 'bao', specs: 'Bao 50kg', weight: 10000, expiryDate: '2026-10-10' }], pallets: ['P-N02-L2'], bin: 'T2-F2-P2-A2', status: 'PROCESSING', priority: false, creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: (() => { const d = new Date(); d.setHours(9, 15, 0, 0); return d; })() },
-        { id: 33, code: 'P-N03-L3_MAT-003_50_TDAY', materials: [{ code: 'MAT-003', name: 'Gạch men 60x60', qty: 50, unit: 'thùng', specs: '600x600x10', weight: 1000, expiryDate: '2027-01-01' }], pallets: ['P-N03-L3'], bin: 'T3-F3-P3-A3', status: 'PENDING', priority: false, creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: (() => { const d = new Date(); d.setHours(14, 45, 0, 0); return d; })() }
+        { id: 1, type: 'NEW', code: 'P-A01-L3_MAT-001_500_25102025', materials: [{ code: 'MAT-001', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 500, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 6500, expiryDate: '2025-10-25' }], batch: { code: 'LOT-2510-01', name: 'Lô hàng Chuối tháng 10 - Đợt 1' }, pallets: ['P-A01-L3'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', priority: true, creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2025-10-25T08:30:00'), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 2, type: 'REENTRY', code: 'P-B01-L1_MAT-002_1000_26102025', materials: [{ code: 'MAT-002', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 1000, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', weight: 15000, expiryDate: '2025-06-15' }], batch: { code: 'LOT-2510-02', name: 'Lô Sofia 02' }, pallets: ['P-B01-L1'], bin: 'T1-F1-P2-A5', status: 'COMPLETED', priority: false, creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: new Date('2025-10-26T09:15:00'), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 3, type: 'TRANSFER', code: 'P-C01-L2_MAT-003_200_27102025', materials: [{ code: 'MAT-003', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', qty: 200, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 2600, expiryDate: '2025-12-27' }], batch: { code: 'LOT-2510-03', name: 'Lô TROPICAL' }, pallets: ['P-C01-L2'], bin: 'T2-F3-P1-A2', status: 'PROCESSING', creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: new Date('2025-10-27T14:00:00'), process: 'Quy trình Phân cấp - Đóng thùng' },
+        { id: 4, type: 'NEW', code: 'P-A05-L1_MAT-004_50_05112025', materials: [{ code: 'MAT-004', name: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 650, expiryDate: '2026-03-20' }], pallets: ['P-A05-L1'], bin: 'T1-F8-P3-A2', status: 'COMPLETED', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2025-11-05T10:30:00'), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 5, type: 'NEW', code: 'P-D01-L2_MAT-005_500_12112025', materials: [{ code: 'MAT-005', name: 'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA', qty: 500, unit: 'thùng', specs: 'Thùng 12kg tiêu chuẩn', weight: 6000, expiryDate: '2026-11-12' }], pallets: ['P-D01-L2'], bin: 'T3-F2-P5-A1', status: 'PENDING', creator: { id: 'US04', name: 'Phạm Minh Dũng' }, createdAt: new Date('2025-11-12T16:45:00'), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 31, type: 'NEW', code: 'P-N01-L1_MAT-001_100_TDAY', materials: [{ code: 'MAT-001', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 100, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 1300, expiryDate: '2026-08-15' }], pallets: ['P-N01-L1'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', priority: true, creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: (() => { const d = new Date(); d.setHours(8, 30, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 32, type: 'NEW', code: 'P-N02-L2_MAT-002_200_TDAY', materials: [{ code: 'MAT-002', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 200, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', weight: 3000, expiryDate: '2026-10-10' }], pallets: ['P-N02-L2'], bin: 'T1-F2-P2-A2', status: 'PROCESSING', priority: false, creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: (() => { const d = new Date(); d.setHours(9, 15, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 33, type: 'NEW', code: 'P-N03-L3_MAT-003_50_TDAY', materials: [{ code: 'MAT-003', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 650, expiryDate: '2027-01-01' }], pallets: ['P-N03-L3'], bin: 'T1-F3-P3-A3', status: 'PENDING', priority: false, creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: (() => { const d = new Date(); d.setHours(14, 45, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' }
     ];
 
     MOCK_INBOUND_ORDERS.forEach((o, i) => {
         if (!o.exportMethod) o.exportMethod = ['FIFO', 'FEFO'][Math.floor(Math.random() * 2)];
-        o.type = ['NEW', 'REENTRY', 'TRANSFER'][i % 3];
-        o.process = ['Quy trình Nhập - Kho Phụ Tùng', 'Quy trình Xuất - Kho Phụ Tùng', 'Quy trình Kiểm kê - Kho Nguyên Liệu', 'Quy trình Nhập - Kho Phế Liệu', 'Quy trình Xuất - Kho Thành Phẩm'][i % 5];
-        if (o.status === 'COMPLETED') {
+        if (!o.completedAt && o.status === 'COMPLETED') {
             const addMinutes = Math.floor(Math.random() * 9) + 1;
             const addSeconds = Math.floor(Math.random() * 60);
             o.completedAt = new Date(o.createdAt.getTime() + addMinutes * 60000 + addSeconds * 1000);
         }
+        if (!o.batch) o.batch = { code: 'LOT-GEN', name: 'Lô hàng mặc định' };
     });
     saveInboundOrders();
 }
@@ -220,14 +209,24 @@ function ensureTodayDataInbound() {
 
     const hasTodayData = MOCK_INBOUND_ORDERS.some(o => {
         const d = new Date(o.createdAt);
-        return d >= today && d < tomorrow;
+        const nameMatch = o.materials?.some(m => m.name.includes('Thép') || m.name.includes('Xi măng'));
+        return d >= today && d < tomorrow && !nameMatch;
     });
 
     if (!hasTodayData) {
+        // If there's today data but it's legacy mechanical data, remove it from the array
+        const initialLen = MOCK_INBOUND_ORDERS.length;
+        MOCK_INBOUND_ORDERS = MOCK_INBOUND_ORDERS.filter(o => {
+            const d = new Date(o.createdAt);
+            const isToday = d >= today && d < tomorrow;
+            const isLegacy = o.materials?.some(m => m.name.includes('Thép') || m.name.includes('Xi măng'));
+            return !(isToday && isLegacy);
+        });
+
         const todayData = [
-            { id: Date.now() + 1, code: 'P-T01-A1_MAT-001_50_T' + today.getTime().toString().slice(-4), materials: [{ code: 'MAT-001', name: 'Thép ống D60', qty: 50, unit: 'kg', specs: 'Φ60mm x 6m', expiryDate: new Date(today.getFullYear(), today.getMonth() + 6, today.getDate()).toISOString().split('T')[0] }], pallets: ['P-T01-A1'], bin: 'T1-F1-P1-A1', status: 'PENDING', priority: true, type: 'NEW', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date(today.getTime() + 8 * 3600000 + 30 * 60000) },
-            { id: Date.now() + 2, code: 'P-T02-B2_MAT-002_120_T' + today.getTime().toString().slice(-4), materials: [{ code: 'MAT-002', name: 'Thép tấm 5mm', qty: 120, unit: 'tấm', specs: '1200x2400mm', expiryDate: new Date(today.getFullYear(), today.getMonth() + 12, today.getDate()).toISOString().split('T')[0] }], pallets: ['P-T02-B2'], bin: 'T2-F3-P1-B2', status: 'PROCESSING', priority: false, type: 'REENTRY', creator: { id: 'US14', name: 'Trịnh Thị Quyên' }, createdAt: new Date(today.getTime() + 10 * 3600000 + 15 * 60000) },
-            { id: Date.now() + 3, code: 'C-T03-C3_MAT-003_200_T' + today.getTime().toString().slice(-4), materials: [{ code: 'MAT-003', name: 'Bulong M20', qty: 200, unit: 'bộ', specs: 'M20 x 80mm', expiryDate: '' }], pallets: ['C-T03-C3'], bin: 'T1-F5-P2-C1', status: 'COMPLETED', priority: false, type: 'TRANSFER', creator: { id: 'US06', name: 'Bùi Thanh Sơn' }, createdAt: new Date(today.getTime() + 14 * 3600000 + 45 * 60000) }
+            { id: Date.now() + 1, code: 'P-T01-A1_MAT-001_50_T' + today.getTime().toString().slice(-4), materials: [{ code: 'MAT-001', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', expiryDate: new Date(today.getFullYear(), today.getMonth() + 6, today.getDate()).toISOString().split('T')[0] }], pallets: ['P-T01-A1'], bin: 'T1-F1-P1-A1', status: 'PENDING', priority: true, type: 'NEW', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date(today.getTime() + 8 * 3600000 + 30 * 60000) },
+            { id: Date.now() + 2, code: 'P-T02-B2_MAT-002_120_T' + today.getTime().toString().slice(-4), materials: [{ code: 'MAT-002', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 120, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', expiryDate: new Date(today.getFullYear(), today.getMonth() + 12, today.getDate()).toISOString().split('T')[0] }], pallets: ['P-T02-B2'], bin: 'T2-F3-P1-B2', status: 'PROCESSING', priority: false, type: 'REENTRY', creator: { id: 'US14', name: 'Trịnh Thị Quyên' }, createdAt: new Date(today.getTime() + 10 * 3600000 + 15 * 60000) },
+            { id: Date.now() + 3, code: 'C-T03-C3_MAT-003_200_T' + today.getTime().toString().slice(-4), materials: [{ code: 'MAT-003', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', qty: 200, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', expiryDate: '' }], pallets: ['C-T03-C3'], bin: 'T1-F5-P2-C1', status: 'COMPLETED', priority: false, type: 'TRANSFER', creator: { id: 'US06', name: 'Bùi Thanh Sơn' }, createdAt: new Date(today.getTime() + 14 * 3600000 + 45 * 60000) }
         ];
         MOCK_INBOUND_ORDERS.unshift(...todayData);
         saveInboundOrders();
@@ -321,14 +320,18 @@ function renderTableBody() {
                 </td>
                 <td>
                     <div class="product-list">
-                        ${o.materials.map(m => `
+                        ${o.materials.map(m => {
+                            const master = MASTER_MATERIALS.find(mm => mm.code === m.code);
+                            const displayName = master ? master.name : m.name;
+                            return `
                             <div class="product-item" style="max-width:100%;overflow:hidden;">
                                 <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;">
                                     <span class="prod-code" style="font-weight:500;color:#0284c7;font-size:13px;">${m.code}</span>
-                                    <span style="font-weight:600;color:#334155;font-size:14px;margin-left:4px;"> - ${m.name}</span>
+                                    <span style="font-weight:600;color:#334155;font-size:14px;margin-left:4px;"> - ${displayName}</span>
                                 </div>
                                 <div style="font-size:13px;color:#334155;margin-top:4px;">Số lượng: <span style="font-weight:700;">${m.qty} ${m.unit}</span></div>
-                            </div>`).join('')}
+                            </div>`;
+                        }).join('')}
                     </div>
                 </td>
                 <td>
@@ -1628,7 +1631,10 @@ function openOrderDetailModal(orderId) {
     let matHtml = renderRow('Container', order.pallets?.length ? order.pallets.join(', ') : '-')
         + renderRow('Vị trí lưu', order.bin ? formatBinLocation(order.bin) : '-')
         + renderRow('Mã sản phẩm', mat ? mat.code : '-')
-        + renderRow('Tên sản phẩm', mat ? mat.name : '-')
+        + renderRow('Tên sản phẩm', mat ? (() => { 
+            const master = MASTER_MATERIALS.find(mm => mm.code === mat.code);
+            return master ? master.name : mat.name;
+        })() : '-')
         + renderRow('Số lượng', mat ? `${mat.qty} ${mat.unit}` : '-')
         + renderRow('Quy cách', order.exportMethod || 'FIFO')
         + renderRow('Ngày hết hạn', mat?.expiryDate ? new Date(mat.expiryDate).toLocaleDateString('en-GB') : '-');
@@ -1782,7 +1788,7 @@ function processImportData(rows) {
             pallets: [pallet], bin: destPos || '', status: 'PENDING', priority: isPriority,
             type: destPos ? 'TRANSFER' : 'NEW',
             creator: { id: 'US_IMPORT', name: 'Import System' },
-            createdAt: arrivalDate, process: 'Quy trình Nhập - Kho Phụ Tùng'
+            createdAt: arrivalDate, process: 'Quy trình Nhập - Kho Chuối'
         });
     });
 

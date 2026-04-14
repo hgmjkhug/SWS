@@ -1,25 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Roboto:wght@400;600&display=swap');
+
 .grid-container {
     padding: 20px;
     background-color: #f8fafc;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     overflow: auto;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 40px; /* Increased from 15px to avoid overlap with absolute labels */
+    gap: 16px;
 }
 
 .layout-controls {
     display: flex;
     gap: 12px;
-    background: white;
-    padding: 10px 15px;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     align-items: center;
-    border: 1px solid #e2e8f0;
-    width: fit-content;
+    width: 100%;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    padding: 0;
 }
 
 .control-group {
@@ -160,10 +160,36 @@
 /* Map Wrapper & Scaler */
 .map-wrapper {
     display: inline-block;
-    padding: 20px 0 0 40px; /* Added padding to make room for absolute labels */
+    padding: 20px 0 0 30px; /* Added padding to make room for absolute labels */
     position: relative;
     overflow: visible;
     width: fit-content;
+}
+
+/* Map Action Buttons (Fullscreen, etc.) */
+.map-action-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    width: 32px;
+    height: 32px;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    color: #475569;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.map-action-btn:hover {
+    background: #f1f5f9;
+    color: #0367CC;
+    border-color: #0367CC;
 }
 
 #new-layout-grid-scaler {
@@ -192,62 +218,79 @@
 
 .mod-A { grid-template-columns: repeat(19, 30px); }
 .mod-B { grid-template-columns: repeat(19, 30px); }
-.mod-C { grid-template-columns: repeat(20, 30px); }
+.mod-C { grid-template-columns: repeat(19, 30px); }
 
 /* Module Visibility Filtering */
 .module-block.hidden-module {
     display: none !important;
 }
 
-/* Zoom Controls */
-.zoom-controls {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    z-index: 1000;
-    background: white;
-    padding: 8px;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    backdrop-filter: blur(8px);
-}
-
-.zoom-controls button {
+/* Layout Action Buttons (Fullscreen on Toolbar) */
+.layout-action-btn {
     width: 36px;
     height: 36px;
-    border: none;
-    background: #f1f5f9;
-    border-radius: 6px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
     color: #475569;
     cursor: pointer;
-    transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    transition: all 0.2s;
+    margin-left: auto; /* Đẩy về sát bên phải */
 }
 
-.zoom-controls button:hover {
-    background: #e2e8f0;
-    color: #1e293b;
-    transform: scale(1.05);
+.layout-action-btn:hover {
+    background: #f8fafc;
+    color: #0367CC;
+    border-color: #0367CC;
 }
 
-.zoom-controls button:active {
-    transform: scale(0.95);
+/* Zoom Controls Vertical (Bottom Right of Map) */
+.zoom-controls-vertical {
+    position: absolute;
+    bottom: 25px;
+    right: 8px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    padding: 2px;
+    background: #EFF7FF;
+    opacity: 0.9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-#zoom-reset {
-    margin-top: 4px;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 8px;
+.zoom-controls-vertical button {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 6px;
-    width: 36px;
-    height: 40px;
+    transition: all 0.2s;
+}
+
+.zoom-controls-vertical button:hover {
+    background: #ffffff;
+    color: #0367CC;
+}
+
+.zoom-divider-horizontal {
+    width: 20px;
+    height: 1px;
+    background: #e2e8f0;
+    margin: 4px auto;
+}
+
+#zoom-reset i {
+    font-size: 11px;
 }
 
 .map-cell {
@@ -309,4 +352,649 @@ body {
 }
 .content-body {
     padding: 0px 0px;
+}
+
+/* ═══════════════════════════════════════════════════
+   DASHBOARD CARDS ROW (below the map)
+═══════════════════════════════════════════════════ */
+.dashboard-cards-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    width: 100%;
+    padding: 0 20px;
+    margin: 20px 0;
+    box-sizing: border-box;
+}
+
+/* Panel Card Shell */
+.nl-panel-card {
+    background: #ffffff;
+    border: 0.5px solid #0367CC;
+    box-shadow: 0px 2px 8px rgba(3, 103, 204, 0.08);
+    border-radius: 10px;
+    width: 100%;
+    max-height: 260px;
+    overflow: hidden;
+    box-sizing: border-box;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nl-panel-card:hover {
+    box-shadow: 0px 6px 16px rgba(3, 103, 204, 0.15);
+    transform: translateY(-2px);
+}
+
+.nl-panel-header {
+    padding: 8px 12px 7px;
+    border-bottom: 1px solid rgba(3, 103, 204, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nl-panel-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #0367CC;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.nl-panel-badge {
+    font-size: 10px;
+    font-weight: 600;
+    color: #396BE0;
+    background: rgba(164, 211, 254, 0.4);
+    padding: 1px 7px;
+    border-radius: 20px;
+    border: 1px solid rgba(3, 103, 204, 0.2);
+}
+
+/* Card 1 — Command List */
+.nl-cmd-list {
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.nl-cmd-list::-webkit-scrollbar { width: 4px; }
+.nl-cmd-list::-webkit-scrollbar-track { background: transparent; }
+.nl-cmd-list::-webkit-scrollbar-thumb { background: rgba(3,103,204,0.2); border-radius: 4px; }
+
+.nl-cmd-item {
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    padding: 6px 8px;
+    display: grid;
+    grid-template-columns: 6px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    background: #f9fafb;
+}
+
+.nl-cmd-item.active {
+    background: rgba(3, 103, 204, 0.04);
+    border-color: rgba(3, 103, 204, 0.3);
+}
+
+.nl-cmd-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #9ca3af;
+    flex-shrink: 0;
+}
+
+.nl-cmd-item.active .nl-cmd-dot {
+    background: #0367CC;
+    box-shadow: 0 0 0 3px rgba(3, 103, 204, 0.18);
+}
+
+.nl-cmd-body { min-width: 0; }
+
+.nl-cmd-top-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 2px;
+}
+
+.nl-cmd-tag {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 1px 5px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.nl-tag-in { background: rgba(16,185,129,0.1); color: #059669; border: 1px solid rgba(16,185,129,0.25); }
+.nl-tag-out { background: rgba(245,158,11,0.1); color: #d97706; border: 1px solid rgba(245,158,11,0.25); }
+
+.nl-cmd-code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: #0367CC;
+}
+
+.nl-cmd-product {
+    font-size: 11px;
+    font-weight: 600;
+    color: #1a2742;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nl-cmd-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+}
+
+.nl-cmd-sku {
+    font-size: 9.5px;
+    color: #677594;
+}
+
+.nl-cmd-pallet {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: #a0aec0;
+    background: #f3f4f6;
+    padding: 2px 5px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+/* Card 2 — Log List */
+.nl-log-list {
+    padding: 6px 10px;
+    display: flex;
+    flex-direction: column;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: 'IBM Plex Mono', monospace;
+}
+
+.nl-log-list::-webkit-scrollbar { width: 4px; }
+.nl-log-list::-webkit-scrollbar-track { background: transparent; }
+.nl-log-list::-webkit-scrollbar-thumb { background: rgba(3,103,204,0.2); border-radius: 4px; }
+
+.nl-log-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 3px 4px;
+    border-radius: 3px;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+.nl-log-row:hover { background: rgba(3, 103, 204, 0.04); }
+
+.nl-log-time {
+    color: #a0aec0;
+    flex-shrink: 0;
+    font-size: 9.5px;
+    min-width: 52px;
+}
+
+.nl-log-icon {
+    flex-shrink: 0;
+    width: 13px;
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+}
+
+.nl-log-msg {
+    color: #1a2742;
+    font-family: 'Roboto', sans-serif;
+    font-size: 10.5px;
+    flex: 1;
+    min-width: 0;
+}
+
+.nl-log-msg .loc {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #0367CC;
+    background: rgba(3, 103, 204, 0.08);
+    padding: 0 4px;
+    border-radius: 3px;
+}
+
+.nl-log-divider {
+    height: 1px;
+    background: rgba(3, 103, 204, 0.08);
+    margin: 2px 0;
+    flex-shrink: 0;
+}
+
+/* Card 3 — Activity List (New Design) */
+.nl-device-list {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 0; /* Dùng margin-bottom cho item thay vì gap để kiểm soát tốt hơn khi scroll */
+    max-height: 215px;
+    overflow-y: auto;
+}
+
+/* Tùy chỉnh thanh cuộn cho chuyên nghiệp */
+.nl-device-list::-webkit-scrollbar { width: 5px; }
+.nl-device-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.03); border-radius: 10px; }
+.nl-device-list::-webkit-scrollbar-thumb { background: rgba(3, 103, 204, 0.2); border-radius: 10px; }
+.nl-device-list::-webkit-scrollbar-thumb:hover { background: rgba(3, 103, 204, 0.4); }
+
+/* Dashboard Card Tabs - Simplified Flat Design */
+.nl-card-tabs {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 15px;
+    gap: 15px;
+    background: white;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    overflow-x: auto;
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+}
+.nl-card-tabs::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome/Safari */
+
+.nl-tab-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: color 0.2s;
+    user-select: none;
+    position: relative;
+    padding-bottom: 4px; /* Space for the underline */
+    white-space: nowrap; /* Prevent wrapping */
+}
+
+.nl-tab-label {
+    font-family: 'Roboto', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    color: #545454; /* MÀU 3 */
+}
+
+.nl-tab-item.active .nl-tab-label {
+    color: #076EB8; /* MÀU 1 */
+    font-weight: 700; 
+}
+
+/* Underline for active tab */
+.nl-tab-item::after {
+    content: "";
+    position: absolute;
+    bottom: -10px; /* Aligns with the border-bottom of the container */
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #076EB8;
+    transition: width 0.3s ease;
+}
+
+.nl-tab-item.active::after {
+    width: 100%;
+}
+
+.nl-act-item {
+    display: flex;
+    align-items: center;
+    position: relative;
+    min-height: 48px; /* Tăng nhẹ chiều cao */
+    margin-bottom: 8px; /* Khoảng cách giữa các card */
+    border-radius: 0px 10px 10px 0px;
+    overflow: hidden;
+    padding-right: 10px;
+    flex-shrink: 0; /* Không cho phép item bị co lại */
+}
+
+/* Indicator states */
+.nl-status-success { background: rgba(151, 203, 252, 0.1); }
+.nl-status-warning { background: rgba(255, 157, 157, 0.1); }
+
+/* Left border indicator */
+.nl-act-item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: 10px;
+}
+.nl-status-success::before { background: #006ACC; }
+.nl-status-warning::before { background: #EB5757; }
+
+/* Icon circle with dashed border */
+.nl-act-icon-box {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 0.5px dashed #006ACC;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 14px;
+    flex-shrink: 0;
+}
+.nl-status-warning .nl-act-icon-box { border-color: #EB5757; }
+
+.nl-act-icon-box i {
+    font-size: 14px;
+    color: #006ACC;
+}
+.nl-status-warning .nl-act-icon-box i { color: #EB5757; }
+
+/* Content Area */
+.nl-act-content {
+    flex: 1;
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.nl-act-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nl-act-name {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    color: #346FC7;
+}
+.nl-status-warning .nl-act-name { color: #EB5757; }
+
+/* Battery Badge */
+.nl-act-battery-badge {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 6px;
+    border: 0.5px solid #5CE968;
+    border-radius: 5px;
+    background: #ffffff;
+}
+.nl-status-warning .nl-act-battery-badge { border-color: #C91313; }
+
+.nl-act-battery-badge i {
+    font-size: 9px;
+    color: #217328;
+    transform: rotate(-90deg);
+}
+.nl-status-warning .nl-act-battery-badge i { color: #B01616; }
+
+.nl-act-battery-text {
+    font-family: 'Roboto', sans-serif;
+    font-size: 8px;
+    font-weight: 400;
+    color: #217328;
+}
+.nl-status-warning .nl-act-battery-text { color: #B01616; }
+
+/* Mission/Task description */
+.nl-act-mission {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+}
+
+.nl-act-mission i {
+    font-size: 10px;
+    color: #545454;
+    transform: rotate(-45deg);
+}
+
+.nl-act-mission-text {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    font-size: 10px;
+    color: #545454;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Card 4 — Stats */
+.nl-stats-card {
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.nl-stats-chart {
+    position: relative;
+    width: 90px;
+    height: 90px;
+}
+
+.nl-pie-chart {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(3, 103, 204, 0.15);
+    position: relative;
+}
+
+.nl-stats-v3 {
+    width: 100%;
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
+    color: #000000;
+    box-sizing: border-box;
+}
+
+.nl-pie-and-acc-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 10px;
+    height: 100%;
+}
+
+/* Pie Side */
+.nl-pie-side {
+    flex-shrink: 0;
+    width: 120px;
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+}
+
+.nl-pie-small {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(#4388EF 0% 50%, #076EB8 50% 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.nl-pie-small::after {
+    content: "";
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    background: white;
+    border-radius: 50%;
+}
+
+.nl-pie-small-center {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nl-pie-val {
+    font-size: 18px;
+    font-weight: 700;
+    color: #000000;
+}
+
+/* Accordion Side */
+.nl-acc-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    max-height: 220px;
+    padding-right: 5px;
+}
+
+.nl-acc-side::-webkit-scrollbar { width: 3px; }
+.nl-acc-side::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
+
+.nl-acc-item {
+    width: 100%;
+}
+
+.nl-acc-header {
+    background: #F4F5F9;
+    border-radius: 5px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+    transition: background 0.2s;
+}
+
+.nl-acc-header:hover {
+    background: #ebeef5;
+}
+
+.nl-acc-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.dot-in { background: #4388EF; }
+.dot-out { background: #076EB8; }
+
+.nl-acc-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #000000;
+    flex: 1;
+}
+
+.nl-acc-count {
+    font-size: 13px;
+    font-weight: 600;
+    color: #000000;
+}
+
+/* Accordion Content */
+.nl-acc-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.nl-acc-inner {
+    min-height: 0;
+}
+
+.nl-acc-item.active .nl-acc-content {
+    grid-template-rows: 1fr;
+    padding-top: 5px;
+}
+
+/* Tree Lines */
+.nl-tree-line-wrapper {
+    position: relative;
+    padding-left: 15px;
+}
+
+.nl-tree-line-v {
+    position: absolute;
+    left: 8px;
+    top: -5px;
+    bottom: 15px;
+    width: 1px;
+    border-left: 1px solid #8C8C8C;
+}
+
+.nl-tree-items {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.nl-tree-item {
+    position: relative;
+    background: #F9FAFC;
+    border-radius: 4px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    border: 1px solid transparent;
+}
+
+/* .nl-tree-item.active {
+    border-color: #4388EF;
+    background: #eff6ff;
+} */
+
+.nl-tree-line-h {
+    position: absolute;
+    left: -8px;
+    top: 50%;
+    width: 8px;
+    height: 1px;
+    border-top: 1px solid #8C8C8C;
+}
+
+.nl-tree-name {
+    font-size: 12px;
+    color: #4A4A4A;
+    flex: 1;
+}
+
+.nl-tree-val {
+    font-size: 12px;
+    font-weight: 600;
+    color: #4A4A4A;
+}
+
+.nl-stats-card {
+    padding: 0;
+    height: calc(100% - 35px); /* Adjusted to fit under the header */
 }

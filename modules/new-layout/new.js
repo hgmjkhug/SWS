@@ -378,7 +378,7 @@ const SVG_SHUTTLE_LOADED_V = `<svg width="22" height="30" viewBox="0 0 22 30" fi
 </svg>`;
 
 const ROWS = 17;
-const COLS = 58;
+const COLS = 57;
 
 (function initNewLayout() {
     const grid = document.getElementById('new-layout-grid');
@@ -408,9 +408,7 @@ const COLS = 58;
                 const isBoundaryRow = (warehouseR === 0 || warehouseR === 13);
                 
                 const mCol = (c < 19) ? c : (c < 38) ? c - 19 : c - 38;
-                if (c === 57) {
-                    type = 'space'; // Remove all dots and rails in column 58
-                } else if ((mCol === 0 || mCol === 18) && r === 9) {
+                if ((mCol === 0 || mCol === 18) && r === 9) {
                     type = 'parking'; // Row 10
                 } else if ((mCol === 0 || mCol === 18) && r === 7) {
                     type = 'charging'; // Row 8
@@ -441,9 +439,8 @@ const COLS = 58;
                 type = 'path';
             }
             // Rail Area at bottom (r === 16)
-            else if (r >= 16) {
-                const mCol = (c < 19) ? c : (c < 38) ? c - 19 : c - 38;
-                if (r === 16 && (c <= 8 || (c < 19 && mCol >= 8 && mCol <= 17))) type = 'space';
+            else if (r === 16) {
+                if (c < 18) type = 'space';
                 else type = 'h-rail';
             }
 
@@ -562,7 +559,7 @@ const COLS = 58;
                         topConn = (r > 2); 
                         bottomConn = (r < 16 && r !== 0 && r !== 1);
                         leftConn = (r >= 2 && r <= 13 || r === 0); 
-                        rightConn = (r === 0); // Row 1 Corridor
+                        rightConn = (r === 0 && c < COLS - 1); // Row 1 Corridor
                     }
                     if (r === 15 && (c === 18 || c === 37 || c === 56)) {
                         topConn = true;
@@ -627,9 +624,10 @@ const COLS = 58;
             else if (type === 'h-rail') {
                 const vertCols = [0, 18, 37, 56]; // Keep shafts 1, 19, 38, 57; remove 20, 39, 58
                 let hasLeft = (c !== 0);
+                if (r === 16 && c === 18) hasLeft = false;
                 let vType = 'full';
-                if (c === 9 || c === 28 || c === 47) {
-                    hasLeft = false; // Vẫn bắt đầu thanh rail từ Cột 10
+                if (c === 9) {
+                    hasLeft = false; // Bắt đầu đường ray chính ở các tầng trên
                 }
                 if (c === 18 || c === 37 || c === 56) {
                     if (r === 14 || r === 16) vType = 'top'; // Nối lên tại các tầng biên
@@ -685,13 +683,19 @@ const COLS = 58;
 
     // Shuttle Management
     const activeTimeouts = [];
+    const CELL_SIZE = 30;
+    const MOVE_STEP_MS = 350; // Time per cell step
+    const PAUSE_AT_PARKING_MS = 2000;
+
+    // Each module's 2 shuttles: 
+    //   Shuttle 1: left parking (modCol=0), Shuttle 2: right parking (modCol=18)
     const shuttles = [
-        { id: 'A1', mod: 'A', r: 9, c: 0 },
-        { id: 'A2', mod: 'A', r: 9, c: 18 },
-        { id: 'B1', mod: 'B', r: 9, c: 19 },
-        { id: 'B2', mod: 'B', r: 9, c: 37 },
-        { id: 'C1', mod: 'C', r: 9, c: 38 },
-        { id: 'C2', mod: 'C', r: 9, c: 56 }
+        { id: 'A1', mod: 'A', parkR: 9, parkC: 0,  leftC: 0,  rightC: 18 },
+        { id: 'A2', mod: 'A', parkR: 9, parkC: 18, leftC: 0,  rightC: 18 },
+        { id: 'B1', mod: 'B', parkR: 9, parkC: 19, leftC: 19, rightC: 37 },
+        { id: 'B2', mod: 'B', parkR: 9, parkC: 37, leftC: 19, rightC: 37 },
+        { id: 'C1', mod: 'C', parkR: 9, parkC: 38, leftC: 38, rightC: 56 },
+        { id: 'C2', mod: 'C', parkR: 9, parkC: 56, leftC: 38, rightC: 56 }
     ];
 
     function createShuttle(mod) {
@@ -700,7 +704,7 @@ const COLS = 58;
         shuttle.className = `shuttle-cargo shuttle-${mod}`;
         shuttle.innerHTML = SVG_SHUTTLE_LOADED_V;
         shuttle.style.position = 'absolute';
-        shuttle.style.transition = 'all 1.5s linear';
+        shuttle.style.transition = 'none';
         shuttle.style.width = '22px';
         shuttle.style.height = '30px';
         shuttle.style.zIndex = '100';
@@ -708,8 +712,7 @@ const COLS = 58;
         return shuttle;
     }
 
-    function setPosition(shuttle, r, c, vertical = true) {
-        const cellSize = 30;
+    function setShuttlePos(shuttle, r, c, vertical = true) {
         const w = vertical ? 22 : 30;
         const h = vertical ? 30 : 22;
         
@@ -717,36 +720,93 @@ const COLS = 58;
         shuttle.style.width = `${w}px`;
         shuttle.style.height = `${h}px`;
         
-        const x = c * cellSize + (cellSize - w) / 2;
-        const y = r * cellSize + (cellSize - h) / 2;
+        const x = c * CELL_SIZE + (CELL_SIZE - w) / 2;
+        const y = r * CELL_SIZE + (CELL_SIZE - h) / 2;
         shuttle.style.left = `${x}px`;
         shuttle.style.top = `${y}px`;
     }
 
+    // Build a cell-by-cell path that follows the rails
+    function buildShuttlePath(shuttleData) {
+        const { id, parkR, parkC, leftC, rightC } = shuttleData;
+        const path = [];
+        const isLeft = id.endsWith('1'); // Left parking shuttle
+
+        if (isLeft) {
+            // Shuttle 1 (left parking): 
+            // 1. From parking (r9, leftC) go UP along left corridor to r2
+            // 2. Turn right, go horizontal along row 2 from leftC to rightC
+            // 3. Turn down, go DOWN along right corridor from r2 to r14
+            // 4. Turn left, go horizontal along row 14 from rightC back to leftC
+            // 5. Go UP along left corridor from r14 back to parking r9
+
+            // Step 1: Up from parking to row 2
+            for (let r = parkR; r >= 2; r--) {
+                path.push({ r, c: leftC, v: true });
+            }
+            // Step 2: Right along row 2
+            for (let c = leftC + 1; c <= rightC; c++) {
+                path.push({ r: 2, c, v: false });
+            }
+            // Step 3: Down along right corridor to row 14
+            for (let r = 3; r <= 14; r++) {
+                path.push({ r, c: rightC, v: true });
+            }
+            // Step 4: Left along row 14 back to leftC
+            for (let c = rightC - 1; c >= leftC; c--) {
+                path.push({ r: 14, c, v: false });
+            }
+            // Step 5: Up from row 14 back to parking
+            for (let r = 13; r >= parkR; r--) {
+                path.push({ r, c: leftC, v: true });
+            }
+        } else {
+            // Shuttle 2 (right parking):
+            // 1. From parking (r9, rightC) go DOWN along right corridor to r14
+            // 2. Turn left, go horizontal along row 14 from rightC to leftC
+            // 3. Turn up, go UP along left corridor from r14 to r2
+            // 4. Turn right, go horizontal along row 2 from leftC to rightC
+            // 5. Go DOWN along right corridor from r2 back to parking r9
+
+            // Step 1: Down from parking to row 14
+            for (let r = parkR; r <= 14; r++) {
+                path.push({ r, c: rightC, v: true });
+            }
+            // Step 2: Left along row 14
+            for (let c = rightC - 1; c >= leftC; c--) {
+                path.push({ r: 14, c, v: false });
+            }
+            // Step 3: Up along left corridor to row 2
+            for (let r = 13; r >= 2; r--) {
+                path.push({ r, c: leftC, v: true });
+            }
+            // Step 4: Right along row 2
+            for (let c = leftC + 1; c <= rightC; c++) {
+                path.push({ r: 2, c, v: false });
+            }
+            // Step 5: Down from row 2 back to parking
+            for (let r = 3; r <= parkR; r++) {
+                path.push({ r, c: rightC, v: true });
+            }
+        }
+
+        return path;
+    }
+
+    async function sleep(ms) {
+        return new Promise(res => {
+            const t = setTimeout(res, ms);
+            activeTimeouts.push(t);
+        });
+    }
+
     async function runShuttleAnimation(shuttleData) {
         const shuttle = createShuttle(shuttleData.mod);
-        const { mod, r: startR, c: startC } = shuttleData;
-        const moveDelay = 1500;
-        
-        // Define paths for each shuttle to follow rails
-        let path = [];
-        if (shuttleData.id.endsWith('1')) { // Left side shuttles
-            path = [
-                { r: startR, c: startC, v: true },
-                { r: 2, c: startC, v: true },
-                { r: 2, c: startC + 18, v: false },
-                { r: 2, c: startC, v: false },
-                { r: startR, c: startC, v: true }
-            ];
-        } else { // Right side shuttles
-            path = [
-                { r: startR, c: startC, v: true },
-                { r: 14, c: startC, v: true },
-                { r: 14, c: startC - 18, v: false },
-                { r: 14, c: startC, v: false },
-                { r: startR, c: startC, v: true }
-            ];
-        }
+        const { mod } = shuttleData;
+        const path = buildShuttlePath(shuttleData);
+
+        // Initial position
+        setShuttlePos(shuttle, shuttleData.parkR, shuttleData.parkC, true);
 
         // Initial check for visibility
         const modOption = multiselect?.querySelector(`.option-item[data-value="${mod}"]`);
@@ -754,24 +814,20 @@ const COLS = 58;
             shuttle.style.display = 'none';
         }
 
+        // Enable smooth transition for movement
+        shuttle.style.transition = `left ${MOVE_STEP_MS}ms linear, top ${MOVE_STEP_MS}ms linear`;
+
         while (true) {
+            // Animate along each path step
             for (const step of path) {
-                setPosition(shuttle, step.r, step.c, step.v);
-                await new Promise(res => {
-                    const t = setTimeout(res, moveDelay);
-                    activeTimeouts.push(t);
-                });
+                setShuttlePos(shuttle, step.r, step.c, step.v);
+                await sleep(MOVE_STEP_MS);
             }
-            // Small pause at parking
-            await new Promise(res => {
-                const t = setTimeout(res, 3000);
-                activeTimeouts.push(t);
-            });
+            // Pause at parking spot
+            await sleep(PAUSE_AT_PARKING_MS);
         }
     }
 
-    // Start all shuttles
-    shuttles.forEach(runShuttleAnimation);
 
 
     // Zoom Logic
@@ -825,7 +881,7 @@ const COLS = 58;
                 
                 // Show success toast
                 if (typeof showToast === 'function') {
-                    showToast(`Hiển thị thông tin dữ liệu của ${selectedText}`, 'success');
+                    showToast(`Hiển thị thông tin của ${selectedText}`, 'success');
                 }
                 
                 console.log('Level Selected:', opt.dataset.value);
@@ -854,7 +910,7 @@ const COLS = 58;
                 
                 // Show success toast if becoming active
                 if (opt.classList.contains('active') && typeof showToast === 'function') {
-                    showToast(`Hiển thị thông tin dữ liệu của ${opt.querySelector('.label-text').innerText}`, 'success');
+                    showToast(`Hiển thị thông tin  của ${opt.querySelector('.label-text').innerText}`, 'success');
                 }
 
                 updateAllOptionState();
@@ -876,7 +932,7 @@ const COLS = 58;
                     
                     // Show success toast for "All"
                     if (typeof showToast === 'function') {
-                        showToast('Hiển thị thông tin dữ liệu của Tất cả module', 'success');
+                        showToast('Hiển thị thông tin  của Tất cả module', 'success');
                     }
                 }
                 updateMultiselectText();
@@ -936,7 +992,320 @@ const COLS = 58;
         
         // Initial sync
         updateMapVisibility();
+
+        // Start all shuttles (must be after multiselect is declared)
+        shuttles.forEach(runShuttleAnimation);
+
+        // ═══════════════════════════════════════════════════
+        //  FULLSCREEN LOGIC
+        // ═══════════════════════════════════════════════════
+        const btnFs = document.getElementById('btn-fullscreen');
+        if (btnFs) {
+            btnFs.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.error(`Erroring fullscreen: ${err.message}`);
+                    });
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+            });
+
+            // Update icon when fullscreen state changes (handles Esc key too)
+            document.addEventListener('fullscreenchange', () => {
+                if (document.fullscreenElement) {
+                    btnFs.innerHTML = '<i class="fa-solid fa-compress"></i>';
+                } else {
+                    btnFs.innerHTML = '<i class="fa-solid fa-expand"></i>';
+                }
+            });
+        }
+
     }
+
+    // ═══════════════════════════════════════════════════
+    //  POPULATE 4 DASHBOARD CARDS (reused from traceIO)
+    // ═══════════════════════════════════════════════════
+    (function populateDashboardCards() {
+        // --- Helper: Render Tabs ---
+        function renderTabs(containerId, tabs, onTabClick) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            // Generate HTML
+            container.innerHTML = tabs.map((tab, i) => `
+                <div class="nl-tab-item ${tab.active ? 'active' : ''}" data-status="${tab.status}">
+                    <span class="nl-tab-label">${tab.label}</span>
+                </div>
+            `).join('');
+
+            // Add Events
+            container.querySelectorAll('.nl-tab-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    container.querySelectorAll('.nl-tab-item').forEach(t => t.classList.remove('active'));
+                    item.classList.add('active');
+                    onTabClick(item.dataset.status);
+                });
+            });
+        }
+
+        // Card 1: Command List
+        const cmdCard = document.querySelector('.nl-panel-card:nth-child(1)');
+        const cmdList = document.getElementById('nlCmdList');
+        if (cmdCard && cmdList) {
+            // Data
+            const commands = [
+                { status: 'waiting', type: 'in', code: 'CMD-28240801', product: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', sku: 'MAT-001', pallet: 'PLT-00142' },
+                { status: 'active', type: 'out', code: 'CMD-28240802', product: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', sku: 'MAT-002', pallet: 'PLT-00098' },
+                { status: 'done', type: 'in', code: 'CMD-28240803', product: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', sku: 'MAT-003', pallet: 'PLT-00261' },
+                { status: 'error', type: 'out', code: 'CMD-28240804', product: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', sku: 'MAT-004', pallet: 'PLT-00055' },
+                { status: 'waiting', type: 'in', code: 'CMD-28240805', product: 'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA', sku: 'MAT-005', pallet: 'PLT-00318' },
+                { status: 'active', type: 'in', code: 'CMD-28240806', product: 'Chuối Trung Quốc/ Chinese bananas - CL - DASANG', sku: 'MAT-007', pallet: 'PLT-00450' },
+            ];
+
+            // Inject tab container if needed
+            let tabsContainer = document.getElementById('nlCmdTabs');
+            if (!tabsContainer) {
+                tabsContainer = document.createElement('div');
+                tabsContainer.id = 'nlCmdTabs';
+                tabsContainer.className = 'nl-card-tabs';
+                cmdList.parentNode.insertBefore(tabsContainer, cmdList);
+            }
+
+            const updateCmdList = (status) => {
+                const filtered = status === 'all' ? commands : commands.filter(c => c.status === status);
+                cmdList.innerHTML = filtered.map(cmd => `
+                    <div class="nl-cmd-item ${cmd.status === 'active' ? 'active' : ''}">
+                        <div class="nl-cmd-dot" style="background: ${cmd.status === 'error' ? '#ef4444' : cmd.status === 'done' ? '#10b981' : '#3b82f6'}"></div>
+                        <div class="nl-cmd-body">
+                            <div class="nl-cmd-top-row">
+                                <span class="nl-cmd-tag ${cmd.type === 'in' ? 'nl-tag-in' : 'nl-tag-out'}">${cmd.type === 'in' ? 'Nhập kho' : 'Xuất kho'}</span>
+                                <span class="nl-cmd-code">${cmd.code}</span>
+                            </div>
+                            <div class="nl-cmd-product">${cmd.product}</div>
+                        </div>
+                        <span class="nl-cmd-pallet">${cmd.pallet}</span>
+                    </div>
+                `).join('');
+            };
+
+            const cmdTabs = [
+                { label: `Tất cả (${commands.length})`, status: 'all', active: true },
+                { label: `Đang chờ (${commands.filter(c => c.status === 'waiting').length})`, status: 'waiting' },
+                { label: `Đang thực hiện (${commands.filter(c => c.status === 'active').length})`, status: 'active' },
+                { label: `Hoàn thành (${commands.filter(c => c.status === 'done').length})`, status: 'done' },
+                { label: `Lỗi (${commands.filter(c => c.status === 'error').length})`, status: 'error' },
+            ];
+
+            renderTabs('nlCmdTabs', cmdTabs, updateCmdList);
+            updateCmdList('all'); // Initial view to 'all' as requested
+        }
+
+        // Card 2: Log List (unchanged but re-populated)
+        const logList = document.getElementById('nlLogList');
+        if (logList) {
+            const logs = [
+                { time: '09:15:21', icon: '✓', msg: 'Shuttle S2 bỏ pallet vào vị trí <span class="loc">3-D4</span> thành công', type: 'ok' },
+                { time: '09:16:03', icon: '🚗', msg: 'AMR-01 đã đưa pallet <span class="loc">PLT-00098</span> tới trạm nhập kho', type: 'amr' },
+                { time: '09:16:18', icon: '⬆', msg: 'Lifter L2 lấy pallet thành công', type: 'lift' },
+                { time: '09:16:29', icon: '⬆', msg: 'Lifter L2 đưa tới tầng <span class="loc">1</span> thành công', type: 'lift' },
+                { time: '09:16:37', icon: '→', msg: 'Shuttle S1 di chuyển tới vị trí Lifter để lấy hàng', type: 'shut' },
+                { time: '09:16:44', icon: '✓', msg: 'Shuttle S1 lấy pallet thành công', type: 'ok' },
+                { time: '09:16:52', icon: '→', msg: 'Shuttle S1 di chuyển tới vị trí đích', type: 'shut' },
+                { time: '09:17:01', icon: '✓', msg: 'Shuttle S1 bỏ pallet vào vị trí <span class="loc">1-B2</span> thành công', type: 'ok' },
+            ];
+            logList.innerHTML = logs.map((log, i) => `
+                <div class="nl-log-row">
+                    <span class="nl-log-time">${log.time}</span>
+                    <span class="nl-log-icon">${log.icon}</span>
+                    <span class="nl-log-msg">${log.msg}</span>
+                </div>
+                ${i < logs.length - 1 ? '<div class="nl-log-divider"></div>' : ''}
+            `).join('');
+        }
+
+        // Card 3: Activity List (With Status Tabs)
+        const activityList = document.getElementById('nlActivityList');
+        if (activityList) {
+            const activities = [];
+            // Statuses for simulation
+            const statuses = ['active', 'inactive', 'error'];
+            
+            for(let i=1; i<=14; i++) {
+                let status = i % 8 === 0 ? 'error' : i % 3 === 0 ? 'inactive' : 'active';
+                let mission = status === 'active' ? (i % 2 === 0 ? 'Nhiệm vụ: Lệnh xuất hàng' : 'Nhiệm vụ: Lệnh nhập hàng') : 
+                              status === 'error' ? 'Nhiệm vụ: Lỗi cảm biến hành trình' : 'Nhiệm vụ: Đang chờ lệnh';
+                let battery = i === 6 ? 15 : i === 12 ? 18 : Math.floor(Math.random() * (95 - 40 + 1)) + 40;
+                activities.push({ name: `Shuttle ${i.toString().padStart(2, '0')}`, type: 'shuttle', mission, battery, status });
+            }
+            for(let i=1; i<=6; i++) {
+                let status = i % 5 === 0 ? 'error' : 'active';
+                let mission = status === 'active' ? 'Nhiệm vụ: Đang hoạt động bình thường' : 'Nhiệm vụ: Lỗi phanh khẩn cấp';
+                activities.push({ name: `Lifter ${i.toString().padStart(2, '0')}`, type: 'lifter', mission, battery: 95, status });
+            }
+
+            // Inject tab container
+            let tabsContainer = document.getElementById('nlActTabs');
+            if (!tabsContainer) {
+                tabsContainer = document.createElement('div');
+                tabsContainer.id = 'nlActTabs';
+                tabsContainer.className = 'nl-card-tabs';
+                activityList.parentNode.insertBefore(tabsContainer, activityList);
+            }
+
+            const updateActList = (status) => {
+                const filtered = status === 'all' ? activities : activities.filter(a => a.status === status);
+                activityList.innerHTML = filtered.map(act => {
+                    const statusClass = act.status === 'error' ? 'nl-status-warning' : (act.status === 'inactive' ? '' : 'nl-status-success');
+                    const batIcon = act.battery < 20 ? 'fa-solid fa-battery-quarter' : 'fa-solid fa-battery-full';
+                    const icon = act.type === 'shuttle' ? 'fa-solid fa-shuttle-space' : 'fa-solid fa-elevator';
+                    
+                    return `
+                    <div class="nl-act-item ${statusClass}" style="${act.status === 'inactive' ? 'opacity: 0.6; background: #f1f5f9; border-left: 4px solid #94a3b8;' : ''}">
+                        <div class="nl-act-icon-box" style="${act.status === 'inactive' ? 'border-color: #94a3b8;' : ''}">
+                            <i class="${icon}" style="${act.status === 'inactive' ? 'color: #94a3b8;' : ''}"></i>
+                        </div>
+                        <div class="nl-act-content">
+                            <div class="nl-act-top">
+                                <span class="nl-act-name" style="${act.status === 'inactive' ? 'color: #64748b;' : ''}">${act.name}</span>
+                                <div class="nl-act-battery-badge" style="${act.status === 'inactive' ? 'border-color: #94a3b8;' : ''}">
+                                    <i class="${batIcon}" style="${act.status === 'inactive' ? 'color: #94a3b8;' : ''}"></i>
+                                    <span class="nl-act-battery-text" style="${act.status === 'inactive' ? 'color: #64748b;' : ''}">${act.battery}%</span>
+                                </div>
+                            </div>
+                            <div class="nl-act-mission">
+                                <i class="fa-solid fa-bullhorn"></i>
+                                <span class="nl-act-mission-text">${act.mission}</span>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            };
+
+            const actTabs = [
+                { label: `Tất cả (${activities.length})`, status: 'all', active: true },
+                { label: `Hoạt động (${activities.filter(a => a.status === 'active').length})`, status: 'active' },
+                { label: `Không hoạt động (${activities.filter(a => a.status === 'inactive').length})`, status: 'inactive' },
+                { label: `Lỗi (${activities.filter(a => a.status === 'error').length})`, status: 'error' },
+            ];
+
+            renderTabs('nlActTabs', actTabs, updateActList);
+            updateActList('all'); // Initial view
+        }
+
+        // Card 4: Stats (V2 Design)
+        const statsCard = document.getElementById('nlStatsCard');
+        if (statsCard) {
+            statsCard.innerHTML = `
+                <div class="nl-stats-v3">
+                    <div class="nl-pie-and-acc-row">
+                        <!-- Left: Smaller Pie Chart -->
+                        <div class="nl-pie-side">
+                            <div class="nl-pie-small">
+                                <div class="nl-pie-small-fill"></div>
+                                <div class="nl-pie-small-center">
+                                    <span class="nl-pie-val">80</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Accordions -->
+                        <div class="nl-acc-side">
+                            <!-- Inbound Accordion -->
+                            <div class="nl-acc-item active" id="acc-inbound">
+                                <div class="nl-acc-header">
+                                    <div class="nl-acc-dot dot-in"></div>
+                                    <span class="nl-acc-title">Nhập hàng</span>
+                                    <span class="nl-acc-count">40</span>
+                                </div>
+                                <div class="nl-acc-content">
+                                    <div class="nl-acc-inner">
+                                        <div class="nl-tree-line-wrapper">
+                                            <div class="nl-tree-line-v"></div>
+                                            <div class="nl-tree-items">
+                                                ${[
+                                                    { name: 'Khu vực chứa chuối TQ A456', val: '04' },
+                                                    { name: 'Khu vực chứa chuối TQ CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối TQ A789', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật RCL', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 28LY', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 33CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 35CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 38CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 40CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 35CLD', val: '04' }
+                                                ].map((item, idx) => `
+                                                <div class="nl-tree-item ${idx === 1 ? 'active' : ''}">
+                                                    <div class="nl-tree-line-h"></div>
+                                                    <span class="nl-tree-name">${item.name}</span>
+                                                    <span class="nl-tree-val">${item.val}</span>
+                                                </div>`).join('')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Outbound Accordion -->
+                            <div class="nl-acc-item" id="acc-outbound">
+                                <div class="nl-acc-header">
+                                    <div class="nl-acc-dot dot-out"></div>
+                                    <span class="nl-acc-title">Xuất hàng</span>
+                                    <span class="nl-acc-count">40</span>
+                                </div>
+                                <div class="nl-acc-content">
+                                    <div class="nl-acc-inner">
+                                        <div class="nl-tree-line-wrapper">
+                                            <div class="nl-tree-line-v"></div>
+                                            <div class="nl-tree-items">
+                                                ${[
+                                                    { name: 'Khu vực chứa chuối Nhật 28CP', val: '05' },
+                                                    { name: 'Khu vực chứa chuối Nhật 36CP', val: '05' },
+                                                    { name: 'Khu vực chứa chuối Nhật 30CP', val: '05' },
+                                                    { name: 'Khu vực chứa chuối Nhật 38CP', val: '05' },
+                                                    { name: 'Khu vực chứa chuối Nhật B5', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật B6', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 33CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 28H', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 43 CP', val: '04' }
+                                                ].map((item, idx) => `
+                                                <div class="nl-tree-item">
+                                                    <div class="nl-tree-line-h"></div>
+                                                    <span class="nl-tree-name">${item.name}</span>
+                                                    <span class="nl-tree-val">${item.val}</span>
+                                                </div>`).join('')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Accordion Logic
+            const headers = statsCard.querySelectorAll('.nl-acc-header');
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const item = header.parentElement;
+                    const isActive = item.classList.contains('active');
+                    
+                    // Close others
+                    statsCard.querySelectorAll('.nl-acc-item').forEach(acc => {
+                        acc.classList.remove('active');
+                    });
+
+                    // Toggle current
+                    if (!isActive) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        }
+    })();
 
     // Register cleanup function
     window.destroyModule = function() {

@@ -295,8 +295,8 @@ function loadPage(title) {
         'Quy cách': 'modules/master-data/method/method.html',
         'Quy cách sản phẩm': 'modules/product-method/product-method.html',
         'Báo cáo Nhập/Xuất': 'modules/statistic/statistic.html',
-        'Giám sát hoạt động': 'modules/wcs/traceIO/traceio.html',
-        'Giao diện kho mới': 'modules/new-layout/new.html',
+        'Giám sát hoạt động': 'modules/new-layout/new.html',
+        // 'Giao diện kho mới': 'modules/new-layout/new.html',
         'Quản lý lô hàng': 'modules/batch/batch.html',
         'Nhóm vật chứa': 'modules/master-data/container-group/container-group.html',
         'Loại xe': 'modules/bus/bus.html',
@@ -982,10 +982,10 @@ document.addEventListener('DOMContentLoaded', initFactorySelector);
 
 /* Notification Logic */
 let notifications = [
-    { id: 1, title: 'Cảnh báo tồn kho', desc: 'sản phẩm VT001 sắp hết hàng (còn 5)', time: '10 phút trước', read: false },
-    { id: 2, title: 'Nhập kho thành công', desc: 'Phiếu nhập PN005 đã được xác nhận', time: '1 giờ trước', read: false },
-    { id: 3, title: 'Bảo trì hệ thống', desc: 'Hệ thống sẽ bảo trì vào 22:00 hôm nay', time: '2 giờ trước', read: true },
-    { id: 4, title: 'Yêu cầu phê duyệt', desc: 'Có 2 lệnh xuất kho chờ duyệt', time: '5 giờ trước', read: true }
+    { id: 1, title: 'Cảnh báo tồn kho', desc: 'Sản phẩm Chuối Trung Quốc - A456 - TROPICAL sắp hết hàng (còn 5 thùng)', time: '10 phút trước', read: false },
+    { id: 2, title: 'Nhập kho thành công', desc: 'Phiếu nhập PN005 (Chuối Nhật Bản - 26CP - DEL MONTE) đã được xác nhận', time: '1 giờ trước', read: false },
+    { id: 3, title: 'Bảo trì hệ thống', desc: 'Hệ thống Robot sẽ bảo trì vào 22:00 hôm nay', time: '2 giờ trước', read: true },
+    { id: 4, title: 'Yêu cầu phê duyệt', desc: 'Có 2 lệnh xuất kho chuối chờ duyệt', time: '5 giờ trước', read: true }
 ];
 
 function initNotifications() {

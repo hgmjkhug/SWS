@@ -9,70 +9,235 @@
 
     // Mock Data categories (sync with category.js)
     // Mock Data categories (sync with the fruit theme)
-    var categoryData = [
-        { code: 'NS01', name: 'Chuối tươi nội địa' },
-        { code: 'NS02', name: 'Chuối xuất khẩu' },
-        { code: 'NS03', name: 'Chuối sấy & Chế biến' },
-        { code: 'NS04', name: 'Chuối giống & Kiểng' },
-        { code: 'NS05', name: 'Phụ phẩm từ chuối' }
+    const bananaData = [
+        {
+            "dong_san_pham": "Chuối Trung Quốc/ Chinese bananas",
+            "categories": [
+                {
+                    "pham_cap": "A456",
+                    "products": [
+                        { "stt": 1, "loai_thung": "TROPICAL" },
+                        { "stt": 2, "loai_thung": "SOFIA" },
+                        { "stt": 3, "loai_thung": "FRUIT WHARF" },
+                        { "stt": 4, "loai_thung": "DASANG" }
+                    ]
+                },
+                {
+                    "pham_cap": "A789",
+                    "products": [
+                        { "stt": 5, "loai_thung": "TROPICAL" },
+                        { "stt": 6, "loai_thung": "SOFIA" }
+                    ]
+                },
+                {
+                    "pham_cap": "B456",
+                    "products": [
+                        { "stt": 7, "loai_thung": "TROPICAL" },
+                        { "stt": 8, "loai_thung": "SOFIA" }
+                    ]
+                },
+                {
+                    "pham_cap": "B789",
+                    "products": [
+                        { "stt": 9, "loai_thung": "TROPICAL" },
+                        { "stt": 10, "loai_thung": "SOFIA" }
+                    ]
+                },
+                {
+                    "pham_cap": "CL",
+                    "products": [
+                        { "stt": 11, "loai_thung": "DASANG" }
+                    ]
+                },
+                {
+                    "pham_cap": "16CP",
+                    "products": [
+                        { "stt": 12, "loai_thung": "XINFADIN" },
+                        { "stt": 13, "loai_thung": "SEIKA" }
+                    ]
+                },
+                {
+                    "pham_cap": "CP",
+                    "products": [
+                        { "stt": 14, "loai_thung": "TROPICAL" }
+                    ]
+                }
+            ]
+        },
+        {
+            "dong_san_pham": "Chuối Nhật Bản/ Japanese bananas",
+            "categories": [
+                {
+                    "pham_cap": "14CP",
+                    "products": [
+                        { "stt": 15, "loai_thung": "XINFADIN" }
+                    ]
+                },
+                {
+                    "pham_cap": "16CP",
+                    "products": [
+                        { "stt": 16, "loai_thung": "XINFADIN" },
+                        { "stt": 17, "loai_thung": "SEIKA" }
+                    ]
+                },
+                {
+                    "pham_cap": "26CP",
+                    "products": [
+                        { "stt": 18, "loai_thung": "XINFADIN" },
+                        { "stt": 19, "loai_thung": "SEIKA" },
+                        { "stt": 20, "loai_thung": "DEL MONTE" }
+                    ]
+                },
+                {
+                    "pham_cap": "35CLD",
+                    "products": [
+                        { "stt": 21, "loai_thung": "XINFADIN" }
+                    ]
+                },
+                {
+                    "pham_cap": "18CP",
+                    "products": [
+                        { "stt": 22, "loai_thung": "SEIKA" }
+                    ]
+                },
+                {
+                    "pham_cap": "28CP",
+                    "products": [
+                        { "stt": 23, "loai_thung": "SEIKA" },
+                        { "stt": 24, "loai_thung": "DEL MONTE" }
+                    ]
+                },
+                {
+                    "pham_cap": "30CP",
+                    "products": [
+                        { "stt": 25, "loai_thung": "SEIKA" },
+                        { "stt": 26, "loai_thung": "DEL MONTE" }
+                    ]
+                },
+                {
+                    "pham_cap": "36CP",
+                    "products": [
+                        { "stt": 27, "loai_thung": "SEIKA" }
+                    ]
+                },
+                {
+                    "pham_cap": "38CP",
+                    "products": [
+                        { "stt": 28, "loai_thung": "SEIKA" },
+                        { "stt": 29, "loai_thung": "DEL MONTE" },
+                        { "stt": 30, "loai_thung": "SHIMIZU" }
+                    ]
+                },
+                {
+                    "pham_cap": "40CP",
+                    "products": [
+                        { "stt": 31, "loai_thung": "SEIKA" },
+                        { "stt": 32, "loai_thung": "NHẬT TRƠN" },
+                        { "stt": 33, "loai_thung": "TAITO" }
+                    ]
+                },
+                {
+                    "pham_cap": "43CP",
+                    "products": [
+                        { "stt": 34, "loai_thung": "SEIKA" },
+                        { "stt": 35, "loai_thung": "MAINICHI" }
+                    ]
+                },
+                {
+                    "pham_cap": "B5",
+                    "products": [
+                        { "stt": 36, "loai_thung": "SEIKA 13KG" }
+                    ]
+                },
+                {
+                    "pham_cap": "B6",
+                    "products": [
+                        { "stt": 37, "loai_thung": "SEIKA 13KG" },
+                        { "stt": 38, "loai_thung": "DELMONTE 13KG" }
+                    ]
+                },
+                {
+                    "pham_cap": "33CP",
+                    "products": [
+                        { "stt": 39, "loai_thung": "SEIKA 13KG" },
+                        { "stt": 40, "loai_thung": "DEL MONTE" }
+                    ]
+                },
+                {
+                    "pham_cap": "28LY",
+                    "products": [
+                        { "stt": 41, "loai_thung": "DEL MONTE" }
+                    ]
+                },
+                {
+                    "pham_cap": "35CP",
+                    "products": [
+                        { "stt": 42, "loai_thung": "DEL MONTE" }
+                    ]
+                },
+                {
+                    "pham_cap": "RCL",
+                    "products": [
+                        { "stt": 43, "loai_thung": "DEL MONTE" }
+                    ]
+                },
+                {
+                    "pham_cap": "6 NẢI",
+                    "products": [
+                        { "stt": 44, "loai_thung": "DELMONTE 13KG" }
+                    ]
+                },
+                {
+                    "pham_cap": "7 NẢI",
+                    "products": [
+                        { "stt": 45, "loai_thung": "DELMONTE 13KG" }
+                    ]
+                },
+                {
+                    "pham_cap": "8 NẢI",
+                    "products": [
+                        { "stt": 46, "loai_thung": "DELMONTE 13KG" }
+                    ]
+                },
+                {
+                    "pham_cap": "10CP",
+                    "products": [
+                        { "stt": 47, "loai_thung": "DEL MONTE" }
+                    ]
+                },
+                {
+                    "pham_cap": "28H",
+                    "products": [
+                        { "stt": 48, "loai_thung": "DEL MONTE" }
+                    ]
+                }
+            ]
+        }
     ];
 
-
-    // Mock Data - Mechanical Products
-    // Products mapping to categories: KC01 (Kim khí), KC02 (Cắt gọt), KC03 (Cầm tay), KC04 (Hàn), etc.
-    // Mock Data - Agricultural Products (Exact List)
-    const productNames = [
-        "TROPICAL", "TROPICAL", "TROPICAL", "TROPICAL", "TROPICAL",
-        "TROPICAL 18KG", "TROPICAL LẺ", "TROPICAL LẺ",
-        "SOFIA", "SOFIA", "SOFIA", "SOFIA", "SOFIA",
-        "FRUIT WHARF", "FRUIT WHARF", "FRUIT WHARF", "FRUIT WHARF", "FRUIT WHARF",
-        "DASANG LẺ", "DASANG LẺ", "DASANG", "DASANG", "DASANG", "DASANG", "DASANG",
-        "SUN BANANA", "SUN BANANA", "SUN BANANA", "SUN BANANA", "SUN BANANA",
-        "SISTER", "SISTER", "SISTER", "SISTER", "SISTER",
-        "JIHAO", "JIHAO", "JIHAO", "JIHAO", "JIHAO",
-        "GAIER", "GAIER", "GAIER", "GAIER", "GAIER",
-        "XINFADIN 14CP", "XINFADIN 16CP", "XINFADIN 26CP", "XINFADIN 35CLD",
-        "SEIKA 16CP", "SEIKA 18CP", "SEIKA 26CP", "SEIKA 28CP", "SEIKA 30CP",
-        "SEIKA 36CP", "SEIKA 38CP", "SEIKA 40CP", "SEIKA 43CP",
-        "SEIKA 13KG (5 NẢI)", "SEIKA 13KG (6 NẢI)", "SEIKA 13KG (28 CP)", "SEIKA 13KG (33 CP)",
-        "DEL MONTE 28LY", "DEL MONTE 28CP", "DEL MONTE 30CP", "DEL MONTE 33CP",
-        "DEL MONTE 35CP", "DEL MONTE 38CP", "DEL MONTE RCL",
-        "DELMONTE 13KG (6 NẢI)", "DELMONTE 13KG (7 NẢI)", "DELMONTE 13KG (8 NẢI)",
-        "DEL MONTE 10CP", "DEL MONTE 28H",
-        "NHẬT TRƠN 40CP", "TAITO 40CP", "SHIMIZU 38CP", "MAINICHI 43CP",
-        "XINFADIN 14CP", "XINFADIN 16CP", "XINFADIN 26CP", "XINFADIN 35CLD",
-        "SEIKA 16CP", "SEIKA 18CP", "SEIKA 26CP", "SEIKA 28CP", "SEIKA 30CP",
-        "SEIKA 36CP", "SEIKA 38CP", "SEIKA 40CP", "SEIKA 43CP",
-        "SEIKA 13KG (5 NẢI)", "SEIKA 13KG (6 NẢI)", "SEIKA 13KG (28 CP)", "SEIKA 13KG (33 CP)",
-        "DEL MONTE 28LY", "DEL MONTE 28CP", "DEL MONTE 30CP", "DEL MONTE 33CP",
-        "DEL MONTE 35CP", "DEL MONTE 38CP", "DEL MONTE RCL",
-        "DELMONTE 13KG (6 NẢI)", "DELMONTE 13KG (7 NẢI)", "DELMONTE 13KG (8 NẢI)",
-        "DEL MONTE 10CP", "DEL MONTE 28H",
-        "NHẬT TRƠN 40CP", "TAITO 40CP", "SHIMIZU 38CP", "MAINICHI 43CP"
-    ];
-
-    let products = productNames.map((name, idx) => {
-        const id = (idx + 1).toString().padStart(3, '0');
-        const groups = ['NS01', 'NS02', 'NS03', 'NS04', 'NS05'];
-        const group = groups[idx % groups.length];
-        const units = ['Thùng', 'Kg', 'Nải', 'Cái'];
-        const unit = units[idx % units.length];
-        
-        return {
-            id: `uuid-prod-${id}`,
-            code: `VT${id}`,
-            name: name,
-            group: group,
-            unit: unit,
-            weight: (Math.random() * 0.5 + 0.1),
-            exportMethod: 'FIFO',
-            description: `Sản phẩm ${name} chất lượng cao`,
-            status: 1,
-            qr_code: `QR${id}`,
-            is_deleted: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-        };
+    let products = [];
+    bananaData.forEach(line => {
+        line.categories.forEach(cat => {
+            cat.products.forEach(p => {
+                const id = p.stt.toString().padStart(3, '0');
+                const fullName = `${line.dong_san_pham} - ${cat.pham_cap} - ${p.loai_thung}`;
+                products.push({
+                    id: `uuid-prod-${id}`,
+                    code: `VT${id}`,
+                    name: fullName,
+                    group: cat.pham_cap,
+                    unit: 'Thùng',
+                    weight: (Math.random() * 0.5 + 13), // Adjusted weight to ~13kg
+                    exportMethod: 'FIFO',
+                    description: `Sản phẩm ${fullName} chất lượng cao`,
+                    status: 1,
+                    qr_code: `QR${id}`,
+                    is_deleted: false,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                });
+            });
+        });
     });
 
     function getCurrentWarehouse() {
@@ -742,8 +907,8 @@
     window.downloadSampleFile = function () {
         const sampleData = [
             ['Mã vật tư', 'Tên vật tư', 'Mô tả', 'Khối lượng (kg)', 'Mã QR', 'Trạng thái (1=HĐ, 0=Ngừng)'],
-            ['SP0100', 'Bulong M10x30', 'Bulong thép mạ kẽm', 0.05, 'QR-SP0100', 1],
-            ['SP0101', 'Đai ốc M10', 'Đai ốc thép không gỉ', 0.02, 'QR-SP0101', 1]
+            ['VT001', 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', 'Thùng chuối 13kg', 13.5, 'QR001', 1],
+            ['VT002', 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', 'Thùng chuối 15kg', 15.2, 'QR002', 1]
         ];
 
         const ws = XLSX.utils.aoa_to_sheet(sampleData);
