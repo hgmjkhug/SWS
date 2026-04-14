@@ -216,8 +216,19 @@
     ];
 
     let products = [];
+    window.masterCategoryData = [];
+
     bananaData.forEach(line => {
+        const linePrefix = line.dong_san_pham.split('/')[0].trim();
         line.categories.forEach(cat => {
+            // Collect category info for filters/displays
+            if (!window.masterCategoryData.find(c => c.code === cat.pham_cap)) {
+                window.masterCategoryData.push({
+                    code: cat.pham_cap,
+                    name: `${linePrefix} - ${cat.pham_cap}`
+                });
+            }
+
             cat.products.forEach(p => {
                 const id = p.stt.toString().padStart(3, '0');
                 const fullName = `${line.dong_san_pham} - ${cat.pham_cap} - ${p.loai_thung}`;
@@ -279,7 +290,7 @@
         const filterMenu = document.getElementById('group-filter-menu');
         if (filterMenu) {
             let items = `<div class="custom-dropdown-item selected" onclick="selectFilterOption('group', '', 'Tất cả nhóm')">Tất cả nhóm</div>`;
-            categoryData.forEach(cat => {
+            window.masterCategoryData.forEach(cat => {
                 items += `<div class="custom-dropdown-item" onclick="selectFilterOption('group', '${cat.code}', '${cat.name}')">${cat.name}</div>`;
             });
             filterMenu.innerHTML = items;
@@ -289,7 +300,7 @@
         const modalMenu = document.getElementById('group-dropdown-menu');
         if (modalMenu) {
             modalMenu.innerHTML = '';
-            categoryData.forEach(cat => {
+            window.masterCategoryData.forEach(cat => {
                 const item = document.createElement('div');
                 item.className = 'custom-dropdown-item';
                 item.innerText = cat.name;
@@ -392,7 +403,7 @@
             tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 20px; color: #64748b;">Không tìm thấy dữ liệu</td></tr>';
         } else {
             pageData.forEach((item, idx) => {
-                const groupName = categoryData.find(c => c.code === item.group)?.name || item.group || 'N/A';
+                const groupName = window.masterCategoryData.find(c => c.code === item.group)?.name || item.group || 'N/A';
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -534,7 +545,8 @@
 
     // Helper for Vietnamese search
     const normalizeString = (str) => {
-        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        if (!str) return '';
+        return str.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
     };
 
     const unitOptions = ['Cái', 'Hộp', 'Thùng', 'Cuộn', 'Kg', 'Mét', 'Lít', 'Bộ', 'Viên', 'Phuy', 'Chai', 'Lon', 'Bao', 'Tấm', 'Đôi', 'Gói'];
@@ -543,18 +555,30 @@
         const list = document.getElementById('group-items-list');
         if (!list) return;
 
-        const searchTerm = normalizeString(filter);
-        const filtered = categoryData.filter(c => 
-            normalizeString(c.name).includes(searchTerm)
-        );
+        // Use a very simple but effective normalization
+        const query = filter.toString().toLowerCase().trim();
+        const searchTerm = normalizeString(query);
+        
+        const data = window.masterCategoryData || [];
+        
+        const filtered = !query ? data : data.filter(c => {
+            const name = (c.name || '').toString().toLowerCase();
+            const code = (c.code || '').toString().toLowerCase();
+            
+            // Check both original and normalized versions for maximum compatibility
+            return name.includes(query) || 
+                   code.includes(query) || 
+                   normalizeString(name).includes(searchTerm) || 
+                   normalizeString(code).includes(searchTerm);
+        });
         
         if (filtered.length === 0) {
-            list.innerHTML = '<div class="no-results">Không tìm thấy nhóm</div>';
+            list.innerHTML = '<div class="no-results" style="padding: 12px; color: #94a3b8; text-align: center; font-style: italic;">Không tìm thấy nhóm sản phẩm</div>';
             return;
         }
 
         list.innerHTML = filtered.map(c => `
-            <div class="custom-dropdown-item" onclick="selectGroup('${c.code}', '${c.name}')">
+            <div class="custom-dropdown-item" onclick="selectGroup('${c.code}', '${c.name.replace(/'/g, "\\'")}')">
                 ${c.name}
             </div>
         `).join('');
@@ -564,13 +588,15 @@
         const list = document.getElementById('unit-items-list');
         if (!list) return;
 
-        const searchTerm = normalizeString(filter);
-        const filtered = unitOptions.filter(u => 
-            normalizeString(u).includes(searchTerm)
-        );
+        const query = filter.toString().toLowerCase().trim();
+        const searchTerm = normalizeString(query);
+        const filtered = !query ? unitOptions : unitOptions.filter(u => {
+            const val = u.toString().toLowerCase();
+            return val.includes(query) || normalizeString(val).includes(searchTerm);
+        });
 
         if (filtered.length === 0) {
-            list.innerHTML = '<div class="no-results">Không tìm thấy ĐVT</div>';
+            list.innerHTML = '<div class="no-results" style="padding: 12px; color: #94a3b8; text-align: center; font-style: italic;">Không tìm thấy ĐVT</div>';
             return;
         }
 
@@ -581,14 +607,17 @@
         `).join('');
     };
 
-    window.filterGroupItems = function (query) {
-        if (!query) document.getElementById('prod-group').value = '';
-        window.renderGroupItems(query);
+    window.filterGroupItems = function (val) {
+        // Ensure we always have the latest value if passed incorrectly
+        const inputVal = val !== undefined ? val : (document.getElementById('group-search-input')?.value || '');
+        if (!inputVal) document.getElementById('prod-group').value = '';
+        window.renderGroupItems(inputVal);
     };
 
-    window.filterUnitItems = function (query) {
-        if (!query) document.getElementById('prod-unit').value = '';
-        window.renderUnitItems(query);
+    window.filterUnitItems = function (val) {
+        const inputVal = val !== undefined ? val : (document.getElementById('unit-search-input')?.value || '');
+        if (!inputVal) document.getElementById('prod-unit').value = '';
+        window.renderUnitItems(inputVal);
     };
 
     // Product Modal
@@ -619,7 +648,7 @@
                 
                 // Set Group Search Input
                 const gVal = prod.group || '';
-                const gName = categoryData.find(c => c.code === gVal)?.name || '';
+                const gName = window.masterCategoryData.find(c => c.code === gVal)?.name || '';
                 document.getElementById('prod-group').value = gVal;
                 if (gSearchInput) gSearchInput.value = gName;
 
@@ -735,6 +764,16 @@
 
         if (!name) {
             alert('Vui lòng nhập tên sản phẩm');
+            return;
+        }
+
+        if (!group) {
+            alert('Vui lòng chọn nhóm sản phẩm');
+            return;
+        }
+
+        if (!unit) {
+            alert('Vui lòng chọn đơn vị tính');
             return;
         }
 

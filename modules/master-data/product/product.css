@@ -9,7 +9,8 @@ html, body {
 .product-container {
     padding: 24px;
     background-color: #f8fafc;
-    height: 100vh;
+    height: auto;
+    max-height: 100vh;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -184,7 +185,7 @@ html, body {
 /* tbody wrapper — scrolls */
 .table-scroll-body {
     overflow: auto;
-    flex: 1;
+    height: 70vh;
     min-height: 0;
 }
 
@@ -200,42 +201,6 @@ html, body {
     background: #cbd5e1;
     border-radius: 3px;
 }
-.table-scroll-body::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
-
-
-
-/* thead wrapper — does NOT scroll */
-.table-scroll-head {
-    overflow: hidden;
-    width: 100%;
-    background: white;
-    flex-shrink: 0;
-}
-
-/* tbody wrapper — scrolls */
-.table-scroll-body {
-    overflow: auto;
-    flex: 1;
-    min-height: 0;
-}
-
-/* Scrollbar only on tbody wrapper */
-.table-scroll-body::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-.table-scroll-body::-webkit-scrollbar-track {
-    background: #f1f5f9;
-}
-
-.table-scroll-body::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
-}
-
 .table-scroll-body::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
@@ -715,6 +680,12 @@ input:checked+.slider:before {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.toggle-label-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 /* Import Modal Styles */

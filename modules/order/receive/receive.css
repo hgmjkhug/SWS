@@ -285,27 +285,27 @@
     text-overflow: ellipsis;
 }
 
-/* Specific Column Widths for Main Table - Final Perfect 8-Column Layout */
+/* Perfect percentage-based alignment for 10-column layout */
 .receive-container .receive-table th:nth-child(1), 
-.receive-container .receive-table td:nth-child(1) { width: 45px; min-width: 45px; text-align: center; }
+.receive-container .receive-table td:nth-child(1) { width: 3%; text-align: center; }
 .receive-container .receive-table th:nth-child(2), 
-.receive-container .receive-table td:nth-child(2) { width: 55px; min-width: 55px; text-align: center; }
+.receive-container .receive-table td:nth-child(2) { width: 4%; text-align: center; }
 .receive-container .receive-table th:nth-child(3), 
-.receive-container .receive-table td:nth-child(3) { width: 110px; min-width: 110px; }
+.receive-container .receive-table td:nth-child(3) { width: 10%; }
 .receive-container .receive-table th:nth-child(4), 
-.receive-container .receive-table td:nth-child(4) { width: 220px; min-width: 220px; }
+.receive-container .receive-table td:nth-child(4) { width: 22%; }
 .receive-container .receive-table th:nth-child(5), 
-.receive-container .receive-table td:nth-child(5) { width: 180px; min-width: 180px; }
+.receive-container .receive-table td:nth-child(5) { width: 13%; }
 .receive-container .receive-table th:nth-child(6), 
-.receive-container .receive-table td:nth-child(6) { width: 180px; min-width: 180px; }
+.receive-container .receive-table td:nth-child(6) { width: 13%; }
 .receive-container .receive-table th:nth-child(7), 
-.receive-container .receive-table td:nth-child(7) { width: 140px; min-width: 140px; text-align: center; }
+.receive-container .receive-table td:nth-child(7) { width: 12%; text-align: center; }
 .receive-container .receive-table th:nth-child(8), 
-.receive-container .receive-table td:nth-child(8) { width: 130px; min-width: 130px; text-align: center; }
+.receive-container .receive-table td:nth-child(8) { width: 8%; text-align: center; }
 .receive-container .receive-table th:nth-child(9), 
-.receive-container .receive-table td:nth-child(9) { width: 200px; min-width: 200px; }
+.receive-container .receive-table td:nth-child(9) { width: 10%; }
 .receive-container .receive-table th:nth-child(10), 
-.receive-container .receive-table td:nth-child(10) { width: 110px; min-width: 110px; text-align: center; }
+.receive-container .receive-table td:nth-child(10) { width: 5%; text-align: center; }
 
 /* Specific Column Widths for ERP Sync Table - Optimized for Modal LG */
 .erp-table-wrapper .receive-table th:nth-child(1),

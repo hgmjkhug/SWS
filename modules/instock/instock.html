@@ -1,0 +1,128 @@
+<div id="main-view">
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <!-- Search Input -->
+      <div class="search-group">
+        <!-- <label class="filter-label">Tìm kiếm sản phẩm</label> -->
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input
+            type="text"
+            class="search-input"
+            id="instock-search-input"
+            placeholder="Tìm theo mã hoặc tên sản phẩm..."
+            onkeyup="filterInstockData()"
+          />
+        </div>
+      </div>
+
+      <!-- Product Group Filter (Searchable Select) -->
+      <div class="filter-group">
+        <!-- <label class="filter-label">Nhóm sản phẩm</label> -->
+        <div class="custom-combobox-wrapper" id="group-combobox-wrapper">
+          <div class="combobox-input-group">
+            <input
+              type="text"
+              id="group-combobox-input"
+              class="combobox-input"
+              placeholder="Tất cả"
+              autocomplete="off"
+              onclick="toggleInstockGroupCombobox()"
+              onkeyup="handleInstockGroupComboboxSearch(this)"
+            />
+            <i
+              class="fas fa-chevron-down combobox-arrow"
+              onclick="toggleInstockGroupCombobox()"
+            ></i>
+          </div>
+          <div class="combobox-dropdown" id="group-combobox-dropdown">
+            <ul class="combobox-list" id="group-combobox-list">
+              <!-- Populated by JS -->
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="toolbar-right">
+      <button class="btn-outline-green" onclick="exportInstockExcel()">
+        <i class="fas fa-file-excel"></i> Xuất Excel
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Table Container -->
+  <div class="table-scroll-container">
+    <div class="table-scroll-head">
+      <table class="data-table">
+        <colgroup>
+          <col style="width: 60px">
+          <col style="width: 180px">
+          <col style="width: 350px">
+          <col style="width: 200px">
+          <col style="width: 150px">
+          <col style="width: 120px">
+        </colgroup>
+        <thead>
+          <tr>
+            <th class="text-center">STT</th>
+            <th>Mã sản phẩm</th>
+            <th>Tên sản phẩm</th>
+            <th>Nhóm sản phẩm</th>
+            <th class="text-center">Số lượng</th>
+            <th class="text-center">Đơn vị tính</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <div class="table-scroll-body" id="instock-table-body-scroll">
+      <table class="data-table">
+        <colgroup>
+          <col style="width: 60px">
+          <col style="width: 180px">
+          <col style="width: 350px">
+          <col style="width: 200px">
+          <col style="width: 150px">
+          <col style="width: 120px">
+        </colgroup>
+        <tbody id="instock-table-body">
+          <!-- Data will be rendered here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-bar">
+    <span id="pagination-info">Hiển thị 0 trên tổng 0</span>
+    <div class="pagination-controls">
+      <button
+        class="page-btn"
+        id="prev-page"
+        onclick="instockPrevPage()"
+        disabled
+      >
+        &lt;
+      </button>
+      <div id="page-numbers" class="page-numbers"></div>
+      <button class="page-btn" id="next-page" onclick="instockNextPage()">
+        &gt;
+      </button>
+      <span class="page-goto">
+        Đến
+        <input
+          type="number"
+          id="goto-page"
+          min="1"
+          onchange="instockGotoPage(this.value)"
+        />
+        trang
+      </span>
+    </div>
+  </div>
+
+  <link rel="stylesheet" href="instock.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="instock.js"></script>
+</div>
