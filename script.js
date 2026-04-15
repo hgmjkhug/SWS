@@ -305,7 +305,8 @@ function loadPage(title) {
         'Thị trường': 'modules/market/market.html',
         'Đơn hàng nhập': 'modules/order/receive/receive.html',
         'Đơn hàng xuất': 'modules/order/send/send.html',
-        'Quản lý tồn kho': 'modules/instock/instock.html',
+        'Theo dõi tồn kho': 'modules/instock/instock.html',
+        'Kiểm kê nhập xuất': 'modules/check/check.html'
         // 'Vật chứa mới': 'modules/new-container/new-cont.html',
     };
 

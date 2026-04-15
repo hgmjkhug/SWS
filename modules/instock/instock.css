@@ -283,6 +283,29 @@
   font-size: 15px;
 }
 
+/* --- CHEVRON ACCORDION INDICATOR --- */
+.product-code-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chevron-icon {
+  font-size: 11px;
+  color: #94a3b8;
+  transition: transform 0.25s ease, color 0.25s ease;
+  flex-shrink: 0;
+}
+
+.clickable-row:hover .chevron-icon {
+  color: var(--primary-blue);
+}
+
+.clickable-row.expanded .chevron-icon {
+  transform: rotate(90deg);
+  color: var(--primary-blue);
+}
+
 .text-center {
   text-align: center !important;
 }
@@ -293,7 +316,7 @@
 }
 
 .sub-table-container {
-  padding: 16px 24px;
+  padding: 10px 6px 14px 8px;
   background: #f1f5f9;
   border-bottom: 3px solid #e2e8f0;
 }
@@ -311,16 +334,17 @@
 .sub-table th {
   background: #e2e8f0;
   color: #475569;
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 10px 16px;
+  letter-spacing: 0.04em;
+  padding: 8px 10px;
   text-align: left;
+  white-space: nowrap;
 }
 
 .sub-table td {
-  padding: 10px 16px;
-  font-size: 13px;
+  padding: 8px 10px;
+  font-size: 12px;
   border-bottom: 1px solid #f1f5f9;
   color: #334155;
 }
@@ -360,18 +384,31 @@
   color: #854d0e;
 }
 
-.user-info {
+.sub-table .user-info {
   display: flex;
   flex-direction: column;
 }
 
-.user-fullname {
+.sub-table .user-fullname {
   font-weight: 600;
 }
 
-.user-username {
+.sub-table .user-username {
   font-size: 11px;
   color: #64748b;
+}
+
+/* --- STORAGE DURATION BADGE --- */
+.storage-duration-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: #fff7ed;
+  color: #c2410c;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #fed7aa;
+  white-space: nowrap;
 }
 
 /* --- PAGINATION --- */

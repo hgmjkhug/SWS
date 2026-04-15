@@ -247,8 +247,8 @@ html, body {
 /* 4. Name */
 .product-table th:nth-child(4),
 .product-table td:nth-child(4) {
-    width: 200px;
-    min-width: 200px;
+    width: 230px;
+    min-width: 230px;
     text-align: left;
 }
 
@@ -263,16 +263,16 @@ html, body {
 /* 6. Unit */
 .product-table th:nth-child(6),
 .product-table td:nth-child(6) {
-    width: 100px;
-    min-width: 100px;
+    width: 90px;
+    min-width: 90px;
     text-align: center;
 }
 
 /* 7. Weight */
 .product-table th:nth-child(7),
 .product-table td:nth-child(7) {
-    width: 120px;
-    min-width: 120px;
+    width: 100px;
+    min-width: 100px;
     text-align: center;
 }
 
@@ -287,8 +287,8 @@ html, body {
 /* 9. Status */
 .product-table th:nth-child(9),
 .product-table td:nth-child(9) {
-    width: 120px;
-    min-width: 120px;
+    width: 100px;
+    min-width: 100px;
     text-align: center;
 }
 

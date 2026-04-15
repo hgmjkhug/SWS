@@ -232,15 +232,16 @@
             cat.products.forEach(p => {
                 const id = p.stt.toString().padStart(3, '0');
                 const fullName = `${line.dong_san_pham} - ${cat.pham_cap} - ${p.loai_thung}`;
+                const productCode = `${cat.pham_cap} - ${p.loai_thung}`;
                 products.push({
                     id: `uuid-prod-${id}`,
-                    code: `VT${id}`,
+                    code: productCode,
                     name: fullName,
                     group: cat.pham_cap,
                     unit: 'Thùng',
                     weight: (Math.random() * 0.5 + 13), // Adjusted weight to ~13kg
                     exportMethod: 'FIFO',
-                    description: `Sản phẩm ${fullName} chất lượng cao`,
+                    description: `Mô tả ${fullName}`,
                     status: 1,
                     qr_code: `QR${id}`,
                     is_deleted: false,
@@ -946,8 +947,8 @@
     window.downloadSampleFile = function () {
         const sampleData = [
             ['Mã vật tư', 'Tên vật tư', 'Mô tả', 'Khối lượng (kg)', 'Mã QR', 'Trạng thái (1=HĐ, 0=Ngừng)'],
-            ['VT001', 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', 'Thùng chuối 13kg', 13.5, 'QR001', 1],
-            ['VT002', 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', 'Thùng chuối 15kg', 15.2, 'QR002', 1]
+            ['A456 - TROPICAL', 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', 'Thùng chuối 13kg', 13.5, 'QR001', 1],
+            ['26CP - DEL MONTE', 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', 'Thùng chuối 15kg', 15.2, 'QR002', 1]
         ];
 
         const ws = XLSX.utils.aoa_to_sheet(sampleData);

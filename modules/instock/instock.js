@@ -168,7 +168,7 @@ function generateMockHistory(productId) {
     const containerId = `${prefix}_${i}`;
 
     history.push({
-      id: `ORD-${productId}-${i}`,
+      id: `${containerId}-${productId}-${i}`,
       containerId: containerId,
       type: isInput ? "Nhập kho" : "Xuất kho",
       quantity: Math.floor(Math.random() * 50) + 5,
@@ -180,6 +180,30 @@ function generateMockHistory(productId) {
     });
   }
   return history;
+}
+
+// Calculate storage duration from executedAt string ("HH:MM DD/MM/YYYY") to now
+function calcStorageDuration(executedAt) {
+  if (!executedAt) return null;
+  // Parse "HH:MM DD/MM/YYYY"
+  const match = executedAt.match(/(\d{2}):(\d{2})\s+(\d{2})\/(\d{2})\/(\d{4})/);
+  if (!match) return null;
+  const [, hh, mm, dd, mo, yyyy] = match;
+  const from = new Date(+yyyy, +mo - 1, +dd, +hh, +mm, 0);
+  const now = new Date();
+  let diffMs = now - from;
+  if (diffMs < 0) diffMs = 0;
+
+  const totalMinutes = Math.floor(diffMs / 60000);
+  const days    = Math.floor(totalMinutes / 1440);
+  const hours   = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+
+  const parts = [];
+  if (days > 0)    parts.push(`${days} ngày`);
+  if (hours > 0)   parts.push(`${hours} giờ`);
+  parts.push(`${minutes} phút`);
+  return parts.join(' ');
 }
 
 // Render Functions
@@ -205,7 +229,12 @@ function renderInstockTable() {
     row.onclick = () => toggleRowExpansion(item.id);
     row.innerHTML = `
       <td class="text-center">${startIndex + index + 1}</td>
-      <td><strong>${item.id}</strong></td>
+      <td>
+        <span class="product-code-cell">
+          <i class="fas fa-chevron-right chevron-icon"></i>
+          <strong>${item.id}</strong>
+        </span>
+      </td>
       <td>${item.name}</td>
       <td>${item.group}</td>
       <td class="text-center"><span class="qty-cell">${item.quantity}</span></td>
@@ -222,6 +251,19 @@ function renderInstockTable() {
       <td colspan="6">
         <div class="sub-table-container">
           <table class="sub-table">
+            <colgroup>
+              <col style="width: 3%">
+              <col style="width: 13%">
+              <col style="width: 11%">
+              <col style="width: 8%">
+              <col style="width: 6%">
+              <col style="width: 12%">
+              <col style="width: 9%">
+              <col style="width: 9%">
+              <col style="width: 9%">
+              <col style="width: 8%">
+              <col style="width: 12%">
+            </colgroup>
             <thead>
               <tr>
                 <th class="text-center">STT</th>
@@ -232,6 +274,7 @@ function renderInstockTable() {
                 <th class="text-center">Vị trí lưu kho</th>
                 <th class="text-center">Ngày tạo</th>
                 <th class="text-center">Ngày thực hiện</th>
+                <th class="text-center">TG tồn kho</th>
                 <th class="text-center">Tình trạng</th>
                 <th class="text-center">Người tạo</th>
               </tr>
@@ -251,6 +294,12 @@ function renderInstockTable() {
                   <td class="text-center" style="font-weight: 600; color: #076eb8;">${h.location}</td>
                   <td class="text-center">${h.createdAt}</td>
                   <td class="text-center">${h.executedAt}</td>
+                  <td class="text-center">
+                    ${h.type === 'Nhập kho'
+                      ? `<span class="storage-duration-badge">${calcStorageDuration(h.executedAt) || '—'}</span>`
+                      : `<span style="color:#94a3b8;font-size:12px;">—</span>`
+                    }
+                  </td>
                   <td class="text-center">
                     <span class="status-badge ${h.status === 'Đã nhập kho' ? 'status-in' : 'status-out'}">
                       ${h.status}

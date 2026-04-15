@@ -1,12 +1,12 @@
 (function () {
     // --- CONFIGURATION & STATE ---
     var BATCH_STORAGE_KEY = 'SWS_BATCH_DATA';
-    var PAGE_SIZE = 15;
+    var PAGE_SIZE = 20;
     var mainCurrentPage = 1;
     var batchSearchQuery = "";
     var statusFilter = "ALL";
     var selectedCreatorFilterId = "ALL";
-    var selectedGradeTypeFilter = "ALL";
+
 
     // Advanced Date Picker State (Verbatim from Outbound)
     var currentLeftDate = new Date();
@@ -42,6 +42,81 @@
         { id: 'NV004', name: 'Phạm Minh Dũng' }
     ];
 
+    // Product groups mapped from product module's pham_cap categories
+    var PRODUCT_GROUPS = [
+        { id: 'A456', name: 'Chuối Trung Quốc - A456' },
+        { id: 'A789', name: 'Chuối Trung Quốc - A789' },
+        { id: 'B456', name: 'Chuối Trung Quốc - B456' },
+        { id: 'B789', name: 'Chuối Trung Quốc - B789' },
+        { id: 'CL', name: 'Chuối Trung Quốc - CL' },
+        { id: '16CP-TQ', name: 'Chuối Trung Quốc - 16CP' },
+        { id: 'CP', name: 'Chuối Trung Quốc - CP' },
+        { id: '14CP', name: 'Chuối Nhật Bản - 14CP' },
+        { id: '16CP-NB', name: 'Chuối Nhật Bản - 16CP' },
+        { id: '26CP', name: 'Chuối Nhật Bản - 26CP' },
+        { id: '35CLD', name: 'Chuối Nhật Bản - 35CLD' },
+        { id: '18CP', name: 'Chuối Nhật Bản - 18CP' },
+        { id: '28CP', name: 'Chuối Nhật Bản - 28CP' },
+        { id: '30CP', name: 'Chuối Nhật Bản - 30CP' },
+        { id: '36CP', name: 'Chuối Nhật Bản - 36CP' },
+        { id: '38CP', name: 'Chuối Nhật Bản - 38CP' },
+        { id: '40CP', name: 'Chuối Nhật Bản - 40CP' },
+        { id: '43CP', name: 'Chuối Nhật Bản - 43CP' },
+        { id: 'B5', name: 'Chuối Nhật Bản - B5' },
+        { id: 'B6', name: 'Chuối Nhật Bản - B6' },
+        { id: '33CP', name: 'Chuối Nhật Bản - 33CP' },
+        { id: '28LY', name: 'Chuối Nhật Bản - 28LY' },
+        { id: '35CP', name: 'Chuối Nhật Bản - 35CP' },
+        { id: 'RCL', name: 'Chuối Nhật Bản - RCL' }
+    ];
+
+    // Products mapped from product module (bananaData structure)
+    var INVENTORY_PRODUCTS = [
+        { id: 'SP001', code: 'A456 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', group: 'A456' },
+        { id: 'SP002', code: 'A456 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', group: 'A456' },
+        { id: 'SP003', code: 'A456 - FRUIT WHARF', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - FRUIT WHARF', group: 'A456' },
+        { id: 'SP004', code: 'A456 - DASANG', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - DASANG', group: 'A456' },
+        { id: 'SP005', code: 'A789 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', group: 'A789' },
+        { id: 'SP006', code: 'A789 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - SOFIA', group: 'A789' },
+        { id: 'SP007', code: 'B456 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - B456 - TROPICAL', group: 'B456' },
+        { id: 'SP008', code: 'B456 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - B456 - SOFIA', group: 'B456' },
+        { id: 'SP009', code: 'B789 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - B789 - TROPICAL', group: 'B789' },
+        { id: 'SP010', code: 'B789 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - B789 - SOFIA', group: 'B789' },
+        { id: 'SP011', code: 'CL - DASANG', name: 'Chuối Trung Quốc/ Chinese bananas - CL - DASANG', group: 'CL' },
+        { id: 'SP012', code: '16CP - XINFADIN', name: 'Chuối Trung Quốc/ Chinese bananas - 16CP - XINFADIN', group: '16CP-TQ' },
+        { id: 'SP013', code: '16CP - SEIKA', name: 'Chuối Trung Quốc/ Chinese bananas - 16CP - SEIKA', group: '16CP-TQ' },
+        { id: 'SP014', code: 'CP - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - CP - TROPICAL', group: 'CP' },
+        { id: 'SP015', code: '14CP - XINFADIN', name: 'Chuối Nhật Bản/ Japanese bananas - 14CP - XINFADIN', group: '14CP' },
+        { id: 'SP016', code: '16CP - XINFADIN', name: 'Chuối Nhật Bản/ Japanese bananas - 16CP - XINFADIN', group: '16CP-NB' },
+        { id: 'SP017', code: '16CP - SEIKA', name: 'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA', group: '16CP-NB' },
+        { id: 'SP018', code: '26CP - XINFADIN', name: 'Chuối Nhật Bản/ Japanese bananas - 26CP - XINFADIN', group: '26CP' },
+        { id: 'SP019', code: '26CP - SEIKA', name: 'Chuối Nhật Bản/ Japanese bananas - 26CP - SEIKA', group: '26CP' },
+        { id: 'SP020', code: '26CP - DEL MONTE', name: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', group: '26CP' },
+        { id: 'SP021', code: '35CLD - XINFADIN', name: 'Chuối Nhật Bản/ Japanese bananas - 35CLD - XINFADIN', group: '35CLD' },
+        { id: 'SP022', code: '18CP - SEIKA', name: 'Chuối Nhật Bản/ Japanese bananas - 18CP - SEIKA', group: '18CP' },
+        { id: 'SP023', code: '28CP - SEIKA', name: 'Chuối Nhật Bản/ Japanese bananas - 28CP - SEIKA', group: '28CP' },
+        { id: 'SP024', code: '28CP - DEL MONTE', name: 'Chuối Nhật Bản/ Japanese bananas - 28CP - DEL MONTE', group: '28CP' },
+        { id: 'SP025', code: '30CP - SEIKA', name: 'Chuối Nhật Bản/ Japanese bananas - 30CP - SEIKA', group: '30CP' },
+        { id: 'SP026', code: '30CP - DEL MONTE', name: 'Chuối Nhật Bản/ Japanese bananas - 30CP - DEL MONTE', group: '30CP' },
+        { id: 'SP027', code: '36CP - SEIKA', name: 'Chuối Nhật Bản/ Japanese bananas - 36CP - SEIKA', group: '36CP' },
+        { id: 'SP028', code: '38CP - SEIKA', name: 'Chuối Nhật Bản/ Japanese bananas - 38CP - SEIKA', group: '38CP' },
+        { id: 'SP029', code: '38CP - DEL MONTE', name: 'Chuối Nhật Bản/ Japanese bananas - 38CP - DEL MONTE', group: '38CP' },
+        { id: 'SP030', code: '38CP - SHIMIZU', name: 'Chuối Nhật Bản/ Japanese bananas - 38CP - SHIMIZU', group: '38CP' },
+        { id: 'SP031', code: '40CP - SEIKA', name: 'Chuối Nhật Bản/ Japanese bananas - 40CP - SEIKA', group: '40CP' },
+        { id: 'SP032', code: '40CP - NHẬT TRƠN', name: 'Chuối Nhật Bản/ Japanese bananas - 40CP - NHẬT TRƠN', group: '40CP' },
+        { id: 'SP033', code: '40CP - TAITO', name: 'Chuối Nhật Bản/ Japanese bananas - 40CP - TAITO', group: '40CP' },
+        { id: 'SP034', code: '43CP - SEIKA', name: 'Chuối Nhật Bản/ Japanese bananas - 43CP - SEIKA', group: '43CP' },
+        { id: 'SP035', code: '43CP - MAINICHI', name: 'Chuối Nhật Bản/ Japanese bananas - 43CP - MAINICHI', group: '43CP' },
+        { id: 'SP036', code: 'B5 - SEIKA 13KG', name: 'Chuối Nhật Bản/ Japanese bananas - B5 - SEIKA 13KG', group: 'B5' },
+        { id: 'SP037', code: 'B6 - SEIKA 13KG', name: 'Chuối Nhật Bản/ Japanese bananas - B6 - SEIKA 13KG', group: 'B6' },
+        { id: 'SP038', code: 'B6 - DELMONTE 13KG', name: 'Chuối Nhật Bản/ Japanese bananas - B6 - DELMONTE 13KG', group: 'B6' },
+        { id: 'SP039', code: '33CP - SEIKA 13KG', name: 'Chuối Nhật Bản/ Japanese bananas - 33CP - SEIKA 13KG', group: '33CP' },
+        { id: 'SP040', code: '33CP - DEL MONTE', name: 'Chuối Nhật Bản/ Japanese bananas - 33CP - DEL MONTE', group: '33CP' },
+        { id: 'SP041', code: '28LY - DEL MONTE', name: 'Chuối Nhật Bản/ Japanese bananas - 28LY - DEL MONTE', group: '28LY' },
+        { id: 'SP042', code: '35CP - DEL MONTE', name: 'Chuối Nhật Bản/ Japanese bananas - 35CP - DEL MONTE', group: '35CP' },
+        { id: 'SP043', code: 'RCL - DEL MONTE', name: 'Chuối Nhật Bản/ Japanese bananas - RCL - DEL MONTE', group: 'RCL' }
+    ];
+
     var STATUS_MAP = {
         'NEW': { label: 'Mới tạo', class: 'status-NEW' },
         'IMPORTING': { label: 'Đang nhập', class: 'status-IMPORTING' },
@@ -60,7 +135,36 @@
             var saved = localStorage.getItem(BATCH_STORAGE_KEY);
             if (saved) {
                 var parsed = JSON.parse(saved);
-                return parsed.map(function(b) { return Object.assign({}, b, { createdAt: new Date(b.createdAt) }); });
+                var batches = parsed.map(function(b) { return Object.assign({}, b, { createdAt: new Date(b.createdAt) }); });
+                
+                // Recalculate createdAt dates relative to today so data always has current entries
+                var now = new Date();
+                if (batches.length > 0) {
+                    var newest = new Date(Math.max.apply(null, batches.map(function(b) { return b.createdAt.getTime(); })));
+                    var daysDiff = Math.floor((now.setHours(0,0,0,0) - new Date(newest).setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+                    if (daysDiff > 0) {
+                        batches = batches.map(function(b) {
+                            var d = new Date(b.createdAt);
+                            d.setDate(d.getDate() + daysDiff);
+                            b.createdAt = d;
+                            // Also shift importDate/exportDate if they exist
+                            if (b.importDate) {
+                                var id = new Date(b.importDate);
+                                id.setDate(id.getDate() + daysDiff);
+                                b.importDate = id.toISOString().split('T')[0];
+                            }
+                            if (b.exportDate) {
+                                var ed = new Date(b.exportDate);
+                                ed.setDate(ed.getDate() + daysDiff);
+                                b.exportDate = ed.toISOString().split('T')[0];
+                            }
+                            return b;
+                        });
+                        // Persist the updated dates
+                        localStorage.setItem(BATCH_STORAGE_KEY, JSON.stringify(batches));
+                    }
+                }
+                return batches;
             }
         } catch (e) { console.error("Error loading batches", e); }
         return [];
@@ -131,7 +235,6 @@
                                 b.name.toLowerCase().indexOf(batchSearchQuery.toLowerCase()) !== -1;
             var matchesStatus = statusFilter === 'ALL' || b.status === statusFilter;
             var matchesCreator = selectedCreatorFilterId === 'ALL' || b.creator.id === selectedCreatorFilterId;
-            var matchesGradeType = selectedGradeTypeFilter === 'ALL' || b.productType === selectedGradeTypeFilter;
             
             var matchesDate = true;
             if (selectedRange.start && selectedRange.end) {
@@ -140,7 +243,7 @@
                 matchesDate = b.createdAt >= start && b.createdAt <= end;
             }
 
-            return matchesSearch && matchesStatus && matchesCreator && matchesGradeType && matchesDate;
+            return matchesSearch && matchesStatus && matchesCreator && matchesDate;
         });
 
         var totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
@@ -151,16 +254,20 @@
 
         tbody.innerHTML = pageData.map(function(b, index) {
             var statusObj = STATUS_MAP[b.status] || { label: b.status, class: '' };
+            // Determine batch type: OUTSTOCK / EXPORTING = Lô xuất, otherwise Lô nhập
+            var isExport = (b.status === 'OUTSTOCK' || b.status === 'EXPORTING');
+            var batchTypeBadge = isExport
+                ? '<span class="batch-type-badge batch-type-export">Lô xuất</span>'
+                : '<span class="batch-type-badge batch-type-import">Lô nhập</span>';
             return `
                 <tr>
                     <td class="text-center">${startIdx + index + 1}</td>
                     <td style="font-weight: 700; color: #076EB8">${b.code}</td>
                     <td style="font-weight: 500">${b.name}</td>
-                    <td>${b.productType}</td>
-                    <td>${b.grades.join(', ')}</td>
-                    <td class="text-center">
+                    <td style="text-align:center">
                         <span class="status-badge ${statusObj.class}">${statusObj.label}</span>
                     </td>
+                    <td style="text-align:center">${batchTypeBadge}</td>
                     <td>${formatDate(b.importDate)}</td>
                     <td>${formatDate(b.exportDate)}</td>
                     <td>
@@ -169,10 +276,11 @@
                             <span style="color: #64748b; font-size: 11px;">${b.creator.id}</span>
                         </div>
                     </td>
-                    <td class="text-center">
-                        <div style="display: flex; justify-content: center; gap: 4px">
+                    <td>
+                        <div style="display: flex; justify-content: center; gap: 4px; align-items: center;">
                             <button class="btn-icon" title="Xem" onclick="window.viewBatch(${b.id})"><i class="fa-regular fa-eye"></i></button>
                             <button class="btn-icon" title="Cây" onclick="window.viewTree(${b.id})"><i class="fa-solid fa-sitemap"></i></button>
+                            <button class="btn-icon btn-icon-inventory" title="Kiểm kê" onclick="window.openInventoryCheck(${b.id})"><i class="fa-solid fa-list-check"></i></button>
                             <button class="btn-icon" title="Sửa" onclick="window.editBatch(${b.id})" ${b.status !== 'NEW' ? 'disabled' : ''}><i class="fa-regular fa-edit"></i></button>
                             <button class="btn-icon" title="Xóa" onclick="window.deleteBatch(${b.id})" ${b.status !== 'NEW' ? 'disabled' : ''} style="color: #ef4444"><i class="fa-regular fa-trash"></i></button>
                         </div>
@@ -317,69 +425,7 @@
         mainCurrentPage = 1; window.renderTable();
     };
 
-    // --- Grade Type Combobox Logic ---
-    function initGradeTypeFilterCombobox() {
-        var input = document.getElementById('grade-type-filter-input');
-        var list = document.getElementById('grade-type-filter-list');
-        var wrapper = document.getElementById('grade-type-filter-combobox');
-        
-        if (!input || !list || !wrapper) return;
 
-        input.onfocus = function() {
-            renderGradeTypeOptions(input.value);
-            wrapper.classList.add('active');
-        };
-
-        input.oninput = function() {
-            renderGradeTypeOptions(input.value);
-            wrapper.classList.add('active');
-        };
-    }
-
-    function renderGradeTypeOptions(term) {
-        var list = document.getElementById('grade-type-filter-list');
-        if (!list) return;
-        
-        var filterTerm = (term || "").toLowerCase().trim();
-        var html = '';
-
-        if (!filterTerm || "tất cả loại phẩm cấp".indexOf(filterTerm) !== -1) {
-            html += `<div class="combobox-option ${selectedGradeTypeFilter === 'ALL' ? 'selected' : ''}" onclick="window.selectGradeTypeFilter('ALL', 'Tất cả loại phẩm cấp')">
-                Tất cả loại phẩm cấp
-            </div>`;
-        }
-
-        PRODUCT_TYPES.forEach(function(pt) {
-            if (!filterTerm || pt.name.toLowerCase().indexOf(filterTerm) !== -1) {
-                html += `<div class="combobox-option ${selectedGradeTypeFilter === pt.name ? 'selected' : ''}" onclick="window.selectGradeTypeFilter('${pt.name}', '${pt.name}')">
-                    <span style="font-weight: 500;">${pt.name}</span>
-                </div>`;
-            }
-        });
-
-        if (html === '') {
-            html = '<div class="combobox-option no-results">Không tìm thấy loại phẩm cấp</div>';
-        }
-        
-        list.innerHTML = html;
-        list.classList.add('show');
-    }
-
-    window.selectGradeTypeFilter = function(val, label) {
-        selectedGradeTypeFilter = val;
-        var input = document.getElementById('grade-type-filter-input');
-        if (input) {
-            input.value = (val === 'ALL' ? '' : label);
-            input.blur();
-        }
-        var list = document.getElementById('grade-type-filter-list');
-        if (list) list.classList.remove('show');
-        
-        var wrapper = document.getElementById('grade-type-filter-combobox');
-        if (wrapper) wrapper.classList.remove('active');
-
-        mainCurrentPage = 1; window.renderTable();
-    };
 
     // --- DATE PICKER LOGIC (Verbatim from Outbound) ---
     window.toggleDateRangePicker = function (e) {
@@ -593,10 +639,18 @@
     window.openCreateModal = function() {
         var modal = document.getElementById('modal-add-batch');
         if (!modal) return;
-        // Ensure modal is in the top-level document body (for SPA/Iframe robustness)
         if (modal.parentNode !== document.body) {
             document.body.appendChild(modal);
         }
+        // Reset fields
+        document.getElementById('batch-code').value = '';
+        document.getElementById('batch-name').value = '';
+        document.getElementById('batch-export-date').value = '';
+        document.getElementById('batch-sender').value = '';
+        document.getElementById('batch-receiver').value = '';
+        document.getElementById('batch-plate').value = '';
+        document.getElementById('batch-mooc').value = '';
+        document.getElementById('batch-cont').value = '';
         modal.classList.add('open');
     };
     window.closeCreateModal = function() { document.getElementById('modal-add-batch').classList.remove('open'); };
@@ -607,32 +661,415 @@
         document.getElementById('edit-batch-id').value = b.id;
         document.getElementById('edit-batch-code').value = b.code;
         document.getElementById('edit-batch-name').value = b.name;
-        document.getElementById('edit-product-type-input').value = b.productType;
+        document.getElementById('edit-batch-export-date').value = b.exportDate ? formatDate(new Date(b.exportDate)) : '';
+        document.getElementById('edit-batch-sender').value = b.sender || '';
+        document.getElementById('edit-batch-receiver').value = b.receiver || '';
+        document.getElementById('edit-batch-plate').value = b.plate || '';
+        document.getElementById('edit-batch-mooc').value = b.mooc || '';
+        document.getElementById('edit-batch-cont').value = b.cont || '';
         document.getElementById('modal-edit-batch').classList.add('open');
     };
 
     window.closeEditModal = function() { document.getElementById('modal-edit-batch').classList.remove('open'); };
 
     window.saveNewBatch = function() {
-        var code = document.getElementById('batch-code').value;
-        var name = document.getElementById('batch-name').value;
-        if (!code || !name) { alert('Vui lòng điền đủ thông tin'); return; }
+        var code = document.getElementById('batch-code').value.trim();
+        var name = document.getElementById('batch-name').value.trim();
+        if (!code || !name) { alert('Vui lòng điền đủ thông tin bắt buộc (mã lô, tên lô)'); return; }
+        var exportDateVal = document.getElementById('batch-export-date').value;
+        var exportDateISO = null;
+        if (exportDateVal) {
+            var parts = exportDateVal.split('/');
+            if (parts.length === 3) exportDateISO = parts[2] + '-' + parts[1] + '-' + parts[0];
+        }
         MOCK_BATCHES.unshift({
-            id: Date.now(), code: code, name: name, productType: 'Chuối Trung Quốc/ Chinese bananas', grades: ['A'], status: 'NEW', createdAt: new Date(),
-            creator: STAFF_LIST[0]
+            id: Date.now(),
+            code: code,
+            name: name,
+            productType: 'Chuối Trung Quốc/ Chinese bananas',
+            grades: ['A'],
+            status: 'NEW',
+            createdAt: new Date(),
+            importDate: null,
+            exportDate: exportDateISO,
+            creator: STAFF_LIST[0],
+            sender: document.getElementById('batch-sender').value.trim(),
+            receiver: document.getElementById('batch-receiver').value.trim(),
+            plate: document.getElementById('batch-plate').value.trim(),
+            mooc: document.getElementById('batch-mooc').value.trim(),
+            cont: document.getElementById('batch-cont').value.trim()
         });
         saveBatches(); window.renderTable(); window.closeCreateModal();
     };
 
     window.saveEditBatch = function() {
         var id = parseInt(document.getElementById('edit-batch-id').value);
-        var name = document.getElementById('edit-batch-name').value;
+        var name = document.getElementById('edit-batch-name').value.trim();
         var idx = MOCK_BATCHES.findIndex(function(x) { return x.id === id; });
-        if (idx !== -1) { MOCK_BATCHES[idx].name = name; saveBatches(); window.renderTable(); window.closeEditModal(); }
+        if (idx !== -1) {
+            var exportDateVal = document.getElementById('edit-batch-export-date').value;
+            var exportDateISO = MOCK_BATCHES[idx].exportDate;
+            if (exportDateVal) {
+                var parts = exportDateVal.split('/');
+                if (parts.length === 3) exportDateISO = parts[2] + '-' + parts[1] + '-' + parts[0];
+            } else {
+                exportDateISO = null;
+            }
+            MOCK_BATCHES[idx].name = name;
+            MOCK_BATCHES[idx].exportDate = exportDateISO;
+            MOCK_BATCHES[idx].sender = document.getElementById('edit-batch-sender').value.trim();
+            MOCK_BATCHES[idx].receiver = document.getElementById('edit-batch-receiver').value.trim();
+            MOCK_BATCHES[idx].plate = document.getElementById('edit-batch-plate').value.trim();
+            MOCK_BATCHES[idx].mooc = document.getElementById('edit-batch-mooc').value.trim();
+            MOCK_BATCHES[idx].cont = document.getElementById('edit-batch-cont').value.trim();
+            saveBatches(); window.renderTable(); window.closeEditModal();
+        }
     };
 
-    window.deleteBatch = function(id) { if (confirm('Xóa lô hàng này?')) { MOCK_BATCHES = MOCK_BATCHES.filter(function(x) { return x.id !== id; }); saveBatches(); window.renderTable(); } };
+    window.deleteBatch = function(id) {
+        var b = MOCK_BATCHES.find(function(x) { return x.id === id; });
+        if (!b) return;
+        if (b.status !== 'NEW') {
+            alert('Chỉ có thể xóa lô hàng có trạng thái "Mới tạo".');
+            return;
+        }
+        if (confirm('Xóa lô hàng này?')) {
+            MOCK_BATCHES = MOCK_BATCHES.filter(function(x) { return x.id !== id; });
+            saveBatches(); window.renderTable();
+        }
+    };
     window.viewBatch = function(id) { alert('Xem chi tiết: ' + id); };
+
+    // =============================================
+    // INVENTORY CHECK (KIỂM KÊ) MODULE
+    // =============================================
+    var inventorySearchQuery = '';
+    var inventoryGroupFilter = 'ALL';
+    var inventorySelectedIds = {};
+    var currentInventoryBatchId = null;
+
+    window.openInventoryCheck = function(batchId) {
+        var b = MOCK_BATCHES.find(function(x) { return x.id === batchId; });
+        if (!b) return;
+        currentInventoryBatchId = batchId;
+        inventorySearchQuery = '';
+        inventoryGroupFilter = 'ALL';
+        inventorySelectedIds = {};
+
+        var modal = document.getElementById('modal-inventory-check');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'modal-inventory-check';
+            modal.className = 'modal-overlay';
+            modal.setAttribute('data-module-asset', 'true');
+            modal.innerHTML = buildInventoryModalHTML();
+            document.body.appendChild(modal);
+            setupInventoryEventListeners();
+        }
+
+        // Update modal title
+        var titleEl = document.getElementById('inventory-modal-title');
+        if (titleEl) titleEl.textContent = 'Kiểm kê lô hàng — ' + b.code;
+
+        var batchInfoEl = document.getElementById('inventory-batch-info');
+        if (batchInfoEl) {
+            var statusObj = STATUS_MAP[b.status] || { label: b.status, class: '' };
+            batchInfoEl.innerHTML =
+                '<div class="lifecycle-info-item"><i class="fa-solid fa-code-fork fa-rotate-180" style="color: #076eb8;"></i> <span>Mã lô: <strong>' + b.code + '</strong></span></div>' +
+                '<div class="lifecycle-info-item"><i class="fa-solid fa-cube" style="color:#64748b"></i> <span>' + b.name + '</span></div>' +
+                '<div class="lifecycle-info-item"><span class="status-badge ' + statusObj.class + '">' + statusObj.label + '</span></div>';
+        }
+
+        // Reset search and filters
+        var searchInput = document.getElementById('inventory-search-input');
+        if (searchInput) searchInput.value = '';
+        var groupInput = document.getElementById('inventory-group-input');
+        if (groupInput) groupInput.value = '';
+        var groupSelectedLabel = document.getElementById('inventory-group-selected-label');
+        if (groupSelectedLabel) groupSelectedLabel.textContent = 'Tất cả nhóm sản phẩm';
+
+        renderInventoryTable();
+        modal.classList.add('open');
+    };
+
+    window.closeInventoryCheck = function() {
+        var modal = document.getElementById('modal-inventory-check');
+        if (modal) modal.classList.remove('open');
+    };
+
+    function buildInventoryModalHTML() {
+        return '<div class="modal-box inventory-modal-box">' +
+            '<div class="modal-header">' +
+                '<div style="display:flex;align-items:center;gap:15px;flex:1">' +
+                    '<i class="fa-solid fa-list-check" style="color:#076EB8;font-size:20px"></i>' +
+                    '<div class="modal-title" id="inventory-modal-title">Kiểm kê sản phẩm</div>' +
+                    '<div class="lifecycle-header-info" id="inventory-batch-info"></div>' +
+                '</div>' +
+                '<div class="close-modal" onclick="window.closeInventoryCheck()">' +
+                    '<i class="fas fa-times"></i>' +
+                '</div>' +
+            '</div>' +
+            '<div class="modal-body" style="padding:20px 24px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:0;">' +
+                '<!-- Search & Filter Bar -->' +
+                '<div class="inventory-toolbar">' +
+                    '<div class="inventory-search-box">' +
+                        '<i class="fas fa-search"></i>' +
+                        '<input type="text" id="inventory-search-input" placeholder="Tìm theo mã sản phẩm, tên sản phẩm..." autocomplete="off">' +
+                    '</div>' +
+                    '<div class="inventory-group-filter" id="inventory-group-dropdown">' +
+                        '<div class="inventory-group-searchable">' +
+                            '<i class="fas fa-layer-group inventory-group-icon"></i>' +
+                            '<input type="text" id="inventory-group-search-input" class="inventory-group-search" placeholder="Tất cả nhóm sản phẩm" autocomplete="off" onfocus="window.openInventoryGroupDropdown()" oninput="window.filterInventoryGroupOptions(this.value)">' +
+                            '<i class="fas fa-chevron-down inventory-group-arrow"></i>' +
+                        '</div>' +
+                        '<div class="inventory-group-options" id="inventory-group-options"></div>' +
+                    '</div>' +
+                '</div>' +
+                '<!-- Inventory Table (Split Head/Body Architecture) -->' +
+                '<div class="inventory-table-container">' +
+                    '<div class="inventory-table-head" id="inventory-table-head">' +
+                        '<table class="inventory-table">' +
+                            '<colgroup>' +
+                                '<col style="width:45px">' +
+                                '<col style="width:55px">' +
+                                '<col style="width:140px">' +
+                                '<col>' +
+                                '<col style="width:160px">' +
+                                '<col style="width:170px">' +
+                            '</colgroup>' +
+                            '<thead>' +
+                                '<tr>' +
+                                    '<th class="text-center"><input type="checkbox" id="inventory-select-all" onchange="window.toggleInventorySelectAll(this)"></th>' +
+                                    '<th class="text-center">STT</th>' +
+                                    '<th>Mã sản phẩm</th>' +
+                                    '<th>Tên sản phẩm</th>' +
+                                    '<th class="text-center">SL vật chứa</th>' +
+                                    '<th class="text-center">SL SP/Vật chứa</th>' +
+                                '</tr>' +
+                            '</thead>' +
+                        '</table>' +
+                    '</div>' +
+                    '<div class="inventory-table-body" id="inventory-table-body-wrapper">' +
+                        '<table class="inventory-table">' +
+                            '<colgroup>' +
+                                '<col style="width:45px">' +
+                                '<col style="width:55px">' +
+                                '<col style="width:140px">' +
+                                '<col>' +
+                                '<col style="width:160px">' +
+                                '<col style="width:170px">' +
+                            '</colgroup>' +
+                            '<tbody id="inventory-table-body"></tbody>' +
+                        '</table>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="modal-footer" style="padding:12px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">' +
+                '<div class="inventory-footer-info" id="inventory-footer-info">Đã chọn: <strong>0</strong> sản phẩm</div>' +
+                '<div style="display:flex;gap:12px">' +
+                    '<button class="btn-secondary" onclick="window.closeInventoryCheck()">Đóng</button>' +
+                    '<button class="btn-primary" onclick="window.saveInventoryCheck()">Lưu</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function setupInventoryEventListeners() {
+        // Search input
+        var searchInput = document.getElementById('inventory-search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                inventorySearchQuery = this.value;
+                renderInventoryTable();
+            });
+        }
+
+        // Sync horizontal scroll between head and body
+        var bodyWrapper = document.getElementById('inventory-table-body-wrapper');
+        var headWrapper = document.getElementById('inventory-table-head');
+        if (bodyWrapper && headWrapper) {
+            bodyWrapper.addEventListener('scroll', function() {
+                headWrapper.scrollLeft = bodyWrapper.scrollLeft;
+            });
+        }
+    }
+
+    function getFilteredInventoryProducts() {
+        return INVENTORY_PRODUCTS.filter(function(p) {
+            var matchesSearch = !inventorySearchQuery ||
+                p.code.toLowerCase().indexOf(inventorySearchQuery.toLowerCase()) !== -1 ||
+                p.name.toLowerCase().indexOf(inventorySearchQuery.toLowerCase()) !== -1;
+            var matchesGroup = inventoryGroupFilter === 'ALL' || p.group === inventoryGroupFilter;
+            return matchesSearch && matchesGroup;
+        });
+    }
+
+    function renderInventoryTable() {
+        var tbody = document.getElementById('inventory-table-body');
+        if (!tbody) return;
+
+        var filtered = getFilteredInventoryProducts();
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:40px;color:#94a3b8;font-size:14px;"><i class="fa-regular fa-folder-open" style="font-size:32px;display:block;margin-bottom:12px;"></i>Không tìm thấy sản phẩm phù hợp</td></tr>';
+            updateInventoryFooter();
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(function(p, index) {
+            var isChecked = !!inventorySelectedIds[p.id];
+            var containerVal = (inventorySelectedIds[p.id] && inventorySelectedIds[p.id].containerCount) || '';
+            var perContainerVal = (inventorySelectedIds[p.id] && inventorySelectedIds[p.id].perContainer) || '';
+            var groupName = (PRODUCT_GROUPS.find(function(g) { return g.id === p.group; }) || {}).name || '';
+
+            return '<tr class="' + (isChecked ? 'row-selected' : '') + '">' +
+                '<td class="text-center"><input type="checkbox" class="inventory-row-check" data-product-id="' + p.id + '" ' + (isChecked ? 'checked' : '') + ' onchange="window.toggleInventoryRow(this)"></td>' +
+                '<td class="text-center" style="color:#64748b;font-weight:600">' + (index + 1) + '</td>' +
+                '<td style="font-weight:700;color:#076EB8">' + p.code + '</td>' +
+                '<td><div style="line-height:1.4"><strong style="color:#1e293b">' + p.name + '</strong><br><span style="color:#94a3b8;font-size:11px">' + groupName + '</span></div></td>' +
+                '<td class="text-center"><input type="number" class="inventory-number-input" min="1" step="1" placeholder="0" value="' + containerVal + '" data-product-id="' + p.id + '" data-field="containerCount" oninput="window.onInventoryInputChange(this)" onkeydown="window.preventNonInteger(event)"></td>' +
+                '<td class="text-center"><input type="number" class="inventory-number-input" min="1" step="1" placeholder="0" value="' + perContainerVal + '" data-product-id="' + p.id + '" data-field="perContainer" oninput="window.onInventoryInputChange(this)" onkeydown="window.preventNonInteger(event)"></td>' +
+            '</tr>';
+        }).join('');
+
+        updateInventoryFooter();
+        updateSelectAllCheckbox();
+    }
+
+    function updateInventoryFooter() {
+        var footerInfo = document.getElementById('inventory-footer-info');
+        if (!footerInfo) return;
+        var count = Object.keys(inventorySelectedIds).length;
+        footerInfo.innerHTML = 'Đã chọn: <strong>' + count + '</strong> sản phẩm';
+    }
+
+    function updateSelectAllCheckbox() {
+        var selectAll = document.getElementById('inventory-select-all');
+        if (!selectAll) return;
+        var filtered = getFilteredInventoryProducts();
+        var allChecked = filtered.length > 0 && filtered.every(function(p) { return !!inventorySelectedIds[p.id]; });
+        var someChecked = filtered.some(function(p) { return !!inventorySelectedIds[p.id]; });
+        selectAll.checked = allChecked;
+        selectAll.indeterminate = !allChecked && someChecked;
+    }
+
+    window.toggleInventorySelectAll = function(checkbox) {
+        var filtered = getFilteredInventoryProducts();
+        if (checkbox.checked) {
+            filtered.forEach(function(p) {
+                if (!inventorySelectedIds[p.id]) {
+                    inventorySelectedIds[p.id] = { containerCount: '', perContainer: '' };
+                }
+            });
+        } else {
+            filtered.forEach(function(p) {
+                delete inventorySelectedIds[p.id];
+            });
+        }
+        renderInventoryTable();
+    };
+
+    window.toggleInventoryRow = function(checkbox) {
+        var productId = checkbox.getAttribute('data-product-id');
+        if (checkbox.checked) {
+            inventorySelectedIds[productId] = inventorySelectedIds[productId] || { containerCount: '', perContainer: '' };
+        } else {
+            delete inventorySelectedIds[productId];
+        }
+        renderInventoryTable();
+    };
+
+    window.onInventoryInputChange = function(input) {
+        var productId = input.getAttribute('data-product-id');
+        var field = input.getAttribute('data-field');
+        // Ensure positive integer only
+        var val = input.value.replace(/[^0-9]/g, '');
+        if (val !== '' && parseInt(val) <= 0) val = '';
+        input.value = val;
+
+        if (!inventorySelectedIds[productId]) {
+            inventorySelectedIds[productId] = { containerCount: '', perContainer: '' };
+            // Auto-check the row when user types
+            var checkbox = document.querySelector('.inventory-row-check[data-product-id="' + productId + '"]');
+            if (checkbox) checkbox.checked = true;
+            // Add selected styling
+            var row = input.closest('tr');
+            if (row) row.classList.add('row-selected');
+        }
+        inventorySelectedIds[productId][field] = val;
+        updateInventoryFooter();
+        updateSelectAllCheckbox();
+    };
+
+    window.preventNonInteger = function(e) {
+        // Prevent ., -, e, +
+        if (['.', '-', 'e', 'E', '+'].indexOf(e.key) !== -1) {
+            e.preventDefault();
+        }
+    };
+
+    // Product Group Searchable Select
+    window.openInventoryGroupDropdown = function() {
+        var dropdown = document.getElementById('inventory-group-dropdown');
+        if (!dropdown) return;
+        dropdown.classList.add('open');
+        renderInventoryGroupOptions('');
+    };
+
+    window.filterInventoryGroupOptions = function(searchTerm) {
+        renderInventoryGroupOptions(searchTerm || '');
+    };
+
+    function renderInventoryGroupOptions(searchTerm) {
+        var optionsEl = document.getElementById('inventory-group-options');
+        if (!optionsEl) return;
+        var term = (searchTerm || '').toLowerCase().trim();
+
+        var html = '';
+        // "All" option
+        if (!term || 'tất cả nhóm sp'.indexOf(term) !== -1) {
+            html += '<div class="inventory-group-option ' + (inventoryGroupFilter === 'ALL' ? 'active' : '') + '" onclick="window.selectInventoryGroup(\'ALL\', \'Tất cả nhóm sản phẩm\')">Tất cả nhóm sản phẩm</div>';
+        }
+        PRODUCT_GROUPS.forEach(function(g) {
+            if (!term || g.name.toLowerCase().indexOf(term) !== -1 || g.id.toLowerCase().indexOf(term) !== -1) {
+                html += '<div class="inventory-group-option ' + (inventoryGroupFilter === g.id ? 'active' : '') + '" onclick="window.selectInventoryGroup(\'' + g.id + '\', \'' + g.name + '\')">' + g.name + '</div>';
+            }
+        });
+        if (!html) {
+            html = '<div class="inventory-group-option" style="color:#94a3b8;cursor:default;text-align:center;">Không tìm thấy nhóm sản phẩm</div>';
+        }
+        optionsEl.innerHTML = html;
+    }
+
+    window.selectInventoryGroup = function(id, name) {
+        inventoryGroupFilter = id;
+        var input = document.getElementById('inventory-group-search-input');
+        if (input) input.value = (id === 'ALL' ? '' : name);
+        var dropdown = document.getElementById('inventory-group-dropdown');
+        if (dropdown) dropdown.classList.remove('open');
+        renderInventoryTable();
+    };
+
+    window.saveInventoryCheck = function() {
+        var selectedCount = Object.keys(inventorySelectedIds).length;
+        if (selectedCount === 0) {
+            showToast('Vui lòng chọn ít nhất 1 sản phẩm để kiểm kê.', 'warning');
+            return;
+        }
+        // Validate all selected have values
+        var valid = true;
+        Object.keys(inventorySelectedIds).forEach(function(pid) {
+            var data = inventorySelectedIds[pid];
+            if (!data.containerCount || !data.perContainer) valid = false;
+        });
+        if (!valid) {
+            showToast('Vui lòng điền đầy đủ số lượng vật chứa và số sản phẩm/vật chứa cho các sản phẩm đã chọn.', 'warning');
+            return;
+        }
+        showToast('Đã lưu kiểm kê thành công cho ' + selectedCount + ' sản phẩm!', 'success');
+        window.closeInventoryCheck();
+    };
+
 
     window.viewTree = function(id) {
         var b = MOCK_BATCHES.find(function(x) { return x.id === id; });
@@ -858,15 +1295,14 @@
         window.renderTable();
         setupExtraDatePickerListeners();
         initCreatorFilterCombobox();
-        initGradeTypeFilterCombobox();
         
-        // Initialize Date Range Display
+        // Initialize Date Range Display - default to today
         var triggerDisplay = document.getElementById("dateRangeDisplay");
         if (triggerDisplay && selectedRange.start && selectedRange.end) {
             triggerDisplay.textContent = formatDate(selectedRange.start) + " - " + formatDate(selectedRange.end);
         }
         
-        // Mark "Today" as active in picker sidebar
+        // Mark "Hôm nay" as active in picker sidebar
         var todayItem = document.querySelector('.analytics-date-picker .sidebar-item[data-range="today"]');
         if (todayItem) todayItem.classList.add('active');
 
@@ -899,15 +1335,136 @@
                 var cWrapper = document.getElementById('creator-filter-combobox');
                 if (cWrapper) cWrapper.classList.remove('active');
             }
-            // Grade Type Combobox
-            if (!e.target.closest('#grade-type-filter-combobox')) {
-                var gList = document.getElementById('grade-type-filter-list');
-                if (gList) gList.classList.remove('show');
-                var gWrapper = document.getElementById('grade-type-filter-combobox');
-                if (gWrapper) gWrapper.classList.remove('active');
+            // Inventory Group Dropdown
+            if (!e.target.closest('.inventory-group-filter')) {
+                var ig = document.getElementById('inventory-group-dropdown');
+                if (ig) ig.classList.remove('open');
             }
         });
     }
+
+    // --- ACCORDION ---
+    window.toggleAccordion = function(id) {
+        var el = document.getElementById(id);
+        if (el) el.classList.toggle('open');
+    };
+
+    // --- MODAL INLINE SINGLE DATE PICKER ---
+    // activeModalPicker tracks { inputId, containerId }
+    var activeModalPicker = null;
+
+    window.toggleModalDatePicker = function(inputId, containerId) {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        var isOpen = container.style.display === 'block';
+        // Close any other open picker first
+        document.querySelectorAll('.modal-inline-calendar').forEach(function(c) { c.style.display = 'none'; });
+        if (!isOpen) {
+            activeModalPicker = { inputId: inputId, containerId: containerId };
+            renderModalCalendar(inputId, containerId);
+            container.style.display = 'block';
+        }
+    };
+
+    function parseDisplayDate(str) {
+        if (!str) return null;
+        var parts = str.split('/');
+        if (parts.length !== 3) return null;
+        return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+    }
+
+    function renderModalCalendar(inputId, containerId) {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        var inputEl = document.getElementById(inputId);
+        var currentVal = inputEl ? inputEl.value : '';
+        var selected = parseDisplayDate(currentVal);
+        var viewDate = selected ? new Date(selected) : new Date();
+        var month = viewDate.getMonth();
+        var year = viewDate.getFullYear();
+
+        var months = ["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"];
+        var curYear = new Date().getFullYear();
+        var monthOptions = months.map(function(m, i) {
+            return '<option value="' + i + '"' + (i === month ? ' selected' : '') + '>' + m + '</option>';
+        }).join('');
+        var yearOptions = '';
+        for (var y = curYear - 5; y <= curYear + 5; y++) {
+            yearOptions += '<option value="' + y + '"' + (y === year ? ' selected' : '') + '>' + y + '</option>';
+        }
+
+        // Build days
+        var firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+        // Convert to Mon-start: Mon=0 ... Sun=6
+        var startOffset = (firstDay === 0) ? 6 : firstDay - 1;
+        var daysInMonth = new Date(year, month + 1, 0).getDate();
+        var today = new Date();
+        var dayHeaders = ['T2','T3','T4','T5','T6','T7','CN'].map(function(d) {
+            return '<div class="day-header">' + d + '</div>';
+        }).join('');
+
+        var dayCells = '';
+        for (var i = 0; i < startOffset; i++) {
+            dayCells += '<div class="cal-day empty"></div>';
+        }
+        for (var d = 1; d <= daysInMonth; d++) {
+            var isSelected = selected && selected.getDate() === d && selected.getMonth() === month && selected.getFullYear() === year;
+            var isToday = today.getDate() === d && today.getMonth() === month && today.getFullYear() === year;
+            var cls = 'cal-day' + (isSelected ? ' selected' : '') + (isToday && !isSelected ? ' today-marker' : '') + (isToday && isSelected ? ' selected today-marker' : '');
+            dayCells += '<div class="' + cls + '" data-day="' + d + '">' + d + '</div>';
+        }
+
+        container.innerHTML =
+            '<div class="modal-cal-nav">' +
+                '<select id="mc-month-' + containerId + '">' + monthOptions + '</select>' +
+                '<select id="mc-year-' + containerId + '">' + yearOptions + '</select>' +
+            '</div>' +
+            '<div class="modal-cal-grid">' + dayHeaders + dayCells + '</div>' +
+            '<div class="modal-cal-footer">' +
+                '<button type="button" class="modal-cal-clear" onclick="window.clearModalDate(\'' + inputId + '\',\'' + containerId + '\')">Xóa</button>' +
+            '</div>';
+
+        // Month/year select events
+        var monthSel = document.getElementById('mc-month-' + containerId);
+        var yearSel = document.getElementById('mc-year-' + containerId);
+        function rerender() {
+            viewDate.setMonth(parseInt(monthSel.value));
+            viewDate.setFullYear(parseInt(yearSel.value));
+            renderModalCalendar(inputId, containerId);
+        }
+        if (monthSel) monthSel.onchange = rerender;
+        if (yearSel) yearSel.onchange = rerender;
+
+        // Day click events
+        container.querySelectorAll('.cal-day[data-day]').forEach(function(cell) {
+            cell.onclick = function() {
+                var day = parseInt(this.getAttribute('data-day'));
+                var newDate = new Date(parseInt(yearSel.value), parseInt(monthSel.value), day);
+                var inputField = document.getElementById(inputId);
+                if (inputField) {
+                    inputField.value = String(day).padStart(2,'0') + '/' + String(newDate.getMonth()+1).padStart(2,'0') + '/' + newDate.getFullYear();
+                }
+                container.style.display = 'none';
+                activeModalPicker = null;
+            };
+        });
+    }
+
+    window.clearModalDate = function(inputId, containerId) {
+        var inputField = document.getElementById(inputId);
+        if (inputField) inputField.value = '';
+        var container = document.getElementById(containerId);
+        if (container) container.style.display = 'none';
+        activeModalPicker = null;
+    };
+
+    // Close modal date pickers when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.modal-date-picker-wrapper')) {
+            document.querySelectorAll('.modal-inline-calendar').forEach(function(c) { c.style.display = 'none'; });
+            activeModalPicker = null;
+        }
+    }, true);
 
     init();
 })();

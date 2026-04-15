@@ -160,7 +160,7 @@ body {
 
 .data-table {
     width: 100%;
-    min-width: 1320px;
+    min-width: 1440px;
     table-layout: fixed;
     border-collapse: collapse;
 }
@@ -1097,4 +1097,580 @@ body {
 /* Glow for active message line */
 .sd-row--active .sd-arrow-line {
     filter: drop-shadow(0 0 4px var(--sc));
+}
+
+/* ===== INVENTORY CHECK (KIỂM KÊ) MODAL ===== */
+.btn-icon-inventory {
+    color: #16a34a !important;
+}
+.btn-icon-inventory:hover {
+    background: #f0fdf4 !important;
+    color: #15803d !important;
+}
+
+.inventory-modal-box {
+    width: 1200px !important;
+    max-width: 95vw;
+    height: 88vh;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border: 1px solid rgba(7, 110, 184, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Toolbar */
+.inventory-toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.inventory-search-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    height: 40px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    flex: 1;
+    min-width: 260px;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.inventory-search-box:focus-within {
+    border-color: #076EB8;
+    box-shadow: 0 0 0 3px rgba(7, 110, 184, 0.1);
+}
+
+.inventory-search-box i {
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.inventory-search-box input {
+    border: none;
+    outline: none;
+    font-size: 13px;
+    background: transparent;
+    width: 100%;
+    color: #334155;
+}
+
+.inventory-search-box input::placeholder {
+    color: #94a3b8;
+}
+
+/* Group Filter Searchable Select */
+.inventory-group-filter {
+    position: relative;
+    min-width: 220px;
+}
+
+.inventory-group-searchable {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    height: 40px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    position: relative;
+}
+
+.inventory-group-searchable:hover {
+    border-color: #076EB8;
+    background: #f8fafc;
+}
+
+.inventory-group-filter.open .inventory-group-searchable {
+    border-color: #076EB8;
+    box-shadow: 0 0 0 3px rgba(7, 110, 184, 0.1);
+}
+
+.inventory-group-icon {
+    color: #64748b;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.inventory-group-filter.open .inventory-group-icon {
+    color: #076EB8;
+}
+
+.inventory-group-search {
+    border: none;
+    outline: none;
+    font-size: 13px;
+    background: transparent;
+    width: 100%;
+    color: #334155;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.inventory-group-filter.open .inventory-group-search {
+    cursor: text;
+}
+
+.inventory-group-search::placeholder {
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.inventory-group-arrow {
+    font-size: 11px;
+    color: #94a3b8;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.inventory-group-filter.open .inventory-group-arrow {
+    transform: rotate(180deg);
+    color: #076EB8;
+}
+
+.inventory-group-options {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    width: 100%;
+    min-width: 220px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    z-index: 1300;
+    display: none;
+    padding: 4px;
+    max-height: 280px;
+    overflow-y: auto;
+    animation: fadeIn 0.15s ease-out;
+}
+
+.inventory-group-filter.open .inventory-group-options {
+    display: block;
+}
+
+.inventory-group-option {
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #334155;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.15s;
+    font-weight: 500;
+}
+
+.inventory-group-option:hover {
+    background: #f1f5f9;
+    color: #076EB8;
+}
+
+.inventory-group-option.active {
+    background: #eff6ff;
+    color: #076EB8;
+    font-weight: 600;
+}
+
+/* Inventory Table — Split Head/Body Architecture */
+.inventory-table-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+    min-height: 0; /* Allow flex child to shrink */
+}
+
+.inventory-table-head {
+    overflow: hidden;
+    background-color: #076EB8;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.inventory-table-body {
+    flex: 1;
+    overflow: auto;
+    min-height: 0; /* Allow flex child to shrink */
+}
+
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.inventory-table thead th {
+    padding: 12px 14px;
+    text-align: left;
+    color: #fff;
+    font-weight: 600;
+    font-size: 12px;
+    background-color: #076EB8;
+    white-space: nowrap;
+}
+
+.inventory-table thead th:first-child {
+    border-radius: 10px 0 0 0;
+}
+
+.inventory-table thead th:last-child {
+    border-radius: 0 10px 0 0;
+}
+
+.inventory-table tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+    color: #334155;
+    vertical-align: middle;
+}
+
+.inventory-table tbody tr:hover td {
+    background-color: #f8fafc;
+}
+
+.inventory-table tbody tr:nth-child(even) td {
+    background-color: #fafbfc;
+}
+
+.inventory-table tbody tr:nth-child(even):hover td {
+    background-color: #f1f5f9;
+}
+
+.inventory-table tbody tr.row-selected td {
+    background-color: #eff6ff !important;
+}
+
+.inventory-table tbody tr.row-selected:hover td {
+    background-color: #dbeafe !important;
+}
+
+/* Checkbox styling */
+.inventory-table input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #076EB8;
+    border-radius: 4px;
+}
+
+/* Number Input */
+.inventory-number-input {
+    width: 100%;
+    max-width: 120px;
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+    outline: none;
+    transition: all 0.2s;
+    background: #fff;
+    color: #334155;
+    font-weight: 600;
+    box-sizing: border-box;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.inventory-number-input::-webkit-outer-spin-button,
+.inventory-number-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.inventory-number-input:focus {
+    border-color: #076EB8;
+    box-shadow: 0 0 0 3px rgba(7, 110, 184, 0.1);
+}
+
+.inventory-number-input::placeholder {
+    color: #cbd5e1;
+    font-weight: 400;
+}
+
+/* Footer info */
+.inventory-footer-info {
+    font-size: 13px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.inventory-footer-info strong {
+    color: #076EB8;
+    font-size: 15px;
+}
+
+/* Custom scrollbar for inventory table body */
+.inventory-table-body::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.inventory-table-body::-webkit-scrollbar-track {
+    background: #f8fafc;
+}
+.inventory-table-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+.inventory-table-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Group options scrollbar */
+.inventory-group-options::-webkit-scrollbar {
+    width: 5px;
+}
+.inventory-group-options::-webkit-scrollbar-track {
+    background: transparent;
+}
+.inventory-group-options::-webkit-scrollbar-thumb {
+    background: #bfdbfe;
+    border-radius: 10px;
+}
+/* ===== WIDE MODAL (1000px) ===== */
+.batch-wide-modal {
+    width: 1000px !important;
+    max-width: 95vw;
+}
+
+/* ===== FORM GRIDS ===== */
+.form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.form-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+/* ===== ACCORDION ===== */
+.batch-accordion {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.batch-accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    background: #f8fafc;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: background 0.15s;
+}
+
+.batch-accordion-header:hover {
+    background: #f1f5f9;
+}
+
+.batch-accordion.open .batch-accordion-header {
+    border-bottom: 1px solid var(--border-color);
+    background: #eff6ff;
+}
+
+.batch-accordion-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.batch-accordion.open .batch-accordion-title {
+    color: var(--active-color);
+}
+
+.batch-accordion-title i {
+    color: var(--active-color);
+    font-size: 14px;
+}
+
+.batch-accordion-arrow {
+    font-size: 11px;
+    color: #94a3b8;
+    transition: transform 0.2s;
+}
+
+.batch-accordion.open .batch-accordion-arrow {
+    transform: rotate(180deg);
+    color: var(--active-color);
+}
+
+.batch-accordion-body {
+    padding: 20px 18px 4px;
+    display: none;
+}
+
+.batch-accordion.open .batch-accordion-body {
+    display: block;
+}
+
+/* ===== BATCH TYPE BADGE ===== */
+.batch-type-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+.batch-type-import {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+.batch-type-export {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+}
+
+/* ===== MODAL INLINE DATE PICKER ===== */
+.modal-date-picker-wrapper {
+    position: relative;
+}
+.modal-date-picker-wrapper .form-control {
+    padding-right: 36px;
+    cursor: pointer;
+    background: white;
+}
+.modal-date-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 14px;
+}
+.modal-date-icon:hover {
+    color: var(--active-color);
+}
+.modal-inline-calendar {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 200000;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    padding: 12px;
+    width: 280px;
+}
+.modal-cal-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 6px;
+}
+.modal-cal-nav select {
+    flex: 1;
+    height: 30px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 12px;
+    padding: 0 6px;
+    outline: none;
+    cursor: pointer;
+}
+.modal-cal-nav select:focus {
+    border-color: var(--active-color);
+}
+.modal-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+.modal-cal-grid .day-header {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    padding: 4px 0;
+}
+.modal-cal-grid .cal-day {
+    text-align: center;
+    padding: 5px 2px;
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #334155;
+    transition: background 0.15s;
+}
+.modal-cal-grid .cal-day:hover:not(.empty):not(.other-month) {
+    background: #eff6ff;
+    color: var(--active-color);
+}
+.modal-cal-grid .cal-day.selected {
+    background: var(--active-color);
+    color: white;
+    font-weight: 700;
+}
+.modal-cal-grid .cal-day.today-marker {
+    border: 1px solid var(--active-color);
+    color: var(--active-color);
+    font-weight: 600;
+}
+.modal-cal-grid .cal-day.selected.today-marker {
+    border-color: transparent;
+    color: white;
+}
+.modal-cal-grid .cal-day.empty,
+.modal-cal-grid .cal-day.other-month {
+    color: #cbd5e1;
+    cursor: default;
+}
+.modal-cal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+.modal-cal-clear {
+    font-size: 12px;
+    color: #64748b;
+    cursor: pointer;
+    padding: 4px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: white;
+}
+.modal-cal-clear:hover {
+    background: #f1f5f9;
+    color: var(--danger-color);
 }
