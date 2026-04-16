@@ -16,9 +16,23 @@
 
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
+    const toggleIcon = document.querySelector('.toggle-btn i');
+    
     // Close any open flyout before toggling
     if (typeof closeCollapsedFlyout === 'function') closeCollapsedFlyout();
     sidebar.classList.toggle('collapsed');
+    
+    // Update icon based on state
+    if (toggleIcon) {
+        if (sidebar.classList.contains('collapsed')) {
+            toggleIcon.classList.remove('fa-outdent');
+            toggleIcon.classList.add('fa-indent');
+        } else {
+            toggleIcon.classList.remove('fa-indent');
+            toggleIcon.classList.add('fa-outdent');
+        }
+    }
+
     // Persist sidebar state
     try {
         localStorage.setItem('sidebar_collapsed', sidebar.classList.contains('collapsed') ? 'true' : 'false');
@@ -29,8 +43,21 @@ function toggleSidebar() {
 try {
     const isCollapsed = localStorage.getItem('sidebar_collapsed');
     const sidebar = document.getElementById('sidebar');
-    if (sidebar && isCollapsed === 'true') {
+    const toggleIcon = document.querySelector('.toggle-btn i');
+    
+    // Default to collapsed if no preference is saved
+    if (sidebar && isCollapsed === 'false') {
+        sidebar.classList.remove('collapsed');
+        if (toggleIcon) {
+            toggleIcon.classList.remove('fa-indent');
+            toggleIcon.classList.add('fa-outdent');
+        }
+    } else if (sidebar) {
         sidebar.classList.add('collapsed');
+        if (toggleIcon) {
+            toggleIcon.classList.remove('fa-outdent');
+            toggleIcon.classList.add('fa-indent');
+        }
     }
     // Remove the blocking style from <head> if it exists
     const preStyle = document.getElementById('pre-collapse');
@@ -261,7 +288,7 @@ function loadPage(title) {
 
     // mapping menu text -> module HTML path
     const moduleMap = {
-        'Quản lý Kho': 'modules/warehouse/warehouse.html',
+        'Quản lý kho': 'modules/warehouse/warehouse.html',
         'Cấu hình Kho': 'modules/warehouse/warehouse-config.html',
         'Quản lý vật chứa': 'modules/pallet/pallet.html',
         'Layout Kho': 'modules/layout/index.html',
@@ -303,8 +330,8 @@ function loadPage(title) {
         'Dòng sản phẩm': 'modules/product-line/line.html',
         'Khách hàng': 'modules/customer/customer.html',
         'Thị trường': 'modules/market/market.html',
-        'Đơn hàng nhập': 'modules/order/receive/receive.html',
-        'Đơn hàng xuất': 'modules/order/send/send.html',
+        'Đơn hàng ERP': 'modules/order/receive/receive.html',
+        // 'Đơn hàng xuất': 'modules/order/send/send.html',
         'Theo dõi tồn kho': 'modules/instock/instock.html',
         'Kiểm kê nhập xuất': 'modules/check/check.html'
         // 'Vật chứa mới': 'modules/new-container/new-cont.html',

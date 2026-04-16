@@ -25,7 +25,7 @@
   <script>
     // Apply sidebar state immediately before HTML renders
     try {
-      if (localStorage.getItem('sidebar_collapsed') === 'true') {
+      if (localStorage.getItem('sidebar_collapsed') !== 'false') {
         // Temporarily embed CSS for the collapsed state
         document.write('<style id="pre-collapse">.sidebar { width: 70px !important; transition: none !important; } .brand-logo, .brand-text, .link-text, .arrow-icon, .submenu { display: none !important; visibility: hidden !important; }</style>');
       }
@@ -44,14 +44,14 @@
       }
     })();
   </script>
-  <nav class="sidebar" id="sidebar">
+  <nav class="sidebar collapsed" id="sidebar">
     <div class="sidebar-header">
       <div class="brand-logo">
         <img src="https://demo-qtsx.thacoindustries.com/favicon.ico" alt="Logo" style="width: 24px; height: 24px" />
         <span class="brand-text">THACO INDUSTRIES</span>
       </div>
       <div class="toggle-btn" onclick="toggleSidebar()">
-        <i class="fa-solid fa-bars"></i>
+        <i class="fa-solid fa-indent"></i>
       </div>
     </div>
 
@@ -96,8 +96,8 @@
           <i class="fas fa-chevron-right arrow-icon"></i>
         </div>
         <div class="submenu">
-          <a href="#" onclick="loadPage('Đơn hàng nhập')" data-code="OUTBOUND_ORDER"><i class="fa-solid fa-arrow-right-to-bracket"></i>Đơn hàng nhập</a>
-          <a href="#" onclick="loadPage('Đơn hàng xuất')" data-code="OUTBOUND_ORDER"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đơn hàng xuất</a>
+          <a href="#" onclick="loadPage('Đơn hàng ERP')" data-code="OUTBOUND_ORDER"><i class="fa-solid fa-retweet"></i>Đơn hàng ERP</a>
+          <!-- <a href="#" onclick="loadPage('Đơn hàng xuất')" data-code="OUTBOUND_ORDER"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đơn hàng xuất</a> -->
         </div>
       </div>
 
@@ -111,8 +111,7 @@
           <i class="fas fa-chevron-right arrow-icon"></i>
         </div>
         <div class="submenu">
-          <a href="#" onclick="loadPage('Quản lý kho')" data-code="WAREHOUSE_LIST"><i class="fas fa-warehouse"></i>Danh
-            sách kho</a>
+          <a href="#" onclick="loadPage('Quản lý kho')" data-code="WAREHOUSE_LIST"><i class="fas fa-warehouse"></i>Quản lý kho</a>
           <a href="#" onclick="loadPage('Quản lý lô hàng')" data-code="LOT_MGMT"><i class="fa-solid fa-code-fork fa-rotate-180"></i>Quản lý lô hàng</a>
           <a href="#" onclick="loadPage('Theo dõi tồn kho')" data-code="INVENTORY_MGMT"><i class="fa-solid fa-layer-group"></i>Theo dõi tồn kho</a>
           <!-- <a href="#" onclick="loadPage('Kiểm kê nhập xuất')" data-code="CHECK_IO"><i class="fa-solid fa-list-check"></i>Kiểm kê nhập xuất</a> -->
@@ -156,8 +155,8 @@
       <div class="menu-item" data-module="INBOUND">
         <div class="menu-link" onclick="toggleSubmenu(this)">
           <div class="link-content">
-            <i class="fas fa-file-import"></i>
-            <span class="link-text">Nhập kho</span>
+        <i class="fa-solid fa-list-ul"></i>
+            <span class="link-text">Quản lý lệnh</span>
           </div>
           <i class="fas fa-chevron-right arrow-icon"></i>
         </div>
@@ -165,10 +164,14 @@
           <a href="#" onclick="loadPage('Lệnh nhập kho')" data-code="INBOUND_ORDER"><i
               class="fas fa-file-import"></i>Lệnh nhập kho</a>
         </div>
+        <div class="submenu">
+          <a href="#" onclick="loadPage('Lệnh xuất kho')" data-code="INBOUND_ORDER"><i
+              class="fas fa-file-import"></i>Lệnh xuất kho</a>
+        </div>
       </div>
 
       <!-- Xuất kho -->
-      <div class="menu-item" data-module="OUTBOUND">
+      <!-- <div class="menu-item" data-module="OUTBOUND">
         <div class="menu-link" onclick="toggleSubmenu(this)">
           <div class="link-content">
             <i class="fas fa-file-export"></i>
@@ -180,7 +183,7 @@
           <a href="#" onclick="loadPage('Lệnh xuất kho')" data-code="OUTBOUND_ORDER"><i
               class="fas fa-file-export"></i>Lệnh xuất kho</a>
         </div>
-      </div>
+      </div> -->
 
       <!-- Quản lý luồng và quy trình -->
       <div class="menu-item" data-module="WORKFLOW">

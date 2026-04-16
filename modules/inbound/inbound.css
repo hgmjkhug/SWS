@@ -287,34 +287,7 @@ input, button, select, textarea {
 .modal-body { padding: 12px 24px; max-height: 80vh; overflow-y: auto; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 12px; padding: 12px 24px; background-color: #f8fafc; border-top: 1px solid var(--border-color); border-radius: 0 0 12px 12px; }
 
-/* SEGMENTED TABS */
-.segment-tabs {
-    display: flex;
-    background: #f1f5f9;
-    padding: 4px;
-    border-radius: 10px;
-    margin: 8px 24px 0;
-}
-.segment-tab {
-    flex: 1;
-    padding: 10px 16px;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 600;
-    color: #64748b;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: all 0.2s;
-    user-select: none;
-}
-.segment-tab:hover {
-    color: #334155;
-}
-.segment-tab.active {
-    background: white;
-    color: #3b82f6;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
+
 
 /* PALLET HISTORY */
 .pallet-history-container {
@@ -658,7 +631,6 @@ input, button, select, textarea {
 
 .sidebar-item.filter-mode-item::before {
     content: '\f058';
-    font-family: 'Font Awesome 6 Free';
     font-weight: 400;
     margin-right: 8px;
     color: #cbd5e1;
@@ -754,7 +726,7 @@ input, button, select, textarea {
 
 .dropdown-selected::after {
     content: '\f078';
-    font-family: 'Font Awesome 6 Free';
+    font-family: "Font Awesome 6 Pro", "Font Awesome 6 Free", sans-serif;
     font-weight: 900;
     font-size: 10px;
     color: #94a3b8;
@@ -1130,18 +1102,27 @@ input, button, select, textarea {
 }
 
 .pda-cal-nav {
-    background: none;
-    border: none;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     cursor: pointer;
-    color: #64748b;
-    padding: 6px 10px;
-    border-radius: 6px;
-    transition: all 0.15s;
+    color: #3b82f6;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s;
 }
 
 .pda-cal-nav:hover {
-    background: #f1f5f9;
-    color: #3b82f6;
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.pda-cal-nav i {
+    font-size: 14px;
 }
 
 .pda-cal-weekdays {
@@ -1330,7 +1311,7 @@ input, button, select, textarea {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.9);
-    z-index: 2000;
+    z-index: 1000000;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -1345,15 +1326,11 @@ input, button, select, textarea {
     width: 90%;
     max-width: 450px;
     border-radius: 16px;
-    padding: 20px;
+    padding: 0;
     text-align: center;
+    overflow: hidden;
 }
 
-.scanner-window h3 {
-    margin: 0 0 16px 0;
-    color: #1e293b;
-    font-size: 16px;
-}
 
 #qr-reader {
     width: 100%;
@@ -1363,22 +1340,6 @@ input, button, select, textarea {
     min-height: 300px;
 }
 
-.btn-close-scanner {
-    margin-top: 16px;
-    padding: 12px 32px;
-    border: none;
-    border-radius: 8px;
-    background: #ef4444;
-    color: white;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-close-scanner:hover {
-    background: #dc2626;
-}
 
 /* Scanner Tabs */
 .scanner-tabs {
@@ -1819,29 +1780,24 @@ input, button, select, textarea {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    display: none; /* Controlled by JS */
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
     justify-content: center;
     align-items: center;
-    z-index: 2000;
-    backdrop-filter: blur(2px);
+    z-index: 9999 !important;
 }
 
 .modal-box {
     background: white;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     width: 100%;
     max-width: 500px;
     position: relative;
-    animation: modal-appear 0.3s ease-out;
-}
-
-@keyframes modal-appear {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    opacity: 1 !important;
+    display: block !important;
 }
 
 .modal-header {
@@ -1922,4 +1878,140 @@ input, button, select, textarea {
 }
 .priority-toggle-switch input:disabled + .priority-toggle-slider:before {
     box-shadow: none;
+}
+
+/* --- PDA Steps and Batch Selection --- */
+.pda-step-container {
+    position: relative;
+    width: 100%;
+}
+.pda-step {
+    animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.pda-search-box {
+    position: relative;
+    margin-bottom: 16px;
+}
+.pda-search-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+.pda-search-box .pda-input {
+    padding-left: 38px;
+    border-radius: 10px;
+}
+
+.batch-selection-list {
+    max-height: 350px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    background: #fff;
+}
+.batch-selection-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.batch-selection-item:last-child {
+    border-bottom: none;
+}
+.batch-selection-item:hover {
+    background-color: #f8fafc;
+}
+.batch-selection-item.selected {
+    background-color: #eff6ff;
+}
+.batch-radio-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    margin-right: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    background: transparent;
+}
+.batch-radio-custom.checked {
+    border-color: #3b82f6;
+    background: #3b82f6;
+}
+.batch-radio-custom.checked::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    border-radius: 50%;
+}
+.batch-radio {
+    display: none;
+}
+.batch-info {
+    flex: 1;
+}
+.batch-info .batch-code {
+    font-weight: 700;
+    color: #076EB8;
+    font-size: 14px;
+    display: block;
+}
+.batch-info .batch-name {
+    font-size: 13px;
+    color: #475569;
+    margin-top: 2px;
+}
+.batch-status-tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: #fef3c7;
+    color: #92400e;
+    font-weight: 600;
+}
+
+.pda-nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+.btn-back-step {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+    color: #64748b;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-back-step:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.empty-batch-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: #94a3b8;
+}
+.empty-batch-state i {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: block;
+    opacity: 0.5;
 }

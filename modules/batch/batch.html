@@ -20,10 +20,24 @@
                     <div class="dropdown-options">
                         <div class="dropdown-option active" onclick="window.selectStatusFilter('ALL', 'Tất cả trạng thái')">Tất cả trạng thái</div>
                         <div class="dropdown-option" onclick="window.selectStatusFilter('NEW', 'Mới tạo')">Mới tạo</div>
-                        <div class="dropdown-option" onclick="window.selectStatusFilter('IMPORTING', 'Đang nhập')">Đang nhập</div>
-                        <div class="dropdown-option" onclick="window.selectStatusFilter('INSTOCK', 'Đã lưu kho')">Đã lưu kho</div>
-                        <div class="dropdown-option" onclick="window.selectStatusFilter('EXPORTING', 'Đang xuất')">Đang xuất</div>
-                        <div class="dropdown-option" onclick="window.selectStatusFilter('OUTSTOCK', 'Đã xuất kho')">Đã xuất kho</div>
+                        <div class="dropdown-option" onclick="window.selectStatusFilter('CHECKED', 'Đã kiểm kê')">Đã kiểm kê</div>
+                        <div class="dropdown-option" onclick="window.selectStatusFilter('PROCESSING', 'Đang thực hiện')">Đang thực hiện</div>
+                        <div class="dropdown-option" onclick="window.selectStatusFilter('COMPLETED', 'Hoàn thành')">Hoàn thành</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Batch Type Filter -->
+            <div class="filter-group">
+                <div class="status-custom-dropdown" id="type-dropdown">
+                    <div class="dropdown-selected" onclick="window.toggleTypeDropdown()">
+                        <span id="type-selected-label">Tất cả loại lô</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="dropdown-options">
+                        <div class="dropdown-option active" onclick="window.selectTypeFilter('ALL', 'Tất cả loại lô')">Tất cả loại lô</div>
+                        <div class="dropdown-option" onclick="window.selectTypeFilter('IMPORT', 'Lô nhập')">Lô nhập</div>
+                        <div class="dropdown-option" onclick="window.selectTypeFilter('EXPORT', 'Lô xuất')">Lô xuất</div>
                     </div>
                 </div>
             </div>
@@ -134,14 +148,16 @@
         <div class="batch-table-header" id="batch-header-wrapper">
             <table class="data-table">
                 <colgroup>
-                    <col style="width: 50px">
-                    <col style="width: 140px">
-                    <col style="width: 260px">
-                    <col style="width: 120px">
+                    <col style="width: 40px">
                     <col style="width: 110px">
+                    <col style="width: 180px">
+                    <col style="width: 90px">
+                    <col style="width: 70px">
+                    <col style="width: 90px">
+                    <col style="width: 125px">
                     <col style="width: 110px">
+                    <col style="width: 125px">
                     <col style="width: 110px">
-                    <col style="width: 200px">
                     <col style="width: 110px">
                 </colgroup>
                 <thead>
@@ -149,11 +165,13 @@
                         <th class="text-center">STT</th>
                         <th>Mã lô hàng</th>
                         <th>Tên lô hàng</th>
-                        <th class="text-center">Trạng thái</th>
                         <th class="text-center">Loại lô</th>
-                        <th>Ngày nhập</th>
-                        <th>Ngày xuất</th>
-                        <th>Người tạo</th>
+                        <th class="text-center">Số lượng</th>
+                        <th class="text-center">SL thực hiện</th>
+                        <th class="text-center">Ngày tạo</th>
+                        <th class="text-center">Ngày hoàn thành</th>
+                        <th class="text-center">Người tạo</th>
+                        <th class="text-center">Trạng thái</th>
                         <th class="text-center">Thao tác</th>
                     </tr>
                 </thead>
@@ -164,14 +182,16 @@
         <div class="batch-table-body" id="batch-body-wrapper">
             <table class="data-table">
                 <colgroup>
-                    <col style="width: 50px">
-                    <col style="width: 140px">
-                    <col style="width: 260px">
-                    <col style="width: 120px">
+                    <col style="width: 40px">
                     <col style="width: 110px">
+                    <col style="width: 180px">
+                    <col style="width: 90px">
+                    <col style="width: 70px">
+                    <col style="width: 90px">
+                    <col style="width: 125px">
                     <col style="width: 110px">
+                    <col style="width: 125px">
                     <col style="width: 110px">
-                    <col style="width: 200px">
                     <col style="width: 110px">
                 </colgroup>
                 <tbody id="batch-table-body"></tbody>
@@ -212,7 +232,7 @@
                         <i class="fas fa-chevron-down batch-accordion-arrow"></i>
                     </div>
                     <div class="batch-accordion-body">
-                        <div class="form-grid-3">
+                        <div class="form-grid-4">
                             <div class="form-group">
                                 <label>Mã lô hàng <span style="color: red">*</span></label>
                                 <input type="text" id="batch-code" class="form-control" placeholder="Nhập mã lô" required>
@@ -220,6 +240,13 @@
                             <div class="form-group">
                                 <label>Tên lô hàng <span style="color: red">*</span></label>
                                 <input type="text" id="batch-name" class="form-control" placeholder="Nhập tên lô" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Loại lô</label>
+                                <select id="batch-type" class="form-control">
+                                    <option value="IMPORT">Lô nhập</option>
+                                    <option value="EXPORT">Lô xuất</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Ngày xuất</label>
@@ -233,43 +260,6 @@
                     </div>
                 </div>
 
-                <!-- Accordion 2: Thông tin riêng -->
-                <div class="batch-accordion open" id="accordion-detail">
-                    <div class="batch-accordion-header" onclick="window.toggleAccordion('accordion-detail')">
-                        <div class="batch-accordion-title">
-                            <i class="fas fa-file-alt"></i> Thông tin riêng
-                        </div>
-                        <i class="fas fa-chevron-down batch-accordion-arrow"></i>
-                    </div>
-                    <div class="batch-accordion-body">
-                        <div class="form-grid-2" style="margin-bottom: 0">
-                            <!-- Bên giao -->
-                            <div class="form-group">
-                                <label>Bên giao</label>
-                                <input type="text" id="batch-sender" class="form-control" placeholder="Nhập bên giao">
-                            </div>
-                            <!-- Bên nhận -->
-                            <div class="form-group">
-                                <label>Bên nhận</label>
-                                <input type="text" id="batch-receiver" class="form-control" placeholder="Nhập bên nhận">
-                            </div>
-                        </div>
-                        <div class="form-grid-4">
-                            <div class="form-group">
-                                <label>Biển số xe</label>
-                                <input type="text" id="batch-plate" class="form-control" placeholder="VD: 51A-12345">
-                            </div>
-                            <div class="form-group">
-                                <label>Số mooc</label>
-                                <input type="text" id="batch-mooc" class="form-control" placeholder="Nhập số mooc">
-                            </div>
-                            <div class="form-group">
-                                <label>Số cont</label>
-                                <input type="text" id="batch-cont" class="form-control" placeholder="Nhập số cont">
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
             </form>
         </div>
@@ -302,7 +292,7 @@
                         <i class="fas fa-chevron-down batch-accordion-arrow"></i>
                     </div>
                     <div class="batch-accordion-body">
-                        <div class="form-grid-3">
+                        <div class="form-grid-4">
                             <div class="form-group">
                                 <label>Mã lô hàng <span style="color: red">*</span></label>
                                 <input type="text" id="edit-batch-code" class="form-control" disabled style="background: #f1f5f9">
@@ -312,48 +302,19 @@
                                 <input type="text" id="edit-batch-name" class="form-control" required>
                             </div>
                             <div class="form-group">
+                                <label>Loại lô</label>
+                                <select id="edit-batch-type" class="form-control">
+                                    <option value="IMPORT">Lô nhập</option>
+                                    <option value="EXPORT">Lô xuất</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label>Ngày xuất</label>
                                 <div class="modal-date-picker-wrapper">
                                     <input type="text" id="edit-batch-export-date" class="form-control" placeholder="dd/mm/yyyy" autocomplete="off" readonly>
                                     <i class="fas fa-calendar-alt modal-date-icon" onclick="window.toggleModalDatePicker('edit-batch-export-date', 'modal-date-picker-edit')"></i>
                                     <div class="modal-inline-calendar" id="modal-date-picker-edit" style="display:none;"></div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Accordion 2: Thông tin riêng -->
-                <div class="batch-accordion open" id="edit-accordion-detail">
-                    <div class="batch-accordion-header" onclick="window.toggleAccordion('edit-accordion-detail')">
-                        <div class="batch-accordion-title">
-                            <i class="fas fa-file-alt"></i> Thông tin riêng
-                        </div>
-                        <i class="fas fa-chevron-down batch-accordion-arrow"></i>
-                    </div>
-                    <div class="batch-accordion-body">
-                        <div class="form-grid-2" style="margin-bottom: 0">
-                            <div class="form-group">
-                                <label>Bên giao</label>
-                                <input type="text" id="edit-batch-sender" class="form-control" placeholder="Nhập bên giao">
-                            </div>
-                            <div class="form-group">
-                                <label>Bên nhận</label>
-                                <input type="text" id="edit-batch-receiver" class="form-control" placeholder="Nhập bên nhận">
-                            </div>
-                        </div>
-                        <div class="form-grid-4">
-                            <div class="form-group">
-                                <label>Biển số xe</label>
-                                <input type="text" id="edit-batch-plate" class="form-control" placeholder="VD: 51A-12345">
-                            </div>
-                            <div class="form-group">
-                                <label>Số mooc</label>
-                                <input type="text" id="edit-batch-mooc" class="form-control" placeholder="Nhập số mooc">
-                            </div>
-                            <div class="form-group">
-                                <label>Số cont</label>
-                                <input type="text" id="edit-batch-cont" class="form-control" placeholder="Nhập số cont">
                             </div>
                         </div>
                     </div>

@@ -1,11 +1,13 @@
 (function () {
     // --- CONFIGURATION & STATE ---
-    var BATCH_STORAGE_KEY = 'SWS_BATCH_DATA';
+    var BATCH_STORAGE_KEY = 'SWS_BATCH_DATA_v4';
     var PAGE_SIZE = 20;
     var mainCurrentPage = 1;
     var batchSearchQuery = "";
     var statusFilter = "ALL";
+    var typeFilter = "ALL";
     var selectedCreatorFilterId = "ALL";
+    var activeModalPicker = null;
 
 
     // Advanced Date Picker State (Verbatim from Outbound)
@@ -119,11 +121,9 @@
 
     var STATUS_MAP = {
         'NEW': { label: 'Mới tạo', class: 'status-NEW' },
-        'IMPORTING': { label: 'Đang nhập', class: 'status-IMPORTING' },
-        'PROCESSING': { label: 'Đang nhập', class: 'status-IMPORTING' }, // Legacy mapping
-        'INSTOCK': { label: 'Đã lưu kho', class: 'status-INSTOCK' },
-        'EXPORTING': { label: 'Đang xuất', class: 'status-EXPORTING' },
-        'OUTSTOCK': { label: 'Đã xuất kho', class: 'status-OUTSTOCK' }
+        'CHECKED': { label: 'Đã kiểm kê', class: 'status-CHECKED' },
+        'PROCESSING': { label: 'Đang thực hiện', class: 'status-PROCESSING' },
+        'COMPLETED': { label: 'Hoàn thành', class: 'status-COMPLETED' }
     };
 
     var MOCK_BATCHES = [];
@@ -135,72 +135,80 @@
             var saved = localStorage.getItem(BATCH_STORAGE_KEY);
             if (saved) {
                 var parsed = JSON.parse(saved);
-                var batches = parsed.map(function(b) { return Object.assign({}, b, { createdAt: new Date(b.createdAt) }); });
+                var batches = Array.isArray(parsed) ? parsed.map(function(b, i) { 
+                    var dtStr = b.createdAt || new Date();
+                    var obj = Object.assign({}, b, { createdAt: new Date(dtStr) }); 
+                    
+                    // Auto-repair missing creator so it's not "N/A"
+                    if (!obj.creator || !obj.creator.id) {
+                        obj.creator = STAFF_LIST[i % STAFF_LIST.length];
+                    }
+
+                    // Migration to new lifecycle statuses
+                    if (['IMPORTING', 'INSTOCK', 'EXPORTING'].indexOf(obj.status) !== -1) obj.status = 'PROCESSING';
+                    if (obj.status === 'OUTSTOCK') obj.status = 'COMPLETED';
+                    return obj;
+                }).filter(function(b) { return b && b.createdAt && !isNaN(b.createdAt.getTime()); }) : [];
                 
-                // Recalculate createdAt dates relative to today so data always has current entries
                 var now = new Date();
                 if (batches.length > 0) {
-                    var newest = new Date(Math.max.apply(null, batches.map(function(b) { return b.createdAt.getTime(); })));
-                    var daysDiff = Math.floor((now.setHours(0,0,0,0) - new Date(newest).setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-                    if (daysDiff > 0) {
-                        batches = batches.map(function(b) {
-                            var d = new Date(b.createdAt);
-                            d.setDate(d.getDate() + daysDiff);
-                            b.createdAt = d;
-                            // Also shift importDate/exportDate if they exist
-                            if (b.importDate) {
-                                var id = new Date(b.importDate);
-                                id.setDate(id.getDate() + daysDiff);
-                                b.importDate = id.toISOString().split('T')[0];
-                            }
-                            if (b.exportDate) {
-                                var ed = new Date(b.exportDate);
-                                ed.setDate(ed.getDate() + daysDiff);
-                                b.exportDate = ed.toISOString().split('T')[0];
-                            }
-                            return b;
-                        });
-                        // Persist the updated dates
-                        localStorage.setItem(BATCH_STORAGE_KEY, JSON.stringify(batches));
-                    }
+                    var newestTs = Math.max.apply(null, batches.map(function(b) { return b.createdAt.getTime(); }));
+                    var newest = new Date(newestTs);
+                    var offset = now.setHours(0,0,0,0) - (isNaN(newest.getTime()) ? now.setHours(0,0,0,0) : new Date(newest).setHours(0,0,0,0));
+                    
+                    MOCK_BATCHES = batches.map(function(b, i) {
+                        b.createdAt = new Date(b.createdAt.getTime() + offset);
+                        if (!b.batchType) b.batchType = (i % 2 === 0) ? 'EXPORT' : 'IMPORT';
+                        return b;
+                    });
+                } else {
+                    MOCK_BATCHES = generateMockData();
+                    saveBatches();
                 }
-                return batches;
+            } else {
+                MOCK_BATCHES = generateMockData();
+                saveBatches();
             }
-        } catch (e) { console.error("Error loading batches", e); }
-        return [];
+        } catch (e) {
+            console.error("Error loading batches:", e);
+            MOCK_BATCHES = generateMockData();
+        }
     }
 
-    // --- GENERATE DATA ---
     function generateMockData() {
-        var statusList = ['NEW', 'IMPORTING', 'INSTOCK', 'EXPORTING', 'OUTSTOCK'];
+        var statusList = ['NEW', 'CHECKED', 'PROCESSING', 'COMPLETED'];
         var codes = ['CN-BN', 'JP-BN'];
-        return Array.from({ length: 120 }, function(_, i) {
-            var status = statusList[i % 5];
+        return Array.from({ length: 50 }, function(_, i) {
+            var status = (i < 10) ? 'CHECKED' : statusList[i % 4];
             var typeIndex = i % PRODUCT_TYPES.length;
             var productType = PRODUCT_TYPES[typeIndex];
             var creator = STAFF_LIST[i % STAFF_LIST.length];
             var createdAt = new Date();
-            createdAt.setDate(createdAt.getDate() - (i % 60)); 
+            // Đảm bảo 30 lô đầu tiên là ngày hôm nay để default nhìn đầy đặn (1-30)
+            createdAt.setDate(createdAt.getDate() - (i < 30 ? 0 : (i % 30)));
             
-            var importDate = null, exportDate = null;
-            if (['INSTOCK', 'EXPORTING', 'OUTSTOCK'].indexOf(status) !== -1) {
-                var iDate = new Date(createdAt); iDate.setDate(iDate.getDate() + 2);
-                importDate = iDate.toISOString().split('T')[0];
-            }
-            if (status === 'OUTSTOCK') {
+            var exportDate = null;
+            if (status === 'COMPLETED') {
                 var eDate = new Date(createdAt); eDate.setDate(eDate.getDate() + 5);
-                exportDate = eDate.toISOString().split('T')[0];
+                exportDate = eDate.toISOString();
             }
+
+            // Mock quantities: 10 lô CHECKED có sẵn số lượng 1200
+            var totalQty = (i < 10) ? 1200 : ((status === 'NEW') ? 0 : 500);
+            var executedQty = (status === 'COMPLETED') ? totalQty : ((status === 'PROCESSING') ? Math.floor(totalQty * 0.4) : 0);
             
             return {
                 id: Date.now() + i,
                 code: codes[typeIndex] + '-' + String(1060 - i).padStart(4, '0'),
-                name: 'Lô ' + productType.name + ' - Đợt ' + (Math.floor(i / 5) + 1),
+                name: (i < 10 ? 'Lô kiểm tồn - ' : 'Lô ') + productType.name + ' - Đợt ' + (Math.floor(i / 5) + 1),
                 productType: productType.name,
                 grades: ['A', 'B'],
                 status: status,
-                importDate: importDate,
+                batchType: (i % 2 === 0) ? 'EXPORT' : 'IMPORT',
+                importDate: null,
                 exportDate: exportDate,
+                totalQty: totalQty,
+                executedQty: executedQty,
                 creator: creator,
                 createdAt: createdAt
             };
@@ -212,6 +220,11 @@
         if (!date) return "";
         var d = new Date(date);
         return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
+    }
+    function formatTime(date) {
+        if (!date) return "";
+        var d = new Date(date);
+        return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
     }
     function isSameDay(d1, d2) {
         if (!d1 || !d2) return false;
@@ -226,63 +239,85 @@
     }
 
     // --- TABLE RENDERING ---
-    window.renderTable = function() {
+        window.renderTable = function() {
         var tbody = document.getElementById('batch-table-body');
         if (!tbody) return;
 
         var filtered = MOCK_BATCHES.filter(function(b) {
-            var matchesSearch = b.code.toLowerCase().indexOf(batchSearchQuery.toLowerCase()) !== -1 || 
-                                b.name.toLowerCase().indexOf(batchSearchQuery.toLowerCase()) !== -1;
+            var search = (batchSearchQuery || "").toLowerCase();
+            var matchesSearch = !search || b.code.toLowerCase().indexOf(search) !== -1 || 
+                                 b.name.toLowerCase().indexOf(search) !== -1;
             var matchesStatus = statusFilter === 'ALL' || b.status === statusFilter;
-            var matchesCreator = selectedCreatorFilterId === 'ALL' || b.creator.id === selectedCreatorFilterId;
             
             var matchesDate = true;
             if (selectedRange.start && selectedRange.end) {
-                var start = new Date(selectedRange.start).setHours(0,0,0,0);
-                var end = new Date(selectedRange.end).setHours(23,59,59,999);
-                matchesDate = b.createdAt >= start && b.createdAt <= end;
+                var s = new Date(selectedRange.start).setHours(0,0,0,0);
+                var e = new Date(selectedRange.end).setHours(23,59,59,999);
+                var c = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                matchesDate = c >= s && c <= e;
             }
 
-            return matchesSearch && matchesStatus && matchesCreator && matchesDate;
+            var matchesCreator = selectedCreatorFilterId === 'ALL' || (b.creator && b.creator.id === selectedCreatorFilterId);
+            var bt = (b.batchType || 'IMPORT').toString().toUpperCase().trim();
+            var matchesType = (typeFilter === 'ALL') || (bt === typeFilter.toUpperCase().trim());
+            
+            return matchesSearch && matchesStatus && matchesType && matchesCreator && matchesDate;
         });
 
-        var totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
+        var totalItems = filtered.length;
+        var totalPages = Math.ceil(totalItems / PAGE_SIZE) || 1;
         if (mainCurrentPage > totalPages) mainCurrentPage = totalPages;
 
         var startIdx = (mainCurrentPage - 1) * PAGE_SIZE;
         var pageData = filtered.slice(startIdx, startIdx + PAGE_SIZE);
 
+        if (totalItems === 0) {
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center" style="padding:40px; color:#64748b;"><i class="fas fa-box-open" style="font-size:24px; margin-bottom:10px; display:block; opacity:0.5;"></i>Không tìm thấy dữ liệu phù hợp</td></tr>';
+            renderPaginationBar(0);
+            return;
+        }
+
         tbody.innerHTML = pageData.map(function(b, index) {
             var statusObj = STATUS_MAP[b.status] || { label: b.status, class: '' };
-            // Determine batch type: OUTSTOCK / EXPORTING = Lô xuất, otherwise Lô nhập
-            var isExport = (b.status === 'OUTSTOCK' || b.status === 'EXPORTING');
-            var batchTypeBadge = isExport
+            var createdDateFormatted = formatTime(b.createdAt) + ' ' + formatDate(b.createdAt);
+            var completedDateFormatted = b.exportDate ? formatDate(new Date(b.exportDate)) : '-';
+
+            var batchTypeBadge = (b.batchType === 'EXPORT')
                 ? '<span class="batch-type-badge batch-type-export">Lô xuất</span>'
                 : '<span class="batch-type-badge batch-type-import">Lô nhập</span>';
+
             return `
                 <tr>
                     <td class="text-center">${startIdx + index + 1}</td>
                     <td style="font-weight: 700; color: #076EB8">${b.code}</td>
                     <td style="font-weight: 500">${b.name}</td>
-                    <td style="text-align:center">
-                        <span class="status-badge ${statusObj.class}">${statusObj.label}</span>
-                    </td>
                     <td style="text-align:center">${batchTypeBadge}</td>
-                    <td>${formatDate(b.importDate)}</td>
-                    <td>${formatDate(b.exportDate)}</td>
-                    <td>
+                    <td style="text-align:center; font-weight: 700;">${b.totalQty || 0}</td>
+                    <td class="text-center" style="font-weight: 700; color: #10b981;">${b.executedQty || 0}</td>
+                    <td class="text-center">${createdDateFormatted}</td>
+                    <td class="text-center">${completedDateFormatted}</td>
+                    <td class="text-center">
                         <div style="line-height: 1.4">
-                            <strong style="color: #1e293b">${b.creator.name}</strong><br>
-                            <span style="color: #64748b; font-size: 11px;">${b.creator.id}</span>
+                            <strong style="color: #1e293b">${b.creator ? b.creator.name : 'N/A'}</strong><br>
+                            <span style="color: #64748b; font-size: 11px;">${b.creator ? b.creator.id : '-'}</span>
                         </div>
+                    </td>
+                    <td class="text-center">
+                        <span class="status-badge ${statusObj.class}">${statusObj.label}</span>
                     </td>
                     <td>
                         <div style="display: flex; justify-content: center; gap: 4px; align-items: center;">
-                            <button class="btn-icon" title="Xem" onclick="window.viewBatch(${b.id})"><i class="fa-regular fa-eye"></i></button>
-                            <button class="btn-icon" title="Cây" onclick="window.viewTree(${b.id})"><i class="fa-solid fa-sitemap"></i></button>
-                            <button class="btn-icon btn-icon-inventory" title="Kiểm kê" onclick="window.openInventoryCheck(${b.id})"><i class="fa-solid fa-list-check"></i></button>
-                            <button class="btn-icon" title="Sửa" onclick="window.editBatch(${b.id})" ${b.status !== 'NEW' ? 'disabled' : ''}><i class="fa-regular fa-edit"></i></button>
-                            <button class="btn-icon" title="Xóa" onclick="window.deleteBatch(${b.id})" ${b.status !== 'NEW' ? 'disabled' : ''} style="color: #ef4444"><i class="fa-regular fa-trash"></i></button>
+                            <button class="btn-icon" title="Xem" onclick="window.viewBatch('${b.id}')"><i class="far fa-eye"></i></button>
+                            <button class="btn-icon" title="Cây quy trình" onclick="window.viewTree('${b.id}')"><i class="fas fa-sitemap"></i></button>
+                            
+                            <button class="btn-icon" title="Kiểm kê" onclick="window.openInventoryCheck('${b.id}')" ${['PROCESSING', 'COMPLETED'].indexOf(b.status) !== -1 ? 'disabled' : ''}>
+                                <i class="fas fa-list-check"></i>
+                            </button>
+
+
+
+                            <button class="btn-icon" title="Sửa" onclick="window.editBatch('${b.id}')"><i class="far fa-edit"></i></button>
+                            <button class="btn-icon" title="Xóa" onclick="window.deleteBatch('${b.id}')" ${b.status !== 'NEW' ? 'disabled' : ''} style="${b.status !== 'NEW' ? 'opacity: 0.3' : 'color: #ef4444'}"><i class="far fa-trash-alt"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -291,7 +326,6 @@
 
         renderPaginationBar(filtered.length);
         
-        // Ensure horizontal scroll sync after re-render if needed
         var headerWrapper = document.getElementById('batch-header-wrapper');
         var bodyWrapper = document.getElementById('batch-body-wrapper');
         if (headerWrapper && bodyWrapper) {
@@ -299,7 +333,7 @@
         }
     };
 
-    function renderPaginationBar(totalItems) {
+function renderPaginationBar(totalItems) {
         var totalPages = Math.ceil(totalItems / PAGE_SIZE) || 1;
         var container = document.getElementById('main-pagination');
         if (!container) return;
@@ -347,6 +381,26 @@
         if (display) display.innerText = label;
         
         var dropdown = document.getElementById('status-dropdown');
+        if (dropdown) {
+            dropdown.querySelectorAll('.dropdown-option').forEach(function(opt) {
+                opt.classList.toggle('active', opt.getAttribute('onclick').indexOf("'" + val + "'") !== -1);
+            });
+            dropdown.classList.remove('open');
+        }
+        mainCurrentPage = 1; window.renderTable();
+    };
+
+    window.toggleTypeDropdown = function() {
+        var dropdown = document.getElementById('type-dropdown');
+        if (dropdown) dropdown.classList.toggle('open');
+    };
+
+    window.selectTypeFilter = function(val, label) {
+        typeFilter = val;
+        var display = document.getElementById('type-selected-label');
+        if (display) display.innerText = label;
+        
+        var dropdown = document.getElementById('type-dropdown');
         if (dropdown) {
             dropdown.querySelectorAll('.dropdown-option').forEach(function(opt) {
                 opt.classList.toggle('active', opt.getAttribute('onclick').indexOf("'" + val + "'") !== -1);
@@ -645,28 +699,18 @@
         // Reset fields
         document.getElementById('batch-code').value = '';
         document.getElementById('batch-name').value = '';
-        document.getElementById('batch-export-date').value = '';
-        document.getElementById('batch-sender').value = '';
-        document.getElementById('batch-receiver').value = '';
-        document.getElementById('batch-plate').value = '';
-        document.getElementById('batch-mooc').value = '';
-        document.getElementById('batch-cont').value = '';
+        document.getElementById('batch-type').value = 'IMPORT';
         modal.classList.add('open');
     };
     window.closeCreateModal = function() { document.getElementById('modal-add-batch').classList.remove('open'); };
 
     window.editBatch = function(id) {
-        var b = MOCK_BATCHES.find(function(x) { return x.id === id; });
+        var b = MOCK_BATCHES.find(function(x) { return x.id == id; });
         if (!b) return;
         document.getElementById('edit-batch-id').value = b.id;
         document.getElementById('edit-batch-code').value = b.code;
         document.getElementById('edit-batch-name').value = b.name;
-        document.getElementById('edit-batch-export-date').value = b.exportDate ? formatDate(new Date(b.exportDate)) : '';
-        document.getElementById('edit-batch-sender').value = b.sender || '';
-        document.getElementById('edit-batch-receiver').value = b.receiver || '';
-        document.getElementById('edit-batch-plate').value = b.plate || '';
-        document.getElementById('edit-batch-mooc').value = b.mooc || '';
-        document.getElementById('edit-batch-cont').value = b.cont || '';
+        document.getElementById('edit-batch-type').value = b.batchType || 'IMPORT';
         document.getElementById('modal-edit-batch').classList.add('open');
     };
 
@@ -693,19 +737,17 @@
             importDate: null,
             exportDate: exportDateISO,
             creator: STAFF_LIST[0],
-            sender: document.getElementById('batch-sender').value.trim(),
-            receiver: document.getElementById('batch-receiver').value.trim(),
-            plate: document.getElementById('batch-plate').value.trim(),
-            mooc: document.getElementById('batch-mooc').value.trim(),
-            cont: document.getElementById('batch-cont').value.trim()
+            batchType: document.getElementById('batch-type').value,
+            totalQty: 0,
+            executedQty: 0
         });
         saveBatches(); window.renderTable(); window.closeCreateModal();
     };
 
     window.saveEditBatch = function() {
-        var id = parseInt(document.getElementById('edit-batch-id').value);
+        var id = document.getElementById('edit-batch-id').value;
         var name = document.getElementById('edit-batch-name').value.trim();
-        var idx = MOCK_BATCHES.findIndex(function(x) { return x.id === id; });
+        var idx = MOCK_BATCHES.findIndex(function(x) { return x.id == id; });
         if (idx !== -1) {
             var exportDateVal = document.getElementById('edit-batch-export-date').value;
             var exportDateISO = MOCK_BATCHES[idx].exportDate;
@@ -717,24 +759,20 @@
             }
             MOCK_BATCHES[idx].name = name;
             MOCK_BATCHES[idx].exportDate = exportDateISO;
-            MOCK_BATCHES[idx].sender = document.getElementById('edit-batch-sender').value.trim();
-            MOCK_BATCHES[idx].receiver = document.getElementById('edit-batch-receiver').value.trim();
-            MOCK_BATCHES[idx].plate = document.getElementById('edit-batch-plate').value.trim();
-            MOCK_BATCHES[idx].mooc = document.getElementById('edit-batch-mooc').value.trim();
-            MOCK_BATCHES[idx].cont = document.getElementById('edit-batch-cont').value.trim();
+            MOCK_BATCHES[idx].batchType = document.getElementById('edit-batch-type').value;
             saveBatches(); window.renderTable(); window.closeEditModal();
         }
     };
 
     window.deleteBatch = function(id) {
-        var b = MOCK_BATCHES.find(function(x) { return x.id === id; });
+        var b = MOCK_BATCHES.find(function(x) { return x.id == id; });
         if (!b) return;
         if (b.status !== 'NEW') {
             alert('Chỉ có thể xóa lô hàng có trạng thái "Mới tạo".');
             return;
         }
         if (confirm('Xóa lô hàng này?')) {
-            MOCK_BATCHES = MOCK_BATCHES.filter(function(x) { return x.id !== id; });
+            MOCK_BATCHES = MOCK_BATCHES.filter(function(x) { return x.id != id; });
             saveBatches(); window.renderTable();
         }
     };
@@ -749,7 +787,7 @@
     var currentInventoryBatchId = null;
 
     window.openInventoryCheck = function(batchId) {
-        var b = MOCK_BATCHES.find(function(x) { return x.id === batchId; });
+        var b = MOCK_BATCHES.find(function(x) { return x.id == batchId; });
         if (!b) return;
         currentInventoryBatchId = batchId;
         inventorySearchQuery = '';
@@ -1056,23 +1094,40 @@
             showToast('Vui lòng chọn ít nhất 1 sản phẩm để kiểm kê.', 'warning');
             return;
         }
-        // Validate all selected have values
+        
+        var totalQty = 0;
         var valid = true;
         Object.keys(inventorySelectedIds).forEach(function(pid) {
             var data = inventorySelectedIds[pid];
-            if (!data.containerCount || !data.perContainer) valid = false;
+            if (!data.containerCount || !data.perContainer) {
+                valid = false;
+            } else {
+                totalQty += parseInt(data.containerCount) * parseInt(data.perContainer);
+            }
         });
+
         if (!valid) {
             showToast('Vui lòng điền đầy đủ số lượng vật chứa và số sản phẩm/vật chứa cho các sản phẩm đã chọn.', 'warning');
             return;
         }
-        showToast('Đã lưu kiểm kê thành công cho ' + selectedCount + ' sản phẩm!', 'success');
+
+        var bIdx = MOCK_BATCHES.findIndex(function(x) { return x.id == currentInventoryBatchId; });
+        if (bIdx !== -1) {
+            MOCK_BATCHES[bIdx].totalQty = totalQty;
+            MOCK_BATCHES[bIdx].status = 'CHECKED';
+            saveBatches();
+            window.renderTable();
+        }
+
+        showToast('Đã kiểm kê thành công. Tổng số lượng: ' + totalQty, 'success');
         window.closeInventoryCheck();
     };
 
 
+
+
     window.viewTree = function(id) {
-        var b = MOCK_BATCHES.find(function(x) { return x.id === id; });
+        var b = MOCK_BATCHES.find(function(x) { return x.id == id; });
         if (!b) return;
 
         // Use percentages for a truly responsive diagram area (75% of modal)
@@ -1276,37 +1331,7 @@
         modal.classList.add('open');
     };
 
-    // --- INIT ---
-    function init() {
-        MOCK_BATCHES = loadBatches();
-        
-        // Data Migration: Convert old PROCESSING status to new IMPORTING
-        var hasChanges = false;
-        MOCK_BATCHES = MOCK_BATCHES.map(function(b) {
-            if (b.status === 'PROCESSING') {
-                b.status = 'IMPORTING';
-                hasChanges = true;
-            }
-            return b;
-        });
-        if (hasChanges) saveBatches();
-
-        if (MOCK_BATCHES.length === 0) { MOCK_BATCHES = generateMockData(); saveBatches(); }
-        window.renderTable();
-        setupExtraDatePickerListeners();
-        initCreatorFilterCombobox();
-        
-        // Initialize Date Range Display - default to today
-        var triggerDisplay = document.getElementById("dateRangeDisplay");
-        if (triggerDisplay && selectedRange.start && selectedRange.end) {
-            triggerDisplay.textContent = formatDate(selectedRange.start) + " - " + formatDate(selectedRange.end);
-        }
-        
-        // Mark "Hôm nay" as active in picker sidebar
-        var todayItem = document.querySelector('.analytics-date-picker .sidebar-item[data-range="today"]');
-        if (todayItem) todayItem.classList.add('active');
-
-        // Horizontal Sync Scroll Logic
+    // --- INITIALIZATION ---
         var headerWrapper = document.getElementById('batch-header-wrapper');
         var bodyWrapper = document.getElementById('batch-body-wrapper');
         if (headerWrapper && bodyWrapper) {
@@ -1316,9 +1341,10 @@
         }
         
         document.addEventListener('click', function(e) {
-            // Status Dropdown
+            // Status & Type Dropdowns
             if (!e.target.closest('.status-custom-dropdown')) { 
                 var s = document.getElementById('status-dropdown'); if (s) s.classList.remove('open'); 
+                var t = document.getElementById('type-dropdown'); if (t) t.classList.remove('open'); 
             }
             // Date Picker
             if (!e.target.closest('.unified-date-filter')) { 
@@ -1341,7 +1367,6 @@
                 if (ig) ig.classList.remove('open');
             }
         });
-    }
 
     // --- ACCORDION ---
     window.toggleAccordion = function(id) {
@@ -1465,6 +1490,238 @@
             activeModalPicker = null;
         }
     }, true);
+    function initCreatorFilterCombobox() {
+        var input = document.getElementById('creator-filter-input');
+        var list = document.getElementById('creator-filter-list');
+        var wrapper = document.getElementById('creator-filter-combobox');
+        if (!input || !list || !wrapper) return;
+
+        function renderOptions(term) {
+            var filtered = STAFF_LIST.filter(function(s) {
+                return !term || s.name.toLowerCase().indexOf(term.toLowerCase()) !== -1;
+            });
+            
+            var html = '<div class="combobox-option ' + (selectedCreatorFilterId === 'ALL' ? 'active' : '') + '" data-id="ALL">Tất cả người tạo</div>';
+            filtered.forEach(function(s) {
+                html += '<div class="combobox-option ' + (selectedCreatorFilterId === s.id ? 'active' : '') + '" data-id="' + s.id + '">' + s.name + '</div>';
+            });
+            list.innerHTML = html;
+        }
+
+        input.addEventListener('focus', function() {
+            renderOptions(this.value);
+            list.classList.add('show');
+            wrapper.classList.add('active');
+        });
+
+        input.addEventListener('input', function() {
+            renderOptions(this.value);
+            list.classList.add('show');
+        });
+
+        list.addEventListener('click', function(e) {
+            var opt = e.target.closest('.combobox-option');
+            if (!opt) return;
+            selectedCreatorFilterId = opt.getAttribute('data-id');
+            input.value = (selectedCreatorFilterId === 'ALL') ? '' : opt.textContent;
+            list.classList.remove('show');
+            wrapper.classList.remove('active');
+            window.renderTable();
+        });
+    }
+
+    function setupExtraDatePickerListeners() {
+        // Date picker sidebar range selection
+        document.querySelectorAll('.analytics-date-picker .sidebar-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                var range = this.getAttribute('data-range');
+                document.querySelectorAll('.analytics-date-picker .sidebar-item').forEach(function(i){ i.classList.remove('active'); });
+                this.classList.add('active');
+
+                var start = new Date(today);
+                var end = new Date(today);
+                
+                switch(range) {
+                    case 'all': start = null; end = null; break;
+                    case 'today': break;
+                    case 'last3': start.setDate(today.getDate() - 2); break; // 3 days including today
+                    case 'thisweek': 
+                        var day = today.getDay(); // 0 is Sun
+                        var diff = today.getDate() - day + (day === 0 ? -6 : 1); 
+                        start = new Date(today.setDate(diff));
+                        end = new Date();
+                        break;
+                    case 'last7': start.setDate(today.getDate() - 6); break;
+                    case 'last30': start.setDate(today.getDate() - 29); break;
+                    case 'last3mo': start.setMonth(today.getMonth() - 3); break;
+                    case 'last6mo': start.setMonth(today.getMonth() - 6); break;
+                    case 'last1yr': start.setFullYear(today.getFullYear() - 1); break;
+                }
+                
+                if (start === null) {
+                    tempRange.start = null;
+                    tempRange.end = null;
+                } else {
+                    tempRange.start = new Date(start);
+                    tempRange.end = new Date(end);
+                    // Sync calendars to the new specific range
+                    currentLeftDate = new Date(tempRange.start);
+                    currentRightDate = new Date(tempRange.start);
+                    currentRightDate.setMonth(currentRightDate.getMonth() + 1);
+                }
+                
+                updateCalendarUI();
+            });
+        });
+
+        // Date Picker Actions
+        var applyBtn = document.getElementById('applyPicker');
+        if (applyBtn) {
+            applyBtn.addEventListener('click', function() {
+                selectedRange.start = tempRange.start ? new Date(tempRange.start) : null;
+                selectedRange.end = tempRange.end ? new Date(tempRange.end) : null;
+                
+                var display = document.getElementById('dateRangeDisplay');
+                if (display) {
+                    if (!selectedRange.start) {
+                        display.textContent = "Tất cả thời gian";
+                    } else {
+                        display.textContent = formatDate(selectedRange.start) + " - " + formatDate(selectedRange.end);
+                    }
+                }
+                
+                var picker = document.getElementById('analyticsPicker');
+                if (picker) picker.classList.remove('active');
+                window.renderTable();
+            });
+        }
+
+        var cancelBtn = document.getElementById('cancelPicker');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                var picker = document.getElementById('analyticsPicker');
+                if (picker) picker.classList.remove('active');
+            });
+        }
+
+        var clearBtn = document.getElementById('clearPicker');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+                tempRange.start = null;
+                tempRange.end = null;
+                updateCalendarUI();
+            });
+        }
+    }
+
+    // Function to update the visual calendars inside picker (placeholder - assumes implementation exists or adding it)
+    function updateCalendarUI() {
+        var tempDisplay = document.getElementById('tempRangeDisplay');
+        if (tempDisplay) {
+            if (!tempRange.start) {
+                tempDisplay.textContent = "Tất cả thời gian";
+            } else {
+                tempDisplay.textContent = formatDate(tempRange.start) + " - " + formatDate(tempRange.end);
+            }
+        }
+        // These draw functions should exist in your codebase to redraw the grids
+        if (typeof renderCalendarPanel === 'function') {
+            renderCalendarPanel('leftCalendar', currentLeftDate);
+            renderCalendarPanel('rightCalendar', currentRightDate);
+        }
+    }
+
+    window.toggleDateRangePicker = function(e) {
+        var picker = document.getElementById('analyticsPicker');
+        if (!picker) return;
+        picker.classList.toggle('active');
+        e.stopPropagation();
+    };
+
+    // Need to define renderCalendarPanel as well if it was lost
+    function renderCalendarPanel(containerId, viewDate) {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        var grid = container.querySelector('.days-container');
+        if (!grid) return;
+
+        var month = viewDate.getMonth();
+        var year = viewDate.getFullYear();
+        
+        // Update month/year labels
+        var monthLabel = containerId === 'leftCalendar' ? 'leftMonthSelected' : 'rightMonthSelected';
+        var yearLabel = containerId === 'leftCalendar' ? 'leftYearSelected' : 'rightYearSelected';
+        var months = ["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"];
+        document.getElementById(monthLabel).textContent = months[month];
+        document.getElementById(yearLabel).textContent = year;
+
+        var firstDay = new Date(year, month, 1).getDay();
+        var startOffset = (firstDay === 0) ? 6 : firstDay - 1;
+        var daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        var html = '';
+        for (var i = 0; i < startOffset; i++) html += '<div class="day empty"></div>';
+        for (var d = 1; d <= daysInMonth; d++) {
+            var cur = new Date(year, month, d);
+            var isSelected = false;
+            var inRange = false;
+            var isStart = false;
+            var isEnd = false;
+
+            if (tempRange.start && tempRange.end) {
+                var s = new Date(tempRange.start).setHours(0,0,0,0);
+                var e = new Date(tempRange.end).setHours(0,0,0,0);
+                var c = cur.getTime();
+                if (c === s) isStart = true;
+                if (c === e) isEnd = true;
+                if (c >= s && c <= e) inRange = true;
+            }
+
+            var cls = 'day';
+            if (isStart) cls += ' start-date';
+            if (isEnd) cls += ' end-date';
+            if (inRange) cls += ' in-range';
+            
+            html += '<div class="' + cls + '" onclick="window.onDateClick(' + cur.getTime() + ')">' + d + '</div>';
+        }
+        grid.innerHTML = html;
+    }
+
+    window.onDateClick = function(timestamp) {
+        var clicked = new Date(timestamp);
+        if (!tempRange.start || (tempRange.start && tempRange.end)) {
+            tempRange.start = clicked;
+            tempRange.end = clicked;
+        } else if (clicked < tempRange.start) {
+            tempRange.end = tempRange.start;
+            tempRange.start = clicked;
+        } else {
+            tempRange.end = clicked;
+        }
+        updateCalendarUI();
+    };
+
+
+    function init() {
+        loadBatches();
+        initCreatorFilterCombobox();
+        setupExtraDatePickerListeners();
+        
+        // Initialize Date Range Display - default to today
+        var triggerDisplay = document.getElementById("dateRangeDisplay");
+        if (triggerDisplay && selectedRange.start && selectedRange.end) {
+            triggerDisplay.textContent = formatDate(selectedRange.start) + " - " + formatDate(selectedRange.end);
+        }
+        
+        // Mark "Hôm nay" as active in picker sidebar
+        var todayItem = document.querySelector('.analytics-date-picker .sidebar-item[data-range="today"]');
+        if (todayItem) {
+            document.querySelectorAll('.analytics-date-picker .sidebar-item').forEach(function(i){ i.classList.remove('active'); });
+            todayItem.classList.add('active');
+        }
+
+        window.renderTable();
+    }
 
     init();
 })();

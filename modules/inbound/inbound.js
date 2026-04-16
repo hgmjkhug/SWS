@@ -53,36 +53,46 @@ function loadInboundOrders() {
 }
 
 // ── Master Data ──────────────────────────────────────────────
-const MASTER_MATERIALS = Array.from({ length: 35 }, (_, i) => ({
-    code: `MAT-${String(i + 1).padStart(3, '0')}`,
-    name: [
-        'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', 
-        'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA',
-        'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL',
-        'Chuối Trung Quốc/ Chinese bananas - B456 - SOFIA',
-        'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE',
-        'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA',
-        'Chuối Nhật Bản/ Japanese bananas - 38CP - SHIMIZU',
-        'Chuối Nhật Bản/ Japanese bananas - B6 - SEIKA 13KG',
-        'Chuối Nhật Bản/ Japanese bananas - 40CP - TAITO',
-        'Chuối Nhật Bản/ Japanese bananas - 43CP - MAINICHI',
-        'Chuối Trung Quốc/ Chinese bananas - CL - DASANG',
-        'Chuối Nhật Bản/ Japanese bananas - 28CP - DEL MONTE',
-        'Chuối Nhật Bản/ Japanese bananas - 33CP - SEIKA 13KG',
-        'Chuối Nhật Bản/ Japanese bananas - 6 NẢI - DELMONTE 13KG',
-        'Chuối Nhật Bản/ Japanese bananas - 14CP - XINFADIN'
-    ][i % 15],
-    specs: `Tiêu chuẩn banana Group ${Math.floor(i / 5) + 1}`,
-    unit: 'thùng',
-    weight: 13,
-    weightPerUnit: 13,
-    expiryDate: i % 4 === 0 ? null : `2026-${String((i % 12) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
-    dimensions: {
-        length: 400,
-        width: 300,
-        height: 200
-    }
-}));
+const MASTER_MATERIALS_NAMES = [
+    'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', 
+    'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA',
+    'Chuối Trung Quốc/ Chinese bananas - A456 - FRUIT WHARF',
+    'Chuối Trung Quốc/ Chinese bananas - A456 - DASANG',
+    'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', 
+    'Chuối Trung Quốc/ Chinese bananas - A789 - SOFIA',
+    'Chuối Trung Quốc/ Chinese bananas - B456 - TROPICAL',
+    'Chuối Trung Quốc/ Chinese bananas - B456 - SOFIA',
+    'Chuối Trung Quốc/ Chinese bananas - B789 - TROPICAL', 
+    'Chuối Trung Quốc/ Chinese bananas - B789 - SOFIA',
+    'Chuối Trung Quốc/ Chinese bananas - CL - DASANG',
+    'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE',
+    'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA',
+    'Chuối Nhật Bản/ Japanese bananas - 38CP - SHIMIZU',
+    'Chuối Nhật Bản/ Japanese bananas - B6 - SEIKA 13KG',
+    'Chuối Nhật Bản/ Japanese bananas - 40CP - TAITO',
+    'Chuối Nhật Bản/ Japanese bananas - 43CP - MAINICHI',
+];
+
+const MASTER_MATERIALS = Array.from({ length: 35 }, (_, i) => {
+    const fullName = MASTER_MATERIALS_NAMES[i % MASTER_MATERIALS_NAMES.length];
+    const codeMatch = fullName.split(' - ');
+    const code = codeMatch.length > 1 ? codeMatch.slice(1).join(' - ') : `MAT-${i + 1}`;
+    
+    return {
+        code: code,
+        name: fullName,
+        specs: `Tiêu chuẩn banana Group ${Math.floor(i / 5) + 1}`,
+        unit: 'thùng',
+        weight: 13,
+        weightPerUnit: 13,
+        expiryDate: i % 4 === 0 ? null : `2026-${String((i % 12) + 1).padStart(2, '0')}-${String((i % 28) + 1).padStart(2, '0')}`,
+        dimensions: {
+            length: 400,
+            width: 300,
+            height: 200
+        }
+    };
+});
 
 const STAFF_LIST = [
     { id: 'ST01', name: 'Nguyễn Văn A', position: 'Quản kho' },
@@ -92,12 +102,12 @@ const STAFF_LIST = [
 
 const MOCK_PALLET_DATA = {
     'P-001': {
-        material: { code: 'MAT-001', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', totalQty: 1000 },
+        material: { code: 'A456 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', totalQty: 1000 },
         maxCapacity: 2000,
-        history: [{ code: 'P-011_MAT-001_200_251120', exported: 200, total: 1000, time: '2025-11-20 08:30' }]
+        history: [{ code: 'P-011_A456-TROP_200_251120', exported: 200, total: 1000, time: '2025-11-20 08:30' }]
     },
     'P-002': {
-        material: { code: 'MAT-005', name: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', totalQty: 500 }
+        material: { code: 'A789 - TROPICAL', name: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', totalQty: 500 }
     }
 };
 
@@ -151,14 +161,14 @@ if (MOCK_INBOUND_ORDERS && MOCK_INBOUND_ORDERS.some(o =>
 
 if (!MOCK_INBOUND_ORDERS) {
     MOCK_INBOUND_ORDERS = [
-        { id: 1, type: 'NEW', code: 'P-A01-L3_MAT-001_500_25102025', materials: [{ code: 'MAT-001', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 500, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 6500, expiryDate: '2025-10-25' }], batch: { code: 'LOT-2510-01', name: 'Lô hàng Chuối tháng 10 - Đợt 1' }, pallets: ['P-A01-L3'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', priority: true, creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2025-10-25T08:30:00'), process: 'Quy trình Nhập - Kho Chuối' },
-        { id: 2, type: 'REENTRY', code: 'P-B01-L1_MAT-002_1000_26102025', materials: [{ code: 'MAT-002', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 1000, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', weight: 15000, expiryDate: '2025-06-15' }], batch: { code: 'LOT-2510-02', name: 'Lô Sofia 02' }, pallets: ['P-B01-L1'], bin: 'T1-F1-P2-A5', status: 'COMPLETED', priority: false, creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: new Date('2025-10-26T09:15:00'), process: 'Quy trình Nhập - Kho Chuối' },
-        { id: 3, type: 'TRANSFER', code: 'P-C01-L2_MAT-003_200_27102025', materials: [{ code: 'MAT-003', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', qty: 200, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 2600, expiryDate: '2025-12-27' }], batch: { code: 'LOT-2510-03', name: 'Lô TROPICAL' }, pallets: ['P-C01-L2'], bin: 'T2-F3-P1-A2', status: 'PROCESSING', creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: new Date('2025-10-27T14:00:00'), process: 'Quy trình Phân cấp - Đóng thùng' },
-        { id: 4, type: 'NEW', code: 'P-A05-L1_MAT-004_50_05112025', materials: [{ code: 'MAT-004', name: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 650, expiryDate: '2026-03-20' }], pallets: ['P-A05-L1'], bin: 'T1-F8-P3-A2', status: 'COMPLETED', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2025-11-05T10:30:00'), process: 'Quy trình Nhập - Kho Chuối' },
-        { id: 5, type: 'NEW', code: 'P-D01-L2_MAT-005_500_12112025', materials: [{ code: 'MAT-005', name: 'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA', qty: 500, unit: 'thùng', specs: 'Thùng 12kg tiêu chuẩn', weight: 6000, expiryDate: '2026-11-12' }], pallets: ['P-D01-L2'], bin: 'T3-F2-P5-A1', status: 'PENDING', creator: { id: 'US04', name: 'Phạm Minh Dũng' }, createdAt: new Date('2025-11-12T16:45:00'), process: 'Quy trình Nhập - Kho Chuối' },
-        { id: 31, type: 'NEW', code: 'P-N01-L1_MAT-001_100_TDAY', materials: [{ code: 'MAT-001', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 100, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 1300, expiryDate: '2026-08-15' }], pallets: ['P-N01-L1'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', priority: true, creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: (() => { const d = new Date(); d.setHours(8, 30, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' },
-        { id: 32, type: 'NEW', code: 'P-N02-L2_MAT-002_200_TDAY', materials: [{ code: 'MAT-002', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 200, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', weight: 3000, expiryDate: '2026-10-10' }], pallets: ['P-N02-L2'], bin: 'T1-F2-P2-A2', status: 'PROCESSING', priority: false, creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: (() => { const d = new Date(); d.setHours(9, 15, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' },
-        { id: 33, type: 'NEW', code: 'P-N03-L3_MAT-003_50_TDAY', materials: [{ code: 'MAT-003', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 650, expiryDate: '2027-01-01' }], pallets: ['P-N03-L3'], bin: 'T1-F3-P3-A3', status: 'PENDING', priority: false, creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: (() => { const d = new Date(); d.setHours(14, 45, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' }
+        { id: 1, type: 'NEW', code: 'P-A01-L3_A456-TROPICAL_500_25102025', materials: [{ code: 'A456 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 500, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 6500, expiryDate: '2025-10-25' }], batch: { code: 'LOT-2510-01', name: 'Lô hàng Chuối tháng 10 - Đợt 1' }, pallets: ['P-A01-L3'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', priority: true, creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2025-10-25T08:30:00'), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 2, type: 'REENTRY', code: 'P-B01-L1_A456-SOFIA_1000_26102025', materials: [{ code: 'A456 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 1000, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', weight: 15000, expiryDate: '2025-06-15' }], batch: { code: 'LOT-2510-02', name: 'Lô Sofia 02' }, pallets: ['P-B01-L1'], bin: 'T1-F1-P2-A5', status: 'COMPLETED', priority: false, creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: new Date('2025-10-26T09:15:00'), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 3, type: 'TRANSFER', code: 'P-C01-L2_A789-TROPICAL_200_27102025', materials: [{ code: 'A789 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', qty: 200, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 2600, expiryDate: '2025-12-27' }], batch: { code: 'LOT-2510-03', name: 'Lô TROPICAL' }, pallets: ['P-C01-L2'], bin: 'T2-F3-P1-A2', status: 'PROCESSING', creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: new Date('2025-10-27T14:00:00'), process: 'Quy trình Phân cấp - Đóng thùng' },
+        { id: 4, type: 'NEW', code: 'P-A05-L1_26CP-DELMONTE_50_05112025', materials: [{ code: '26CP - DEL MONTE', name: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 650, expiryDate: '2026-03-20' }], pallets: ['P-A05-L1'], bin: 'T1-F8-P3-A2', status: 'COMPLETED', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2025-11-05T10:30:00'), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 5, type: 'NEW', code: 'P-D01-L2_16CP-SEIKA_500_12112025', materials: [{ code: '16CP - SEIKA', name: 'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA', qty: 500, unit: 'thùng', specs: 'Thùng 12kg tiêu chuẩn', weight: 6000, expiryDate: '2026-11-12' }], pallets: ['P-D01-L2'], bin: 'T3-F2-P5-A1', status: 'PENDING', creator: { id: 'US04', name: 'Phạm Minh Dũng' }, createdAt: new Date('2025-11-12T16:45:00'), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 31, type: 'NEW', code: 'P-N01-L1_A456-TROPICAL_100_TDAY', materials: [{ code: 'A456 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 100, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 1300, expiryDate: '2026-08-15' }], pallets: ['P-N01-L1'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', priority: true, creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: (() => { const d = new Date(); d.setHours(8, 30, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 32, type: 'NEW', code: 'P-N02-L2_A456-SOFIA_200_TDAY', materials: [{ code: 'A456 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 200, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', weight: 3000, expiryDate: '2026-10-10' }], pallets: ['P-N02-L2'], bin: 'T1-F2-P2-A2', status: 'PROCESSING', priority: false, creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: (() => { const d = new Date(); d.setHours(9, 15, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 33, type: 'NEW', code: 'P-N03-L3_A789-TROPICAL_50_TDAY', materials: [{ code: 'A789 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 650, expiryDate: '2027-01-01' }], pallets: ['P-N03-L3'], bin: 'T1-F3-P3-A3', status: 'PENDING', priority: false, creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: (() => { const d = new Date(); d.setHours(14, 45, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' }
     ];
 
     MOCK_INBOUND_ORDERS.forEach((o, i) => {
@@ -224,9 +234,8 @@ function ensureTodayDataInbound() {
         });
 
         const todayData = [
-            { id: Date.now() + 1, code: 'P-T01-A1_MAT-001_50_T' + today.getTime().toString().slice(-4), materials: [{ code: 'MAT-001', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', expiryDate: new Date(today.getFullYear(), today.getMonth() + 6, today.getDate()).toISOString().split('T')[0] }], pallets: ['P-T01-A1'], bin: 'T1-F1-P1-A1', status: 'PENDING', priority: true, type: 'NEW', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date(today.getTime() + 8 * 3600000 + 30 * 60000) },
-            { id: Date.now() + 2, code: 'P-T02-B2_MAT-002_120_T' + today.getTime().toString().slice(-4), materials: [{ code: 'MAT-002', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 120, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', expiryDate: new Date(today.getFullYear(), today.getMonth() + 12, today.getDate()).toISOString().split('T')[0] }], pallets: ['P-T02-B2'], bin: 'T2-F3-P1-B2', status: 'PROCESSING', priority: false, type: 'REENTRY', creator: { id: 'US14', name: 'Trịnh Thị Quyên' }, createdAt: new Date(today.getTime() + 10 * 3600000 + 15 * 60000) },
-            { id: Date.now() + 3, code: 'C-T03-C3_MAT-003_200_T' + today.getTime().toString().slice(-4), materials: [{ code: 'MAT-003', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', qty: 200, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', expiryDate: '' }], pallets: ['C-T03-C3'], bin: 'T1-F5-P2-C1', status: 'COMPLETED', priority: false, type: 'TRANSFER', creator: { id: 'US06', name: 'Bùi Thanh Sơn' }, createdAt: new Date(today.getTime() + 14 * 3600000 + 45 * 60000) }
+            { id: Date.now() + 1, code: 'P-T01-A1_A456-TROPICAL_50_T' + today.getTime().toString().slice(-4), materials: [{ code: 'A456 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', expiryDate: new Date(today.getFullYear(), today.getMonth() + 6, today.getDate()).toISOString().split('T')[0] }], pallets: ['P-T01-A1'], bin: 'T1-F1-P1-A1', status: 'PENDING', priority: true, type: 'NEW', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date(today.getTime() + 8 * 3600000 + 30 * 60000) },
+            { id: Date.now() + 2, code: 'P-T02-B2_A456-SOFIA_120_T' + today.getTime().toString().slice(-4), materials: [{ code: 'A456 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 120, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', expiryDate: new Date(today.getFullYear(), today.getMonth() + 12, today.getDate()).toISOString().split('T')[0] }], pallets: ['P-T02-B2'], bin: 'T2-F3-P1-B2', status: 'PROCESSING', priority: false, type: 'REENTRY', creator: { id: 'US14', name: 'Trịnh Thị Quyên' }, createdAt: new Date(today.getTime() + 10 * 3600000 + 15 * 60000) }
         ];
         MOCK_INBOUND_ORDERS.unshift(...todayData);
         saveInboundOrders();
@@ -291,7 +300,7 @@ function renderTableBody() {
     const entryTypeConfig = {
         'NEW': { label: 'Nhập mới', color: '#3b82f6', bg: '#eff6ff' },
         'REENTRY': { label: 'Nhập lại', color: '#f59e0b', bg: '#fffbeb' },
-        'TRANSFER': { label: 'Nhập chuyền thẳng', color: '#10b981', bg: '#f0fdf4' }
+        // 'TRANSFER': { label: 'Nhập chuyền thẳng', color: '#10b981', bg: '#f0fdf4' }
     };
 
     const getStatusBadge = (status) => {
@@ -327,12 +336,14 @@ function renderTableBody() {
                             <div class="product-item" style="max-width:100%;overflow:hidden;">
                                 <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;">
                                     <span class="prod-code" style="font-weight:500;color:#0284c7;font-size:13px;">${m.code}</span>
-                                    <span style="font-weight:600;color:#334155;font-size:14px;margin-left:4px;"> - ${displayName}</span>
                                 </div>
-                                <div style="font-size:13px;color:#334155;margin-top:4px;">Số lượng: <span style="font-weight:700;">${m.qty} ${m.unit}</span></div>
+                                <div style="font-weight:600;color:#334155;font-size:14px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${displayName}</div>
                             </div>`;
                         }).join('')}
                     </div>
+                </td>
+                <td class="text-center">
+                    ${o.materials.map(m => `<div style="font-weight:700;color:#334155;font-size:14px;height:36px;display:flex;align-items:center;justify-content:center;">${m.qty} ${m.unit}</div>`).join('')}
                 </td>
                 <td>
                     <div class="product-item" style="border-bottom:none;min-height:fit-content;">
@@ -424,17 +435,21 @@ function goToMainPageFromInput() {
 
 // ── Actions ──────────────────────────────────────────────────
 function deleteInboundOrder(id) {
-    showCustomConfirm('Bạn có chắc chắn muốn xóa Lệnh nhập này không?', () => {
-        const idx = MOCK_INBOUND_ORDERS.findIndex(o => o.id == id || o.code === id);
+    const order = MOCK_INBOUND_ORDERS.find(o => String(o.id) === String(id) || o.code === id);
+    if (!order) return;
+
+    if (order.status !== 'PENDING') {
+        showToast('Chỉ có thể xóa các lệnh ở trạng thái "Đang chờ"', 'error');
+        return;
+    }
+
+    showCustomConfirm(`Bạn có chắc chắn muốn xóa lệnh <span style="color: #1378C0; font-weight: 600;"> ${order.code} </span> không?`, () => {
+        const idx = MOCK_INBOUND_ORDERS.findIndex(o => String(o.id) === String(id) || o.code === id);
         if (idx !== -1) {
-            if (MOCK_INBOUND_ORDERS[idx].status !== 'PENDING') {
-                showToast('Chỉ có thể xóa các Lệnh nhập ở trạng thái Đang chờ (PENDING).', 'error');
-                return;
-            }
             MOCK_INBOUND_ORDERS.splice(idx, 1);
             saveInboundOrders();
             renderTableBody();
-            showToast('Đã xóa Lệnh nhập thành công!', 'success');
+            showToast('Đã xóa lệnh nhập kho thành công!', 'success');
         }
     });
 }
@@ -625,41 +640,164 @@ function selectCreator(id, text) {
 }
 
 // ── Modal: Create ────────────────────────────────────────────
+let selectedBatchForCreate = null;
+let currentCreateType = 'NEW';
+
 function openCreateModal() {
     const modal = document.getElementById('modal-create');
     if (!modal) return;
 
-    ['inputPallet', 'inputVatTu', 'inputSoLuong', 'inputExpiry', 'inputProcess', 'selectedProcessId'].forEach(id => {
+    // Reset fields
+    ['inputPallet', 'inputVatTu', 'inputSoLuong', 'inputExpiry', 'batch-selection-search'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
     });
-    selectedProcessId = null;
-    selectedMaterials = [];
+    document.getElementById('inputPriority').checked = false;
+    selectedBatchForCreate = null;
+
+    // Go to step 1
+    goToBatchStep();
 
     modal.classList.add('show');
     modal.style.display = 'flex';
     modal.style.opacity = '1';
 
-    document.getElementById('result-box')?.style.setProperty('display', 'none');
-    const btn = document.getElementById('btnNext');
-    if (btn) btn.disabled = true;
+    const pri = document.getElementById('inputPriority');
+    if (pri) pri.checked = false;
 
-    const vatTuInput = document.getElementById('inputVatTu');
-    const soLuongInput = document.getElementById('inputSoLuong');
-    if (vatTuInput) { vatTuInput.value = ''; vatTuInput.readOnly = false; vatTuInput.style.backgroundColor = ''; vatTuInput.style.cursor = ''; }
-    if (soLuongInput) { soLuongInput.value = ''; soLuongInput.readOnly = false; soLuongInput.style.backgroundColor = ''; soLuongInput.removeAttribute('data-min'); soLuongInput.style.borderColor = ''; }
-    document.getElementById('added-materials-container')?.style.setProperty('display', 'none');
+    document.getElementById('result-box')?.style.setProperty('display', 'none');
+    
+    // Clear dynamic states
     const historySection = document.getElementById('pallet-history-section');
     if (historySection) { historySection.style.display = 'none'; document.getElementById('pallet-history-body').innerHTML = ''; }
+    
+    document.getElementById('pallet-capacity-info').style.display = 'none';
+    document.getElementById('material-weight-info').style.display = 'none';
+    document.getElementById('total-weight-info').style.display = 'none';
 
-    renderAddedMaterialsUI();
     initPDAFormListeners();
-    validatePDAForm();
+    renderBatchSelectionList();
+}
 
+function renderBatchSelectionList() {
+    const listContainer = document.getElementById('batch-selection-list');
+    const searchInput = document.getElementById('batch-selection-search');
+    const btnNextStep = document.getElementById('btnNextStep');
+    if (!listContainer) return;
+
+    const query = (searchInput?.value || '').toLowerCase().trim();
+    
+    // Load from localStorage (SWS_BATCH_DATA_v4)
+    let batches = [];
+    try {
+        const saved = localStorage.getItem('SWS_BATCH_DATA_v4');
+        if (saved) {
+            batches = JSON.parse(saved);
+        }
+    } catch (e) { console.error(e); }
+
+    // Filter by status CHECKED (Đã kiểm kê) and search query
+    const filtered = batches.filter(b => 
+        (b.status === 'CHECKED' || b.status === "Đã kiểm kê") && 
+        (b.code.toLowerCase().includes(query) || b.name.toLowerCase().includes(query))
+    );
+
+    if (filtered.length === 0) {
+        listContainer.innerHTML = `<div class="empty-batch-state" style="padding: 40px; text-align: center; color: #94a3b8;">
+            <i class="fas fa-box-open" style="font-size: 32px; display: block; margin-bottom: 12px;"></i>
+            Không tìm thấy lô hàng "Đã kiểm kê" nào phù hợp
+        </div>`;
+    } else {
+        // Tách 2 table: Head và Body để fix lỗi scroll bar trùm lên head
+        let html = `
+            <div class="batch-selection-table-wrapper">
+                <div class="batch-selection-head">
+                    <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                        <colgroup>
+                            <col style="width: 45px">
+                            <col style="width: 55px">
+                            <col style="width: 150px">
+                            <col>
+                        </colgroup>
+                        <thead>
+                            <tr style="background: #0D6BB9; color: white;">
+                                <th style="padding: 12px 8px; border-right: 1px solid rgba(255,255,255,0.1);"></th>
+                                <th style="padding: 12px 8px; border-right: 1px solid rgba(255,255,255,0.1); text-align: center; font-weight: 600; font-size: 13px;">STT</th>
+                                <th style="padding: 12px 12px; border-right: 1px solid rgba(255,255,255,0.1); text-align: left; font-weight: 600; font-size: 13px;">Mã lô hàng</th>
+                                <th style="padding: 12px 12px; text-align: left; font-weight: 600; font-size: 13px;">Tên lô hàng</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="batch-selection-body" id="batchSelectionBodyScroll" style="max-height: 300px; overflow-y: auto;">
+                    <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                        <colgroup>
+                            <col style="width: 45px">
+                            <col style="width: 55px">
+                            <col style="width: 150px">
+                            <col>
+                        </colgroup>
+                        <tbody>
+        `;
+
+        html += filtered.map((b, idx) => {
+            const isSelected = selectedBatchForCreate?.id === b.id;
+            return `
+                <tr class="batch-table-row ${isSelected ? 'selected' : ''}" onclick="window.selectBatchForCreate('${b.id}')" style="cursor: pointer; transition: all 0.2s;">
+                    <td style="padding: 12px 8px; border-bottom: 1px solid #f1f5f9; text-align: center;">
+                        <input type="radio" name="batch-selector" ${isSelected ? 'checked' : ''} style="cursor: pointer;">
+                    </td>
+                    <td style="padding: 12px 8px; border-bottom: 1px solid #f1f5f9; text-align: center; color: #64748b; font-weight: 500;">${idx + 1}</td>
+                    <td style="padding: 12px 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #076EB8;">${b.code}</td>
+                    <td style="padding: 12px 12px; border-bottom: 1px solid #f1f5f9; color: #1e293b;">${b.name}</td>
+                </tr>
+            `;
+        }).join('');
+
+        html += `</tbody></table></div></div>`;
+        listContainer.innerHTML = html;
+        
+        // Fix sync horizontal scroll (if needed for small screens)
+        const head = listContainer.querySelector('.batch-selection-head');
+        const body = listContainer.querySelector('.batch-selection-body');
+        if (head && body) {
+            body.onscroll = () => { head.scrollLeft = body.scrollLeft; };
+        }
+    }
+
+    if (btnNextStep) btnNextStep.disabled = !selectedBatchForCreate;
+}
+
+window.selectBatchForCreate = function(id) {
+    let batches = [];
+    try {
+        const saved = localStorage.getItem('SWS_BATCH_DATA_v4');
+        if (saved) batches = JSON.parse(saved);
+    } catch (e) { }
+    
+    const batch = batches.find(b => String(b.id) === String(id));
+    if (batch) {
+        selectedBatchForCreate = batch;
+        renderBatchSelectionList();
+    }
+};
+
+function goToBatchStep() {
+    document.getElementById('create-step-1').style.display = 'block';
+    document.getElementById('create-step-2').style.display = 'none';
+}
+
+function goToScanStep() {
+    if (!selectedBatchForCreate) return;
+    document.getElementById('create-step-1').style.display = 'none';
+    document.getElementById('create-step-2').style.display = 'block';
+    document.getElementById('selected-batch-info-display').textContent = `${selectedBatchForCreate.code} - ${selectedBatchForCreate.name}`;
+    
+    // Auto focus pallet input
     setTimeout(() => {
-        const palletField = document.getElementById('inputPallet');
-        if (palletField) { palletField.focus(); palletField.select(); }
-    }, 0);
+        const p = document.getElementById('inputPallet');
+        if (p) { p.focus(); p.select(); }
+    }, 100);
 }
 
 function closeCreateModal() {
@@ -667,33 +805,7 @@ function closeCreateModal() {
     if (modal) { modal.classList.remove('show'); modal.style.display = 'none'; }
 }
 
-function switchInboundTab(el, type) {
-    document.querySelectorAll('.segment-tab').forEach(tab => tab.classList.remove('active'));
-    el.classList.add('active');
-    currentTabMode = type;
 
-    const expGroup = document.getElementById('expiry-date-group');
-    const destGroup = document.getElementById('next-destination-group');
-    const palletHelper = document.getElementById('pallet-helper-text');
-
-    if (type === 'transfer') {
-        expGroup?.style.setProperty('display', 'none');
-        destGroup?.style.setProperty('display', 'block');
-        palletHelper?.style.setProperty('display', 'none');
-    } else {
-        expGroup?.style.setProperty('display', 'block');
-        destGroup?.style.setProperty('display', 'none');
-        palletHelper?.style.setProperty('display', 'block');
-    }
-
-    const inputExp = document.getElementById('inputExpiry');
-    const inputDest = document.getElementById('inputNextDestination');
-    const hiddenDest = document.getElementById('selectedDestinationId');
-    if (inputExp && type === 'transfer') inputExp.value = '';
-    if (inputDest && type === 'normal') { inputDest.value = ''; if (hiddenDest) hiddenDest.value = ''; selectedDestinationId = ''; }
-
-    validatePDAForm();
-}
 
 // ── Weight Tracking ──────────────────────────────────────────
 let currentPalletMaxCapacity = null;
@@ -759,7 +871,9 @@ function handlePalletScan(code) {
                     <td style="padding:10px;border-bottom:1px solid #f1f5f9;">${item.time}</td>
                 </tr>`).join('');
         }
+        currentCreateType = 'REENTRY';
     } else {
+        currentCreateType = 'NEW';
         if (!isValidPalletCode) { currentPalletMaxCapacity = null; if (capacityInfo) capacityInfo.style.display = 'none'; }
         if (vatTuInput?.readOnly) { vatTuInput.value = ''; vatTuInput.readOnly = false; vatTuInput.style.backgroundColor = ''; vatTuInput.style.cursor = ''; }
         if (soLuongInput?.readOnly) { soLuongInput.value = ''; soLuongInput.readOnly = false; soLuongInput.style.backgroundColor = ''; }
@@ -828,169 +942,50 @@ function updateTotalWeightDisplay() {
     }
 }
 
-// ── Material Selection ───────────────────────────────────────
-function addMaterialFromInput() {
-    const vatTuInput = document.getElementById('inputVatTu');
-    const soLuongInput = document.getElementById('inputSoLuong');
-    if (!vatTuInput || !soLuongInput) return;
 
-    const code = vatTuInput.value.trim();
-    if (!code) { showToast('Vui lòng nhập hoặc quét mã sản phẩm', 'error'); return; }
-
-    const qty = parseInt(soLuongInput.value, 10);
-    if (isNaN(qty) || qty <= 0) { showToast('Vui lòng nhập số lượng hợp lệ', 'error'); return; }
-
-    let mat = MASTER_MATERIALS.find(m => m.code.toLowerCase() === code.toLowerCase()) || { code: code.toUpperCase(), name: `Sản phẩm mới (${code.toUpperCase()})`, specs: 'Chưa có thông tin', unit: 'cái' };
-    const expiryDate = document.getElementById('inputExpiry')?.value || '';
-    const existingIndex = selectedMaterials.findIndex(s => s.code.toLowerCase() === mat.code.toLowerCase());
-
-    if (existingIndex >= 0) {
-        selectedMaterials[existingIndex].qty += qty;
-        if (expiryDate) selectedMaterials[existingIndex].expiryDate = expiryDate;
-        showToast(`Đã cộng dồn ${qty} vào sản phẩm ${mat.code}`, 'success');
-    } else {
-        selectedMaterials.push(Object.assign({}, mat, { qty, expiryDate }));
-        showToast(`Đã thêm sản phẩm ${mat.code}`, 'success');
-    }
-
-    vatTuInput.value = ''; soLuongInput.value = ''; vatTuInput.focus();
-    renderAddedMaterialsUI();
-}
-
-function removeAddedMaterial(index) {
-    if (index >= 0 && index < selectedMaterials.length) {
-        selectedMaterials.splice(index, 1);
-        renderAddedMaterialsUI();
-    }
-}
-
-function renderAddedMaterialsUI() {
-    const container = document.getElementById('added-materials-container');
-    const list = document.getElementById('added-materials-list');
-    if (!container || !list) return;
-
-    if (selectedMaterials.length === 0) { container.style.display = 'none'; list.innerHTML = ''; return; }
-    container.style.display = 'block';
-    list.innerHTML = selectedMaterials.map((m, i) => `
-        <div style="display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;padding:8px 12px;border-radius:6px;">
-            <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
-                <code style="background:white;padding:2px 6px;border-radius:4px;border:1px solid #cbd5e1;font-size:12px;white-space:nowrap;">${m.code}</code>
-                <span style="font-size:13px;font-weight:500;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${m.name}">${m.name}</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;margin-left:12px;">
-                <span style="font-size:12px;color:#64748b;margin-right:8px;">HSD: ${m.expiryDate || '-'}</span>
-                <span style="font-size:13px;font-weight:600;color:#0d6bb9;">Số lượng: ${m.qty}</span>
-                <button type="button" class="btn-icon btn-delete" style="width:28px;height:28px;min-width:28px;" onclick="removeAddedMaterial(${i})" title="Xóa"><i class="fas fa-times" style="font-size:12px;"></i></button>
-            </div>
-        </div>`).join('');
-}
-
-// ── Select Materials Modal ───────────────────────────────────
-function openSelectModal() {
-    document.getElementById('modal-select-material').style.display = 'flex';
-    selectSearchQuery = ''; selectPage = 1;
-    const selectAll = document.getElementById('select-all-checkbox');
-    if (selectAll) selectAll.checked = false;
-    renderSelectMaterialTable();
-    updateConfirmButton();
-}
-
-function closeSelectModal() { document.getElementById('modal-select-material').style.display = 'none'; }
-
-function handleSelectSearch(val) { selectSearchQuery = val || ''; selectPage = 1; renderSelectMaterialTable(); }
-
-function renderSelectMaterialTable() {
-    const tbody = document.getElementById('select-material-body');
-    if (!tbody) return;
-
-    const filtered = MASTER_MATERIALS.filter(m =>
-        m.code.toLowerCase().includes(selectSearchQuery.toLowerCase()) ||
-        m.name.toLowerCase().includes(selectSearchQuery.toLowerCase())
-    );
-    const total = Math.max(1, Math.ceil(filtered.length / materialPageSize));
-    const start = (selectPage - 1) * materialPageSize;
-    const pageItems = filtered.slice(start, start + materialPageSize);
-
-    tbody.innerHTML = pageItems.map((m, i) => {
-        const dim = m.dimensions || { length: 0, width: 0, height: 0 };
-        const expStr = m.expiryDate ? (() => { const d = new Date(m.expiryDate); return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; })() : '-';
-        return `<tr>
-            <td class="text-center"><input type="checkbox" class="select-checkbox" data-idx="${start + i}" onchange="updateConfirmButton()"></td>
-            <td class="text-center">${start + i + 1}</td>
-            <td><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;">${m.code}</code></td>
-            <td>${m.name}</td>
-            <td><div style="font-size:11px;color:#64748b;line-height:1.4;"><div>KL: ${m.weight || 0}kg | ĐVT: ${m.unit}</div><div>HSD: ${expStr}</div></div></td>
-            <td class="text-center" style="font-size:12px;color:#475569">${dim.length}</td>
-            <td class="text-center" style="font-size:12px;color:#475569">${dim.width}</td>
-            <td class="text-center" style="font-size:12px;color:#475569">${dim.height}</td>
-        </tr>`;
-    }).join('');
-
-    const pag = document.getElementById('select-material-pagination');
-    if (pag) {
-        let html = `<button class="btn-page" ${selectPage === 1 ? 'disabled' : ''} onclick="goToSelectPage(${selectPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
-        for (let i = 1; i <= total; i++) {
-            if (i <= 2 || i > total - 2 || (i >= selectPage - 1 && i <= selectPage + 1)) html += `<button class="btn-page ${i === selectPage ? 'active' : ''}" onclick="goToSelectPage(${i})">${i}</button>`;
-            else if (i === 3 && selectPage > 4) html += `<span style="padding:0 6px;color:#64748b">...</span>`;
-            else if (i === total - 2 && selectPage < total - 3) html += `<span style="padding:0 6px;color:#64748b">...</span>`;
-        }
-        html += `<button class="btn-page" ${selectPage === total ? 'disabled' : ''} onclick="goToSelectPage(${selectPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
-        pag.innerHTML = html;
-        pag.style.display = filtered.length === 0 ? 'none' : 'flex';
-    }
-
-    const info = document.getElementById('select-info');
-    if (info) info.innerText = `Hiển thị ${pageItems.length} trong tổng ${filtered.length}`;
-    const input = document.getElementById('select-go-page'); if (input) input.value = '';
-}
-
-function goToSelectPage(p) { selectPage = p; renderSelectMaterialTable(); }
-
-function goToSelectPageFromInput() {
-    const v = Number(document.getElementById('select-go-page')?.value || 0);
-    if (!v || isNaN(v)) return;
-    goToSelectPage(v);
-}
-
-function toggleSelectAllModal(master) {
-    document.querySelectorAll('#select-material-body .select-checkbox').forEach(cb => cb.checked = master.checked);
-    updateConfirmButton();
-}
-
-function updateConfirmButton() {
-    const checkedCount = Array.from(document.querySelectorAll('#select-material-body .select-checkbox')).filter(cb => cb.checked).length;
-    const btn = document.getElementById('btn-confirm-select');
-    if (btn) btn.disabled = checkedCount === 0;
-}
-
-function confirmSelectMaterials() {
-    const chosen = [];
-    document.querySelectorAll('#select-material-body .select-checkbox').forEach(cb => {
-        if (cb.checked) {
-            const idx = parseInt(cb.getAttribute('data-idx'));
-            if (!isNaN(idx) && MASTER_MATERIALS[idx]) chosen.push(Object.assign({}, MASTER_MATERIALS[idx]));
-        }
-    });
-    if (chosen.length === 0) { showToast('Chưa chọn sản phẩm', 'error'); return; }
-    showCustomConfirm(`Bạn muốn thêm ${chosen.length} sản phẩm đã chọn?`, () => {
-        chosen.forEach(c => { if (!selectedMaterials.find(s => s.code === c.code)) selectedMaterials.push(Object.assign({ qty: 0 }, c)); });
-        closeSelectModal();
-    });
-}
 
 // ── Confirm Modal ─────────────────────────────────────────────
 function showCustomConfirm(message, onConfirm) {
-    const modal = document.getElementById('custom-confirm');
-    const msg = document.getElementById('custom-confirm-msg');
-    const ok = document.getElementById('custom-confirm-ok');
-    if (!modal || !msg || !ok) { if (onConfirm) onConfirm(); return; }
-    msg.innerText = message;
+    let modal = document.getElementById('js-inbound-confirm');
+    
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'js-inbound-confirm';
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.6);display:none;justify-content:center;align-items:center;z-index:999999;font-family:sans-serif;';
+        modal.innerHTML = `
+            <div style="max-width:750px; width:90%; text-align:center; background:white; border-radius:12px; padding:30px 24px; box-shadow:0 20px 50px rgba(0,0,0,0.3); position:relative;">
+                <div style="width:60px; height:60px; background:#fef2f2; color:#dc2626; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:30px;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 style="margin-bottom:12px; font-size:18px; color:#1e293b; margin-top:0;">Xác nhận xóa</h3>
+                <p id="js-confirm-msg" style="color:#64748b; font-size:14px; margin-bottom:24px; line-height:1.5;">${message}</p>
+                <div style="display:flex; justify-content:center; gap:12px;">
+                    <button id="js-confirm-cancel" style="width:100px; padding:10px; border:1px solid #e2e8f0; border-radius:6px; cursor:pointer; background:white; color:#475569; font-weight:500;">Hủy</button>
+                    <button id="js-confirm-ok" style="background:#dc2626; border:none; width:100px; color:white; border-radius:6px; cursor:pointer; font-weight:500; padding:10px;">Xác nhận</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    const msgEl = modal.querySelector('#js-confirm-msg');
+    const okBtn = modal.querySelector('#js-confirm-ok');
+    const cancelBtn = modal.querySelector('#js-confirm-cancel');
+    
+    if (msgEl) msgEl.innerHTML = message;
     modal.style.display = 'flex';
-    ok.onclick = null;
-    ok.onclick = () => { modal.style.display = 'none'; onConfirm?.(); };
+    
+    okBtn.onclick = () => {
+        modal.style.display = 'none';
+        if (onConfirm) onConfirm();
+    };
+    
+    cancelBtn.onclick = () => {
+        modal.style.display = 'none';
+    };
 }
 
-function closeCustomConfirm() { document.getElementById('custom-confirm')?.style.setProperty('display', 'none'); }
+function closeCustomConfirm() { document.getElementById('js-inbound-confirm')?.style.setProperty('display', 'none'); }
 
 // ── PDA Form Validation ──────────────────────────────────────
 function validatePDAForm() {
@@ -1002,8 +997,13 @@ function validatePDAForm() {
     const btn = document.getElementById('btnNext');
     if (!btn) return;
 
-    const hasRequiredModeField = currentTabMode === 'transfer' ? !!nextDest : !!expiry;
-    btn.disabled = !((pallet || vattu) && soluong && parseInt(soluong) > 0 && hasRequiredModeField);
+    const hasRequiredFields = !!expiry;
+    const isValid = (pallet || vattu) && soluong && parseInt(soluong) > 0 && hasRequiredFields;
+    
+    if (btn) btn.disabled = !isValid;
+    
+    const btnContinue = document.getElementById('btnContinue');
+    if (btnContinue) btnContinue.disabled = !isValid;
 }
 
 function initPDAFormListeners() {
@@ -1025,16 +1025,13 @@ function initPDAFormListeners() {
     }
 }
 
-function generateReceipt() {
+function generateReceipt(shouldStay = false) {
     const pallet = document.getElementById('inputPallet')?.value.trim() || 'P-XXX';
     const vattu = document.getElementById('inputVatTu')?.value.trim() || 'VT-XXX';
     const soluong = document.getElementById('inputSoLuong')?.value || '0';
     const expiry = document.getElementById('inputExpiry')?.value;
-    const nextDest = document.getElementById('selectedDestinationId')?.value;
-    const procInput = document.getElementById('inputProcess');
 
-    if (currentTabMode === 'normal' && !expiry) return alert('Vui lòng chọn ngày hết hạn');
-    if (currentTabMode === 'transfer' && !nextDest) return alert('Vui lòng chọn đích đến tiếp theo');
+    if (!expiry) return alert('Vui lòng chọn ngày hết hạn');
 
     const now = new Date();
     const dateStr = String(now.getDate()).padStart(2, '0') + String(now.getMonth() + 1).padStart(2, '0') + now.getFullYear();
@@ -1044,24 +1041,55 @@ function generateReceipt() {
         id: Date.now(), code,
         supplier: 'PDA Import', status: 'PENDING',
         priority: document.getElementById('inputPriority')?.checked || false,
-        type: 'Nhập nội bộ',
-        creator: { id: 'US_PDA', name: 'PDA User' },
+        type: currentCreateType,
+        creator: { id: 'US_PDA', name: 'admin' },
         createdAt: now, pallets: [pallet],
         materials: [{ code: vattu, name: document.getElementById('inputVatTu')?.value || 'Sản phẩm PDA', qty: parseInt(soluong), unit: 'Cái', expiryDate: expiry }],
-        process: procInput?.value || 'Quy trình mặc định', bin: ''
+        batch: selectedBatchForCreate ? { code: selectedBatchForCreate.code, name: selectedBatchForCreate.name } : null,
+        process: 'Quy trình mặc định', bin: ''
     };
 
     MOCK_INBOUND_ORDERS.unshift(newOrder);
     saveInboundOrders();
 
-    if (procInput) procInput.value = '';
-    const selectedProcEl = document.getElementById('selectedProcessId');
-    if (selectedProcEl) selectedProcEl.value = '';
-    selectedProcessId = null;
+    if (shouldStay) {
+        // Clear only material inputs to continue creating for same pallet/batch
+        ['inputPallet', 'inputVatTu', 'inputSoLuong', 'inputExpiry'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.value = '';
+                el.readOnly = false;
+                el.style.backgroundColor = '';
+                el.style.cursor = '';
+            }
+        });
+        document.getElementById('inputPriority').checked = false;
+        
+        // Reset dynamic info displays
+        document.getElementById('pallet-capacity-info').style.display = 'none';
+        document.getElementById('material-weight-info').style.display = 'none';
+        document.getElementById('total-weight-info').style.display = 'none';
+        
+        currentPalletMaxCapacity = null;
+        currentMaterialWeightPerUnit = null;
 
-    closeCreateModal();
-    if (typeof refreshData === 'function') refreshData();
-    showToast('Thêm lệnh nhập kho thành công!', 'success');
+        const btnScan = document.getElementById('btnScanVatTu');
+        if (btnScan) btnScan.disabled = false;
+        
+        const historySection = document.getElementById('pallet-history-section');
+        if (historySection) { historySection.style.display = 'none'; document.getElementById('pallet-history-body').innerHTML = ''; }
+
+        validatePDAForm();
+        showToast('Đã thêm lệnh. Mời bạn nhập lệnh tiếp theo cho lô này.', 'success');
+        
+        // Refocus for next entry
+        setTimeout(() => document.getElementById('inputPallet')?.focus(), 100);
+    } else {
+        closeCreateModal();
+        showToast('Thêm lệnh nhập kho thành công!', 'success');
+    }
+    
+    if (typeof renderTableBody === 'function') renderTableBody();
 }
 
 // ── Print ────────────────────────────────────────────────────
@@ -1604,7 +1632,7 @@ function openOrderDetailModal(orderId) {
     const typeMap = {
         'NEW': { label: 'Nhập mới', color: '#3b82f6', bg: '#eff6ff' },
         'REENTRY': { label: 'Nhập lại', color: '#f59e0b', bg: '#fffbeb' },
-        'TRANSFER': { label: 'Nhập chuyền thẳng', color: '#10b981', bg: '#f0fdf4' }
+        // 'TRANSFER': { label: 'Nhập chuyền thẳng', color: '#10b981', bg: '#f0fdf4' }
     };
     const getTypeLabel = type => { const c = typeMap[type] || { label: type, color: '#64748b', bg: '#f1f5f9' }; return `<span style="display:inline-block;width:130px;text-align:center;background:${c.bg};color:${c.color};border:1px solid ${c.color}44;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:500;">${c.label}</span>`; };
     const renderRow = (label, value) => `<tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:12px 0;font-weight:500;color:#64748b;width:40%;">${label}</td><td style="padding:12px 0;color:#1e293b;font-weight:500;">${value}</td></tr>`;
@@ -1668,7 +1696,7 @@ function exportInboundExcel() {
         'Sản phẩm': order.materials.map(m => `${m.name} (${m.code})`).join(', '),
         'Số lượng': order.materials.reduce((sum, m) => sum + (m.qty || 0), 0),
         'Đơn vị': order.materials[0]?.unit || '',
-        'Loại lệnh nhập': order.type === 'NEW' ? 'Nhập mới' : order.type === 'REENTRY' ? 'Nhập lại' : 'Nhập chuyền thẳng',
+        'Loại lệnh nhập': order.type === 'NEW' ? 'Nhập mới' : (order.type === 'REENTRY' ? 'Nhập lại' : order.type),
         'Trạng thái': order.status === 'PENDING' ? 'Đang chờ' : order.status === 'PROCESSING' ? 'Đang xử lý' : 'Hoàn thành',
         'Người tạo': order.creator.name,
         'Thời gian tạo': formatDateTime(order.createdAt)
@@ -1849,14 +1877,6 @@ Object.assign(window, {
     selectCreator,
     toggleCreatorCombobox,
     handleCreatorComboboxSearch,
-    handleSelectSearch,
-    confirmSelectMaterials,
-    toggleSelectAllModal,
-    goToSelectPage,
-    goToSelectPageFromInput,
-    openSelectModal,
-    closeSelectModal,
-    updateConfirmButton,
     openQRScanner,
     closeQRScanner,
     switchScannerTab,
@@ -1865,8 +1885,6 @@ Object.assign(window, {
     handleVatTuInput,
     handleSoLuongInput,
     updateTotalWeightDisplay,
-    addMaterialFromInput,
-    removeAddedMaterial,
     validatePDAForm,
     generateReceipt,
     addQuickDays,
@@ -1876,7 +1894,9 @@ Object.assign(window, {
     pdaCalPrevMonth,
     pdaCalNextMonth,
     pdaCalApply,
-    switchInboundTab,
+    renderBatchSelectionList,
+    goToBatchStep,
+    goToScanStep,
     toggleProcessCombobox,
     handleProcessSearch,
     selectProcess,
