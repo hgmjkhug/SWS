@@ -1633,8 +1633,8 @@
 
     // ===== KHAI BÁO TAB LOGIC =====
     var equipmentData = [
-        { group: 'Lifter',        items: ['LIFT-001', 'LIFT-002', 'LIFT-003'] },
-        { group: 'SHUTTLE',      items: ['SHUTTLE-001', 'SHUTTLE-002', 'SHUTTLE-003', 'SHUTTLE-004', 'SHUTTLE-005', 'SHUTTLE-006', 'SHUTTLE-007', 'SHUTTLE-008', 'SHUTTLE-009', 'SHUTTLE-010', 'SHUTTLE-011', 'SHUTTLE-012', 'SHUTTLE-013'] }
+        { group: 'Lifter',        items: ['Lifter - 001', 'Lifter - 002', 'Lifter - 003','Lifter - 004', 'Lifter - 005', 'Lifter - 006'] },
+        { group: 'Shuttle',      items: ['Shuttle - 001', 'Shuttle - 002', 'Shuttle - 003', 'Shuttle - 004', 'Shuttle - 005', 'Shuttle - 006', 'Shuttle - 007', 'Shuttle - 008', 'Shuttle - 009', 'Shuttle - 010', 'Shuttle - 011', 'Shuttle - 012', 'Shuttle - 013', 'Shuttle - 014'] }
     ];
 
     // equipmentAssignment: { 'LIFT-001': 'nhap' | 'xuat' | 'danang' }
@@ -1708,14 +1708,14 @@
             
             // Mã tháp
             html += '<div class="area-field">';
-            html += '<span class="area-field-label">Mã tầng tháp<span class="required-star">*</span></span>';
+            html += '<span class="area-field-label">Mã tháp<span class="required-star">*</span></span>';
             html += '<div class="area-field-value">';
             html += '<input type="text" value="' + escapeHtml(mod.code) + '" onchange="updateModuleField(' + mod.id + ', \'code\', this.value)" placeholder="Nhập mã tầng tháp...">';
             html += '</div></div>';
             
             // Tên tháp
             html += '<div class="area-field">';
-            html += '<span class="area-field-label">Tên tầng tháp<span class="required-star">*</span></span>';
+            html += '<span class="area-field-label">Tên tháp<span class="required-star">*</span></span>';
             html += '<div class="area-field-value">';
             html += '<input type="text" value="' + escapeHtml(mod.name) + '" onchange="updateModuleField(' + mod.id + ', \'name\', this.value)" placeholder="Nhập tên tầng tháp...">';
             html += '</div></div>';
@@ -2857,12 +2857,12 @@
             var hasProductSelection = selProduct ? ' has-selection' : '';
 
             html += '<div class="area-field init-equipment-section" style="padding: 0; margin-top: 12px; margin-bottom: 2px;">';
-            html += '<span class="area-field-label" style="padding-top: 10px;">Nhóm sản phẩm<span style="color: red;">*</span></span>';
+            html += '<span class="area-field-label" style="padding-top: 10px;">Sản phẩm<span style="color: red;">*</span></span>';
             html += '<div class="init-equipment-container" style="flex: 1;">';
             html += '  <div class="init-equipment-search-wrapper' + hasProductSelection + '">';
             html += '    <div class="init-equipment-search">';
             html += '      <i class="fas fa-search search-icon"></i>';
-            html += '      <input type="text" id="areaProductSearch-' + area.id + '" value="' + displayProduct + '" placeholder="Tìm nhóm sản phẩm..." onfocus="showAreaProductList(' + area.id + ')" oninput="filterAreaProductList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selProduct ? 'readonly' : '') + '>';
+            html += '      <input type="text" id="areaProductSearch-' + area.id + '" value="' + displayProduct + '" placeholder="Tìm sản phẩm..." onfocus="showAreaProductList(' + area.id + ')" oninput="filterAreaProductList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selProduct ? 'readonly' : '') + '>';
             
             if (selProduct && !isReadonly) {
                 html += '      <i class="fas fa-times clear-icon" title="Xóa" onclick="removeAreaProduct(' + area.id + ')"></i>';
@@ -4037,7 +4037,7 @@
             html += '</div></div>';
 
             // Loại vị trí
-            var locationTypes = ['Vị trí ô trống', 'Vị trí chứa hàng', 'Vị trí sạc pin', 'Vị trí dừng đỗ', 'Vị trí lifter', 'Vị trí đã chứa hàng (Không tạt ngang)'];
+            var locationTypes = ['Vị trí ô trống', 'Vị trí chứa hàng', 'Vị trí sạc pin', 'Vị trí dừng đỗ', 'Vị trí Lifter', 'Vị trí đã chứa hàng (Không tạt ngang)'];
             var currentLocType = loc.locationType || 'Vị trí ô trống';
             
             html += '<div class="location-field" style="display: none;">';
