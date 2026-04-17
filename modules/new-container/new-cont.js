@@ -171,8 +171,8 @@
         // "All" option
         const allOpt = document.createElement('div');
         allOpt.className = `select-option ${filterTypeCode === 'all' ? 'selected' : ''}`;
-        allOpt.textContent = 'Tất cả loại vật chứa';
-        allOpt.onclick = () => selectTypeFilter('all', 'Tất cả loại vật chứa');
+        allOpt.textContent = 'Tất cả nhóm vật chứa';
+        allOpt.onclick = () => selectTypeFilter('all', 'Tất cả nhóm vật chứa');
         container.appendChild(allOpt);
 
         const filtered = containerTypes.filter(t => 
@@ -181,7 +181,7 @@
         );
 
         if (filtered.length === 0 && keyword) {
-            container.innerHTML = '<div class="select-option no-result">Không tìm thấy loại này</div>';
+            container.innerHTML = '<div class="select-option no-result">Không tìm thấy nhóm này</div>';
         } else {
             filtered.forEach(t => {
                 const opt = document.createElement('div');
@@ -454,7 +454,7 @@
     function createPallets(mode, printAfter = false) {
         const isAuto = mode === 'auto';
         const type = isAuto ? selectedTypeAuto : selectedTypeManual;
-        if (!type) { showToast('Vui lòng chọn loại vật chứa!', 'error'); return; }
+        if (!type) { showToast('Vui lòng chọn nhóm vật chứa!', 'error'); return; }
         
         const qty = isAuto ? parseInt(document.getElementById('auto-qty').value || 0) : 1;
         if (qty <= 0) { showToast('Số lượng phải lớn hơn 0!', 'error'); return; }
@@ -521,7 +521,7 @@
     }
 
     function saveEditPallet() {
-        if (!selectedTypeEdit) { showToast('Vui lòng chọn loại vật chứa!', 'error'); return; }
+        if (!selectedTypeEdit) { showToast('Vui lòng chọn nhóm vật chứa!', 'error'); return; }
         const newCode = document.getElementById('edit-pallet-code').value.trim();
         if (!newCode) { showToast('Vui lòng nhập mã vật chứa!', 'error'); return; }
 

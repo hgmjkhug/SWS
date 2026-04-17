@@ -13,7 +13,7 @@
                     <!-- Filter by Container Type (Searchable Select Pattern) -->
                     <div class="searchable-select" style="width: 280px;" id="type-filter-container">
                         <div class="select-input-wrapper">
-                            <input type="text" id="type-filter-input" placeholder="Tất cả loại vật chứa" 
+                            <input type="text" id="type-filter-input" placeholder="Tất cả nhóm vật chứa" 
                                    oninput="filterTypeFilterOptions(this)" 
                                    onfocus="showTypeFilterDropdown()"
                                    autocomplete="off">
@@ -76,7 +76,7 @@
                                 <th><input type="checkbox" id="check-all" onchange="toggleAllPallets(this)"></th>
                                 <th>STT</th>
                                 <th>Mã vật chứa</th>
-                                <th>Loại vật chứa</th>
+                                <th>Nhóm vật chứa</th>
                                 <th>Trạng thái</th>
                                 <th>Thao tác</th>
                             </tr>
@@ -136,10 +136,10 @@
                 <div id="tab-auto" class="tab-panel active">
                     <div class="form-stack">
                         <div class="form-group">
-                            <label>Loại vật chứa <span class="required">*</span></label>
+                            <label>Nhóm vật chứa <span class="required">*</span></label>
                             <div class="searchable-select" id="type-select-auto">
                                 <div class="select-input-wrapper">
-                                    <input type="text" placeholder="Tìm loại vật chứa..." oninput="filterTypesAuto(this)" onfocus="showTypeDropdownAuto()">
+                                    <input type="text" placeholder="Tìm nhóm vật chứa..." oninput="filterTypesAuto(this)" onfocus="showTypeDropdownAuto()">
                                 </div>
                                 <div class="select-dropdown" id="type-dropdown-auto"></div>
                             </div>
@@ -163,10 +163,10 @@
                             <input type="text" id="manual-code" placeholder="Nhập mã vật chứa">
                         </div>
                         <div class="form-group">
-                            <label>Loại vật chứa <span class="required">*</span></label>
+                            <label>Nhóm vật chứa <span class="required">*</span></label>
                             <div class="searchable-select" id="type-select-manual">
                                 <div class="select-input-wrapper">
-                                    <input type="text" placeholder="Tìm loại vật chứa..." oninput="filterTypesManual(this)" onfocus="showTypeDropdownManual()">
+                                    <input type="text" placeholder="Tìm nhóm vật chứa..." oninput="filterTypesManual(this)" onfocus="showTypeDropdownManual()">
                                 </div>
                                 <div class="select-dropdown" id="type-dropdown-manual"></div>
                             </div>
@@ -203,10 +203,10 @@
                         <input type="text" id="edit-pallet-code" placeholder="Nhập mã vật chứa">
                     </div>
                     <div class="form-group">
-                        <label>Loại vật chứa <span class="required">*</span></label>
+                        <label>Nhóm vật chứa <span class="required">*</span></label>
                         <div class="searchable-select" id="type-select-edit">
                             <div class="select-input-wrapper">
-                                <input type="text" placeholder="Tìm loại vật chứa..." oninput="filterTypesEdit(this)" onfocus="showTypeDropdownEdit()">
+                                <input type="text" placeholder="Tìm nhóm vật chứa..." oninput="filterTypesEdit(this)" onfocus="showTypeDropdownEdit()">
                             </div>
                             <div class="select-dropdown" id="type-dropdown-edit"></div>
                         </div>

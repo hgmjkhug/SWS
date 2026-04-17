@@ -42,19 +42,16 @@
         } else {
             // Mock initial data
             const mockBuses = [
-                { id: 1, code: 'BUS-45', name: 'Xe Bus 45 chỗ', desc: 'Xe khách Thaco Bluesky 120S' },
-                { id: 2, code: 'BUS-29', name: 'Xe Bus 29 chỗ', desc: 'Xe khách Thaco Garden 79s' },
-                { id: 3, code: 'BUS-16', name: 'Xe Bus 16 chỗ', desc: 'Xe khách Iveco Daily' },
-                { id: 4, code: 'BUS-TB85', name: 'Xe Bus TB85S', desc: 'Xe khách Thaco Meadow TB85S' },
-                { id: 5, code: 'BUS-G7', name: 'Xe Bus G7', desc: 'Xe khách Thaco Garden G7' },
+                { id: 1, code: 'CONT-45FT', name: 'Xe container 45 feet', desc: 'Xe container 45 feet' },
+                { id: 2, code: 'CONT-20FT', name: 'Xe container 20 feet', desc: 'Xe container 20 feet' },
             ];
             // Add more mock data to test pagination (20 items/page)
-            for (let i = 6; i <= 45; i++) {
+            for (let i = 3; i <= 10; i++) {
                 mockBuses.push({
                     id: i,
-                    code: `BUS-${100 + i}`,
-                    name: `Loại xe Bus ${i}`,
-                    desc: `Mô tả chi tiết cho loại xe bus mẫu số ${i}`
+                    code: `CONT-${10 + i}FT`,
+                    name: `Xe container ${10 + i} feet`,
+                    desc: `Xe container ${10 + i} feet`
                 });
             }
             buses = mockBuses;

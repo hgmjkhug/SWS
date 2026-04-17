@@ -1,0 +1,137 @@
+<body>
+    <link rel="stylesheet" href="station.css">
+
+    <div id="main-view">
+        <div class="station-container">
+            <!-- Header Actions -->
+            <div class="station-actions">
+                <div class="station-filters">
+                    <div class="filter-group">
+                        <div class="station-search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="station-search" placeholder="Tìm theo mã hoặc tên xưởng đóng gói..." oninput="handleSearch()">
+                        </div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-danger" id="bulk-delete-btn" onclick="handleBulkDelete()" disabled>
+                        <i class="fas fa-trash"></i> Xóa (<span id="selected-count">0</span>)
+                    </button>
+                    <button class="btn btn-primary" onclick="openModal()">
+                        <i class="fas fa-plus"></i> Thêm mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Section -->
+            <div class="table-wrapper">
+                <div class="table-scroll-head">
+                    <table class="station-table">
+                        <colgroup>
+                            <col style="width: 40px;">
+                            <col style="width: 60px;">
+                            <col style="width: 250px;">
+                            <col style="width: auto;">
+                            <col style="width: auto;">
+                            <col style="width: 120px;">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" id="check-all" onchange="toggleSelectAll(this)">
+                                </th>
+                                <th style="text-align: center;">STT</th>
+                                <th>Mã xưởng đóng gói</th>
+                                <th>Tên xưởng đóng gói</th>
+                                <th>Mô tả</th>
+                                <th style="text-align: center;">Thao tác</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="table-scroll-body">
+                    <table class="station-table">
+                        <colgroup>
+                            <col style="width: 40px;">
+                            <col style="width: 60px;">
+                            <col style="width: 250px;">
+                            <col style="width: auto;">
+                            <col style="width: auto;">
+                            <col style="width: 120px;">
+                        </colgroup>
+                        <tbody id="station-table-body">
+                            <!-- Data rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination Section -->
+            <div class="pagination-bar">
+                <div class="pagination-info" id="pagination-info">Hiển thị 0 trên tổng 0</div>
+                <div class="pagination-controls">
+                    <button class="page-btn btn-secondary" id="prev-btn" onclick="changePage(currentPage - 1)" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="page-numbers" id="page-numbers">
+                        <!-- Page numbers by JS -->
+                    </div>
+                    <button class="page-btn btn-secondary" id="next-btn" onclick="changePage(currentPage + 1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <div class="page-goto">
+                        Đến trang <input type="number" id="goto-page" min="1" onchange="handleGotoPage(this.value)">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Add/Edit -->
+    <div id="station-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">Thêm mới xưởng đóng gói</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="station-form">
+                    <input type="hidden" id="station-id">
+                    <div class="form-group">
+                        <label>Mã xưởng đóng gói <span class="required">*</span></label>
+                        <input type="text" id="node-code" placeholder="Nhập mã xưởng đóng gói" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tên xưởng đóng gói <span class="required">*</span></label>
+                        <input type="text" id="node-name" placeholder="Nhập tên xưởng đóng gói" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <textarea id="node-description" rows="3" placeholder="Nhập mô tả..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+                <button class="btn btn-primary" onclick="handleSave()">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="delete-confirm-modal" class="modal-overlay">
+        <div class="modal-confirm">
+            <div class="confirm-icon warning">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="confirm-title">Xác nhận xóa</h3>
+            <p id="confirm-msg" class="confirm-msg">Bạn có chắc chắn muốn xóa xưởng đóng gói này?</p>
+            <div class="confirm-actions">
+                <button class="btn btn-secondary" onclick="closeConfirmModal()">Hủy</button>
+                <button class="btn btn-danger" onclick="executeDelete()">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="station.js"></script>
+</body>

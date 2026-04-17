@@ -328,6 +328,7 @@ function loadPage(title) {
         'Nhóm vật chứa': 'modules/master-data/container-group/container-group.html',
         'Loại xe': 'modules/bus/bus.html',
         'Dòng sản phẩm': 'modules/product-line/line.html',
+        'Xưởng đóng gói': 'modules/package-station/station.html',
         'Khách hàng': 'modules/customer/customer.html',
         'Thị trường': 'modules/market/market.html',
         'Đơn hàng ERP': 'modules/order/receive/receive.html',
