@@ -552,7 +552,7 @@
           <!-- Step 1: Chọn lô hàng -->
           <div id="create-step-1" class="pda-step">
             <div class="pda-form-group">
-                <label class="pda-label">Chọn lô hàng nhập kho <span style="font-size:12px; font-weight:normal; color:#64748b; margin-left:4px;">(Trạng thái: Đã kiểm kê)</span></label>
+                <!-- <label class="pda-label">Chọn lô hàng nhập kho <span style="font-size:12px; font-weight:normal; color:#64748b; margin-left:4px;">(Trạng thái: Đã kiểm kê)</span></label> -->
                 <div class="pda-search-box">
                   <i class="fas fa-search"></i>
                   <input type="text" id="batch-selection-search" class="pda-input" placeholder="Tìm kiếm theo mã hoặc tên lô hàng..." oninput="renderBatchSelectionList()">
@@ -563,7 +563,7 @@
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
               <button class="btn-cancel-custom" style="padding: 8px 16px; min-width: 100px; height: 38px;" onclick="closeCreateModal()">Hủy</button>
-              <button id="btnNextStep" class="btn-add" disabled onclick="goToScanStep()" style="padding: 8px 16px; min-width: 120px; height: 38px; border-radius: 8px;">Tiếp theo <i class="fas fa-arrow-right" style="margin-left:8px;"></i></button>
+              <button id="btnNextStep" class="btn-add" disabled onclick="goToScanStep()" style="padding: 8px 16px; height: 38px; border-radius: 8px;">Tiếp theo<i class="fas fa-arrow-right" style="margin-left:8px;"></i></button>
             </div>
           </div>
 
@@ -682,6 +682,11 @@
                   <div id="pda-calendar-dropdown" class="pda-calendar-dropdown">
                     <div class="pda-cal-container">
                       <div class="pda-cal-sidebar">
+                        <div class="pda-cal-option" onclick="addQuickDays(1)">1 Ngày</div>
+                        <div class="pda-cal-option" onclick="addQuickDays(3)">3 Ngày</div>
+                        <div class="pda-cal-option" onclick="addQuickDays(5)">5 Ngày</div>
+                        <div class="pda-cal-option" onclick="addQuickDays(7)">7 Ngày</div>
+                        <div class="pda-cal-option" onclick="addQuickDays(15)">15 Ngày</div>
                         <div class="pda-cal-option" onclick="addQuickDays(30)">30 Ngày</div>
                         <div class="pda-cal-option" onclick="addQuickDays(90)">90 Ngày</div>
                         <div class="pda-cal-option" onclick="addQuickDays(180)">180 Ngày</div>
@@ -705,7 +710,8 @@
                         </div>
                         <div id="pda-cal-days" class="pda-cal-days"></div>
                         <div class="pda-cal-footer">
-                          <button type="button" class="pda-btn-apply" onclick="pdaCalApply()">Chọn ngày này</button>
+                          <button type="button" class="pda-cal-btn-secondary" onclick="togglePdaCalendar()">Hủy</button>
+                          <button type="button" class="pda-btn-apply" onclick="pdaCalApply()">Xác nhận</button>
                         </div>
                       </div>
                     </div>
@@ -749,7 +755,7 @@
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
               <button type="button" class="btn-cancel-custom" style="padding: 8px 16px; min-width: 100px; height: 38px;" onclick="goToBatchStep()">Quay lại</button>
               <button type="button" id="btnContinue" class="btn-cancel-custom" style="padding: 8px 16px; min-width: 130px; height: 38px; color: #076EB8; border-color: #076EB8;" disabled onclick="generateReceipt(true)">Tiếp tục tạo</button>
-              <button type="button" id="btnNext" class="btn-add" style="padding: 8px 16px; min-width: 120px; height: 38px; border-radius: 8px;" disabled onclick="generateReceipt(false)">Xác nhận</button>
+              <button type="button" id="btnNext" class="btn-add" style="padding: 8px 16px; height: 38px; border-radius: 8px;" disabled onclick="generateReceipt(false)">Xác nhận</button>
             </div>
 
             <div id="result-box" class="pda-result-box" style="display: none">

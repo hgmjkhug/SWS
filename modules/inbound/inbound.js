@@ -146,6 +146,44 @@ const MOCK_USER_DATA = {
     'US15': { username: 'user015', fullname: 'Đinh Văn Rồng' }
 };
 
+// ── Shared Batch Initialization (Mirroring batch.js) ──────────
+function ensureBatchDataInitialized() {
+    const BATCH_STORAGE_KEY = 'SWS_BATCH_DATA_v4';
+    if (!localStorage.getItem(BATCH_STORAGE_KEY)) {
+        console.log('Inbound: Initializing Batch Master Data...');
+        const STAFF_LIST = [
+            { id: 'NV001', name: 'Nguyễn Văn An' },
+            { id: 'NV002', name: 'Trần Thị Bình' },
+            { id: 'NV003', name: 'Lê Văn Cường' },
+            { id: 'NV004', name: 'Phạm Minh Dũng' }
+        ];
+        const statusList = ['NEW', 'CHECKED', 'PROCESSING', 'COMPLETED'];
+        const codes = ['CN-BN', 'JP-BN'];
+        const productTypes = ['Chuối Trung Quốc/ Chinese bananas', 'Chuối Nhật Bản/ Japanese bananas'];
+        
+        const mockBatches = Array.from({ length: 50 }, function(_, i) {
+            const status = (i < 10) ? 'CHECKED' : statusList[i % 4];
+            const typeIndex = i % 2;
+            const createdAt = new Date();
+            createdAt.setDate(createdAt.getDate() - (i < 30 ? 0 : (i % 30)));
+            
+            return {
+                id: Date.now() + i,
+                code: codes[typeIndex] + '-' + String(1060 - i).padStart(4, '0'),
+                name: (i < 10 ? 'Lô kiểm tồn - ' : 'Lô ') + productTypes[typeIndex] + ' - Đợt ' + (Math.floor(i / 5) + 1),
+                productType: productTypes[typeIndex],
+                status: status,
+                batchType: (i % 2 === 0) ? 'EXPORT' : 'IMPORT',
+                totalQty: (i < 10) ? 1200 : ((status === 'NEW') ? 0 : 500),
+                executedQty: (status === 'COMPLETED') ? 500 : 0,
+                creator: STAFF_LIST[i % STAFF_LIST.length],
+                createdAt: createdAt
+            };
+        });
+        localStorage.setItem(BATCH_STORAGE_KEY, JSON.stringify(mockBatches));
+    }
+}
+
 // ── Mock Orders ──────────────────────────────────────────────
 let MOCK_INBOUND_ORDERS = loadInboundOrders();
 
@@ -182,6 +220,11 @@ if (!MOCK_INBOUND_ORDERS) {
     });
     saveInboundOrders();
 }
+
+// Ensure all orders have batch (repair for existing data)
+MOCK_INBOUND_ORDERS.forEach(o => {
+    if (!o.batch) o.batch = { code: 'LOT-GEN', name: 'Lô hàng mặc định' };
+});
 
 // ── Utilities ────────────────────────────────────────────────
 function formatDateTime(date) {
@@ -324,7 +367,7 @@ function renderTableBody() {
                 <td>
                     <div style="display:flex;align-items:center;gap:6px;">
                         <a href="javascript:void(0)" class="text-link code-link-truncate" title="${o.code}" onclick="openOrderDetailModal('${o.id}')">${o.code}</a>
-                        <i class="fas fa-copy btn-copy" onclick="copyToClipboard('${o.code}', this)" title="Sao chép"></i>
+                        <i class="fa-regular fa-copy btn-copy" onclick="copyToClipboard('${o.code}', this)" title="Sao chép"></i>
                     </div>
                 </td>
                 <td>
@@ -716,14 +759,14 @@ function renderBatchSelectionList() {
                         <colgroup>
                             <col style="width: 45px">
                             <col style="width: 55px">
-                            <col style="width: 150px">
+                            <col style="width: 220px">
                             <col>
                         </colgroup>
                         <thead>
                             <tr style="background: #0D6BB9; color: white;">
                                 <th style="padding: 12px 8px; border-right: 1px solid rgba(255,255,255,0.1);"></th>
                                 <th style="padding: 12px 8px; border-right: 1px solid rgba(255,255,255,0.1); text-align: center; font-weight: 600; font-size: 13px;">STT</th>
-                                <th style="padding: 12px 12px; border-right: 1px solid rgba(255,255,255,0.1); text-align: left; font-weight: 600; font-size: 13px;">Mã lô hàng</th>
+                                <th style="padding: 12px 12px; border-right: 1px solid rgba(255,255,255,0.1); text-align: center; font-weight: 600; font-size: 13px;">Mã lô hàng</th>
                                 <th style="padding: 12px 12px; text-align: left; font-weight: 600; font-size: 13px;">Tên lô hàng</th>
                             </tr>
                         </thead>
@@ -734,7 +777,7 @@ function renderBatchSelectionList() {
                         <colgroup>
                             <col style="width: 45px">
                             <col style="width: 55px">
-                            <col style="width: 150px">
+                            <col style="width: 220px">
                             <col>
                         </colgroup>
                         <tbody>
@@ -748,7 +791,7 @@ function renderBatchSelectionList() {
                         <input type="radio" name="batch-selector" ${isSelected ? 'checked' : ''} style="cursor: pointer;">
                     </td>
                     <td style="padding: 12px 8px; border-bottom: 1px solid #f1f5f9; text-align: center; color: #64748b; font-weight: 500;">${idx + 1}</td>
-                    <td style="padding: 12px 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #076EB8;">${b.code}</td>
+                    <td style="padding: 12px 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #076EB8; text-align: center;">${b.code}</td>
                     <td style="padding: 12px 12px; border-bottom: 1px solid #f1f5f9; color: #1e293b;">${b.name}</td>
                 </tr>
             `;
@@ -1839,6 +1882,7 @@ function initButtonListeners() {
 
 // ── Initialization ───────────────────────────────────────────
 function init() {
+    ensureBatchDataInitialized();
     ensureTodayDataInbound();
     initDefaultDateRange();
     initCreatorCombobox();
