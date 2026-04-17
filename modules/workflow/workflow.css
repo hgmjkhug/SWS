@@ -8,6 +8,13 @@
     background-color: #f8fafc;
 }
 
+.pagination-info
+{
+    font-size:13px;
+    font-weight: 400;
+    color: #64748b;
+    /* font-family: 'Roboto', sans-serif; */
+}
 /* Toolbar */
 .toolbar {
     display: flex;
