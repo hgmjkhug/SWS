@@ -25,7 +25,7 @@
               type="text"
               id="group-combobox-input"
               class="combobox-input"
-              placeholder="Tất cả"
+              placeholder="Tất cả nhóm sản phẩm"
               autocomplete="off"
               onclick="toggleInstockGroupCombobox()"
               onkeyup="handleInstockGroupComboboxSearch(this)"
@@ -42,9 +42,104 @@
           </div>
         </div>
       </div>
+      
+      <!-- Batch ID Filter (Searchable Select) -->
+      <div class="filter-group">
+        <div class="custom-combobox-wrapper" id="batch-combobox-wrapper">
+          <div class="combobox-input-group">
+            <input
+              type="text"
+              id="batch-combobox-input"
+              class="combobox-input"
+              placeholder="Tất cả lô hàng"
+              autocomplete="off"
+            />
+            <i class="fas fa-chevron-down combobox-arrow" id="batch-combobox-arrow"></i>
+          </div>
+          <div class="combobox-dropdown" id="batch-combobox-dropdown">
+            <ul class="combobox-list" id="batch-combobox-list">
+              <!-- Populated by JS -->
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
     
-    <div class="toolbar-right">
+    <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+      <!-- Date Range Picker -->
+      <div class="unified-date-filter">
+        <div class="date-picker-trigger" id="instockDateRangeTrigger">
+          <i class="fas fa-calendar-alt"></i>
+          <span id="instockDateRangeDisplay">dd/mm/yyyy - dd/mm/yyyy</span>
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <!-- Bespoke Analytics Date Picker -->
+        <div class="analytics-date-picker" id="instockAnalyticsPicker">
+          <div class="picker-sidebar">
+            <div class="sidebar-item" data-range="all">Tất cả</div>
+            <div class="sidebar-item" data-range="today">Hôm nay</div>
+            <div class="sidebar-item" data-range="last3">3 ngày gần đây</div>
+            <div class="sidebar-item" data-range="thisweek">Tuần này</div>
+            <div class="sidebar-item" data-range="last7">7 ngày gần đây</div>
+            <div class="sidebar-item active" data-range="last30">30 ngày gần đây</div>
+            <div class="sidebar-item" data-range="last3mo">3 tháng gần đây</div>
+            <div class="sidebar-item" data-range="last6mo">6 tháng gần đây</div>
+            <div class="sidebar-item" data-range="last1yr">1 năm qua</div>
+          </div>
+          <div class="picker-main">
+            <div class="picker-header">
+              <div class="selected-range-box" id="instockTempRangeDisplay" style="flex: 1;">
+                Chọn khoảng thời gian
+              </div>
+              <div class="header-actions">
+                <button type="button" class="text-btn clear-btn" id="instockClearPicker">Xóa bộ lọc</button>
+                <button type="button" class="text-btn cancel-btn" id="instockCancelPicker">Hủy</button>
+                <button type="button" class="apply-btn" id="instockApplyPicker">Áp dụng</button>
+              </div>
+            </div>
+            <div class="picker-body">
+              <div class="calendar-panel left-panel">
+                <div class="panel-title">Từ ngày</div>
+                <div class="panel-nav">
+                  <div class="custom-dropdown month-dropdown" id="instockLeftMonthDropdown">
+                    <div class="dropdown-selected" id="instockLeftMonthSelected">Tháng</div>
+                    <div class="dropdown-list month-grid" id="instockLeftMonthList"></div>
+                  </div>
+                  <div class="custom-dropdown year-dropdown" id="instockLeftYearDropdown">
+                    <div class="dropdown-selected" id="instockLeftYearSelected">Năm</div>
+                    <div class="dropdown-list year-grid" id="instockLeftYearList"></div>
+                  </div>
+                </div>
+                <div class="calendar-grid" id="instockLeftCalendar">
+                  <div class="day-names">
+                    <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                  </div>
+                  <div class="days-container"></div>
+                </div>
+              </div>
+              <div class="calendar-panel right-panel">
+                <div class="panel-title">Đến ngày</div>
+                <div class="panel-nav">
+                  <div class="custom-dropdown month-dropdown" id="instockRightMonthDropdown">
+                    <div class="dropdown-selected" id="instockRightMonthSelected">Tháng</div>
+                    <div class="dropdown-list month-grid" id="instockRightMonthList"></div>
+                  </div>
+                  <div class="custom-dropdown year-dropdown" id="instockRightYearDropdown">
+                    <div class="dropdown-selected" id="instockRightYearSelected">Năm</div>
+                    <div class="dropdown-list year-grid" id="instockRightYearList"></div>
+                  </div>
+                </div>
+                <div class="calendar-grid" id="instockRightCalendar">
+                  <div class="day-names">
+                    <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                  </div>
+                  <div class="days-container"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <button class="btn-outline-green" onclick="exportInstockExcel()">
         <i class="fas fa-file-excel"></i> Xuất Excel
       </button>
@@ -56,12 +151,17 @@
     <div class="table-scroll-head">
       <table class="data-table">
         <colgroup>
-          <col style="width: 60px">
-          <col style="width: 180px">
-          <col style="width: 350px">
-          <col style="width: 200px">
-          <col style="width: 150px">
-          <col style="width: 120px">
+          <col style="width: 50px">
+          <col style="width: 130px">
+          <col style="width: 250px">
+          <col style="width: 220px">
+          <col style="width: 70px">
+          <col style="width: 70px">
+          <col style="width: 70px">
+          <col style="width: 70px">
+          <col style="width: 70px">
+          <col style="width: 70px">
+          <col style="width: 70px">
         </colgroup>
         <thead>
           <tr>
@@ -69,8 +169,13 @@
             <th>Mã sản phẩm</th>
             <th>Tên sản phẩm</th>
             <th>Nhóm sản phẩm</th>
-            <th class="text-center">Số lượng</th>
-            <th class="text-center">Đơn vị tính</th>
+            <th class="text-center">Tồn đầu</th>
+            <th class="text-center">Nhập mới</th>
+            <th class="text-center">Nhập lại</th>
+            <th class="text-center">Xuất bán</th>
+            <th class="text-center">Xuất hủy</th>
+            <th class="text-center">Tồn cuối</th>
+            <th class="text-center">Đơn vị</th>
           </tr>
         </thead>
       </table>
@@ -78,12 +183,17 @@
     <div class="table-scroll-body" id="instock-table-body-scroll">
       <table class="data-table">
         <colgroup>
-          <col style="width: 60px">
-          <col style="width: 180px">
-          <col style="width: 350px">
-          <col style="width: 200px">
-          <col style="width: 150px">
-          <col style="width: 120px">
+           <col style="width: 50px">
+          <col style="width: 130px">
+          <col style="width: 250px">
+          <col style="width: 220px">
+          <col style="width: 70px">
+          <col style="width: 70px">
+          <col style="width: 70px">
+          <col style="width: 70px">
+          <col style="width: 70px">
+          <col style="width: 70px">
+          <col style="width: 70px">
         </colgroup>
         <tbody id="instock-table-body">
           <!-- Data will be rendered here -->
