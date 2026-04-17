@@ -159,6 +159,18 @@
                     MOCK_BATCHES = batches.map(function(b, i) {
                         b.createdAt = new Date(b.createdAt.getTime() + offset);
                         if (!b.batchType) b.batchType = (i % 2 === 0) ? 'EXPORT' : 'IMPORT';
+                        
+                        // Migration for new fields
+                        if (!b.arrivalDate) b.arrivalDate = b.createdAt.toISOString();
+                        if (b.driverName === undefined) b.driverName = 'Nguyễn Văn ' + (i % 10);
+                        if (b.plateNumber === undefined) b.plateNumber = '29A-' + (1000 + i);
+                        if (b.moocNumber === undefined) b.moocNumber = 'M-' + (200 + i);
+                        if (b.contNumber === undefined) b.contNumber = 'C-' + (300 + i);
+                        if (b.deliverer === undefined) b.deliverer = 'Công ty Giao Vận ' + (i % 5);
+                        if (b.delivererRep === undefined) b.delivererRep = 'Ông A';
+                        if (b.receiver === undefined) b.receiver = 'Kho Thaco ID';
+                        if (b.receiverRep === undefined) b.receiverRep = 'Bà B';
+                        
                         return b;
                     });
                 } else {
@@ -207,10 +219,21 @@
                 batchType: (i % 2 === 0) ? 'EXPORT' : 'IMPORT',
                 importDate: null,
                 exportDate: exportDate,
+                arrivalDate: createdAt.toISOString(),
                 totalQty: totalQty,
                 executedQty: executedQty,
                 creator: creator,
-                createdAt: createdAt
+                createdAt: createdAt,
+
+                // New fields for demo
+                driverName: 'Nguyễn Văn ' + (i % 10),
+                plateNumber: '29A-' + (1000 + i),
+                moocNumber: 'M-' + (200 + i),
+                contNumber: 'C-' + (300 + i),
+                deliverer: 'Công ty Giao Vận ' + (i % 5),
+                delivererRep: 'Ông A',
+                receiver: 'Kho Thaco ID',
+                receiverRep: 'Bà B'
             };
         });
     }
@@ -280,7 +303,8 @@
         tbody.innerHTML = pageData.map(function(b, index) {
             var statusObj = STATUS_MAP[b.status] || { label: b.status, class: '' };
             var createdDateFormatted = formatTime(b.createdAt) + ' ' + formatDate(b.createdAt);
-            var completedDateFormatted = b.exportDate ? formatDate(new Date(b.exportDate)) : '-';
+            var arrivalDateFormatted = b.arrivalDate ? formatDate(new Date(b.arrivalDate)) : '-';
+            var completedDateFormatted = b.exportDate ? formatDate(new Date(b.exportDate)) : arrivalDateFormatted;
 
             var batchTypeBadge = (b.batchType === 'EXPORT')
                 ? '<span class="batch-type-badge batch-type-export">Lô xuất</span>'
@@ -427,6 +451,20 @@ function renderPaginationBar(totalItems) {
         document.getElementById('batch-code').value = '';
         document.getElementById('batch-name').value = '';
         document.getElementById('batch-type').value = 'IMPORT';
+        document.getElementById('batch-arrival-date').value = '';
+        
+        // Transport fields
+        document.getElementById('batch-driver-name').value = '';
+        document.getElementById('batch-plate-number').value = '';
+        document.getElementById('batch-mooc-number').value = '';
+        document.getElementById('batch-cont-number').value = '';
+        
+        // Handover fields
+        document.getElementById('batch-deliverer').value = '';
+        document.getElementById('batch-deliverer-rep').value = '';
+        document.getElementById('batch-receiver').value = '';
+        document.getElementById('batch-receiver-rep').value = '';
+
         modal.classList.add('open');
     };
     window.closeCreateModal = function() { document.getElementById('modal-add-batch').classList.remove('open'); };
@@ -438,6 +476,20 @@ function renderPaginationBar(totalItems) {
         document.getElementById('edit-batch-code').value = b.code;
         document.getElementById('edit-batch-name').value = b.name;
         document.getElementById('edit-batch-type').value = b.batchType || 'IMPORT';
+        document.getElementById('edit-batch-arrival-date').value = b.arrivalDate ? formatDate(new Date(b.arrivalDate)) : '';
+        
+        // Transport
+        document.getElementById('edit-batch-driver-name').value = b.driverName || '';
+        document.getElementById('edit-batch-plate-number').value = b.plateNumber || '';
+        document.getElementById('edit-batch-mooc-number').value = b.moocNumber || '';
+        document.getElementById('edit-batch-cont-number').value = b.contNumber || '';
+
+        // Handover
+        document.getElementById('edit-batch-deliverer').value = b.deliverer || '';
+        document.getElementById('edit-batch-deliverer-rep').value = b.delivererRep || '';
+        document.getElementById('edit-batch-receiver').value = b.receiver || '';
+        document.getElementById('edit-batch-receiver-rep').value = b.receiverRep || '';
+
         document.getElementById('modal-edit-batch').classList.add('open');
     };
 
@@ -447,12 +499,14 @@ function renderPaginationBar(totalItems) {
         var code = document.getElementById('batch-code').value.trim();
         var name = document.getElementById('batch-name').value.trim();
         if (!code || !name) { alert('Vui lòng điền đủ thông tin bắt buộc (mã lô, tên lô)'); return; }
-        var exportDateVal = document.getElementById('batch-export-date').value;
-        var exportDateISO = null;
-        if (exportDateVal) {
-            var parts = exportDateVal.split('/');
-            if (parts.length === 3) exportDateISO = parts[2] + '-' + parts[1] + '-' + parts[0];
+        
+        var arrivalDateVal = document.getElementById('batch-arrival-date').value;
+        var arrivalDateISO = null;
+        if (arrivalDateVal) {
+            var parts = arrivalDateVal.split('/');
+            if (parts.length === 3) arrivalDateISO = parts[2] + '-' + parts[1] + '-' + parts[0];
         }
+        
         MOCK_BATCHES.unshift({
             id: Date.now(),
             code: code,
@@ -461,12 +515,24 @@ function renderPaginationBar(totalItems) {
             grades: ['A'],
             status: 'NEW',
             createdAt: new Date(),
-            importDate: null,
-            exportDate: exportDateISO,
+            arrivalDate: arrivalDateISO,
+            exportDate: null,
             creator: STAFF_LIST[0],
             batchType: document.getElementById('batch-type').value,
             totalQty: 0,
-            executedQty: 0
+            executedQty: 0,
+            
+            // Transport
+            driverName: document.getElementById('batch-driver-name').value.trim(),
+            plateNumber: document.getElementById('batch-plate-number').value.trim(),
+            moocNumber: document.getElementById('batch-mooc-number').value.trim(),
+            contNumber: document.getElementById('batch-cont-number').value.trim(),
+
+            // Handover
+            deliverer: document.getElementById('batch-deliverer').value.trim(),
+            delivererRep: document.getElementById('batch-deliverer-rep').value.trim(),
+            receiver: document.getElementById('batch-receiver').value.trim(),
+            receiverRep: document.getElementById('batch-receiver-rep').value.trim()
         });
         saveBatches(); window.renderTable(); window.closeCreateModal();
     };
@@ -476,17 +542,29 @@ function renderPaginationBar(totalItems) {
         var name = document.getElementById('edit-batch-name').value.trim();
         var idx = MOCK_BATCHES.findIndex(function(x) { return x.id == id; });
         if (idx !== -1) {
-            var exportDateVal = document.getElementById('edit-batch-export-date').value;
-            var exportDateISO = MOCK_BATCHES[idx].exportDate;
-            if (exportDateVal) {
-                var parts = exportDateVal.split('/');
-                if (parts.length === 3) exportDateISO = parts[2] + '-' + parts[1] + '-' + parts[0];
-            } else {
-                exportDateISO = null;
+            var arrivalDateVal = document.getElementById('edit-batch-arrival-date').value;
+            var arrivalDateISO = null;
+            if (arrivalDateVal) {
+                var parts = arrivalDateVal.split('/');
+                if (parts.length === 3) arrivalDateISO = parts[2] + '-' + parts[1] + '-' + parts[0];
             }
+            
             MOCK_BATCHES[idx].name = name;
-            MOCK_BATCHES[idx].exportDate = exportDateISO;
+            MOCK_BATCHES[idx].arrivalDate = arrivalDateISO;
             MOCK_BATCHES[idx].batchType = document.getElementById('edit-batch-type').value;
+
+            // Transport
+            MOCK_BATCHES[idx].driverName = document.getElementById('edit-batch-driver-name').value.trim();
+            MOCK_BATCHES[idx].plateNumber = document.getElementById('edit-batch-plate-number').value.trim();
+            MOCK_BATCHES[idx].moocNumber = document.getElementById('edit-batch-mooc-number').value.trim();
+            MOCK_BATCHES[idx].contNumber = document.getElementById('edit-batch-cont-number').value.trim();
+
+            // Handover
+            MOCK_BATCHES[idx].deliverer = document.getElementById('edit-batch-deliverer').value.trim();
+            MOCK_BATCHES[idx].delivererRep = document.getElementById('edit-batch-deliverer-rep').value.trim();
+            MOCK_BATCHES[idx].receiver = document.getElementById('edit-batch-receiver').value.trim();
+            MOCK_BATCHES[idx].receiverRep = document.getElementById('edit-batch-receiver-rep').value.trim();
+
             saveBatches(); window.renderTable(); window.closeEditModal();
         }
     };
@@ -503,7 +581,35 @@ function renderPaginationBar(totalItems) {
             saveBatches(); window.renderTable();
         }
     };
-    window.viewBatch = function(id) { alert('Xem chi tiết: ' + id); };
+    window.viewBatch = function(id) {
+        var b = MOCK_BATCHES.find(function(x) { return x.id == id; });
+        if (!b) return;
+
+        document.getElementById('view-modal-title').textContent = 'Chi tiết lô hàng — ' + b.code;
+
+        // General Info
+        document.getElementById('view-batch-code').textContent = b.code || '-';
+        document.getElementById('view-batch-name').textContent = b.name || '-';
+        document.getElementById('view-batch-type').textContent = b.batchType === 'EXPORT' ? 'Lô xuất' : 'Lô nhập';
+        document.getElementById('view-batch-arrival-date').textContent = b.arrivalDate ? formatDate(new Date(b.arrivalDate)) : '-';
+
+        // Transport
+        document.getElementById('view-batch-driver-name').textContent = b.driverName || '-';
+        document.getElementById('view-batch-plate-number').textContent = b.plateNumber || '-';
+        document.getElementById('view-batch-mooc-number').textContent = b.moocNumber || '-';
+        document.getElementById('view-batch-cont-number').textContent = b.contNumber || '-';
+
+        // Handover
+        document.getElementById('view-batch-deliverer').textContent = b.deliverer || '-';
+        document.getElementById('view-batch-deliverer-rep').textContent = b.delivererRep || '-';
+        document.getElementById('view-batch-receiver').textContent = b.receiver || '-';
+        document.getElementById('view-batch-receiver-rep').textContent = b.receiverRep || '-';
+
+        document.getElementById('modal-view-batch').classList.add('open');
+    };
+    window.closeViewModal = function() {
+        document.getElementById('modal-view-batch').classList.remove('open');
+    };
 
     // =============================================
     // INVENTORY CHECK (KIỂM KÊ) MODULE

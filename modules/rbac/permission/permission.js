@@ -7,50 +7,39 @@ var permissionData = [
         name: 'Theo dõi & Giám sát',
         children: [
             { id: 101, name: 'Dashboard chi tiết' },
-            { id: 102, name: 'Giám sát hoạt động' },
-            { id: 103, name: 'Giao diện kho mới' }
-        ]
-    },
-    {
-        id: 2,
-        name: 'Quản lý đơn hàng',
-        children: [
-            { id: 201, name: 'Đơn hàng nhập' },
-            { id: 202, name: 'Đơn hàng xuất' }
+            { id: 102, name: 'Giám sát hoạt động' }
         ]
     },
     {
         id: 3,
-        name: 'Quản lý Kho',
+        name: 'Quản lý kho',
         children: [
-            { id: 301, name: 'Danh sách Kho' },
-            { id: 302, name: 'Quản lý lô hàng' },
-            { id: 303, name: 'Quản lý tồn kho' },
-            { id: 304, name: 'Quy cách sản phẩm' },
-            { id: 305, name: 'Quản lý vật chứa' },
-            { id: 306, name: 'Quản lý bảo trì' },
-            { id: 307, name: 'Biên bản bàn giao' }
+            { id: 301, name: 'Quản lý kho' },
+            { id: 302, name: 'Loại khu vực' }
         ]
     },
     {
         id: 4,
         name: 'Quản lý điều phối WCS',
         children: [
-            { id: 401, name: 'Kanban WCS' }
+            { id: 401, name: 'Kanban lệnh' }
         ]
     },
     {
         id: 5,
-        name: 'Nhập kho',
+        name: 'Quản lý lệnh',
         children: [
-            { id: 501, name: 'Lệnh nhập kho' }
+            { id: 501, name: 'Quản lý lô hàng' },
+            { id: 502, name: 'Lệnh nhập kho' },
+            { id: 503, name: 'Lệnh xuất kho' }
         ]
     },
     {
         id: 6,
-        name: 'Xuất kho',
+        name: 'Quản lý thiết bị',
         children: [
-            { id: 601, name: 'Lệnh xuất kho' }
+            { id: 601, name: 'Quản lý thiết bị' },
+            { id: 602, name: 'Quản lý bảo trì' }
         ]
     },
     {
@@ -65,25 +54,23 @@ var permissionData = [
         name: 'Danh mục chung',
         children: [
             { id: 801, name: 'Nhóm thiết bị' },
-            { id: 802, name: 'Thiết bị' },
-            { id: 803, name: 'Dòng sản phẩm' },
-            { id: 804, name: 'Nhóm sản phẩm' },
-            { id: 805, name: 'Sản phẩm' },
+            { id: 802, name: 'Dòng sản phẩm' },
+            { id: 803, name: 'Nhóm sản phẩm' },
+            { id: 804, name: 'Sản phẩm' },
+            { id: 805, name: 'Xưởng đóng gói' },
             { id: 806, name: 'Quy cách' },
-            { id: 807, name: 'Loại xe' },
-            { id: 808, name: 'Nhóm vật chứa' },
-            { id: 809, name: 'Vật chứa' },
-            { id: 810, name: 'Đơn vị tính' },
-            { id: 811, name: 'Thị trường' },
-            { id: 812, name: 'Khách hàng' },
-            { id: 813, name: 'Loại khu vực' }
+            { id: 807, name: 'Nhóm vật chứa' },
+            { id: 808, name: 'Vật chứa' },
+            { id: 809, name: 'Đơn vị tính' },
+            { id: 810, name: 'Thị trường' }
         ]
     },
     {
         id: 9,
         name: 'Báo cáo thống kê',
         children: [
-            { id: 901, name: 'Báo cáo Nhập/Xuất' }
+            { id: 901, name: 'Theo dõi tồn kho' },
+            { id: 902, name: 'Báo cáo Nhập/Xuất' }
         ]
     },
     {
@@ -100,8 +87,7 @@ var permissionData = [
         id: 11,
         name: 'Tài liệu',
         children: [
-            { id: 1101, name: 'Tài liệu hướng dẫn' },
-            { id: 1102, name: 'Quy trình vận hành' }
+            { id: 1101, name: 'Quản lý tài liệu' }
         ]
     }
 ];

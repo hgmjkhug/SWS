@@ -1681,3 +1681,15 @@ body {
     background: #f1f5f9;
     color: var(--danger-color);
 }
+
+/* ===== VIEW MODAL TEXT VALUES ===== */
+.view-text-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 4px;
+}

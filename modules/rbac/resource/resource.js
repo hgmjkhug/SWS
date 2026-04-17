@@ -10,43 +10,34 @@
   // Initial Sample Data (based on sub-functions level)
   function initData() {
     allResources = [
-      { id: 101, code: 'DASHBOARD_CHITIET', name: 'Dashboard chi tiết', description: 'Trang dashboard hiển thị số liệu chi tiết.' },
-      { id: 102, code: 'GIAMSAT_HOATDONG', name: 'Giám sát hoạt động', description: 'Trang giám sát hoạt động thời gian thực.' },
-      { id: 103, code: 'GIAODIEN_KHO_MOI', name: 'Giao diện kho mới', description: 'Giao diện quản lý kho 2D/3D mới.' },
-      { id: 201, code: 'DONHANG_NHAP', name: 'Đơn hàng nhập', description: 'Quản lý các đơn hàng nhập từ khách hàng.' },
-      { id: 202, code: 'DONHANG_XUAT', name: 'Đơn hàng xuất', description: 'Quản lý các đơn hàng xuất cho khách hàng.' },
-      { id: 301, code: 'QUANLY_KHO', name: 'Danh sách Kho', description: 'Quản lý danh sách và cấu hình các kho.' },
-      { id: 302, code: 'QUANLY_LOHANG', name: 'Quản lý lô hàng', description: 'Theo dõi và quản lý các lô hàng trong kho.' },
-      { id: 303, code: 'QUANLY_TONKHO', name: 'Quản lý tồn kho', description: 'Kiểm kê và theo dõi số lượng tồn kho.' },
-      { id: 304, code: 'QUYCACH_SANPHAM', name: 'Quy cách sản phẩm', description: 'Thiết lập quy cách cho từng mã sản phẩm.' },
-      { id: 305, code: 'QUANLY_VATCHUA', name: 'Quản lý vật chứa', description: 'Quản lý Pallet, vật chứa không.' },
-      { id: 306, code: 'QUANLY_BAOTRI', name: 'Quản lý bảo trì', description: 'Lập lịch và thực hiện bảo trì định kỳ.' },
-      { id: 307, code: 'BIENBAN_BANGIAO', name: 'Biên bản bàn giao', description: 'Quản lý các biên bản bàn giao hàng hóa.' },
-      { id: 401, code: 'KANBANWCS', name: 'Kanban WCS', description: 'Giao diện điều động thiết bị WCS.' },
-      { id: 501, code: 'LENH_NHAPKHO', name: 'Lệnh nhập kho', description: 'Thực hiện các lệnh nhập hàng thực tế.' },
-      { id: 601, code: 'LENH_XUATKHO', name: 'Lệnh xuất kho', description: 'Thực hiện các lệnh xuất hàng thực tế.' },
-      { id: 701, code: 'QUANLY_QUYTRINH', name: 'Quản lý quy trình', description: 'Cấu hình các bước trong quy trình nghiệp vụ.' },
-      { id: 801, code: 'NHOM_THIETBI', name: 'Nhóm thiết bị', description: 'Phân loại các loại thiết bị.' },
-      { id: 802, code: 'THIETBI', name: 'Thiết bị', description: 'Quản lý danh mục thiết bị cụ thể.' },
-      { id: 803, code: 'DONG_SANPHAM', name: 'Dòng sản phẩm', description: 'Quản lý danh mục dòng sản phẩm.' },
-      { id: 804, code: 'NHOM_SANPHAM', name: 'Nhóm sản phẩm', description: 'Phân loại các nhóm sản phẩm.' },
-      { id: 805, code: 'SANPHAM', name: 'Sản phẩm', description: 'Quản lý danh mục mã sản phẩm.' },
-      { id: 806, code: 'QUYCACH', name: 'Quy cách', description: 'Quản lý danh mục quy cách đóng gói.' },
-      { id: 807, code: 'LOAI_XE', name: 'Loại xe', description: 'Quản lý danh mục các loại xe giao nhận.' },
-      { id: 808, code: 'NHOM_VATCHUA', name: 'Nhóm vật chứa', description: 'Phân loại các nhóm vật chứa.' },
-      { id: 809, code: 'VATCHUA', name: 'Vật chứa', description: 'Quản lý danh mục vật chứa chi tiết.' },
-      { id: 810, code: 'DON_VI_TINH', name: 'Đơn vị tính', description: 'Quản lý danh mục các đơn vị đo lường.' },
-      { id: 811, code: 'THITRUONG', name: 'Thị trường', description: 'Quản lý danh mục các thị trường.' },
-      { id: 812, code: 'KHACHHANG', name: 'Khách hàng', description: 'Quản lý danh mục khách hàng.' },
-      { id: 813, code: 'LOAI_KHUVUC', name: 'Loại khu vực', description: 'Quản lý các loại khu vực lưu trữ.' },
-      { id: 901, code: 'BAOCAONHAPXUAT', name: 'Báo cáo Nhập/Xuất', description: 'Báo cáo tổng hợp dữ liệu nhập và xuất.' },
-      { id: 1001, code: 'TAIKHOAN', name: 'Tài khoản', description: 'Quản lý danh sách người dùng hệ thống.' },
-      { id: 1002, code: 'VAITRO', name: 'Vai trò', description: 'Quản lý các nhóm quyền (Role).' },
-      { id: 1003, code: 'QUYENHAN', name: 'Quyền hạn', description: 'Chi tiết các quyền hạn cho từng chức năng.' },
-      { id: 1004, code: 'CHUCNANG', name: 'Chức năng', description: 'Quản lý cây menu và chức năng hệ thống.' },
-      { id: 1005, code: 'TAINGUYEN', name: 'Tài nguyên', description: 'Quản lý các tài nguyên (Resources) bảo mật.' },
-      { id: 1101, code: 'TAILIEU_HUONGDAN', name: 'Tài liệu hướng dẫn', description: 'Hướng dẫn sử dụng cho người dùng.' },
-      { id: 1102, code: 'QUYTRINH_VANHANH', name: 'Quy trình vận hành', description: 'Tài liệu các bước vận hành chuẩn (SOP).' }
+      { id: 101, code: 'DASHBOARD_DETAIL', name: 'Dashboard chi tiết', description: 'Trang dashboard hiển thị số liệu chi tiết.' },
+      { id: 102, code: 'DASHBOARD_MONITOR', name: 'Giám sát hoạt động', description: 'Trang giám sát hoạt động thời gian thực.' },
+      { id: 301, code: 'WAREHOUSE_LIST', name: 'Quản lý kho', description: 'Quản lý danh sách và cấu hình các kho.' },
+      { id: 302, code: 'LOCATION_TYPE', name: 'Loại khu vực', description: 'Quản lý các loại khu vực lưu trữ.' },
+      { id: 401, code: 'ORDER_KANBAN', name: 'Kanban lệnh', description: 'Giao diện điều động thiết bị WCS.' },
+      { id: 501, code: 'LOT_MGMT', name: 'Quản lý lô hàng', description: 'Theo dõi và quản lý các lô hàng trong kho.' },
+      { id: 502, code: 'INBOUND_ORDER', name: 'Lệnh nhập kho', description: 'Thực hiện các lệnh nhập hàng thực tế.' },
+      { id: 503, code: 'OUTBOUND_ORDER', name: 'Lệnh xuất kho', description: 'Thực hiện các lệnh xuất hàng thực tế.' },
+      { id: 601, code: 'DEVICE_LIST', name: 'Quản lý thiết bị', description: 'Quản lý danh mục thiết bị cụ thể.' },
+      { id: 602, code: 'DEVICE_MAINTENANCE', name: 'Quản lý bảo trì', description: 'Lập lịch và thực hiện bảo trì định kỳ.' },
+      { id: 701, code: 'WORKFLOW_PROCESS', name: 'Quản lý quy trình', description: 'Cấu hình các bước trong quy trình nghiệp vụ.' },
+      { id: 801, code: 'DEVICE_TYPE', name: 'Nhóm thiết bị', description: 'Phân loại các loại thiết bị.' },
+      { id: 802, code: 'PRODUCT_LINE', name: 'Dòng sản phẩm', description: 'Quản lý danh mục dòng sản phẩm.' },
+      { id: 803, code: 'PRODUCT_GROUP', name: 'Nhóm sản phẩm', description: 'Phân loại các nhóm sản phẩm.' },
+      { id: 804, code: 'PRODUCT_LIST', name: 'Sản phẩm', description: 'Quản lý danh mục mã sản phẩm.' },
+      { id: 805, code: 'PACKING_WORKSHOP', name: 'Xưởng đóng gói', description: 'Quản lý danh mục xưởng đóng gói.' },
+      { id: 806, code: 'METHOD', name: 'Quy cách', description: 'Quản lý danh mục quy cách đóng gói.' },
+      { id: 807, code: 'CONTAINER_GROUP', name: 'Nhóm vật chứa', description: 'Phân loại các nhóm vật chứa.' },
+      { id: 808, code: 'CONTAINER_LIST', name: 'Vật chứa', description: 'Quản lý danh mục vật chứa chi tiết.' },
+      { id: 809, code: 'UNIT_OF_MEASURE', name: 'Đơn vị tính', description: 'Quản lý danh mục các đơn vị đo lường.' },
+      { id: 810, code: 'MARKET', name: 'Thị trường', description: 'Quản lý danh mục các thị trường.' },
+      { id: 901, code: 'INVENTORY_MGMT', name: 'Theo dõi tồn kho', description: 'Kiểm kê và theo dõi số lượng tồn kho.' },
+      { id: 902, code: 'STATISTIC_REPORT', name: 'Báo cáo Nhập/Xuất', description: 'Báo cáo tổng hợp dữ liệu nhập và xuất.' },
+      { id: 1001, code: 'ACCOUNT', name: 'Tài khoản', description: 'Quản lý danh sách người dùng hệ thống.' },
+      { id: 1002, code: 'ROLE', name: 'Vai trò', description: 'Quản lý các nhóm quyền (Role).' },
+      { id: 1003, code: 'MENU', name: 'Chức năng', description: 'Quản lý cây menu và chức năng hệ thống.' },
+      { id: 1004, code: 'RESOURCE', name: 'Tài nguyên', description: 'Quản lý các tài nguyên (Resources) bảo mật.' },
+      { id: 1101, code: 'DOCUMENT_MANAGEMENT', name: 'Quản lý tài liệu', description: 'Quản lý các tài liệu hệ thống.' }
     ];
     
     filteredResources = [...allResources];
@@ -294,7 +285,7 @@
     closeResourceModal();
     handleSearch(); // Refresh filtered list and table
     if (window.showToast) window.showToast(editingId ? 'Cập nhật tài nguyên thành công' : 'Thêm mới tài nguyên thành công', 'success');
-  };
+  }
 
   // --- DELETE CONFIRMATION ---
 

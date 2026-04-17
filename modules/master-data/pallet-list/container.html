@@ -132,7 +132,7 @@
         <button class="btn btn-outline-primary btn-print" id="bulkPrintBtn" title="Chọn đơn vị vật chứa để in">
           <i class="fas fa-print"></i> In
         </button>
-        <div class="dropdown-container">
+        <div class="dropdown-container" style="display: none;">
           <button class="btn btn-outline-primary">
             <i class="fas fa-file-excel"></i> Nhập/Xuất
           </button>
@@ -141,7 +141,7 @@
             <a href="#" onclick="exportExcel()"><i class="fas fa-download"></i> Xuất excel</a>
           </div>
         </div>
-        <button class="btn btn-outline-success" onclick="syncData()">
+        <button class="btn btn-outline-success" onclick="syncData()" style="display: none;">
           <i class="fas fa-sync-alt"></i> Đồng bộ
         </button>
         <button class="btn add-btn" onclick="openContainerModal()">
