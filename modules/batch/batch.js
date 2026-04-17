@@ -410,284 +410,11 @@ function renderPaginationBar(totalItems) {
         mainCurrentPage = 1; window.renderTable();
     };
 
-    // --- Creator Combobox Logic (Standardized) ---
-    function initCreatorFilterCombobox() {
-        var input = document.getElementById('creator-filter-input');
-        var list = document.getElementById('creator-filter-list');
-        var wrapper = document.getElementById('creator-filter-combobox');
-        
-        if (!input || !list || !wrapper) return;
-
-        input.onfocus = function() {
-            renderCreatorFilterOptions(input.value === 'Tất cả' ? '' : input.value);
-            wrapper.classList.add('active');
-        };
-
-        input.oninput = function() {
-            renderCreatorFilterOptions(input.value);
-            wrapper.classList.add('active');
-        };
-
-        // Close when clicking outside (handled by global listener below)
-    }
-
-    function renderCreatorFilterOptions(term) {
-        var list = document.getElementById('creator-filter-list');
-        if (!list) return;
-        
-        var filterTerm = (term || "").toLowerCase().trim();
-        var html = '';
-
-        // "All" option
-        if (!filterTerm || "tất cả".indexOf(filterTerm) !== -1) {
-            html += `<div class="combobox-option ${selectedCreatorFilterId === 'ALL' ? 'selected' : ''}" onclick="window.selectCreatorFilter('ALL', 'Tất cả')">
-                Tất cả
-            </div>`;
-        }
-
-        STAFF_LIST.forEach(function(staff) {
-            var searchStr = (staff.id + " " + staff.name).toLowerCase();
-            if (!filterTerm || searchStr.indexOf(filterTerm) !== -1) {
-                html += `<div class="combobox-option ${selectedCreatorFilterId === staff.id ? 'selected' : ''}" onclick="window.selectCreatorFilter('${staff.id}', '${staff.name}')">
-                    <span style="font-weight: 600;">${staff.name}</span>
-                    <span style="font-size: 11px; color: #64748b; margin-left: 4px;">(${staff.id})</span>
-                </div>`;
-            }
-        });
-
-        if (html === '') {
-            html = '<div class="combobox-option no-results">Không tìm thấy người tạo</div>';
-        }
-        
-        list.innerHTML = html;
-        list.classList.add('show');
-    }
-
-    window.selectCreatorFilter = function(id, name) {
-        selectedCreatorFilterId = id;
-        var input = document.getElementById('creator-filter-input');
-        if (input) {
-            input.value = (id === 'ALL' ? '' : name);
-            input.blur();
-        }
-        var list = document.getElementById('creator-filter-list');
-        if (list) list.classList.remove('show');
-        
-        var wrapper = document.getElementById('creator-filter-combobox');
-        if (wrapper) wrapper.classList.remove('active');
-
-        mainCurrentPage = 1; window.renderTable();
-    };
 
 
 
-    // --- DATE PICKER LOGIC (Verbatim from Outbound) ---
-    window.toggleDateRangePicker = function (e) {
-        if (e) { e.preventDefault(); e.stopPropagation(); }
-        var picker = document.getElementById("analyticsPicker");
-        if (picker) {
-            picker.classList.toggle("active");
-            if (picker.classList.contains("active")) {
-                renderCalendars();
-                initPickerDropdowns();
-            }
-        }
-    };
 
-    function initPickerDropdowns() {
-        var months = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
-        ["left", "right"].forEach(function (side) {
-            var current = side === "left" ? currentLeftDate : currentRightDate;
-            var monthList = document.getElementById(side + "MonthList");
-            var yearList = document.getElementById(side + "YearList");
-            if (monthList) {
-                monthList.innerHTML = "";
-                months.forEach(function (m, idx) {
-                    var item = document.createElement("div");
-                    item.className = "dropdown-item " + (idx === current.getMonth() ? "selected" : "");
-                    item.textContent = m;
-                    item.onclick = function (e) {
-                        e.stopPropagation();
-                        current.setMonth(idx);
-                        document.getElementById(side + "MonthSelected").textContent = m;
-                        var dd = document.getElementById(side + "MonthDropdown");
-                        if (dd) dd.classList.remove("active");
-                        renderCalendars();
-                    };
-                    monthList.appendChild(item);
-                });
-                document.getElementById(side + "MonthSelected").textContent = months[current.getMonth()];
-            }
-            if (yearList) {
-                yearList.innerHTML = "";
-                var currentYear = new Date().getFullYear();
-                for (var y = currentYear - 5; y <= currentYear + 5; y++) {
-                    (function (yr) {
-                        var item = document.createElement("div");
-                        item.className = "dropdown-item " + (yr === current.getFullYear() ? "selected" : "");
-                        item.textContent = yr;
-                        item.onclick = function (e) {
-                            e.stopPropagation();
-                            current.setFullYear(yr);
-                            document.getElementById(side + "YearSelected").textContent = yr;
-                            var dd = document.getElementById(side + "YearDropdown");
-                            if (dd) dd.classList.remove("active");
-                            renderCalendars();
-                        };
-                        yearList.appendChild(item);
-                    })(y);
-                }
-                document.getElementById(side + "YearSelected").textContent = current.getFullYear();
-            }
-        });
-    }
 
-    function renderCalendars() {
-        renderCalendar("left", currentLeftDate);
-        renderCalendar("right", currentRightDate);
-        updateRangeDisplay();
-    }
-
-    function renderCalendar(side, date) {
-        var grid = document.getElementById(side + "Calendar");
-        if (!grid) return;
-        var container = grid.querySelector(".days-container");
-        if (!container) return;
-        container.innerHTML = "";
-        var year = date.getFullYear();
-        var month = date.getMonth();
-        var firstDay = new Date(year, month, 1).getDay();
-        var daysInMonth = getDaysInMonth(month, year);
-        var startOffset = firstDay === 0 ? 6 : firstDay - 1;
-        for (var i = 0; i < startOffset; i++) {
-            var empty = document.createElement("div");
-            empty.className = "day empty";
-            container.appendChild(empty);
-        }
-        for (var d = 1; d <= daysInMonth; d++) {
-            (function (dayNum) {
-                var dayDate = new Date(year, month, dayNum);
-                var el = document.createElement("div");
-                el.className = "day";
-                el.textContent = dayNum;
-                if (tempRange.start && isSameDay(dayDate, tempRange.start)) el.classList.add("selected", "range-start");
-                if (tempRange.end && isSameDay(dayDate, tempRange.end)) el.classList.add("selected", "range-end");
-                if (tempRange.start && tempRange.end && isDateInRange(dayDate, tempRange.start, tempRange.end)) el.classList.add("in-range");
-                var t = new Date();
-                if (dayDate.getDate() === t.getDate() && dayDate.getMonth() === t.getMonth() && dayDate.getFullYear() === t.getFullYear()) el.classList.add("today");
-                el.onclick = function (e) { e.stopPropagation(); handleDayClick(dayDate); };
-                container.appendChild(el);
-            })(d);
-        }
-    }
-
-    function handleDayClick(date) {
-        if (!tempRange.start || (tempRange.start && tempRange.end)) {
-            tempRange.start = date;
-            tempRange.end = null;
-        } else {
-            if (date < tempRange.start) {
-                tempRange.end = tempRange.start;
-                tempRange.start = date;
-            } else {
-                tempRange.end = date;
-            }
-        }
-        renderCalendars();
-    }
-
-    function updateRangeDisplay() {
-        var display = document.getElementById("tempRangeDisplay");
-        if (!display) return;
-        if (tempRange.start && tempRange.end) display.textContent = formatDate(tempRange.start) + " — " + formatDate(tempRange.end);
-        else if (tempRange.start) display.textContent = formatDate(tempRange.start) + " — ...";
-        else display.textContent = "Chọn khoảng thời gian";
-    }
-
-    function setupExtraDatePickerListeners() {
-        document.querySelectorAll(".calendar-panel .custom-dropdown").forEach(function (dd) {
-            var sel = dd.querySelector(".dropdown-selected");
-            if (sel) {
-                sel.onclick = function (e) {
-                    e.stopPropagation();
-                    document.querySelectorAll(".calendar-panel .custom-dropdown").forEach(function (d) {
-                        if (d !== dd) d.classList.remove("active");
-                    });
-                    dd.classList.toggle("active");
-                };
-            }
-        });
-        document.querySelectorAll(".analytics-date-picker .sidebar-item").forEach(function (item) {
-            item.onclick = function (e) {
-                e.preventDefault();
-                document.querySelectorAll(".analytics-date-picker .sidebar-item").forEach(function (i) { i.classList.remove("active"); });
-                item.classList.add("active");
-                var range = item.getAttribute("data-range");
-                var t = new Date();
-                var start = new Date(t.getFullYear(), t.getMonth(), t.getDate());
-                var end = new Date(t.getFullYear(), t.getMonth(), t.getDate());
-                if (range === "all") { start = null; end = null; }
-                else if (range === "today") { /* already set */ }
-                else if (range === "last3") start.setDate(t.getDate() - 3);
-                else if (range === "thisweek") {
-                    var day = t.getDay();
-                    var diff = day === 0 ? 6 : day - 1;
-                    start.setDate(t.getDate() - diff);
-                }
-                else if (range === "last7") start.setDate(t.getDate() - 7);
-                else if (range === "last30") start.setDate(t.getDate() - 30);
-                else if (range === "last3mo") start.setMonth(t.getMonth() - 3);
-                else if (range === "last6mo") start.setMonth(t.getMonth() - 6);
-                else if (range === "last1yr") start.setFullYear(t.getFullYear() - 1);
-                tempRange.start = start;
-                tempRange.end = end;
-                if (start && end) {
-                    currentLeftDate = new Date(tempRange.start);
-                    currentRightDate = new Date(tempRange.end);
-                    if (isSameDay(currentLeftDate, currentRightDate)) currentRightDate.setMonth(currentRightDate.getMonth() + 1);
-                }
-                renderCalendars();
-            };
-        });
-        var applyBtn = document.getElementById("applyPicker");
-        if (applyBtn) {
-            applyBtn.onclick = function () {
-                selectedRange = { start: tempRange.start, end: tempRange.end };
-                var triggerDisplay = document.getElementById("dateRangeDisplay");
-                if (triggerDisplay) {
-                    if (selectedRange.start && selectedRange.end) {
-                        triggerDisplay.textContent = formatDate(selectedRange.start) + " - " + formatDate(selectedRange.end);
-                    } else if (!selectedRange.start && !selectedRange.end) {
-                        triggerDisplay.textContent = "Tất cả thời gian";
-                    }
-                }
-                var p = document.getElementById("analyticsPicker");
-                if (p) p.classList.remove("active");
-                mainCurrentPage = 1; window.renderTable();
-            };
-        }
-        var cancelBtn = document.getElementById("cancelPicker");
-        if (cancelBtn) {
-            cancelBtn.onclick = function () {
-                var p = document.getElementById("analyticsPicker");
-                if (p) p.classList.remove("active");
-            };
-        }
-        var clearBtn = document.getElementById("clearPicker");
-        if (clearBtn) {
-            clearBtn.onclick = function () {
-                tempRange = { start: null, end: null };
-                selectedRange = { start: null, end: null };
-                document.querySelectorAll(".analytics-date-picker .sidebar-item").forEach(function (i) { i.classList.remove("active"); });
-                renderCalendars();
-                var triggerDisplay = document.getElementById("dateRangeDisplay");
-                if (triggerDisplay) triggerDisplay.textContent = "dd/mm/yyyy - dd/mm/yyyy";
-                var p = document.getElementById("analyticsPicker");
-                if (p) p.classList.remove("active");
-                mainCurrentPage = 1; window.renderTable();
-            };
-        }
-    }
 
     // --- MODALS ---
     window.openCreateModal = function() {
@@ -1635,7 +1362,10 @@ function renderPaginationBar(totalItems) {
         var picker = document.getElementById('analyticsPicker');
         if (!picker) return;
         picker.classList.toggle('active');
-        e.stopPropagation();
+        if (picker.classList.contains('active')) {
+            updateCalendarUI();
+        }
+        if (e) e.stopPropagation();
     };
 
     // Need to define renderCalendarPanel as well if it was lost
@@ -1720,6 +1450,7 @@ function renderPaginationBar(totalItems) {
             todayItem.classList.add('active');
         }
 
+        updateCalendarUI();
         window.renderTable();
     }
 
