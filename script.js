@@ -297,7 +297,7 @@ function loadPage(title) {
         'Xác nhận nhập kho': 'modules/inbound/inbound.html',
         'Quản lý thiết bị': 'modules/master-data/device/device.html',
         'Giám sát Thiết bị': 'modules/wcs/device.html',
-        'Kanban WCS': 'modules/kanbanWCS/kanban.html',
+        'Kanban lệnh': 'modules/kanbanWCS/kanban.html',
         'Sản phẩm': 'modules/master-data/product/product.html',
         'Tài khoản': 'modules/rbac/account/account.html',
         'Vai trò': 'modules/rbac/role/role.html',
@@ -1152,6 +1152,14 @@ document.addEventListener('click', (e) => {
 document.addEventListener('DOMContentLoaded', function () {
     initNotifications();
     restoreSidebarOrder();
+
+    // Show Login Success Toast if flag exists
+    if (localStorage.getItem('showLoginSuccess') === 'true') {
+        setTimeout(() => {
+            showToast('Đăng nhập thành công', 'success');
+            localStorage.removeItem('showLoginSuccess');
+        }, 500); // Small delay to let initial UI settle
+    }
 
     // Restore Last Page if exists
     try {
