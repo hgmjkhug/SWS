@@ -88,16 +88,16 @@
           <div
             class="dropdown-option"
             data-value="PALLET"
-            onclick="selectOutboundType('PALLET', 'Xuất theo container')"
+            onclick="selectOutboundType('PALLET', 'Xuất hủy')"
           >
-            Xuất theo container
+            Xuất hủy
           </div>
           <div
             class="dropdown-option"
             data-value="MATERIAL"
-            onclick="selectOutboundType('MATERIAL', 'Xuất theo sản phẩm')"
+            onclick="selectOutboundType('MATERIAL', 'Xuất bán')"
           >
-            Xuất theo sản phẩm
+            Xuất bán
           </div>
         </div>
       </div>
@@ -276,12 +276,13 @@
       <table class="data-table">
         <colgroup>
           <col style="width: 50px">
-          <col style="width: 230px">
-          <col style="width: 300px">
-          <col style="width: 150px">
-          <col style="width: 120px">
+          <col style="width: 200px">
+          <col style="width: 350px">
           <col style="width: 100px">
-          <col style="width: 320px">
+          <col style="width: 120px">
+          <col style="width: 120px">
+          <col style="width: 80px">
+          <col style="width: 270px">
           <col style="width: 80px">
         </colgroup>
         <thead>
@@ -289,6 +290,7 @@
             <th class="text-center">STT</th>
             <th>Mã lệnh xuất</th>
             <th>Sản phẩm</th>
+            <th class="text-center">Số lượng</th>
             <th class="text-center">Loại xuất</th>
             <th class="text-center">Trạng thái</th>
             <th class="text-center">Ưu tiên</th>
@@ -302,12 +304,13 @@
       <table class="data-table">
         <colgroup>
           <col style="width: 50px">
-          <col style="width: 230px">
-          <col style="width: 300px">
-          <col style="width: 150px">
-          <col style="width: 120px">
+          <col style="width: 200px">
+          <col style="width: 350px">
           <col style="width: 100px">
-          <col style="width: 320px">
+          <col style="width: 120px">
+          <col style="width: 120px">
+          <col style="width: 80px">
+          <col style="width: 270px">
           <col style="width: 80px">
         </colgroup>
         <tbody id="table-body">
@@ -357,7 +360,8 @@
       </div>
       <div class="modal-body">
         <!-- Outbound Type Selection -->
-        <div class="outbound-type-selection">
+        <!-- Outbound Type Selection Hidden as per requirements -->
+        <div class="outbound-type-selection" style="display: none;">
           <label class="selection-card">
             <input
               type="radio"
@@ -396,15 +400,18 @@
         <div class="form-grid">
           <!-- MATERIAL FORM (NEW) -->
           <div id="outbound-material-form" class="full-width">
-            <div class="search-box-material">
-              <input
-                type="text"
-                id="material-search-input"
-                class="form-control"
-                placeholder="Tìm kiếm theo mã sản phẩm hoặc tên sản phẩm..."
-                onkeyup="window.filterMaterialSelection()"
-              />
-              <i class="fas fa-search search-icon"></i>
+            <div class="form-row-custom" style="margin-bottom: 16px;">
+              <div style="position: relative;">
+                <input
+                  type="text"
+                  id="material-search-input"
+                  class="form-control"
+                  placeholder="Tìm kiếm theo mã sản phẩm hoặc tên sản phẩm..."
+                  onkeyup="window.filterMaterialSelection()"
+                  style="padding-left: 36px;"
+                />
+                <i class="fas fa-search search-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+              </div>
             </div>
 
             <div class="material-table-wrapper-split">
@@ -412,13 +419,14 @@
                 <table class="material-selection-table" id="materialHeaderTable">
                   <colgroup>
                     <col style="width: 40px">
-                    <col style="width: 50px">
-                    <col style="width: 150px">
-                    <col style="width: 250px">
-                    <col style="width: 180px">
+                    <col style="width: 40px">
+                    <col style="width: 100px">
+                    <col style="width: 320px">
+                    <col style="width: 200px">
+                    <col style="width: 90px">
                     <col style="width: 130px">
-                    <col style="width: 150px">
-                    <col style="width: 150px">
+                    <col style="width: 90px">
+                    <col style="width: 100px">
                   </colgroup>
                   <thead>
                     <tr>
@@ -452,6 +460,7 @@
                           </div>
                         </div>
                       </th>
+                      <th class="text-center">Loại xuất</th>
                       <th class="text-center">SL hiện có</th>
                       <th class="text-center">SL xuất</th>
                     </tr>
@@ -462,13 +471,14 @@
                 <table class="material-selection-table">
                   <colgroup>
                     <col style="width: 40px">
-                    <col style="width: 50px">
-                    <col style="width: 150px">
-                    <col style="width: 250px">
-                    <col style="width: 180px">
+                    <col style="width: 40px">
+                    <col style="width: 100px">
+                    <col style="width: 320px">
+                    <col style="width: 200px">
+                    <col style="width: 90px">
                     <col style="width: 130px">
-                    <col style="width: 150px">
-                    <col style="width: 150px">
+                    <col style="width: 90px">
+                    <col style="width: 100px">
                   </colgroup>
                   <tbody id="material-selection-body">
                     <!-- Populated by JS -->

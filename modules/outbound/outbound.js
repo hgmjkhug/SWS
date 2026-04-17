@@ -34,63 +34,63 @@
   // Mock Data Generation
   const MASTER_MATERIALS = [
     {
-      code: "MAT-001",
+      code: "TROPICAL",
       name: "Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL",
-      category: "A456",
+      category: "Chuối Trung Quốc/ Chinese bananas - A456",
       method: "FIFO",
     },
     {
-      code: "MAT-002",
+      code: "SOFIA",
       name: "Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA",
-      category: "A456",
+      category: "Chuối Trung Quốc/ Chinese bananas - A456",
       method: "FIFO",
     },
     {
-      code: "MAT-003",
+      code: "TROPICAL",
       name: "Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL",
-      category: "A789",
-      method: "LIFO",
+      category: "Chuối Trung Quốc/ Chinese bananas - A789",
+      method: "FIFO",
     },
     {
-      code: "MAT-004",
+      code: "DEL MONTE",
       name: "Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE",
-      category: "26CP",
-      method: "FEFO",
+      category: "Chuối Nhật Bản/ Japanese bananas - 26CP",
+      method: "FIFO",
     },
     {
-      code: "MAT-005",
+      code: "SEIKA",
       name: "Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA",
-      category: "16CP",
+      category: "Chuối Nhật Bản/ Japanese bananas - 16CP",
       method: "FIFO",
     },
     {
-      code: "MAT-006",
+      code: "SHIMIZU",
       name: "Chuối Nhật Bản/ Japanese bananas - 38CP - SHIMIZU",
-      category: "38CP",
+      category: "Chuối Nhật Bản/ Japanese bananas - 38CP",
       method: "FIFO",
     },
     {
-      code: "MAT-007",
+      code: "DASANG",
       name: "Chuối Trung Quốc/ Chinese bananas - CL - DASANG",
-      category: "CL",
+      category: "Chuối Trung Quốc/ Chinese bananas - CL",
       method: "FIFO",
     },
     {
-      code: "MAT-008",
+      code: "DEL MONTE",
       name: "Chuối Nhật Bản/ Japanese bananas - 28CP - DEL MONTE",
-      category: "28CP",
-      method: "LIFO",
+      category: "Chuối Nhật Bản/ Japanese bananas - 28CP",
+      method: "FIFO",
     },
     {
-      code: "MAT-009",
+      code: "SEIKA",
       name: "Chuối Nhật Bản/ Japanese bananas - B6 - SEIKA 13KG",
-      category: "B6",
-      method: "LIFO",
+      category: "Chuối Nhật Bản/ Japanese bananas - B6",
+      method: "FIFO",
     },
     {
-      code: "MAT-010",
+      code: "TAITO",
       name: "Chuối Nhật Bản/ Japanese bananas - 40CP - TAITO",
-      category: "40CP",
+      category: "Chuối Nhật Bản/ Japanese bananas - 40CP",
       method: "FIFO",
     },
   ];
@@ -474,8 +474,8 @@
                                         <th rowspan="2" style="text-align: center; vertical-align: middle;">Thời gian tạo</th>
                                     </tr>
                                     <tr>
-                                        <th style="font-weight: 500; text-align: center;">Pallet</th>
-                                        <th style="font-weight: 500; text-align: center;">Vị trí</th>
+                                        <th style="font-weight: 500; text-align: center;">Vật chứa</th>
+                                        <th style="font-weight: 500; text-align: center;">Vị trí lưu</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -493,11 +493,29 @@
       tr.innerHTML = `
             <td style="text-align:center;"><input type="radio" name="selectedMaterial" value="${item.id}"></td>
             <td style="text-align:center;">${index + 1}</td>
-            <td style="font-weight:600; color:#334155">${item.code}</td>
+            <td style="font-weight:600; color:#334155">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                     <i class="fas fa-chevron-right" style="font-size: 10px; color: #94a3b8;"></i>
+                     <span>${item.code}</span>
+                </div>
+            </td>
             <td>${item.name}</td>
             <td>${item.category}</td>
             <td style="text-align: center">
                 <span class="method-badge method-${item.method}">${item.method}</span>
+            </td>
+            <td style="text-align: center;">
+                <div class="row-custom-dropdown" onclick="window.toggleRowDropdown(this, event)">
+                    <div class="dropdown-selected-mini">
+                        <span class="selected-label">Xuất bán</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="dropdown-options-mini">
+                        <div class="dropdown-option-mini active" data-value="MATERIAL" onclick="window.selectRowOption(this, 'MATERIAL', 'Xuất bán')">Xuất bán</div>
+                        <div class="dropdown-option-mini" data-value="PALLET" onclick="window.selectRowOption(this, 'PALLET', 'Xuất hủy')">Xuất hủy</div>
+                    </div>
+                    <input type="hidden" class="outbound-type-select" value="MATERIAL">
+                </div>
             </td>
             <td style="text-align:center; font-weight:600; color:#076EB8">${item.quantity}</td>
             <td style="text-align: right">
@@ -968,18 +986,17 @@
         const deleteDisabled = isPending ? "" : "disabled";
   
         const tr = document.createElement("tr");
-        if (item.outboundType === "MATERIAL") {
-            tr.className = "clickable-row";
-            tr.onclick = (e) => {
-                if (e.target.closest('.btn-icon') || e.target.closest('.copy-icon')) return;
-                window.toggleOutboundSubTable(item.id, tr);
-            };
-        }
+        tr.className = "clickable-row";
+        tr.onclick = (e) => {
+            if (e.target.closest('.btn-icon') || e.target.closest('.copy-icon')) return;
+            window.toggleOutboundSubTable(item.id, tr);
+        };
   
         tr.innerHTML = `
                 <td style="text-align:center">${start + index + 1}</td>
                 <td>
                     <div class="code-container" style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #475569;">
+                        <i class="fas fa-chevron-right chevron-icon" style="font-size: 10px; color: #94a3b8; transition: transform 0.3s;"></i>
                         <span class="code-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">${item.code}</span>
                         <span class="copy-icon" onclick="copyCode('${item.code}', this, event)" title="Sao chép">
                             <i class="far fa-copy"></i>
@@ -988,19 +1005,19 @@
                     </div>
                 </td>
 
-                <td>
-                    <div class="product-item" style="position: relative; padding-left: 22px;">
-                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">
-                            <span class="prod-code" style="font-weight: 500; color: #0284c7; font-size: 13px;">${item.materialCode}</span>
-                            <span style="font-weight: 600; color: #334155; font-size: 14px; margin-left: 4px;"> - ${item.materialName}</span>
-                        </div>
-                        <div style="font-size:12px; color:#076EB8; font-weight: 600; margin-top: 4px;">Số lượng: ${item.quantity}</div>
+                <td style="text-align: left; padding: 10px 0;">
+                    <div class="product-item" style="position: relative; padding-left: 16px;">
+                        <div style="font-weight: 500; color: #0284c7; font-size: 13px;">${item.materialCode}</div>
+                        <div style="font-weight: 600; color: #334155; font-size: 14px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${item.materialName}</div>
                     </div>
+                </td>
+                <td style="text-align: center; font-weight: 600; color: #076EB8;">
+                    ${item.quantity}
                 </td>
 
                 <td style="text-align: center">
                     <span class="outbound-type-badge type-${item.outboundType}">
-                        ${item.outboundType === "PALLET" ? "Xuất theo container" : "Xuất theo sản phẩm"}
+                        ${item.outboundType === "PALLET" ? "Xuất hủy" : "Xuất bán"}
                     </span>
                 </td>
                 <!-- <td style="text-align: left;">
@@ -1017,13 +1034,13 @@
                         <span class="priority-toggle-slider"></span>
                     </label>
                 </td>
-                <td style="text-align: left;">
-                    <div class="product-item" style="border-bottom:none; min-height: fit-content; padding-left: 18px;">
+                <td style="text-align: left; padding: 10px 0;">
+                    <div class="product-item" style="border-bottom:none; min-height: fit-content; padding-left: 16px;">
                         <div style="font-size: 13px; color: #334155;">
                             <span style="font-weight: 600;">Thời gian:</span> ${item.date}
                         </div>
                         <div style="font-size: 13px; color: #334155; margin-top: 2px;">
-                            <span style="font-weight: 600;">Người tạo:</span> ${item.creatorName} (${item.creatorId})
+                            <span style="font-weight: 600;">Người tạo:</span> ${item.creatorName || (item.creator ? item.creator.split(' (')[0] : 'Admin')} (${item.creatorId || (item.creator ? item.creator.split('(')[1].replace(')', '') : 'admin')})
                         </div>
                     </div>
                 </td>
@@ -1128,7 +1145,20 @@
       document.querySelectorAll(".clickable-row").forEach((r) => r.classList.remove("expanded"));
 
       const item = outboundData.find((d) => d.id === id);
-      if (!item || !item.batches || item.batches.length === 0) return;
+      if (!item) return;
+
+      // Ensure batches exist for sub-table (mock it if no batches exist)
+      if (!item.batches || item.batches.length === 0) {
+          item.batches = [{
+              inboundCode: item.code.includes('_') ? item.code : `IN_${item.materialCode}_001`,
+              exportedQty: item.quantity,
+              totalQty: item.quantity,
+              pallet: item.code.split('_')[0] !== 'OUT' && item.code.includes('_') ? item.code.split('_')[0] : 'PL-001',
+              location: 'K1-1',
+              date: item.date,
+              expiryDate: '-'
+          }];
+      }
 
       tr.classList.add("expanded");
       const subRow = document.createElement("tr");
@@ -1136,15 +1166,17 @@
       subRow.className = "sub-table-row";
 
       const batchesHtml = item.batches
-        .map((batch) => {
+        .map((batch, index) => {
           return `
                 <tr>
-                    <td style="text-align: left; padding-left: 15px; width: 350px;">${batch.inboundCode}</td>
-                    <td style="text-align: center; font-weight: 600; color: #076EB8; width: 130px;">${batch.exportedQty}/${batch.totalQty}</td>
-                    <td style="text-align: center; width: 130px;">${batch.pallet}</td>
-                    <td style="text-align: center; width: 100px;">${batch.location}</td>
+                    <td style="text-align: center; width: 50px;">${index + 1}</td>
+                    <td style="text-align: left; padding-left: 15px; width: 230px;">${batch.inboundCode}</td>
+                    <td style="text-align: center; font-weight: 600; color: #076EB8; width: 130px;">${batch.exportedQty}</td>
+                    <td style="text-align: center; font-weight: 500; color: #64748b; width: 120px;">${batch.totalQty}</td>
+                    <td style="text-align: center; width: 120px;">${batch.pallet}</td>
+                    <td style="text-align: center; width: 90px;">${batch.location}</td>
                     <td style="text-align: center; width: 180px;">${batch.date}</td>
-                    <td style="text-align: center; width: 150px;">${batch.expiryDate || '-'}</td>
+                    <td style="text-align: center; width: 130px;">${batch.expiryDate || '-'}</td>
                 </tr>
             `;
         })
@@ -1157,12 +1189,14 @@
                     <table class="sub-table" style="width: 100%; border-collapse: collapse; background-color: white; border-radius: 6px; overflow: hidden; border: 1px solid #e2e8f0;">
                         <thead>
                             <tr style="background-color: #076eb8;">
-                                <th style="text-align: left; color: white; padding: 10px 15px; font-weight: 600; width: 350px;">Mã lệnh nhập</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 130px;">Đã xuất/Tổng</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 130px;">Container</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 100px;">Vị trí</th>
+                                <th style="text-align: center; color: white; padding: 10px 5px; font-weight: 600; width: 50px;">STT</th>
+                                <th style="text-align: left; color: white; padding: 10px 15px; font-weight: 600; width: 230px;">Mã lệnh nhập</th>
+                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 130px;">Số lượng thực hiện</th>
+                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 120px;">Tổng tồn kho</th>
+                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 120px;">Container</th>
+                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 90px;">Vị trí</th>
                                 <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 180px;">Thời gian hoàn thành</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 150px;">Ngày hết hạn</th>
+                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 130px;">Ngày hết hạn</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2138,7 +2172,7 @@
               'Mã lệnh xuất': order.code,
               'Sản phẩm': `${order.materialName} (${order.materialCode})`,
               'Số lượng': order.quantity,
-              'Loại xuất': order.outboundType === 'PALLET' ? 'Xuất theo container' : 'Xuất theo sản phẩm',
+              'Loại xuất': order.outboundType === 'PALLET' ? 'Xuất hủy' : 'Xuất bán',
               'Trạng thái': order.status,
               'Người tạo': order.creatorName,
               'Thời gian tạo': order.date
@@ -2224,12 +2258,7 @@
   };
 
   window.addOutboundOrder = function () {
-    const selectedTypeInput = document.querySelector(
-      'input[name="outboundType"]:checked',
-    );
-    const selectedType = selectedTypeInput
-      ? selectedTypeInput.value
-      : "MATERIAL";
+    const selectedType = document.getElementById("add-outbound-type")?.value || "MATERIAL";
 
     const isPriority = document.getElementById("inputPriorityOutbound")?.checked || false;
 
@@ -2276,8 +2305,9 @@
         quantity: quantity,
         date: dateStr,
         status: "PENDING",
-        creator: "Bùi Thanh Sơn (user006)",
-        outboundType: "MATERIAL",
+        creatorId: "user006",
+        creatorName: "Bùi Thanh Sơn",
+        outboundType: selectedRow.querySelector(".outbound-type-select")?.value || "MATERIAL",
         priority: isPriority,
         rawDate: dateVal,
       };
@@ -2285,6 +2315,7 @@
       outboundData.unshift(newOrder);
       saveOutboundOrders();
       renderOutboundTable();
+      if (window.showToast) window.showToast("Tạo lệnh xuất thành công", "success");
       closeOutboundModal("add-modal");
 
       // Reset selection
@@ -2297,7 +2328,7 @@
         'input[name="selectedPallet"]:checked',
       );
       if (!selectedRadio) {
-        alert("Vui lòng chọn Pallet để xuất!");
+        alert("Vui lòng chọn vật chứa để xuất!");
         return;
       }
 
@@ -2336,6 +2367,7 @@
       outboundData.unshift(newOrder);
       saveOutboundOrders();
       renderOutboundTable();
+      if (window.showToast) window.showToast("Tạo lệnh xuất thành công", "success");
       closeOutboundModal("add-modal");
 
       // Reset selection
@@ -2587,6 +2619,49 @@
       closeOutboundImportModal();
     }
   }
+
+  // Custom Row Dropdown Logic
+  window.toggleRowDropdown = function(container, event) {
+      if (event) event.stopPropagation();
+      
+      // Close all other row dropdowns
+      document.querySelectorAll('.row-custom-dropdown').forEach(el => {
+          if (el !== container) el.classList.remove('open');
+      });
+      
+      container.classList.toggle('open');
+      
+      // Close on outside click
+      const closeHandler = (e) => {
+          if (!container.contains(e.target)) {
+              container.classList.remove('open');
+              document.removeEventListener('click', closeHandler);
+          }
+      };
+      if (container.classList.contains('open')) {
+          setTimeout(() => document.addEventListener('click', closeHandler), 10);
+      }
+  };
+
+  window.selectRowOption = function(optionEl, value, label) {
+      const container = optionEl.closest('.row-custom-dropdown');
+      if (!container) return;
+      
+      // Update display label
+      const labelEl = container.querySelector('.selected-label');
+      if (labelEl) labelEl.textContent = label;
+      
+      // Update hidden input
+      const input = container.querySelector('.outbound-type-select');
+      if (input) input.value = value;
+      
+      // Update active state
+      container.querySelectorAll('.dropdown-option-mini').forEach(opt => opt.classList.remove('active'));
+      optionEl.classList.add('active');
+      
+      // Close dropdown
+      container.classList.remove('open');
+  };
 
   // Exposure
   window.openOutboundImportModal = openOutboundImportModal;

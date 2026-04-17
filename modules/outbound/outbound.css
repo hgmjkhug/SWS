@@ -214,7 +214,7 @@ input, button, select, textarea {
 /* Scrollbar only for table body (starts below header) */
 
 .data-table {
-    width: 1350px; /* Revised for harmony */
+    width: 1370px;
     table-layout: fixed;
     border-collapse: collapse;
     font-size: 13px;
@@ -225,11 +225,10 @@ input, button, select, textarea {
     border-bottom: 1px solid var(--border-color);
 }
 .data-table th {
-    background-color: #f8fafc;
-    color: #64748b;
+    background-color: #076eb8;
+    color: white;
     font-weight: 600;
     position: sticky;
-    top: 0;
     top: 0;
     z-index: 1000;
 }
@@ -238,15 +237,7 @@ input, button, select, textarea {
 }
 .data-table tr:hover {
     background-color: #f8fafc;
-}/* Columns */
-.data-table th:nth-child(1), .data-table td:nth-child(1) { width: 50px; text-align: center; } /* STT */
-.data-table th:nth-child(2), .data-table td:nth-child(2) { width: 230px; } /* Mã lệnh xuất */
-.data-table th:nth-child(3), .data-table td:nth-child(3) { width: 300px; } /* Sản phẩm */
-.data-table th:nth-child(4), .data-table td:nth-child(4) { width: 150px; text-align: center; } /* Loại xuất */
-.data-table th:nth-child(5), .data-table td:nth-child(5) { width: 120px; text-align: center; } /* Trạng thái */
-.data-table th:nth-child(6), .data-table td:nth-child(6) { width: 100px; text-align: center; } /* Ưu tiên */
-.data-table th:nth-child(7), .data-table td:nth-child(7) { width: 320px; text-align: left; } /* Thông tin tạo */
-.data-table th:nth-child(8), .data-table td:nth-child(8) { width: 80px; text-align: center; } /* Thao tác */
+}
 
 /* Status Badges */
 .status-badge {
@@ -277,6 +268,11 @@ input, button, select, textarea {
 .clickable-row.expanded {
     background-color: #eff6ff;
     border-bottom: none;
+}
+
+.clickable-row.expanded .chevron-icon {
+    transform: rotate(90deg);
+    color: var(--active-color) !important;
 }
 
 .sub-table-row {
@@ -591,8 +587,92 @@ input, button, select, textarea {
     color: #475569;
 }
 
-.creator-filter-group {
+.outbound-type-select:hover {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.row-custom-dropdown {
+    position: relative;
+    width: 100px;
+    display: inline-block;
+    vertical-align: middle;
+    font-family: inherit;
+    user-select: none;
+}
+
+.dropdown-selected-mini {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #475569;
+    height: 32px;
+    transition: all 0.2s ease;
+}
+
+.dropdown-selected-mini:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.dropdown-selected-mini i {
+    font-size: 10px;
+    color: #94a3b8;
+    transition: transform 0.2s ease;
+}
+
+.row-custom-dropdown.open .dropdown-selected-mini i {
+    transform: rotate(180deg);
+}
+
+.dropdown-options-mini {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    display: none;
+    z-index: 2000;
+    padding: 4px;
+    box-sizing: border-box;
+    animation: dropdownSlide 0.15s ease;
+}
+
+.row-custom-dropdown.open .dropdown-options-mini {
+    display: block;
+}
+
+.dropdown-option-mini {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    text-align: left;
+}
+
+.dropdown-option-mini:hover {
+    background: #f8fafc;
+    color: #2563eb;
+}
+
+.dropdown-option-mini.active {
+    background: #eff6ff;
+    color: #2563eb;
+    font-weight: 600;
+}
+
+.creator-filter-group {
     flex-direction: column;
 }
 
@@ -908,6 +988,11 @@ button:disabled {
     padding: 10px 12px;
     border-bottom: 1px solid #f1f5f9;
     color: #334155;
+}
+
+.material-selection-table td:nth-child(7) {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 
 .material-selection-table tr:hover {

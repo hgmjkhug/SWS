@@ -14,7 +14,7 @@
       { id: 102, code: 'DASHBOARD_MONITOR', name: 'Giám sát hoạt động', description: 'Trang giám sát hoạt động thời gian thực.' },
       { id: 301, code: 'WAREHOUSE_LIST', name: 'Quản lý kho', description: 'Quản lý danh sách và cấu hình các kho.' },
       { id: 302, code: 'LOCATION_TYPE', name: 'Loại khu vực', description: 'Quản lý các loại khu vực lưu trữ.' },
-      { id: 401, code: 'ORDER_KANBAN', name: 'Kanban lệnh', description: 'Giao diện điều động thiết bị WCS.' },
+      { id: 401, code: 'ORDER_KANBAN', name: 'Kanban lệnh', description: 'Danh sách các lệnh nhập xuất theo Kanban' },
       { id: 501, code: 'LOT_MGMT', name: 'Quản lý lô hàng', description: 'Theo dõi và quản lý các lô hàng trong kho.' },
       { id: 502, code: 'INBOUND_ORDER', name: 'Lệnh nhập kho', description: 'Thực hiện các lệnh nhập hàng thực tế.' },
       { id: 503, code: 'OUTBOUND_ORDER', name: 'Lệnh xuất kho', description: 'Thực hiện các lệnh xuất hàng thực tế.' },

@@ -18,20 +18,21 @@ var permissionData = [
             { id: 302, name: 'Loại khu vực' }
         ]
     },
-    {
-        id: 4,
-        name: 'Quản lý điều phối WCS',
-        children: [
-            { id: 401, name: 'Kanban lệnh' }
-        ]
-    },
+    // {
+    //     id: 4,
+    //     name: 'Quản lý điều phối WCS',
+    //     children: [
+    //         { id: 401, name: 'Kanban lệnh' }
+    //     ]
+    // },
     {
         id: 5,
         name: 'Quản lý lệnh',
         children: [
             { id: 501, name: 'Quản lý lô hàng' },
             { id: 502, name: 'Lệnh nhập kho' },
-            { id: 503, name: 'Lệnh xuất kho' }
+            { id: 503, name: 'Lệnh xuất kho' },
+            { id: 504, name: 'Kanban lệnh' }
         ]
     },
     {

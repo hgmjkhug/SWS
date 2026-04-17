@@ -31,12 +31,13 @@
         { id: 302, moduleId: 3, code: 'LOCATION_TYPE', name: 'Loại khu vực', icon: 'fas fa-map-marker-alt', path: 'modules/master-data/node-type/node-type', resource: 'LOCATION_TYPE', order: 2 },
 
         // WCS (id: 4)
-        { id: 401, moduleId: 4, code: 'ORDER_KANBAN', name: 'Kanban lệnh', icon: 'fa-regular fa-chart-kanban', path: 'modules/kanbanWCS/kanban', resource: 'ORDER_KANBAN', order: 1 },
+        // { id: 401, moduleId: 4, code: 'ORDER_KANBAN', name: 'Kanban lệnh', icon: 'fa-regular fa-chart-kanban', path: 'modules/kanbanWCS/kanban', resource: 'ORDER_KANBAN', order: 1 },
 
         // INBOUND (id: 5)
         { id: 501, moduleId: 5, code: 'LOT_MGMT', name: 'Quản lý lô hàng', icon: 'fa-solid fa-code-fork fa-rotate-180', path: 'modules/batch/batch', resource: 'LOT_MGMT', order: 1 },
         { id: 502, moduleId: 5, code: 'INBOUND_ORDER', name: 'Lệnh nhập kho', icon: 'fa-solid fa-arrow-right-to-bracket', path: 'modules/inbound/inbound', resource: 'INBOUND_ORDER', order: 2 },
         { id: 503, moduleId: 5, code: 'OUTBOUND_ORDER', name: 'Lệnh xuất kho', icon: 'fa-solid fa-arrow-right-from-bracket', path: 'modules/outbound/outbound', resource: 'OUTBOUND_ORDER', order: 3 },
+        { id: 504, moduleId: 5, code: 'ORDER_KANBAN', name: 'Kanban lệnh', icon: 'fa-regular fa-chart-kanban', path: 'modules/kanbanWCS/kanban', resource: 'ORDER_KANBAN', order: 4 },
 
         // DEVICE (id: 12)
         { id: 601, moduleId: 12, code: 'DEVICE_LIST', name: 'Quản lý thiết bị', icon: 'fa-solid fa-robot', path: 'modules/master-data/device-list/device-list', resource: 'DEVICE_LIST', order: 1 },
