@@ -25,7 +25,7 @@
       { id: 802, code: 'PRODUCT_LINE', name: 'Dòng sản phẩm', description: 'Quản lý danh mục dòng sản phẩm.' },
       { id: 803, code: 'PRODUCT_GROUP', name: 'Nhóm sản phẩm', description: 'Phân loại các nhóm sản phẩm.' },
       { id: 804, code: 'PRODUCT_LIST', name: 'Sản phẩm', description: 'Quản lý danh mục mã sản phẩm.' },
-      { id: 805, code: 'PACKING_WORKSHOP', name: 'Xưởng đóng gói', description: 'Quản lý danh mục xưởng đóng gói.' },
+      // { id: 805, code: 'PACKING_WORKSHOP', name: 'Xưởng đóng gói', description: 'Quản lý danh mục xưởng đóng gói.' },
       { id: 806, code: 'METHOD', name: 'Quy cách', description: 'Quản lý danh mục quy cách đóng gói.' },
       { id: 807, code: 'CONTAINER_GROUP', name: 'Nhóm vật chứa', description: 'Phân loại các nhóm vật chứa.' },
       { id: 808, code: 'CONTAINER_LIST', name: 'Vật chứa', description: 'Quản lý danh mục vật chứa chi tiết.' },

@@ -130,15 +130,9 @@
             statusFilter.onchange = filterData;
         }
 
-        const typeFilter = document.getElementById('typeFilter');
-        if (typeFilter) {
-            typeFilter.onchange = filterData;
-        }
-
         function filterData() {
             const keyword = searchInput ? searchInput.value.toLowerCase() : '';
             const statusValue = statusFilter ? statusFilter.value : '';
-            const typeValue = typeFilter ? typeFilter.value : '';
 
             const filtered = warehouses.filter(w => {
                 const matchesKeyword = w.name.toLowerCase().includes(keyword) || (w.code && w.code.toLowerCase().includes(keyword));
@@ -148,12 +142,7 @@
                     matchesStatus = w.status === statusValue;
                 }
 
-                let matchesType = true;
-                if (typeValue !== '') {
-                    matchesType = w.type === typeValue;
-                }
-
-                return matchesKeyword && matchesStatus && matchesType;
+                return matchesKeyword && matchesStatus;
             });
 
             currentPage = 1;
@@ -212,12 +201,10 @@
                         </span>
                     </div>
                 </td>
-                <td style="text-align: center;">
-                    <span class="badge ${getTypeBadgeClass(item.type)}">${item.type}</span>
-                </td>
-                <td style="text-align: center;">${item.floors}</td>
-                <td style="text-align: center;">${item.towerCount || '-'}</td>
-                <td style="text-align: center;">${totalPos.toLocaleString()}</td>
+                <td style="text-align: center;">${item.type}</td>
+                <td style="text-align: center;" class="value-floors">${item.floors}</td>
+                <td style="text-align: center;" class="value-towers">${item.towerCount || '-'}</td>
+                <td style="text-align: center;" class="value-positions">${totalPos.toLocaleString()}</td>
                 <td style="text-align: center;">
                     <span class="badge badge-status ${getStatusBadgeClass(item.status)}">${item.status}</span>
                 </td>
@@ -332,21 +319,7 @@
 
     // Close dropdown when clicking outside
     window.addEventListener('click', function (e) {
-        // Type Filter Dropdown
-        const typeDropdown = document.getElementById('type-filter-dropdown');
-        if (typeDropdown && !typeDropdown.contains(e.target)) {
-            const menu = document.getElementById('type-filter-menu');
-            if (menu) menu.classList.remove('show');
-        }
-
-        // Modal Type Dropdown
-        const modalTypeDropdown = document.getElementById('modal-type-dropdown');
-        if (modalTypeDropdown && !modalTypeDropdown.contains(e.target)) {
-            const menu = document.getElementById('modal-type-menu');
-            if (menu) menu.classList.remove('show');
-        }
-
-        // Filter Dropdown
+        // Status Filter Dropdown
         const filterDropdown = document.getElementById('status-filter-dropdown');
         if (filterDropdown && !filterDropdown.contains(e.target)) {
             const menu = document.getElementById('status-filter-menu');
@@ -361,7 +334,7 @@
         }
     });
 
-    // --- MODAL CUSTOM DROPDOWN ---
+    // --- MODAL STATUS DROPDOWN ---
     window.toggleModalStatusDropdown = function () {
         const menu = document.getElementById('modal-status-menu');
         if (menu) menu.classList.toggle('show');
@@ -371,46 +344,6 @@
         document.getElementById('warehouseStatus').value = value;
         document.getElementById('modal-status-display').textContent = value;
         document.getElementById('modal-status-menu').classList.remove('show');
-    };
-
-    // --- TYPE FILTER LOGIC ---
-    window.toggleTypeFilterDropdown = function () {
-        const menu = document.getElementById('type-filter-menu');
-        if (menu) {
-            menu.classList.toggle('show');
-        }
-    };
-
-    window.selectTypeFilterOption = function (value, text) {
-        const display = document.getElementById('type-filter-display');
-        if (display) display.textContent = text;
-
-        const input = document.getElementById('typeFilter');
-        if (input) {
-            input.value = value;
-            input.dispatchEvent(new Event('change'));
-        }
-
-        const items = document.querySelectorAll('#type-filter-menu .custom-dropdown-item');
-        items.forEach(item => {
-            if (item.textContent === text) item.classList.add('selected');
-            else item.classList.remove('selected');
-        });
-
-        const menu = document.getElementById('type-filter-menu');
-        if (menu) menu.classList.remove('show');
-    };
-
-    // --- MODAL TYPE DROPDOWN ---
-    window.toggleModalTypeDropdown = function () {
-        const menu = document.getElementById('modal-type-menu');
-        if (menu) menu.classList.toggle('show');
-    };
-
-    window.selectModalTypeOption = function (value) {
-        document.getElementById('warehouseType').value = value;
-        document.getElementById('modal-type-display').textContent = value;
-        document.getElementById('modal-type-menu').classList.remove('show');
     };
 
     // --- DETAIL TABLE LOGIC ---
@@ -436,27 +369,34 @@
         const detailRow = document.createElement('tr');
         detailRow.className = 'detail-row';
         
-        const areas = item.areas || [];
-        let areasHtml = '';
+        const towerCount = item.towerCount || 0;
+        let towersHtml = '';
         
-        if (areas.length === 0) {
-            areasHtml = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #64748b;">Chưa có dữ liệu khu vực</td></tr>';
+        if (towerCount === 0) {
+            towersHtml = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: #64748b;">Chưa có dữ liệu tháp</td></tr>';
         } else {
-            areas.forEach((area, idx) => {
-                areasHtml += `
+            for (let i = 0; i < towerCount; i++) {
+                const towerCode = `T-${item.code}-${String(i + 1).padStart(2, '0')}`;
+                const towerName = `Tháp ${i + 1}`;
+                const towerTypes = ['Tháp mặt sàn di chuyển', 'Tháp lưu trữ hàng hóa'];
+                const towerType = towerTypes[i % 2];
+                const areasInTower = item.floors; 
+                const totalPos = item.areas ? item.areas.reduce((sum, a) => sum + a.positions, 0) : (item.totalLocations || 0);
+                const positionsInTower = Math.floor(totalPos / towerCount) + (i === 0 ? totalPos % towerCount : 0);
+
+                towersHtml += `
                     <tr>
-                        <td style="text-align: center;">${idx + 1}</td>
-                        <td style="text-align: center;">${area.floor}</td>
-                        <td style="font-weight: 500;">${area.areaCode}</td>
-                        <td>${area.areaName}</td>
-                        <td style="text-align: center; font-weight: 600;">${area.positions}</td>
-                        <td style="color: #1e40af;">${area.product}</td>
+                        <td style="text-align: center;">${i + 1}</td>
+                        <td style="font-weight: 500; color: #1e40af;">${towerCode}</td>
+                        <td>${towerName}</td>
                         <td style="text-align: center;">
-                            <span class="badge-spec spec-${area.specification.toLowerCase()}">${area.specification}</span>
+                            <span class="badge ${i % 2 === 0 ? 'badge-tower' : 'badge-stacker'}" style="min-width: unset; width: fit-content; padding: 4px 12px;">${towerType}</span>
                         </td>
+                        <td style="text-align: center;">${areasInTower}</td>
+                        <td style="text-align: center; font-weight: 600;">${positionsInTower.toLocaleString()}</td>
                     </tr>
                 `;
-            });
+            }
         }
 
         detailRow.innerHTML = `
@@ -466,16 +406,15 @@
                         <thead>
                             <tr>
                                 <th style="width: 50px; text-align: center;">STT</th>
-                                <th style="width: 100px; text-align: center;">Tầng</th>
-                                <th style="width: 130px;">Mã khu vực</th>
-                                <th style="width: 180px;">Tên khu vực</th>
-                                <th style="width: 120px; text-align: center;">Số vị trí</th>
-                                <th style="width: 300px;">Sản phẩm</th>
-                                <th style="width: 110px; text-align: center;">Quy cách</th>
+                                <th style="width: 150px;">Mã tháp</th>
+                                <th style="width: 200px;">Tên tháp</th>
+                                <th style="width: 210px; text-align: center;">Loại tháp</th>
+                                <th style="width: 120px; text-align: center;">Số khu vực</th>
+                                <th style="width: 180px; text-align: center;">Số vị trí chứa hàng</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${areasHtml}
+                            ${towersHtml}
                         </tbody>
                     </table>
                 </div>
@@ -496,7 +435,6 @@
         
         // Reset new fields
         document.getElementById('warehouseType').value = '';
-        document.getElementById('modal-type-display').textContent = 'Chọn loại kho';
         document.getElementById('warehouseLength').value = '';
         document.getElementById('warehouseWidth').value = '';
         document.getElementById('towerCount').value = 4;
@@ -526,7 +464,6 @@
 
         document.getElementById('warehouseId').value = item.id;
         document.getElementById('warehouseType').value = item.type || '';
-        document.getElementById('modal-type-display').textContent = item.type || 'Chọn loại kho';
         document.getElementById('warehouseName').value = item.name;
         document.getElementById('floors').value = item.floors;
         document.getElementById('warehouseLength').value = item.warehouseLength || '';
@@ -643,14 +580,7 @@
         if (window.loadPage) window.loadPage('Cấu hình Kho');
     };
 
-    function getTypeBadgeClass(type) {
-        switch(type) {
-            case 'Kho Tower': return 'badge-tower';
-            case 'Kho stacker crane': return 'badge-stacker';
-            case 'Kho Flat': return 'badge-flat';
-            default: return 'badge-inactive';
-        }
-    }
+
 
     function getStatusBadgeClass(status) {
         switch(status) {

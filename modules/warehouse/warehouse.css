@@ -712,6 +712,22 @@ input:checked+.slider:before {
     border: 1px solid #bbf7d0;
 }
 
+/* Value colors for specific columns */
+.warehouse-table td.value-floors {
+    color: #34d399 !important;
+    font-weight: 700;
+}
+
+.warehouse-table td.value-towers {
+    color: #f59e0b !important;
+    font-weight: 700;
+}
+
+.warehouse-table td.value-positions {
+    color: #076eb8 !important;
+    font-weight: 800;
+}
+
 /* --- Expandable Row Styles --- */
 .warehouse-row.active {
     background-color: #f8fafc;

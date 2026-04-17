@@ -57,7 +57,7 @@ var permissionData = [
             { id: 802, name: 'Dòng sản phẩm' },
             { id: 803, name: 'Nhóm sản phẩm' },
             { id: 804, name: 'Sản phẩm' },
-            { id: 805, name: 'Xưởng đóng gói' },
+            // { id: 805, name: 'Xưởng đóng gói' },
             { id: 806, name: 'Quy cách' },
             { id: 807, name: 'Nhóm vật chứa' },
             { id: 808, name: 'Vật chứa' },

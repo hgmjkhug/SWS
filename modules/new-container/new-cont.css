@@ -364,7 +364,8 @@ body {
     padding: 6px 24px;
     border-radius: 0 0 8px 8px;
     border-top: 1px solid #f1f5f9;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 400;
     color: #64748b;
     flex-shrink: 0;
 }
@@ -427,9 +428,9 @@ body {
 }
 
 .page-number-btn.active {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
+    background: #ffffff;
+    color: #076EB8;
+    border-color: #076EB8;
     font-weight: 600;
 }
 

@@ -75,56 +75,7 @@
         <input type="hidden" id="statusFilter" value="" />
       </div>
 
-      <!-- Type Filter (Custom Dropdown) -->
-      <div
-        class="filter-group-wrapper"
-        style="display: flex; flex-direction: column; gap: 4px"
-      >
-        <label class="filter-title">Loại kho</label>
-        <div
-          class="custom-dropdown"
-          id="type-filter-dropdown"
-          style="margin-left: 0"
-        >
-          <div
-            class="custom-dropdown-toggle"
-            onclick="window.toggleTypeFilterDropdown()"
-          >
-            <span id="type-filter-display">Tất cả loại kho</span>
-            <i
-              class="fas fa-chevron-down"
-              style="font-size: 12px; color: #64748b"
-            ></i>
-          </div>
-          <div class="custom-dropdown-menu" id="type-filter-menu">
-            <div
-              class="custom-dropdown-item selected"
-              onclick="window.selectTypeFilterOption('', 'Tất cả loại kho')"
-            >
-              Tất cả loại kho
-            </div>
-            <div
-              class="custom-dropdown-item"
-              onclick="window.selectTypeFilterOption('Kho Tower', 'Kho Tower')"
-            >
-              Kho Tower
-            </div>
-            <div
-              class="custom-dropdown-item"
-              onclick="window.selectTypeFilterOption('Kho Stacker crane', 'Kho Stacker crane')"
-            >
-              Kho Stacker crane
-            </div>
-            <div
-              class="custom-dropdown-item"
-              onclick="window.selectTypeFilterOption('Kho Flat', 'Kho Flat')"
-            >
-              Kho Flat
-            </div>
-          </div>
-        </div>
-        <input type="hidden" id="typeFilter" value="" />
-      </div>
+      <!-- Total Items or other spacer if needed -->
 
       <button class="btn btn-primary" onclick="openModal()">
         <i class="fas fa-plus"></i> Thêm mới
@@ -149,7 +100,7 @@
                 <th>Số tháp</th>
                 <th>Tổng vị trí</th>
                 <th>Trạng thái</th>
-                <th>Thao tác</th>
+                <th style="text-align: center;">Thao tác</th>
               </tr>
             </thead>
           </table>
@@ -194,43 +145,13 @@
         </div>
         <div class="form-group">
           <label class="required">Loại kho</label>
-          <div
-            class="custom-dropdown"
-            id="modal-type-dropdown"
-            style="width: 100%"
-          >
-            <div
-              class="custom-dropdown-toggle"
-              onclick="window.toggleModalTypeDropdown()"
-            >
-              <span id="modal-type-display">Chọn loại kho</span>
-              <i
-                class="fas fa-chevron-down"
-                style="font-size: 12px; color: #64748b"
-              ></i>
-            </div>
-            <div class="custom-dropdown-menu" id="modal-type-menu">
-              <div
-                class="custom-dropdown-item"
-                onclick="window.selectModalTypeOption('Kho Tower')"
-              >
-                Kho Tower
-              </div>
-              <div
-                class="custom-dropdown-item"
-                onclick="window.selectModalTypeOption('Kho Stacker crane')"
-              >
-                Kho Stacker crane
-              </div>
-              <div
-                class="custom-dropdown-item"
-                onclick="window.selectModalTypeOption('Kho Flat')"
-              >
-                Kho Flat
-              </div>
-            </div>
-            <input type="hidden" id="warehouseType" value="" />
-          </div>
+          <input
+            type="text"
+            id="warehouseType"
+            class="form-control"
+            required
+            placeholder="Nhập loại kho"
+          />
         </div>
         <div class="form-row">
           <div class="form-group half">

@@ -40,7 +40,7 @@
 
         // DEVICE (id: 12)
         { id: 601, moduleId: 12, code: 'DEVICE_LIST', name: 'Quản lý thiết bị', icon: 'fa-solid fa-robot', path: 'modules/master-data/device-list/device-list', resource: 'DEVICE_LIST', order: 1 },
-        { id: 602, moduleId: 12, code: 'DEVICE_MAINTENANCE', name: 'Quản lý bảo trì', icon: 'fa-light fa-arrow-progress', path: 'modules/maintenance/maintenance', resource: 'DEVICE_MAINTENANCE', order: 2 },
+        { id: 602, moduleId: 12, code: 'DEVICE_MAINTENANCE', name: 'Quản lý bảo trì', icon: 'fa-solid fa-screwdriver-wrench', path: 'modules/maintenance/maintenance', resource: 'DEVICE_MAINTENANCE', order: 2 },
 
         // WORKFLOW (id: 7)
         { id: 701, moduleId: 7, code: 'WORKFLOW_PROCESS', name: 'Danh sách Quy trình', icon: 'fa-light fa-arrow-progress', path: 'modules/workflow/workflow', resource: 'WORKFLOW_PROCESS', order: 1 },
@@ -50,7 +50,7 @@
         { id: 802, moduleId: 8, code: 'PRODUCT_LINE', name: 'Dòng sản phẩm', icon: 'fa-regular fa-object-group', path: 'modules/product-line/product-line', resource: 'PRODUCT_LINE', order: 2 },
         { id: 803, moduleId: 8, code: 'PRODUCT_GROUP', name: 'Nhóm sản phẩm', icon: 'fas fa-cubes', path: 'modules/master-data/category/category', resource: 'PRODUCT_GROUP', order: 3 },
         { id: 804, moduleId: 8, code: 'PRODUCT_LIST', name: 'Sản phẩm', icon: 'fas fa-box', path: 'modules/master-data/product/product', resource: 'PRODUCT_LIST', order: 4 },
-        { id: 805, moduleId: 8, code: 'PACKING_WORKSHOP', name: 'Xưởng đóng gói', icon: 'fa-regular fa-house', path: 'modules/station/station', resource: 'PACKING_WORKSHOP', order: 5 },
+        // { id: 805, moduleId: 8, code: 'PACKING_WORKSHOP', name: 'Xưởng đóng gói', icon: 'fa-regular fa-house', path: 'modules/station/station', resource: 'PACKING_WORKSHOP', order: 5 },
         { id: 806, moduleId: 8, code: 'METHOD', name: 'Quy cách', icon: 'fa-solid fa-route', path: 'modules/master-data/method/method', resource: 'METHOD', order: 6 },
         { id: 807, moduleId: 8, code: 'CONTAINER_GROUP', name: 'Nhóm vật chứa', icon: 'fa-solid fa-boxes-stacked', path: 'modules/master-data/container-group/container-group', resource: 'CONTAINER_GROUP', order: 7 },
         { id: 808, moduleId: 8, code: 'CONTAINER_LIST', name: 'Vật chứa', icon: 'fa-light fa-pallet-box', path: 'modules/master-data/pallet-list/container', resource: 'CONTAINER_LIST', order: 8 },
