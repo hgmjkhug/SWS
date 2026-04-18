@@ -969,6 +969,66 @@ input, button, select, textarea {
     opacity: 0.5;
 }
 
+/* Searchable Batch Select */
+.searchable-select-container {
+    position: relative;
+    width: 100%;
+}
+.pda-dropdown-list {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-top: 4px;
+    max-height: 250px;
+    overflow-y: auto;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    animation: fadeIn 0.2s ease;
+}
+.batch-option {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+}
+.batch-option:last-child {
+    border-bottom: none;
+}
+.batch-option:hover {
+    background-color: #f8fafc;
+}
+.batch-option .batch-code {
+    font-weight: 700;
+    color: #076EB8;
+    font-size: 13px;
+}
+.batch-option .batch-name {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+#clear-batch-btn:hover {
+    color: #ef4444 !important;
+}
+
+.product-temp-card:hover {
+    border-color: #3b82f6 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.btn-remove-pda:hover {
+    background: #dc2626 !important;
+    color: white !important;
+    border-color: #dc2626 !important;
+}
+
 /* PDA Quick Buttons Row (horizontal below date input) */
 /* PDA Datepicker Sidebar & Layout */
 .pda-cal-container {
@@ -1055,8 +1115,8 @@ input, button, select, textarea {
 .pda-calendar-dropdown {
     display: none;
     position: absolute;
-    bottom: calc(100% + 4px);
-    top: auto;
+    top: 100%;
+    bottom: auto;
     left: auto;
     right: 0;
     background: white;

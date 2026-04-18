@@ -434,11 +434,11 @@
             <thead>
               <tr>
                 <th class="text-center">STT</th>
-                <th>Mã lệnh nhập</th>
+                <th>Mã vật chứa</th>
                 <th>Sản phẩm</th>
                 <th class="text-center">Số lượng</th>
                 <th>Lô hàng</th>
-                <th style="text-align: left">Thông tin lưu</th>
+                <th style="text-align: left">Vị trí lưu</th>
                 <th style="text-align: center">Loại lệnh nhập</th>
                 <th class="text-center">Trạng thái</th>
                 <th class="text-center">Ưu tiên</th>
@@ -549,37 +549,10 @@
 
 
         <div class="modal-body" style="padding: 24px">
-          <!-- Step 1: Chọn lô hàng -->
-          <div id="create-step-1" class="pda-step">
-            <div class="pda-form-group">
-                <!-- <label class="pda-label">Chọn lô hàng nhập kho <span style="font-size:12px; font-weight:normal; color:#64748b; margin-left:4px;">(Trạng thái: Đã kiểm kê)</span></label> -->
-                <div class="pda-search-box">
-                  <i class="fas fa-search"></i>
-                  <input type="text" id="batch-selection-search" class="pda-input" placeholder="Tìm kiếm theo mã hoặc tên lô hàng..." oninput="renderBatchSelectionList()">
-                </div>
-                <div id="batch-selection-list" class="batch-selection-list">
-                    <!-- Batches will be rendered here via JS -->
-                </div>
-            </div>
-            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-              <button class="btn-cancel-custom" style="padding: 8px 16px; min-width: 100px; height: 38px;" onclick="closeCreateModal()">Hủy</button>
-              <button id="btnNextStep" class="btn-add" disabled onclick="goToScanStep()" style="padding: 8px 16px; height: 38px; border-radius: 8px;">Tiếp theo<i class="fas fa-arrow-right" style="margin-left:8px;"></i></button>
-            </div>
-          </div>
+          <!-- Step: Quét chi tiết & Thông tin lệnh -->
+          <div id="create-step-content" class="pda-step">
+            <!-- Mã Pallet -->
 
-          <!-- Step 2: Quét chi tiết -->
-          <div id="create-step-2" class="pda-step" style="display: none;">
-            <!-- Current Active Batch Info -->
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 10px 14px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 10px;">
-              <i class="fas fa-layer-group" style="color: #076EB8;"></i>
-              <div style="flex: 1;">
-                <div style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Đang thực hiện cho lô:</div>
-                <div id="selected-batch-info-display" style="font-weight: 700; color: #1e293b; font-size: 14px;">-</div>
-              </div>
-              <button type="button" class="btn-icon" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 6px;" onclick="goToBatchStep()" title="Đổi lô hàng">
-                <i class="fas fa-exchange-alt" style="font-size: 12px;"></i>
-              </button>
-            </div>
 
             <!-- Mã Pallet -->
             <div class="pda-form-group">
@@ -612,9 +585,14 @@
 
             <!-- Sản phẩm và Số lượng -->
             <div class="pda-form-group">
-              <label class="pda-label">Sản phẩm<span style="color: red">*</span></label>
-              <div style="border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #f8fafc; border-style: dashed; position: relative;">
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <label style="font-size: 13px; font-weight: 700; color: #1e293b;">Sản phẩm & Chi tiết nội dung<span style="color: red">*</span></label>
+                  <button type="button" class="btn-add" onclick="addProductToList()" style="height: 32px; padding: 0 16px; font-size: 13px;">
+                    <i class="fas fa-plus"></i> Thêm sản phẩm
+                  </button>
+                </div>
+                <div style="border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #f8fafc; border-style: dashed; position: relative;">
+                  <div style="display: flex; gap: 12px; align-items: flex-start;">
                   <div style="flex: 6;">
                     <label style="font-size: 13px; font-weight: 500; color: #475569; display: block; margin-bottom: 8px;">Quét/Nhập mã sản phẩm<span style="color: red">*</span></label>
                     <div class="pda-input-box">
@@ -660,61 +638,103 @@
                   </div>
                 </div>
 
-                <div style="margin-top: 16px;">
-                  <label style="font-size: 13px; font-weight: 500; color: #475569; display: block; margin-bottom: 8px;">Ngày hết hạn<span style="color: red">*</span></label>
-                  <div class="pda-input-box">
-                    <input
-                      type="text"
-                      id="inputExpiry"
-                      class="pda-input"
-                      placeholder="dd/mm/yyyy"
-                      readonly
-                      onclick="togglePdaCalendar()"
-                    />
-                    <button
-                      type="button"
-                      class="pda-scan-btn"
-                      onclick="togglePdaCalendar()"
-                    >
-                      <i class="fas fa-calendar-alt"></i>
-                    </button>
-                  </div>
-                  <div id="pda-calendar-dropdown" class="pda-calendar-dropdown">
-                    <div class="pda-cal-container">
-                      <div class="pda-cal-sidebar">
-                        <div class="pda-cal-option" onclick="addQuickDays(1)">1 Ngày</div>
-                        <div class="pda-cal-option" onclick="addQuickDays(3)">3 Ngày</div>
-                        <div class="pda-cal-option" onclick="addQuickDays(5)">5 Ngày</div>
-                        <div class="pda-cal-option" onclick="addQuickDays(7)">7 Ngày</div>
-                        <div class="pda-cal-option" onclick="addQuickDays(15)">15 Ngày</div>
-                        <div class="pda-cal-option" onclick="addQuickDays(30)">30 Ngày</div>
-                        <div class="pda-cal-option" onclick="addQuickDays(90)">90 Ngày</div>
-                        <div class="pda-cal-option" onclick="addQuickDays(180)">180 Ngày</div>
-                        <div class="pda-cal-option" onclick="addQuickYears(1)">1 Năm</div>
-                        <div class="pda-cal-option" onclick="addQuickYears(3)">3 Năm</div>
+                <div style="margin-top: 16px; display: flex; gap: 12px;">
+                  <!-- Chọn lô hàng (Searchable Select) -->
+                  <div style="flex: 6;">
+                    <label style="font-size: 13px; font-weight: 500; color: #475569; display: block; margin-bottom: 8px;">Chọn lô hàng<span style="color: red">*</span></label>
+                    <div class="pda-input-box searchable-select-container" id="batch-select-wrapper" style="position: relative;">
+                      <input
+                        type="text"
+                        id="inputBatch"
+                        class="pda-input"
+                        placeholder="Tìm mã hoặc tên lô hàng..."
+                        autocomplete="off"
+                        oninput="handleBatchSearch(this.value)"
+                        onfocus="handleBatchSearch(this.value)"
+                        style="padding-right: 70px;"
+                      />
+                      <button type="button" id="clear-batch-btn" onclick="clearBatchSelection()" style="display: none; position: absolute; right: 38px; top: 50%; transform: translateY(-50%); border: none; background: transparent; color: #94a3b8; cursor: pointer; padding: 6px; border-radius: 4px; transition: all 0.2s; z-index: 5;">
+                        <i class="fas fa-times"></i>
+                      </button>
+                      <button type="button" class="pda-scan-btn" onclick="toggleBatchDropdown()">
+                        <i class="fas fa-chevron-down"></i>
+                      </button>
+                      <div id="batch-search-dropdown" class="pda-dropdown-list" style="display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background: white; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 4px; max-height: 250px; overflow-y: auto; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                        <!-- Batches will be rendered here -->
                       </div>
-                      <div class="pda-cal-main">
-                        <div class="pda-cal-header">
-                          <button type="button" class="pda-cal-nav" onclick="pdaCalPrevMonth()"><i class="fas fa-chevron-left"></i></button>
-                          <div class="pda-cal-selectors" style="display: flex; gap: 8px">
-                            <div class="custom-dropdown month-dropdown" id="pdaMonthDropdown" style="width: 120px">
-                              <div class="dropdown-selected" id="pdaMonthSelected">Tháng</div>
-                              <div class="dropdown-list month-grid" id="pdaMonthList"></div>
-                            </div>
-                            <div class="custom-dropdown year-dropdown" id="pdaYearDropdown" style="width: 100px">
-                              <div class="dropdown-selected" id="pdaYearSelected">Năm</div>
-                              <div class="dropdown-list year-grid" id="pdaYearList"></div>
-                            </div>
-                          </div>
-                          <button type="button" class="pda-cal-nav" onclick="pdaCalNextMonth()"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                  </div>
+
+                  <!-- Ngày hết hạn -->
+                  <div style="flex: 2; position: relative;">
+                    <label style="font-size: 13px; font-weight: 500; color: #475569; display: block; margin-bottom: 8px;">Ngày hết hạn<span style="color: red">*</span></label>
+                    <div class="pda-input-box">
+                      <input
+                        type="text"
+                        id="inputExpiry"
+                        class="pda-input"
+                        placeholder="dd/mm/yyyy"
+                        readonly
+                        onclick="togglePdaCalendar()"
+                      />
+                      <button
+                        type="button"
+                        class="pda-scan-btn"
+                        onclick="togglePdaCalendar()"
+                      >
+                        <i class="fas fa-calendar-alt"></i>
+                      </button>
+                    </div>
+                    <div id="pda-calendar-dropdown" class="pda-calendar-dropdown">
+                      <div class="pda-cal-container">
+                        <div class="pda-cal-sidebar">
+                          <div class="pda-cal-option" onclick="addQuickDays(1)">1 Ngày</div>
+                          <div class="pda-cal-option" onclick="addQuickDays(3)">3 Ngày</div>
+                          <div class="pda-cal-option" onclick="addQuickDays(5)">5 Ngày</div>
+                          <div class="pda-cal-option" onclick="addQuickDays(7)">7 Ngày</div>
+                          <div class="pda-cal-option" onclick="addQuickDays(15)">15 Ngày</div>
+                          <div class="pda-cal-option" onclick="addQuickDays(30)">30 Ngày</div>
+                          <div class="pda-cal-option" onclick="addQuickDays(90)">90 Ngày</div>
+                          <div class="pda-cal-option" onclick="addQuickDays(180)">180 Ngày</div>
+                          <div class="pda-cal-option" onclick="addQuickYears(1)">1 Năm</div>
                         </div>
-                        <div id="pda-cal-days" class="pda-cal-days"></div>
-                        <div class="pda-cal-footer">
-                          <button type="button" class="pda-cal-btn-secondary" onclick="togglePdaCalendar()">Hủy</button>
-                          <button type="button" class="pda-btn-apply" onclick="pdaCalApply()">Xác nhận</button>
+                        <div class="pda-cal-main">
+                          <div class="pda-cal-header">
+                            <button type="button" class="pda-cal-nav" onclick="pdaCalPrevMonth()"><i class="fas fa-chevron-left"></i></button>
+                            <div class="pda-cal-selectors" style="display: flex; gap: 8px">
+                              <div class="custom-dropdown month-dropdown" id="pdaMonthDropdown" style="width: 120px">
+                                <div class="dropdown-selected" id="pdaMonthSelected">Tháng</div>
+                                <div class="dropdown-list month-grid" id="pdaMonthList"></div>
+                              </div>
+                              <div class="custom-dropdown year-dropdown" id="pdaYearDropdown" style="width: 100px">
+                                <div class="dropdown-selected" id="pdaYearSelected">Năm</div>
+                                <div class="dropdown-list year-grid" id="pdaYearList"></div>
+                              </div>
+                            </div>
+                            <button type="button" class="pda-cal-nav" onclick="pdaCalNextMonth()"><i class="fas fa-chevron-right"></i></button>
+                          </div>
+                          <div id="pda-cal-days" class="pda-cal-days"></div>
+                          <div class="pda-cal-footer">
+                            <button type="button" class="pda-cal-btn-secondary" onclick="togglePdaCalendar()">Hủy</button>
+                            <button type="button" class="pda-btn-apply" onclick="pdaCalApply()">Xác nhận</button>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                <!-- Temp Products List Display (Inside the dashed box) -->
+                <div id="temp-products-container" style="margin-top: 20px; display: none; padding-top: 16px; border-top: 1px solid #e2e8f0;">
+                  <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <i class="fas fa-layer-group" style="color: #076EB8;"></i>
+                      Danh sách vật tư chờ nhập
+                    </div>
+                    <span id="temp-products-count" style="background: #076EB8; color: white; padding: 2px 8px; border-radius: 99px; font-size: 11px;">0</span>
+                  </div>
+                  <div id="temp-products-list" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                    <!-- Items will be rendered here -->
                   </div>
                 </div>
               </div>
@@ -753,7 +773,7 @@
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-              <button type="button" class="btn-cancel-custom" style="padding: 8px 16px; min-width: 100px; height: 38px;" onclick="goToBatchStep()">Quay lại</button>
+              <button type="button" class="btn-cancel-custom" style="padding: 8px 16px; min-width: 100px; height: 38px;" onclick="closeCreateModal()">Quay lại</button>
               <button type="button" id="btnContinue" class="btn-cancel-custom" style="padding: 8px 16px; min-width: 130px; height: 38px; color: #076EB8; border-color: #076EB8;" disabled onclick="generateReceipt(true)">Tiếp tục tạo</button>
               <button type="button" id="btnNext" class="btn-add" style="padding: 8px 16px; height: 38px; border-radius: 8px;" disabled onclick="generateReceipt(false)">Xác nhận</button>
             </div>

@@ -397,7 +397,7 @@ function renderTableBody() {
                 <td>
                     <div class="product-item" style="border-bottom:none;min-height:fit-content;">
                         <div class="pallet-list" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:2px;">
-                            ${o.pallets.length ? o.pallets.map(p => `<span class="pallet-tag" style="background:#e0f2fe;border:1px solid #7dd3fc;padding:2px 6px;font-size:12px;font-weight:500;border-radius:4px;color:#0369a1">Container: ${p}</span>`).join('') : '<span class="no-pallet">-</span>'}
+                            ${o.pallets.length ? o.pallets.map(p => `<span class="pallet-tag" style="background:#e0f2fe;border:1px solid #7dd3fc;padding:2px 6px;font-size:12px;font-weight:500;border-radius:4px;color:#0369a1">Vật chứa: ${p}</span>`).join('') : '<span class="no-pallet">-</span>'}
                         </div>
                         ${o.status === 'COMPLETED' && o.bin ? `<div style="color:#cbd5e1;font-size:10px;margin:2px 0;">-</div><span class="bin-tag" style="background:#f8fafc;border:1px solid #e2e8f0;padding:2px 6px;font-size:12px;font-weight:500;border-radius:4px;color:#64748b;width:fit-content;">Vị trí: ${formatBinLocation(o.bin)}</span>` : ''}
                     </div>
@@ -686,20 +686,31 @@ function selectCreator(id, text) {
 let selectedBatchForCreate = null;
 let currentCreateType = 'NEW';
 
+let tempAddedProducts = [];
+
 function openCreateModal() {
     const modal = document.getElementById('modal-create');
     if (!modal) return;
 
     // Reset fields
-    ['inputPallet', 'inputVatTu', 'inputSoLuong', 'inputExpiry', 'batch-selection-search'].forEach(id => {
+    ['inputPallet', 'inputVatTu', 'inputSoLuong', 'inputExpiry', 'inputBatch'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.value = '';
+        if (el) {
+            el.value = '';
+            el.readOnly = false;
+            el.style.backgroundColor = '';
+            el.style.cursor = '';
+        }
     });
+
+    tempAddedProducts = [];
+    renderTempProductsList();
+
     document.getElementById('inputPriority').checked = false;
     selectedBatchForCreate = null;
 
-    // Go to step 1
-    goToBatchStep();
+    const clearBtn = document.getElementById('clear-batch-btn');
+    if (clearBtn) clearBtn.style.display = 'none';
 
     modal.classList.add('show');
     modal.style.display = 'flex';
@@ -719,99 +730,53 @@ function openCreateModal() {
     document.getElementById('total-weight-info').style.display = 'none';
 
     initPDAFormListeners();
-    renderBatchSelectionList();
+    
+    // Auto focus pallet input
+    setTimeout(() => {
+        const p = document.getElementById('inputPallet');
+        if (p) { p.focus(); p.select(); }
+    }, 100);
 }
 
-function renderBatchSelectionList() {
-    const listContainer = document.getElementById('batch-selection-list');
-    const searchInput = document.getElementById('batch-selection-search');
-    const btnNextStep = document.getElementById('btnNextStep');
-    if (!listContainer) return;
+// ── Searchable Batch Select Logic ────────────────────────────
+function handleBatchSearch(query) {
+    const clearBtn = document.getElementById('clear-batch-btn');
+    if (clearBtn) {
+        clearBtn.style.display = (query && query.length > 0) ? 'flex' : 'none';
+    }
 
-    const query = (searchInput?.value || '').toLowerCase().trim();
+    const dropdown = document.getElementById('batch-search-dropdown');
+    if (!dropdown) return;
+
+    const term = (query || '').toLowerCase().trim();
     
-    // Load from localStorage (SWS_BATCH_DATA_v4)
     let batches = [];
     try {
         const saved = localStorage.getItem('SWS_BATCH_DATA_v4');
-        if (saved) {
-            batches = JSON.parse(saved);
-        }
+        if (saved) batches = JSON.parse(saved);
     } catch (e) { console.error(e); }
 
-    // Filter by status CHECKED (Đã kiểm kê) and search query
+    // Filter by status CHECKED (Đã kiểm kê) or NEW (if relevant) and search query
+    // In this context, usually we import into a batch that is being processed or newly checked
     const filtered = batches.filter(b => 
-        (b.status === 'CHECKED' || b.status === "Đã kiểm kê") && 
-        (b.code.toLowerCase().includes(query) || b.name.toLowerCase().includes(query))
+        (b.status === 'CHECKED' || b.status === "Đã kiểm kê" || b.status === 'NEW') && 
+        (b.code.toLowerCase().includes(term) || b.name.toLowerCase().includes(term))
     );
 
     if (filtered.length === 0) {
-        listContainer.innerHTML = `<div class="empty-batch-state" style="padding: 40px; text-align: center; color: #94a3b8;">
-            <i class="fas fa-box-open" style="font-size: 32px; display: block; margin-bottom: 12px;"></i>
-            Không tìm thấy lô hàng "Đã kiểm kê" nào phù hợp
-        </div>`;
+        dropdown.innerHTML = `<div style="padding: 12px; text-align: center; color: #94a3b8; font-size: 13px;">Không tìm thấy lô hàng nào</div>`;
     } else {
-        // Tách 2 table: Head và Body để fix lỗi scroll bar trùm lên head
-        let html = `
-            <div class="batch-selection-table-wrapper">
-                <div class="batch-selection-head">
-                    <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
-                        <colgroup>
-                            <col style="width: 45px">
-                            <col style="width: 55px">
-                            <col style="width: 220px">
-                            <col>
-                        </colgroup>
-                        <thead>
-                            <tr style="background: #0D6BB9; color: white;">
-                                <th style="padding: 12px 8px; border-right: 1px solid rgba(255,255,255,0.1);"></th>
-                                <th style="padding: 12px 8px; border-right: 1px solid rgba(255,255,255,0.1); text-align: center; font-weight: 600; font-size: 13px;">STT</th>
-                                <th style="padding: 12px 12px; border-right: 1px solid rgba(255,255,255,0.1); text-align: center; font-weight: 600; font-size: 13px;">Mã lô hàng</th>
-                                <th style="padding: 12px 12px; text-align: left; font-weight: 600; font-size: 13px;">Tên lô hàng</th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
-                <div class="batch-selection-body" id="batchSelectionBodyScroll" style="max-height: 300px; overflow-y: auto;">
-                    <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
-                        <colgroup>
-                            <col style="width: 45px">
-                            <col style="width: 55px">
-                            <col style="width: 220px">
-                            <col>
-                        </colgroup>
-                        <tbody>
-        `;
-
-        html += filtered.map((b, idx) => {
-            const isSelected = selectedBatchForCreate?.id === b.id;
-            return `
-                <tr class="batch-table-row ${isSelected ? 'selected' : ''}" onclick="window.selectBatchForCreate('${b.id}')" style="cursor: pointer; transition: all 0.2s;">
-                    <td style="padding: 12px 8px; border-bottom: 1px solid #f1f5f9; text-align: center;">
-                        <input type="radio" name="batch-selector" ${isSelected ? 'checked' : ''} style="cursor: pointer;">
-                    </td>
-                    <td style="padding: 12px 8px; border-bottom: 1px solid #f1f5f9; text-align: center; color: #64748b; font-weight: 500;">${idx + 1}</td>
-                    <td style="padding: 12px 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; color: #076EB8; text-align: center;">${b.code}</td>
-                    <td style="padding: 12px 12px; border-bottom: 1px solid #f1f5f9; color: #1e293b;">${b.name}</td>
-                </tr>
-            `;
-        }).join('');
-
-        html += `</tbody></table></div></div>`;
-        listContainer.innerHTML = html;
-        
-        // Fix sync horizontal scroll (if needed for small screens)
-        const head = listContainer.querySelector('.batch-selection-head');
-        const body = listContainer.querySelector('.batch-selection-body');
-        if (head && body) {
-            body.onscroll = () => { head.scrollLeft = body.scrollLeft; };
-        }
+        dropdown.innerHTML = filtered.map(b => `
+            <div class="batch-option" onclick="selectBatchInModal('${b.id}')" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; hover: background: #f8fafc;">
+                <div style="font-weight: 700; color: #076EB8; font-size: 13px;">${b.code}</div>
+                <div style="font-size: 12px; color: #64748b; margin-top: 2px;">${b.name}</div>
+            </div>
+        `).join('');
     }
-
-    if (btnNextStep) btnNextStep.disabled = !selectedBatchForCreate;
+    dropdown.style.display = 'block';
 }
 
-window.selectBatchForCreate = function(id) {
+function selectBatchInModal(id) {
     let batches = [];
     try {
         const saved = localStorage.getItem('SWS_BATCH_DATA_v4');
@@ -821,26 +786,155 @@ window.selectBatchForCreate = function(id) {
     const batch = batches.find(b => String(b.id) === String(id));
     if (batch) {
         selectedBatchForCreate = batch;
-        renderBatchSelectionList();
-    }
-};
+        const input = document.getElementById('inputBatch');
+        if (input) input.value = `${batch.code} - ${batch.name}`;
+        
+        const clearBtn = document.getElementById('clear-batch-btn');
+        if (clearBtn) clearBtn.style.display = 'flex';
 
-function goToBatchStep() {
-    document.getElementById('create-step-1').style.display = 'block';
-    document.getElementById('create-step-2').style.display = 'none';
+        validatePDAForm();
+    }
+    document.getElementById('batch-search-dropdown').style.display = 'none';
 }
 
-function goToScanStep() {
-    if (!selectedBatchForCreate) return;
-    document.getElementById('create-step-1').style.display = 'none';
-    document.getElementById('create-step-2').style.display = 'block';
-    document.getElementById('selected-batch-info-display').textContent = `${selectedBatchForCreate.code} - ${selectedBatchForCreate.name}`;
+function clearBatchSelection() {
+    selectedBatchForCreate = null;
+    const input = document.getElementById('inputBatch');
+    if (input) input.value = '';
     
-    // Auto focus pallet input
+    const clearBtn = document.getElementById('clear-batch-btn');
+    if (clearBtn) clearBtn.style.display = 'none';
+    
+    validatePDAForm();
+}
+
+function toggleBatchDropdown() {
+    const dropdown = document.getElementById('batch-search-dropdown');
+    if (dropdown.style.display === 'none') {
+        handleBatchSearch(document.getElementById('inputBatch').value);
+    } else {
+        dropdown.style.display = 'none';
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    const wrapper = document.getElementById('batch-select-wrapper');
+    const dropdown = document.getElementById('batch-search-dropdown');
+    if (wrapper && dropdown && !wrapper.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+// ── Multi-Product Management ────────────────────────────────
+function addProductToList() {
+    const vattu = document.getElementById('inputVatTu')?.value.trim();
+    const soluong = document.getElementById('inputSoLuong')?.value;
+    const expiry = document.getElementById('inputExpiry')?.value;
+    const batch = selectedBatchForCreate;
+
+    if (!vattu) return showToast('Vui lòng nhập/quét mã sản phẩm', 'warning');
+    if (!soluong || parseInt(soluong) <= 0) return showToast('Số lượng không hợp lệ', 'warning');
+    if (!batch) return showToast('Vui lòng chọn lô hàng', 'warning');
+    if (!expiry) return showToast('Vui lòng chọn ngày hết hạn', 'warning');
+
+    const product = {
+        code: vattu,
+        name: vattu === 'VT-XXX' ? 'Sản phẩm PDA' : vattu, // Simplified name fallback
+        qty: parseInt(soluong),
+        expiryDate: expiry,
+        batch: { id: batch.id, code: batch.code, name: batch.name }
+    };
+
+    tempAddedProducts.push(product);
+    
+    // Clear sub-inputs
+    ['inputVatTu', 'inputSoLuong', 'inputExpiry', 'inputBatch'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    selectedBatchForCreate = null;
+    document.getElementById('clear-batch-btn').style.display = 'none';
+
+    renderTempProductsList();
+    validatePDAForm();
+    showToast(`Đã thêm ${vattu} vào danh sách`, 'success');
+
+    // Refocus product input for next item
     setTimeout(() => {
-        const p = document.getElementById('inputPallet');
-        if (p) { p.focus(); p.select(); }
+        const vt = document.getElementById('inputVatTu');
+        if (vt) { vt.focus(); vt.select(); }
     }, 100);
+}
+
+function renderTempProductsList() {
+    const container = document.getElementById('temp-products-container');
+    const listEl = document.getElementById('temp-products-list');
+    const countEl = document.getElementById('temp-products-count');
+
+    if (!container || !listEl || !countEl) return;
+
+    if (tempAddedProducts.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+    countEl.textContent = tempAddedProducts.length;
+
+    listEl.innerHTML = `
+        <table class="temp-products-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <tbody style="display: table-row-group;">
+                ${tempAddedProducts.map((p, idx) => `
+                    <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;">
+                        <td style="padding: 12px 10px; text-align: center; width: 40px; color: #94a3b8; font-weight: 700;">${idx + 1}</td>
+                        <td style="padding: 12px 10px; width: 140px;">
+                            <div style="font-weight: 700; color: #0f172a;">${p.code}</div>
+                        </td>
+                        <td style="padding: 12px 10px;">
+                            <div style="color: #64748b; font-size: 12px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${p.name}">
+                                ${p.name === p.code ? 'Vật tư nhập khẩu' : p.name}
+                            </div>
+                        </td>
+                        <td style="padding: 12px 10px; width: 80px; text-align: center;">
+                            <span style="background: #eff6ff; color: #1d4ed8; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-family: 'Roboto Mono', monospace;">
+                                x${p.qty}
+                            </span>
+                        </td>
+                        <td style="padding: 12px 10px; width: 220px;">
+                            <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                <div style="width: 24px; height: 24px; background: #f0f7ff; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;">
+                                    <i class="fas fa-layer-group" style="font-size: 11px; color: #076EB8;"></i>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                                    <div style="font-weight: 700; color: #076EB8; font-size: 13px; line-height: 1.2;">${p.batch.code}</div>
+                                    <div style="color: #64748b; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;" title="${p.batch.name}">
+                                        ${p.batch.name}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 10px; width: 120px;">
+                            <div style="display: flex; align-items: center; gap: 6px; color: #475569;">
+                                <i class="fas fa-calendar-check" style="font-size: 10px; color: #076EB8; width: 12px;"></i>
+                                <span>${p.expiryDate}</span>
+                            </div>
+                        </td>
+                        <td style="padding: 12px 10px; text-align: right; width: 50px;">
+                            <button onclick="removeTempProduct(${idx})" style="width: 28px; height: 28px; border: none; background: #fff1f2; color: #e11d48; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-trash-alt" style="font-size: 11px;"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function removeTempProduct(index) {
+    tempAddedProducts.splice(index, 1);
+    renderTempProductsList();
+    validatePDAForm();
 }
 
 function closeCreateModal() {
@@ -1033,15 +1127,14 @@ function closeCustomConfirm() { document.getElementById('js-inbound-confirm')?.s
 // ── PDA Form Validation ──────────────────────────────────────
 function validatePDAForm() {
     const pallet = document.getElementById('inputPallet')?.value.trim();
-    const vattu = document.getElementById('inputVatTu')?.value.trim();
-    const soluong = document.getElementById('inputSoLuong')?.value;
-    const expiry = document.getElementById('inputExpiry')?.value;
-    const nextDest = document.getElementById('selectedDestinationId')?.value;
     const btn = document.getElementById('btnNext');
     if (!btn) return;
 
-    const hasRequiredFields = !!expiry;
-    const isValid = (pallet || vattu) && soluong && parseInt(soluong) > 0 && hasRequiredFields;
+    // Is current set of inputs valid to add? (for UI feedback on add button if needed)
+    // But validation for Confirm button: Must have Pallet and at least one item in tempProducts
+    const hasPallet = !!pallet;
+    const hasItems = tempAddedProducts.length > 0;
+    const isValid = hasPallet && hasItems;
     
     if (btn) btn.disabled = !isValid;
     
@@ -1050,7 +1143,7 @@ function validatePDAForm() {
 }
 
 function initPDAFormListeners() {
-    ['inputPallet', 'inputVatTu', 'inputSoLuong'].forEach(id => {
+    ['inputPallet', 'inputVatTu', 'inputSoLuong', 'inputBatch'].forEach(id => {
         document.getElementById(id)?.addEventListener('input', validatePDAForm);
     });
     const slInput = document.getElementById('inputSoLuong');
@@ -1070,60 +1163,49 @@ function initPDAFormListeners() {
 
 function generateReceipt(shouldStay = false) {
     const pallet = document.getElementById('inputPallet')?.value.trim() || 'P-XXX';
-    const vattu = document.getElementById('inputVatTu')?.value.trim() || 'VT-XXX';
-    const soluong = document.getElementById('inputSoLuong')?.value || '0';
-    const expiry = document.getElementById('inputExpiry')?.value;
-
-    if (!expiry) return alert('Vui lòng chọn ngày hết hạn');
+    
+    if (tempAddedProducts.length === 0) return alert('Vui lòng thêm sản phẩm vào danh sách');
 
     const now = new Date();
+    // Use first product info for order code generation or generic
+    const firstP = tempAddedProducts[0];
     const dateStr = String(now.getDate()).padStart(2, '0') + String(now.getMonth() + 1).padStart(2, '0') + now.getFullYear();
-    const code = `${pallet}_${vattu}_${soluong}_${dateStr}`;
+    const code = `${pallet}_MIX_${dateStr}`;
+
+    // Map temp products to materials array
+    const materials = tempAddedProducts.map(p => ({
+        code: p.code,
+        name: p.name,
+        qty: p.qty,
+        unit: 'Cái',
+        expiryDate: p.expiryDate,
+        batch: p.batch
+    }));
 
     const newOrder = {
-        id: Date.now(), code,
-        supplier: 'PDA Import', status: 'PENDING',
+        id: Date.now(), 
+        code,
+        supplier: 'PDA Import', 
+        status: 'PENDING',
         priority: document.getElementById('inputPriority')?.checked || false,
         type: currentCreateType,
         creator: { id: 'US_PDA', name: 'admin' },
-        createdAt: now, pallets: [pallet],
-        materials: [{ code: vattu, name: document.getElementById('inputVatTu')?.value || 'Sản phẩm PDA', qty: parseInt(soluong), unit: 'Cái', expiryDate: expiry }],
-        batch: selectedBatchForCreate ? { code: selectedBatchForCreate.code, name: selectedBatchForCreate.name } : null,
-        process: 'Quy trình mặc định', bin: ''
+        createdAt: now, 
+        pallets: [pallet],
+        materials: materials,
+        batch: tempAddedProducts[0].batch, // Primary batch reference
+        process: 'Quy trình mặc định', 
+        bin: ''
     };
 
     MOCK_INBOUND_ORDERS.unshift(newOrder);
     saveInboundOrders();
 
     if (shouldStay) {
-        // Clear only material inputs to continue creating for same pallet/batch
-        ['inputPallet', 'inputVatTu', 'inputSoLuong', 'inputExpiry'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.value = '';
-                el.readOnly = false;
-                el.style.backgroundColor = '';
-                el.style.cursor = '';
-            }
-        });
-        document.getElementById('inputPriority').checked = false;
-        
-        // Reset dynamic info displays
-        document.getElementById('pallet-capacity-info').style.display = 'none';
-        document.getElementById('material-weight-info').style.display = 'none';
-        document.getElementById('total-weight-info').style.display = 'none';
-        
-        currentPalletMaxCapacity = null;
-        currentMaterialWeightPerUnit = null;
-
-        const btnScan = document.getElementById('btnScanVatTu');
-        if (btnScan) btnScan.disabled = false;
-        
-        const historySection = document.getElementById('pallet-history-section');
-        if (historySection) { historySection.style.display = 'none'; document.getElementById('pallet-history-body').innerHTML = ''; }
-
-        validatePDAForm();
-        showToast('Đã thêm lệnh. Mời bạn nhập lệnh tiếp theo cho lô này.', 'success');
+        // Clear all except pallet if they want to reuse pallet? 
+        // Actually usually they want a new pallet.
+        openCreateModal(); // Reset everything
+        showToast('Đã tạo lệnh nhập kho thành công cho pallet này.', 'success');
         
         // Refocus for next entry
         setTimeout(() => document.getElementById('inputPallet')?.focus(), 100);
