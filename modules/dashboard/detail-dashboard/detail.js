@@ -70,9 +70,8 @@ var DATA = {
   completionTimes: [
     { label: 'Nhập mới',         time: 6.5, count: 124, color: 'var(--accent)' },
     { label: 'Nhập lại',         time: 4.2, count: 85,  color: 'var(--cyan)' },
-    { label: 'Nhập chuyền thẳng', time: 5.8, count: 42,  color: 'var(--green)' },
-    { label: 'Xuất theo pallet', time: 7.4, count: 156, color: 'var(--amber)' },
-    { label: 'Xuất theo vật tư', time: 5.0, count: 98,  color: 'var(--purple)' }
+    { label: 'Xuất hủy',         time: 5.8, count: 42,  color: 'var(--red)' },
+    { label: 'Xuất bán hàng',     time: 7.4, count: 156, color: 'var(--amber)' }
   ],
   errors: [
     { rank:'#1', rankCls:'r1', name:'Lỗi cảm biến vật cản (AMR)', count:142, pct:100, color:'#dc2626', mttr:'18ph', devices:['AMR-07','AMR-12'], trend:'+12%', trendUp:true },
@@ -98,6 +97,29 @@ var DATA = {
       pct:83, fillCls:'amber', badgeCls:'warn', badgeLabel:'KIỂM TRA',
       linkedError:'Mất kết nối PLC' },
   ],
+  inventory: {
+    total: 15420,
+    groups: [
+      { name: 'Chuối Nhật Bản', val: 9200, color: '#2563eb', 
+        products: [ 
+          { name: '16CP - SEIKA', v: 4500 }, 
+          { name: '26CP - DEL MONTE', v: 3200 },
+          { name: '40CP - TAITO', v: 1500 }
+        ] 
+      },
+      { name: 'Chuối Trung Quốc', val: 6220, color: '#7c3aed', 
+        products: [ 
+          { name: 'A456 - TROPICAL', v: 3800 }, 
+          { name: 'B789 - SOFIA', v: 2420 }
+        ] 
+      }
+    ]
+  },
+  productStats: {
+    lines: 2,
+    groups: 12,
+    products: 156
+  }
 };
 
 /* ── CLOCK ─────────────────────────────────────────── */
@@ -248,6 +270,62 @@ function renderKPIPies() {
 
   // Số thiết bị
   renderDevicePie();
+
+  // ── Tổng tồn kho ──
+  renderInventory();
+}
+
+/* ── INVENTORY ─────────────────────────────────────── */
+function renderInventory() {
+  const inv = DATA.inventory;
+  const totalEl = document.getElementById('inv-total');
+  if(totalEl) totalEl.textContent = inv.total.toLocaleString();
+
+  const legendEl = document.getElementById('inv-legend');
+  if(legendEl) {
+    legendEl.innerHTML = inv.groups.map((g, idx) => {
+      const subItems = g.products.map(p => `
+        <div class="tree-sub-item">
+          <i class="fas fa-box tree-icon"></i>
+          <span class="tree-name">${p.name}</span>
+          <span class="tree-val">${p.v.toLocaleString()}</span>
+        </div>
+      `).join('');
+      return `
+        <div class="kpi-leg-row">
+          <span class="kpi-leg-dot" style="background:${g.color}"></span>
+          <span class="kpi-leg-label">${g.name}</span>
+          <span class="kpi-leg-val">${g.val.toLocaleString()}</span>
+        </div>
+        <div class="tree-sub-list">${subItems}</div>
+      `;
+    }).join('');
+  }
+  drawDonut('c-inv', inv.groups.map(g=>g.val), inv.groups.map(g=>g.color));
+}
+
+/* ── PRODUCT STATS ─────────────────────────────────── */
+function renderProductStats() {
+  const s = DATA.productStats;
+  const el = document.getElementById('prod-stats-content');
+  if(!el) return;
+  el.innerHTML = `
+    <div class="kpi-leg-row">
+      <i class="fas fa-layer-group" style="color:var(--accent); width:16px;"></i>
+      <span class="kpi-leg-label">Dòng sản phẩm</span>
+      <span class="kpi-leg-val">${s.lines}</span>
+    </div>
+    <div class="kpi-leg-row" style="margin-top:5px;">
+      <i class="fas fa-tags" style="color:var(--purple); width:16px;"></i>
+      <span class="kpi-leg-label">Nhóm sản phẩm</span>
+      <span class="kpi-leg-val">${s.groups}</span>
+    </div>
+    <div class="kpi-leg-row" style="margin-top:5px;">
+      <i class="fas fa-barcode" style="color:var(--cyan); width:16px;"></i>
+      <span class="kpi-leg-label">Sản phẩm</span>
+      <span class="kpi-leg-val">${s.products}</span>
+    </div>
+  `;
 }
 
 /* ── DEVICE PIE ───────────────────────────────────── */
@@ -350,8 +428,9 @@ function renderCompletionBars() {
   // max y is 10 minutes
   wrap.innerHTML = list.map(item => {
     const pct = Math.min(100, (item.time / 10) * 100);
+    const colWidth = (100 / list.length).toFixed(1);
     return `
-      <div style="display:flex; flex-direction:column; align-items:center; width:20%; height:100%; position:relative;">
+      <div style="display:flex; flex-direction:column; align-items:center; width:${colWidth}%; height:100%; position:relative;">
         <div style="flex:1; display:flex; align-items:flex-end; width:100%; justify-content:center; padding-bottom:10px;">
           <div style="width:32px; height:${pct}%; background:${item.color}; border-radius:4px 4px 0 0; transition:height 0.8s ease;"
                data-tip="${item.label}: ${item.count} lệnh&#10;TB thời gian hoàn thành: ${item.time} phút">
@@ -510,6 +589,8 @@ function initAll() {
   renderKanban();
   renderErrors();
   renderPredictive();
+  renderInventory();
+  renderProductStats();
 }
 
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initAll);

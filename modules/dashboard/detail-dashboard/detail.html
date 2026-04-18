@@ -14,7 +14,7 @@
 <div class="dash">
 
   <!-- ROW 0: KPI STRIP -->
-  <div class="row-kpi">
+  <div class="row-kpi row-kpi-3">
     <!-- Pie: Vị trí kho (chiếm 2 cột) -->
     <div class="kpi-pie-card">
       <div class="kpi-pie-head">
@@ -47,6 +47,39 @@
           </div>
         </div>
         <div class="kpi-pie-legend dev-legend" id="area-legend">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </div>
+    <!-- Card: Thống kê sản phẩm -->
+    <div class="kpi-pie-card">
+      <div class="kpi-pie-head">
+        <i class="fas fa-box-open"></i>
+        <span>Thống kê sản phẩm</span>
+      </div>
+      <div class="kpi-pie-body" style="justify-content:center;">
+        <div class="kpi-pie-legend" id="prod-stats-content" style="gap:15px; padding:10px;">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row-kpi row-kpi-4" style="margin-top:20px;">
+    <!-- Pie: Tổng tồn kho -->
+    <div class="kpi-pie-card">
+      <div class="kpi-pie-head">
+        <i class="fas fa-cubes"></i>
+        <span>Tổng tồn kho</span>
+      </div>
+      <div class="kpi-pie-body">
+        <div class="kpi-pie-wrap">
+          <canvas id="c-inv" width="110" height="110"></canvas>
+          <div class="kpi-pie-center">
+            <span class="kpi-pie-n" id="inv-total">0</span>
+          </div>
+        </div>
+        <div class="kpi-pie-legend dev-legend" id="inv-legend">
           <!-- Rendered by JS -->
         </div>
       </div>

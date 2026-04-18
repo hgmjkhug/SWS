@@ -1085,21 +1085,42 @@ const COLS = 57;
             });
         }
 
-        // Card 1: Command List
+        // ── Helper: Format time as HH:MM:SS ──
+        function fmtTime(d) {
+            return d.toLocaleTimeString('vi-VN', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        // ═══════════════════════════════════════════════════
+        // Card 1: Danh sách lệnh – 8 shuttle (6 riêng + 2 chung)
+        // ═══════════════════════════════════════════════════
         const cmdCard = document.querySelector('.nl-panel-card:nth-child(1)');
         const cmdList = document.getElementById('nlCmdList');
         if (cmdCard && cmdList) {
-            // Data
+            const products = [
+                'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL',
+                'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA',
+                'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE',
+                'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA',
+                'Chuối Trung Quốc/ Chinese bananas - CL - DASANG',
+                'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL',
+                'Chuối Nhật Bản/ Japanese bananas - 28CP - RCL',
+                'Chuối Trung Quốc/ Chinese bananas - 16CP - TROPICAL'
+            ];
+            // 6 Shuttle riêng (2 per module) + 2 Shuttle chung (nhập/xuất)
             const commands = [
-                { status: 'waiting', type: 'in', code: 'CMD-28240801', product: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', sku: 'MAT-001', pallet: 'PLT-00142' },
-                { status: 'active', type: 'out', code: 'CMD-28240802', product: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', sku: 'MAT-002', pallet: 'PLT-00098' },
-                { status: 'done', type: 'in', code: 'CMD-28240803', product: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', sku: 'MAT-003', pallet: 'PLT-00261' },
-                { status: 'error', type: 'out', code: 'CMD-28240804', product: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', sku: 'MAT-004', pallet: 'PLT-00055' },
-                { status: 'waiting', type: 'in', code: 'CMD-28240805', product: 'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA', sku: 'MAT-005', pallet: 'PLT-00318' },
-                { status: 'active', type: 'in', code: 'CMD-28240806', product: 'Chuối Trung Quốc/ Chinese bananas - CL - DASANG', sku: 'MAT-007', pallet: 'PLT-00450' },
+                { shuttle: 'Shuttle riêng A1', status: 'active', type: 'in', code: `CMD-${new Date().getFullYear()}0401`, product: products[0], pallet: 'PLT-00142' },
+                { shuttle: 'Shuttle riêng A2', status: 'active', type: 'out', code: `CMD-${new Date().getFullYear()}0402`, product: products[1], pallet: 'PLT-00098' },
+                { shuttle: 'Shuttle riêng B1', status: 'active', type: 'in', code: `CMD-${new Date().getFullYear()}0403`, product: products[2], pallet: 'PLT-00261' },
+                { shuttle: 'Shuttle riêng B2', status: 'waiting', type: 'out', code: `CMD-${new Date().getFullYear()}0404`, product: products[3], pallet: 'PLT-00055' },
+                { shuttle: 'Shuttle riêng C1', status: 'active', type: 'in', code: `CMD-${new Date().getFullYear()}0405`, product: products[4], pallet: 'PLT-00318' },
+                { shuttle: 'Shuttle riêng C2', status: 'active', type: 'out', code: `CMD-${new Date().getFullYear()}0406`, product: products[5], pallet: 'PLT-00450' },
+                { shuttle: 'Shuttle chung nhập', status: 'active', type: 'in', code: `CMD-${new Date().getFullYear()}0407`, product: products[6], pallet: 'PLT-00512' },
+                { shuttle: 'Shuttle chung xuất', status: 'active', type: 'out', code: `CMD-${new Date().getFullYear()}0408`, product: products[7], pallet: 'PLT-00635' },
             ];
 
-            // Inject tab container if needed
+            const cmdBadge = document.getElementById('nlCmdBadge');
+            if (cmdBadge) cmdBadge.textContent = `${commands.length} lệnh`;
+
             let tabsContainer = document.getElementById('nlCmdTabs');
             if (!tabsContainer) {
                 tabsContainer = document.createElement('div');
@@ -1112,7 +1133,7 @@ const COLS = 57;
                 const filtered = status === 'all' ? commands : commands.filter(c => c.status === status);
                 cmdList.innerHTML = filtered.map(cmd => `
                     <div class="nl-cmd-item ${cmd.status === 'active' ? 'active' : ''}">
-                        <div class="nl-cmd-dot" style="background: ${cmd.status === 'error' ? '#ef4444' : cmd.status === 'done' ? '#10b981' : '#3b82f6'}"></div>
+                        <div class="nl-cmd-dot" style="background: ${cmd.status === 'error' ? '#ef4444' : cmd.status === 'done' ? '#10b981' : cmd.status === 'waiting' ? '#f59e0b' : '#3b82f6'}"></div>
                         <div class="nl-cmd-body">
                             <div class="nl-cmd-top-row">
                                 <span class="nl-cmd-tag ${cmd.type === 'in' ? 'nl-tag-in' : 'nl-tag-out'}">${cmd.type === 'in' ? 'Nhập kho' : 'Xuất kho'}</span>
@@ -1134,53 +1155,212 @@ const COLS = 57;
             ];
 
             renderTabs('nlCmdTabs', cmdTabs, updateCmdList);
-            updateCmdList('all'); // Initial view to 'all' as requested
+            updateCmdList('all');
         }
 
-        // Card 2: Log List (unchanged but re-populated)
+        // ═══════════════════════════════════════════════════
+        // Card 2: Log hệ thống – REAL-TIME theo quy trình nhập/xuất kho
+        //   Nhập: Shuttle chung nhập → Lifter nhập → Shuttle riêng
+        //   Xuất: Shuttle riêng → Lifter xuất → Shuttle chung xuất
+        // ═══════════════════════════════════════════════════
         const logList = document.getElementById('nlLogList');
+        const logBadge = document.getElementById('nlLogBadge');
         if (logList) {
-            const logs = [
-                { time: '09:15:21', icon: '✓', msg: 'Shuttle S2 bỏ pallet vào vị trí <span class="loc">3-D4</span> thành công', type: 'ok' },
-                { time: '09:16:03', icon: '🚗', msg: 'AMR-01 đã đưa pallet <span class="loc">PLT-00098</span> tới trạm nhập kho', type: 'amr' },
-                { time: '09:16:18', icon: '⬆', msg: 'Lifter L2 lấy pallet thành công', type: 'lift' },
-                { time: '09:16:29', icon: '⬆', msg: 'Lifter L2 đưa tới tầng <span class="loc">1</span> thành công', type: 'lift' },
-                { time: '09:16:37', icon: '→', msg: 'Shuttle S1 di chuyển tới vị trí Lifter để lấy hàng', type: 'shut' },
-                { time: '09:16:44', icon: '✓', msg: 'Shuttle S1 lấy pallet thành công', type: 'ok' },
-                { time: '09:16:52', icon: '→', msg: 'Shuttle S1 di chuyển tới vị trí đích', type: 'shut' },
-                { time: '09:17:01', icon: '✓', msg: 'Shuttle S1 bỏ pallet vào vị trí <span class="loc">1-B2</span> thành công', type: 'ok' },
+            const modules = ['A','B','C'];
+            const positions = ['1-B3','1-C5','1-D7','1-E4','1-F6','1-A2','1-C8','1-G3','1-H5','1-B7'];
+            const floors = ['1','2','3'];
+
+            // ─── QUY TRÌNH NHẬP KHO (các bước tự động) ───
+            const inboundSteps = [
+                { icon: '📦', tpl: 'WCS gửi tín hiệu → Shuttle chung nhập di chuyển từ vị trí cổng nhập đến lấy Pallet <span class="loc">PLT-{pallet}</span>' },
+                { icon: '→', tpl: 'Shuttle chung nhập di chuyển đến vị trí Lifter nhập <span class="loc">Kho mát {mod}</span>' },
+                { icon: '⬇', tpl: 'Shuttle chung nhập bỏ Pallet vào Lifter nhập <span class="loc">Kho mát {mod}</span>, di chuyển về cổng nhập' },
+                { icon: '✓', tpl: 'Shuttle chung nhập gửi tín hiệu về WCS – hoàn tất giao Pallet' },
+                { icon: '⚙', tpl: 'WCS nhận tín hiệu và thực hiện điều phối' },
+                { icon: '⬆', tpl: 'WCS → PLC điều khiển Lifter nhập <span class="loc">Kho mát {mod}</span> nâng Pallet lên tầng <span class="loc">{floor}</span>' },
+                { icon: '✓', tpl: 'Lifter nhập <span class="loc">Kho mát {mod}</span> gửi tín hiệu hoàn tất về WCS' },
+                { icon: '⚙', tpl: 'WCS nhận tín hiệu và thực hiện điều phối' },
+                { icon: '→', tpl: 'WCS → PLC điều khiển Shuttle riêng <span class="loc">{mod}1</span> di chuyển từ vị trí chờ đến Lifter nhập' },
+                { icon: '📦', tpl: 'Shuttle riêng <span class="loc">{mod}1</span> lấy Pallet từ Lifter nhập thành công' },
+                { icon: '→', tpl: 'Shuttle riêng <span class="loc">{mod}1</span> di chuyển Pallet đến vị trí lưu trữ <span class="loc">{pos}</span>' },
+                { icon: '✓', tpl: 'Shuttle riêng <span class="loc">{mod}1</span> bỏ Pallet tại vị trí <span class="loc">{pos}</span> – gửi tín hiệu WCS' },
+                { icon: '⚙', tpl: 'WCS → PLC: Lifter nhập <span class="loc">Kho mát {mod}</span> hạ xuống tầng 1, Shuttle riêng <span class="loc">{mod}1</span> về vị trí chờ' },
+                { icon: '✓', tpl: 'Lifter và Shuttle riêng gửi tín hiệu hoàn tất về WCS' },
+                { icon: '✅', tpl: 'WCS gửi tín hiệu đến WMS – Lệnh nhập kho <span class="loc">CMD-{cmd}</span> hoàn thành' },
             ];
-            logList.innerHTML = logs.map((log, i) => `
-                <div class="nl-log-row">
-                    <span class="nl-log-time">${log.time}</span>
-                    <span class="nl-log-icon">${log.icon}</span>
-                    <span class="nl-log-msg">${log.msg}</span>
-                </div>
-                ${i < logs.length - 1 ? '<div class="nl-log-divider"></div>' : ''}
-            `).join('');
+
+            // ─── QUY TRÌNH XUẤT KHO (các bước tự động) ───
+            const outboundSteps = [
+                { icon: '⚙', tpl: 'WCS → PLC điều khiển Shuttle riêng <span class="loc">{mod}2</span> di chuyển từ vị trí chờ đến <span class="loc">{pos}</span>' },
+                { icon: '📦', tpl: 'Shuttle riêng <span class="loc">{mod}2</span> lấy Pallet tại vị trí <span class="loc">{pos}</span> thành công' },
+                { icon: '→', tpl: 'Shuttle riêng <span class="loc">{mod}2</span> di chuyển Pallet đến ô chờ trước Lifter xuất' },
+                { icon: '✓', tpl: 'Shuttle riêng <span class="loc">{mod}2</span> đứng chờ – gửi tín hiệu về WCS' },
+                { icon: '⚙', tpl: 'WCS nhận tín hiệu và thực hiện điều phối' },
+                { icon: '⬆', tpl: 'WCS → PLC điều khiển Lifter xuất <span class="loc">Kho mát {mod}</span> nâng lên tầng <span class="loc">{floor}</span>' },
+                { icon: '→', tpl: 'Shuttle riêng <span class="loc">{mod}2</span> di chuyển vào vị trí Lifter xuất, bỏ Pallet' },
+                { icon: '✓', tpl: 'Shuttle riêng <span class="loc">{mod}2</span> rời Lifter xuất – gửi tín hiệu WCS' },
+                { icon: '⚙', tpl: 'WCS → PLC: Lifter xuất <span class="loc">Kho mát {mod}</span> hạ xuống tầng 1, Shuttle riêng <span class="loc">{mod}2</span> về vị trí chờ' },
+                { icon: '✓', tpl: 'Lifter xuất và Shuttle riêng <span class="loc">{mod}2</span> gửi tín hiệu hoàn tất về WCS' },
+                { icon: '⚙', tpl: 'WCS nhận tín hiệu và thực hiện điều phối' },
+                { icon: '→', tpl: 'WCS → PLC điều khiển Shuttle chung xuất di chuyển từ cổng xuất đến Lifter xuất <span class="loc">Kho mát {mod}</span>' },
+                { icon: '📦', tpl: 'Shuttle chung xuất lấy Pallet từ Lifter xuất <span class="loc">Kho mát {mod}</span> thành công' },
+                { icon: '→', tpl: 'Shuttle chung xuất di chuyển Pallet về vị trí cổng xuất' },
+                { icon: '✓', tpl: 'Shuttle chung xuất gửi tín hiệu hoàn tất về WCS' },
+                { icon: '✅', tpl: 'WCS gửi tín hiệu đến WMS – Lệnh xuất kho <span class="loc">CMD-{cmd}</span> hoàn thành' },
+            ];
+
+            let currentLogs = [];
+            let logCounter = 0;
+            const MAX_LOGS = 50;
+
+            // Biến theo dõi chuỗi log (mô phỏng quy trình tuần tự)
+            let activeFlows = []; // Mỗi flow = { steps, stepIdx, mod, pos, floor, pallet, cmd }
+
+            function startNewFlow() {
+                const isInbound = Math.random() > 0.4; // 60% nhập, 40% xuất
+                const mod = modules[Math.floor(Math.random() * modules.length)];
+                const pos = positions[Math.floor(Math.random() * positions.length)];
+                const floor = floors[Math.floor(Math.random() * floors.length)];
+                const pallet = String(Math.floor(Math.random() * 900) + 100).padStart(5,'0');
+                const cmd = String(Math.floor(Math.random() * 9000) + 1000);
+                activeFlows.push({
+                    steps: isInbound ? inboundSteps : outboundSteps,
+                    stepIdx: 0,
+                    mod, pos, floor, pallet, cmd,
+                    type: isInbound ? 'in' : 'out'
+                });
+            }
+
+            function processMsg(tpl, flow) {
+                return tpl
+                    .replace(/\{mod\}/g, flow.mod)
+                    .replace(/\{pos\}/g, flow.pos)
+                    .replace(/\{floor\}/g, flow.floor)
+                    .replace(/\{pallet\}/g, flow.pallet)
+                    .replace(/\{cmd\}/g, flow.cmd);
+            }
+
+            function tickLogs() {
+                const now = new Date();
+                // Bắt đầu flow mới nếu cần (tối đa 3 flow đồng thời)
+                if (activeFlows.length < 3 && Math.random() > 0.4) {
+                    startNewFlow();
+                }
+
+                // Xử lý mỗi flow: lấy 1 bước tiếp theo
+                const newEntries = [];
+                activeFlows = activeFlows.filter(flow => {
+                    if (flow.stepIdx < flow.steps.length) {
+                        const step = flow.steps[flow.stepIdx];
+                        const msg = processMsg(step.tpl, flow);
+                        logCounter++;
+                        newEntries.push({
+                            time: fmtTime(now),
+                            icon: step.icon,
+                            msg,
+                            type: flow.type,
+                            id: logCounter
+                        });
+                        flow.stepIdx++;
+                        return true;
+                    }
+                    return false; // flow hoàn thành → loại bỏ
+                });
+
+                // Thêm vào đầu danh sách (mới nhất trước)
+                currentLogs = [...newEntries.reverse(), ...currentLogs];
+                if (currentLogs.length > MAX_LOGS) currentLogs = currentLogs.slice(0, MAX_LOGS);
+                renderLogList();
+            }
+
+            function renderLogList() {
+                logList.innerHTML = currentLogs.map((log, i) => `
+                    <div class="nl-log-row ${i === 0 ? 'nl-log-new' : ''}">
+                        <span class="nl-log-time">${log.time}</span>
+                        <span class="nl-log-icon">${log.icon}</span>
+                        <span class="nl-log-msg">${log.msg}</span>
+                    </div>
+                    ${i < currentLogs.length - 1 ? '<div class="nl-log-divider"></div>' : ''}
+                `).join('');
+                if (logBadge) logBadge.textContent = `${currentLogs.length} sự kiện`;
+            }
+
+            // Khởi tạo ban đầu: chạy nhanh 2 flow hoàn chỉnh để có log sẵn
+            for (let f = 0; f < 2; f++) startNewFlow();
+            const initTime = new Date();
+            let initStep = 0;
+            activeFlows.forEach(flow => {
+                while (flow.stepIdx < flow.steps.length) {
+                    const step = flow.steps[flow.stepIdx];
+                    const pastTime = new Date(initTime.getTime() - (30 - initStep) * 2000);
+                    const msg = processMsg(step.tpl, flow);
+                    logCounter++;
+                    currentLogs.push({
+                        time: fmtTime(pastTime),
+                        icon: step.icon,
+                        msg,
+                        type: flow.type,
+                        id: logCounter
+                    });
+                    flow.stepIdx++;
+                    initStep++;
+                }
+            });
+            activeFlows = []; // Reset sau init
+            renderLogList();
+
+            // Auto-refresh: mỗi 3 giây xử lý 1 step từ mỗi flow đang chạy
+            const logInterval = setInterval(tickLogs, 3000);
+            activeTimeouts.push(logInterval);
         }
 
-        // Card 3: Activity List (With Status Tabs)
+        // ═══════════════════════════════════════════════════
+        // Card 3: Danh sách hoạt động – 8 Shuttle + 6 Lifter = 14 thiết bị
+        //   8 Shuttle = 6 riêng (2/module) + 2 chung (1 nhập + 1 xuất)
+        //   6 Lifter  = 2/module (1 nhập + 1 xuất)
+        // ═══════════════════════════════════════════════════
         const activityList = document.getElementById('nlActivityList');
         if (activityList) {
             const activities = [];
-            // Statuses for simulation
-            const statuses = ['active', 'inactive', 'error'];
-            
-            for(let i=1; i<=14; i++) {
-                let status = i % 8 === 0 ? 'error' : i % 3 === 0 ? 'inactive' : 'active';
-                let mission = status === 'active' ? (i % 2 === 0 ? 'Nhiệm vụ: Lệnh xuất hàng' : 'Nhiệm vụ: Lệnh nhập hàng') : 
-                              status === 'error' ? 'Nhiệm vụ: Lỗi cảm biến hành trình' : 'Nhiệm vụ: Đang chờ lệnh';
-                let battery = i === 6 ? 15 : i === 12 ? 18 : Math.floor(Math.random() * (95 - 40 + 1)) + 40;
-                activities.push({ name: `Shuttle ${i.toString().padStart(2, '0')}`, type: 'shuttle', mission, battery, status });
-            }
-            for(let i=1; i<=6; i++) {
-                let status = i % 5 === 0 ? 'error' : 'active';
-                let mission = status === 'active' ? 'Nhiệm vụ: Đang hoạt động bình thường' : 'Nhiệm vụ: Lỗi phanh khẩn cấp';
-                activities.push({ name: `Lifter ${i.toString().padStart(2, '0')}`, type: 'lifter', mission, battery: 95, status });
-            }
 
-            // Inject tab container
+            // ─── 6 Shuttle riêng (2 per module) ───
+            const shuttleRieng = [
+                { name: 'Shuttle riêng A1', module: 'Kho mát A', status: 'active', mission: 'Di chuyển Pallet từ Lifter nhập đến vị trí lưu trữ 1-D4', battery: 82 },
+                { name: 'Shuttle riêng A2', module: 'Kho mát A', status: 'active', mission: 'Lấy Pallet tại 1-C6, di chuyển đến Lifter xuất', battery: 75 },
+                { name: 'Shuttle riêng B1', module: 'Kho mát B', status: 'active', mission: 'Chờ tại vị trí Lifter nhập – chờ Lifter nâng Pallet lên', battery: 68 },
+                { name: 'Shuttle riêng B2', module: 'Kho mát B', status: 'inactive', mission: 'Đang chờ lệnh tại vị trí mặc định', battery: 90 },
+                { name: 'Shuttle riêng C1', module: 'Kho mát C', status: 'active', mission: 'Di chuyển Pallet đến vị trí lưu trữ 1-G3', battery: 55 },
+                { name: 'Shuttle riêng C2', module: 'Kho mát C', status: 'error', mission: 'Lỗi cảm biến hành trình – cần kiểm tra', battery: 15 }
+            ];
+            shuttleRieng.forEach(s => {
+                activities.push({ name: s.name, type: 'shuttle', mission: `Nhiệm vụ: ${s.mission}`, battery: s.battery, status: s.status, module: s.module });
+            });
+
+            // ─── 2 Shuttle chung (nhập + xuất) ───
+            const shuttleChung = [
+                { name: 'Shuttle chung nhập', module: 'Tầng 1', status: 'active', mission: 'Di chuyển từ cổng nhập đến Lifter nhập Kho mát B', battery: 78 },
+                { name: 'Shuttle chung xuất', module: 'Tầng 1', status: 'active', mission: 'Lấy Pallet từ Lifter xuất Kho mát A, về cổng xuất', battery: 65 }
+            ];
+            shuttleChung.forEach(s => {
+                activities.push({ name: s.name, type: 'shuttle', mission: `Nhiệm vụ: ${s.mission}`, battery: s.battery, status: s.status, module: s.module });
+            });
+
+            // ─── 6 Lifter (2 per module: 1 nhập + 1 xuất) ───
+            const lifterMissions = [
+                { name: 'Lifter nhập A', module: 'Kho mát A', status: 'active', mission: 'Đang nâng Pallet lên tầng 2', battery: 95 },
+                { name: 'Lifter xuất A', module: 'Kho mát A', status: 'active', mission: 'Đang hạ xuống tầng 1 sau khi nhận Pallet', battery: 92 },
+                { name: 'Lifter nhập B', module: 'Kho mát B', status: 'active', mission: 'Chờ Shuttle chung nhập bỏ Pallet', battery: 88 },
+                { name: 'Lifter xuất B', module: 'Kho mát B', status: 'active', mission: 'Đang nâng lên tầng 1 để nhận Pallet từ Shuttle riêng', battery: 90 },
+                { name: 'Lifter nhập C', module: 'Kho mát C', status: 'error', mission: 'Lỗi phanh khẩn cấp – dừng hoạt động', battery: 78 },
+                { name: 'Lifter xuất C', module: 'Kho mát C', status: 'active', mission: 'Đang hoạt động bình thường – chờ lệnh', battery: 95 }
+            ];
+            lifterMissions.forEach(l => {
+                activities.push({ name: l.name, type: 'lifter', mission: `Nhiệm vụ: ${l.mission}`, battery: l.battery, status: l.status, module: l.module });
+            });
+
+            const actBadge = document.getElementById('nlActivityBadge');
+            if (actBadge) actBadge.textContent = `${activities.length} thiết bị`;
+
             let tabsContainer = document.getElementById('nlActTabs');
             if (!tabsContainer) {
                 tabsContainer = document.createElement('div');
@@ -1226,10 +1406,12 @@ const COLS = 57;
             ];
 
             renderTabs('nlActTabs', actTabs, updateActList);
-            updateActList('all'); // Initial view
+            updateActList('all');
         }
 
-        // Card 4: Stats (V2 Design)
+        // ═══════════════════════════════════════════════════
+        // Card 4: Stats (V2 Design) – giữ nguyên
+        // ═══════════════════════════════════════════════════
         const statsCard = document.getElementById('nlStatsCard');
         if (statsCard) {
             statsCard.innerHTML = `

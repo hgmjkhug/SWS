@@ -73,7 +73,9 @@ body { background: var(--bg); color: var(--text-1); min-height: 100vh; font-fami
 }
 
 /* ── ROW 0: KPI STRIP ── */
-.row-kpi { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.row-kpi { display: grid; gap: 10px; }
+.row-kpi-3 { grid-template-columns: repeat(3, 1fr); }
+.row-kpi-4 { grid-template-columns: repeat(4, 1fr); }
 .kpi-card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r); box-shadow: var(--sh);
