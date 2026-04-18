@@ -5,7 +5,6 @@
     var mainCurrentPage = 1;
     var batchSearchQuery = "";
     var statusFilter = "ALL";
-    var typeFilter = "ALL";
     var selectedCreatorFilterId = "ALL";
     var activeModalPicker = null;
 
@@ -158,10 +157,7 @@
                     
                     MOCK_BATCHES = batches.map(function(b, i) {
                         b.createdAt = new Date(b.createdAt.getTime() + offset);
-                        if (!b.batchType) b.batchType = (i % 2 === 0) ? 'EXPORT' : 'IMPORT';
-                        
                         // Migration for new fields
-                        if (!b.arrivalDate) b.arrivalDate = b.createdAt.toISOString();
                         if (b.driverName === undefined) b.driverName = 'Nguyễn Văn ' + (i % 10);
                         if (b.plateNumber === undefined) b.plateNumber = '29A-' + (1000 + i);
                         if (b.moocNumber === undefined) b.moocNumber = 'M-' + (200 + i);
@@ -216,10 +212,7 @@
                 productType: productType.name,
                 grades: ['A', 'B'],
                 status: status,
-                batchType: (i % 2 === 0) ? 'EXPORT' : 'IMPORT',
-                importDate: null,
-                exportDate: exportDate,
-                arrivalDate: createdAt.toISOString(),
+                productType: productType.name,
                 totalQty: totalQty,
                 executedQty: executedQty,
                 creator: creator,
@@ -279,12 +272,9 @@
                 var c = b.createdAt ? new Date(b.createdAt).getTime() : 0;
                 matchesDate = c >= s && c <= e;
             }
-
             var matchesCreator = selectedCreatorFilterId === 'ALL' || (b.creator && b.creator.id === selectedCreatorFilterId);
-            var bt = (b.batchType || 'IMPORT').toString().toUpperCase().trim();
-            var matchesType = (typeFilter === 'ALL') || (bt === typeFilter.toUpperCase().trim());
             
-            return matchesSearch && matchesStatus && matchesType && matchesCreator && matchesDate;
+            return matchesSearch && matchesStatus && matchesCreator && matchesDate;
         });
 
         var totalItems = filtered.length;
@@ -295,7 +285,7 @@
         var pageData = filtered.slice(startIdx, startIdx + PAGE_SIZE);
 
         if (totalItems === 0) {
-            tbody.innerHTML = '<tr><td colspan="11" class="text-center" style="padding:40px; color:#64748b;"><i class="fas fa-box-open" style="font-size:24px; margin-bottom:10px; display:block; opacity:0.5;"></i>Không tìm thấy dữ liệu phù hợp</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center" style="padding:40px; color:#64748b;"><i class="fas fa-box-open" style="font-size:24px; margin-bottom:10px; display:block; opacity:0.5;"></i>Không tìm thấy dữ liệu phù hợp</td></tr>';
             renderPaginationBar(0);
             return;
         }
@@ -303,31 +293,24 @@
         tbody.innerHTML = pageData.map(function(b, index) {
             var statusObj = STATUS_MAP[b.status] || { label: b.status, class: '' };
             var createdDateFormatted = formatTime(b.createdAt) + ' ' + formatDate(b.createdAt);
-            var arrivalDateFormatted = b.arrivalDate ? formatDate(new Date(b.arrivalDate)) : '-';
-            var completedDateFormatted = b.exportDate ? formatDate(new Date(b.exportDate)) : arrivalDateFormatted;
-
-            var batchTypeBadge = (b.batchType === 'EXPORT')
-                ? '<span class="batch-type-badge batch-type-export">Lô xuất</span>'
-                : '<span class="batch-type-badge batch-type-import">Lô nhập</span>';
 
             return `
                 <tr>
                     <td class="text-center">${startIdx + index + 1}</td>
                     <td style="font-weight: 700; color: #076EB8">${b.code}</td>
                     <td style="font-weight: 500">${b.name}</td>
-                    <td style="text-align:center">${batchTypeBadge}</td>
                     <td style="text-align:center; font-weight: 700;">${b.totalQty || 0}</td>
                     <td class="text-center" style="font-weight: 700; color: #10b981;">${b.executedQty || 0}</td>
                     <td class="text-center">${createdDateFormatted}</td>
-                    <td class="text-center">${completedDateFormatted}</td>
+                    <td class="text-center">${formatDate(b.exportDate || b.createdAt)}</td>
+                    <td class="text-center">
+                        <span class="status-badge ${statusObj.class}">${statusObj.label}</span>
+                    </td>
                     <td class="text-center">
                         <div style="line-height: 1.4">
                             <strong style="color: #1e293b">${b.creator ? b.creator.name : 'N/A'}</strong><br>
                             <span style="color: #64748b; font-size: 11px;">${b.creator ? b.creator.id : '-'}</span>
                         </div>
-                    </td>
-                    <td class="text-center">
-                        <span class="status-badge ${statusObj.class}">${statusObj.label}</span>
                     </td>
                     <td>
                         <div style="display: flex; justify-content: center; gap: 4px; align-items: center;">
@@ -414,25 +397,7 @@ function renderPaginationBar(totalItems) {
         mainCurrentPage = 1; window.renderTable();
     };
 
-    window.toggleTypeDropdown = function() {
-        var dropdown = document.getElementById('type-dropdown');
-        if (dropdown) dropdown.classList.toggle('open');
-    };
 
-    window.selectTypeFilter = function(val, label) {
-        typeFilter = val;
-        var display = document.getElementById('type-selected-label');
-        if (display) display.innerText = label;
-        
-        var dropdown = document.getElementById('type-dropdown');
-        if (dropdown) {
-            dropdown.querySelectorAll('.dropdown-option').forEach(function(opt) {
-                opt.classList.toggle('active', opt.getAttribute('onclick').indexOf("'" + val + "'") !== -1);
-            });
-            dropdown.classList.remove('open');
-        }
-        mainCurrentPage = 1; window.renderTable();
-    };
 
 
 
@@ -450,8 +415,6 @@ function renderPaginationBar(totalItems) {
         // Reset fields
         document.getElementById('batch-code').value = '';
         document.getElementById('batch-name').value = '';
-        document.getElementById('batch-type').value = 'IMPORT';
-        document.getElementById('batch-arrival-date').value = '';
         
         // Transport fields
         document.getElementById('batch-driver-name').value = '';
@@ -475,8 +438,6 @@ function renderPaginationBar(totalItems) {
         document.getElementById('edit-batch-id').value = b.id;
         document.getElementById('edit-batch-code').value = b.code;
         document.getElementById('edit-batch-name').value = b.name;
-        document.getElementById('edit-batch-type').value = b.batchType || 'IMPORT';
-        document.getElementById('edit-batch-arrival-date').value = b.arrivalDate ? formatDate(new Date(b.arrivalDate)) : '';
         
         // Transport
         document.getElementById('edit-batch-driver-name').value = b.driverName || '';
@@ -500,13 +461,6 @@ function renderPaginationBar(totalItems) {
         var name = document.getElementById('batch-name').value.trim();
         if (!code || !name) { alert('Vui lòng điền đủ thông tin bắt buộc (mã lô, tên lô)'); return; }
         
-        var arrivalDateVal = document.getElementById('batch-arrival-date').value;
-        var arrivalDateISO = null;
-        if (arrivalDateVal) {
-            var parts = arrivalDateVal.split('/');
-            if (parts.length === 3) arrivalDateISO = parts[2] + '-' + parts[1] + '-' + parts[0];
-        }
-        
         MOCK_BATCHES.unshift({
             id: Date.now(),
             code: code,
@@ -515,10 +469,8 @@ function renderPaginationBar(totalItems) {
             grades: ['A'],
             status: 'NEW',
             createdAt: new Date(),
-            arrivalDate: arrivalDateISO,
             exportDate: null,
             creator: STAFF_LIST[0],
-            batchType: document.getElementById('batch-type').value,
             totalQty: 0,
             executedQty: 0,
             
@@ -542,16 +494,7 @@ function renderPaginationBar(totalItems) {
         var name = document.getElementById('edit-batch-name').value.trim();
         var idx = MOCK_BATCHES.findIndex(function(x) { return x.id == id; });
         if (idx !== -1) {
-            var arrivalDateVal = document.getElementById('edit-batch-arrival-date').value;
-            var arrivalDateISO = null;
-            if (arrivalDateVal) {
-                var parts = arrivalDateVal.split('/');
-                if (parts.length === 3) arrivalDateISO = parts[2] + '-' + parts[1] + '-' + parts[0];
-            }
-            
             MOCK_BATCHES[idx].name = name;
-            MOCK_BATCHES[idx].arrivalDate = arrivalDateISO;
-            MOCK_BATCHES[idx].batchType = document.getElementById('edit-batch-type').value;
 
             // Transport
             MOCK_BATCHES[idx].driverName = document.getElementById('edit-batch-driver-name').value.trim();
@@ -590,8 +533,6 @@ function renderPaginationBar(totalItems) {
         // General Info
         document.getElementById('view-batch-code').textContent = b.code || '-';
         document.getElementById('view-batch-name').textContent = b.name || '-';
-        document.getElementById('view-batch-type').textContent = b.batchType === 'EXPORT' ? 'Lô xuất' : 'Lô nhập';
-        document.getElementById('view-batch-arrival-date').textContent = b.arrivalDate ? formatDate(new Date(b.arrivalDate)) : '-';
 
         // Transport
         document.getElementById('view-batch-driver-name').textContent = b.driverName || '-';
@@ -703,9 +644,8 @@ function renderPaginationBar(totalItems) {
                             '<colgroup>' +
                                 '<col style="width:45px">' +
                                 '<col style="width:55px">' +
-                                '<col style="width:140px">' +
-                                '<col>' +
-                                '<col style="width:160px">' +
+                                '<col style="width:200px">' +
+                                '<col style="width:auto">' +
                                 '<col style="width:170px">' +
                             '</colgroup>' +
                             '<thead>' +
@@ -714,8 +654,7 @@ function renderPaginationBar(totalItems) {
                                     '<th class="text-center">STT</th>' +
                                     '<th>Mã sản phẩm</th>' +
                                     '<th>Tên sản phẩm</th>' +
-                                    '<th class="text-center">SL vật chứa</th>' +
-                                    '<th class="text-center">SL SP/Vật chứa</th>' +
+                                    '<th class="text-center">Số lượng</th>' +
                                 '</tr>' +
                             '</thead>' +
                         '</table>' +
@@ -725,9 +664,8 @@ function renderPaginationBar(totalItems) {
                             '<colgroup>' +
                                 '<col style="width:45px">' +
                                 '<col style="width:55px">' +
-                                '<col style="width:140px">' +
-                                '<col>' +
-                                '<col style="width:160px">' +
+                                '<col style="width:200px">' +
+                                '<col style="width:auto">' +
                                 '<col style="width:170px">' +
                             '</colgroup>' +
                             '<tbody id="inventory-table-body"></tbody>' +
@@ -789,8 +727,7 @@ function renderPaginationBar(totalItems) {
 
         tbody.innerHTML = filtered.map(function(p, index) {
             var isChecked = !!inventorySelectedIds[p.id];
-            var containerVal = (inventorySelectedIds[p.id] && inventorySelectedIds[p.id].containerCount) || '';
-            var perContainerVal = (inventorySelectedIds[p.id] && inventorySelectedIds[p.id].perContainer) || '';
+            var qtyVal = (inventorySelectedIds[p.id] && inventorySelectedIds[p.id].perContainer) || '';
             var groupName = (PRODUCT_GROUPS.find(function(g) { return g.id === p.group; }) || {}).name || '';
 
             return '<tr class="' + (isChecked ? 'row-selected' : '') + '">' +
@@ -798,8 +735,7 @@ function renderPaginationBar(totalItems) {
                 '<td class="text-center" style="color:#64748b;font-weight:600">' + (index + 1) + '</td>' +
                 '<td style="font-weight:700;color:#076EB8">' + p.code + '</td>' +
                 '<td><div style="line-height:1.4"><strong style="color:#1e293b">' + p.name + '</strong><br><span style="color:#94a3b8;font-size:11px">' + groupName + '</span></div></td>' +
-                '<td class="text-center"><input type="number" class="inventory-number-input" min="1" step="1" placeholder="0" value="' + containerVal + '" data-product-id="' + p.id + '" data-field="containerCount" oninput="window.onInventoryInputChange(this)" onkeydown="window.preventNonInteger(event)"></td>' +
-                '<td class="text-center"><input type="number" class="inventory-number-input" min="1" step="1" placeholder="0" value="' + perContainerVal + '" data-product-id="' + p.id + '" data-field="perContainer" oninput="window.onInventoryInputChange(this)" onkeydown="window.preventNonInteger(event)"></td>' +
+                '<td class="text-center"><input type="number" class="inventory-number-input" min="1" step="1" placeholder="0" value="' + qtyVal + '" data-product-id="' + p.id + '" data-field="perContainer" oninput="window.onInventoryInputChange(this)" onkeydown="window.preventNonInteger(event)"></td>' +
             '</tr>';
         }).join('');
 
@@ -932,15 +868,15 @@ function renderPaginationBar(totalItems) {
         var valid = true;
         Object.keys(inventorySelectedIds).forEach(function(pid) {
             var data = inventorySelectedIds[pid];
-            if (!data.containerCount || !data.perContainer) {
+            if (!data.perContainer) {
                 valid = false;
             } else {
-                totalQty += parseInt(data.containerCount) * parseInt(data.perContainer);
+                totalQty += parseInt(data.perContainer);
             }
         });
 
         if (!valid) {
-            showToast('Vui lòng điền đầy đủ số lượng vật chứa và số sản phẩm/vật chứa cho các sản phẩm đã chọn.', 'warning');
+            showToast('Vui lòng điền đầy đủ số lượng cho các sản phẩm đã chọn.', 'warning');
             return;
         }
 
@@ -1156,7 +1092,6 @@ function renderPaginationBar(totalItems) {
         document.getElementById('lifecycle-batch-info').innerHTML =
             '<div class="lifecycle-info-item"><i class="fa-solid fa-box-open" style="color:#076EB8"></i> <span>Mã lô: <strong>' + b.code + '</strong></span></div>' +
             '<div class="lifecycle-info-item"><i class="fa-solid fa-cube" style="color:#64748b"></i> <span>Sản phẩm: <strong>' + b.name + '</strong></span></div>' +
-            '<div class="lifecycle-info-item"><i class="fa-solid fa-tag" style="color:#64748b"></i> <span>Loại: <strong>' + b.productType + '</strong></span></div>' +
             '<div class="lifecycle-info-item"><span class="status-badge ' + statusObj.class + '">' + statusObj.label + '</span></div>';
         
         var tc = document.getElementById('lifecycle-timeline');

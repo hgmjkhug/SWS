@@ -27,20 +27,7 @@
                 </div>
             </div>
 
-            <!-- Batch Type Filter -->
-            <div class="filter-group">
-                <div class="status-custom-dropdown" id="type-dropdown">
-                    <div class="dropdown-selected" onclick="window.toggleTypeDropdown()">
-                        <span id="type-selected-label">Tất cả loại lô</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="dropdown-options">
-                        <div class="dropdown-option active" onclick="window.selectTypeFilter('ALL', 'Tất cả loại lô')">Tất cả loại lô</div>
-                        <div class="dropdown-option" onclick="window.selectTypeFilter('IMPORT', 'Lô nhập')">Lô nhập</div>
-                        <div class="dropdown-option" onclick="window.selectTypeFilter('EXPORT', 'Lô xuất')">Lô xuất</div>
-                    </div>
-                </div>
-            </div>
+
 
             <!-- Creator Filter -->
             <div class="filter-group">
@@ -148,15 +135,14 @@
         <div class="batch-table-header" id="batch-header-wrapper">
             <table class="data-table">
                 <colgroup>
-                    <col style="width: 40px">
+                    <col style="width: 60px">
+                    <col style="width: 150px">
+                    <col style="width: 310px">
+                    <col style="width: 100px">
+                    <col style="width: 100px">
                     <col style="width: 130px">
-                    <col style="width: 320px">
-                    <col style="width: 80px">
-                    <col style="width: 70px">
-                    <col style="width: 80px">
-                    <col style="width: 120px">
-                    <col style="width: 120px">
                     <col style="width: 130px">
+                    <col style="width: 150px">
                     <col style="width: 120px">
                     <col style="width: 150px">
                 </colgroup>
@@ -165,13 +151,13 @@
                         <th class="text-center">STT</th>
                         <th>Mã lô hàng</th>
                         <th>Tên lô hàng</th>
-                        <th class="text-center">Loại lô</th>
+
                         <th class="text-center">Số lượng</th>
                         <th class="text-center">SL thực hiện</th>
                         <th class="text-center">Ngày tạo</th>
                         <th class="text-center">Ngày hoàn thành</th>
-                        <th class="text-center">Người tạo</th>
                         <th class="text-center">Trạng thái</th>
+                        <th class="text-center">Người tạo</th>
                         <th class="text-center">Thao tác</th>
                     </tr>
                 </thead>
@@ -182,15 +168,14 @@
         <div class="batch-table-body" id="batch-body-wrapper">
             <table class="data-table">
                 <colgroup>
-                    <col style="width: 40px">
+                   <col style="width: 60px">
+                    <col style="width: 150px">
+                    <col style="width: 310px">
+                    <col style="width: 100px">
+                    <col style="width: 100px">
                     <col style="width: 130px">
-                    <col style="width: 320px">
-                    <col style="width: 80px">
-                    <col style="width: 70px">
-                    <col style="width: 80px">
-                    <col style="width: 120px">
-                    <col style="width: 120px">
                     <col style="width: 130px">
+                    <col style="width: 150px">
                     <col style="width: 120px">
                     <col style="width: 150px">
                 </colgroup>
@@ -241,21 +226,7 @@
                                 <label>Tên lô hàng <span style="color: red">*</span></label>
                                 <input type="text" id="batch-name" class="form-control" placeholder="Nhập tên lô" required>
                             </div>
-                            <div class="form-group">
-                                <label>Loại lô</label>
-                                <select id="batch-type" class="form-control">
-                                    <option value="IMPORT">Lô nhập</option>
-                                    <option value="EXPORT">Lô xuất</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Ngày về</label>
-                                <div class="modal-date-picker-wrapper">
-                                    <input type="text" id="batch-arrival-date" class="form-control" placeholder="dd/mm/yyyy" autocomplete="off" readonly>
-                                    <i class="fas fa-calendar-alt modal-date-icon" onclick="window.toggleModalDatePicker('batch-arrival-date', 'modal-date-picker-add')"></i>
-                                    <div class="modal-inline-calendar" id="modal-date-picker-add" style="display:none;"></div>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -361,21 +332,7 @@
                                 <label>Tên lô hàng <span style="color: red">*</span></label>
                                 <input type="text" id="edit-batch-name" class="form-control" required>
                             </div>
-                            <div class="form-group">
-                                <label>Loại lô</label>
-                                <select id="edit-batch-type" class="form-control">
-                                    <option value="IMPORT">Lô nhập</option>
-                                    <option value="EXPORT">Lô xuất</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Ngày về</label>
-                                <div class="modal-date-picker-wrapper">
-                                    <input type="text" id="edit-batch-arrival-date" class="form-control" placeholder="dd/mm/yyyy" autocomplete="off" readonly>
-                                    <i class="fas fa-calendar-alt modal-date-icon" onclick="window.toggleModalDatePicker('edit-batch-arrival-date', 'modal-date-picker-edit')"></i>
-                                    <div class="modal-inline-calendar" id="modal-date-picker-edit" style="display:none;"></div>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -477,14 +434,7 @@
                             <label>Tên lô hàng</label>
                             <div id="view-batch-name" class="view-text-value">-</div>
                         </div>
-                        <div class="form-group">
-                            <label>Loại lô</label>
-                            <div id="view-batch-type" class="view-text-value">-</div>
-                        </div>
-                        <div class="form-group">
-                            <label>Ngày về</label>
-                            <div id="view-batch-arrival-date" class="view-text-value">-</div>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -555,4 +505,4 @@
     </div>
 </div>
 
-<script src="modules/batch/batch.js"></script>
+<script src="modules/batch/batch.js"></script>
