@@ -1136,7 +1136,7 @@ const COLS = 57;
                         <div class="nl-cmd-dot" style="background: ${cmd.status === 'error' ? '#ef4444' : cmd.status === 'done' ? '#10b981' : cmd.status === 'waiting' ? '#f59e0b' : '#3b82f6'}"></div>
                         <div class="nl-cmd-body">
                             <div class="nl-cmd-top-row">
-                                <span class="nl-cmd-tag ${cmd.type === 'in' ? 'nl-tag-in' : 'nl-tag-out'}">${cmd.type === 'in' ? 'Nhập kho' : 'Xuất kho'}</span>
+                                <span class="nl-cmd-tag ${cmd.type === 'in' ? 'nl-tag-in' : 'nl-tag-out'}">${cmd.type === 'in' ? 'Nhập mới' : 'Xuất bán'}</span>
                                 <span class="nl-cmd-code">${cmd.code}</span>
                             </div>
                             <div class="nl-cmd-product">${cmd.product}</div>
@@ -1186,7 +1186,7 @@ const COLS = 57;
                 { icon: '✓', tpl: 'Shuttle riêng <span class="loc">{mod}1</span> bỏ Pallet tại vị trí <span class="loc">{pos}</span> – gửi tín hiệu WCS' },
                 { icon: '⚙', tpl: 'WCS → PLC: Lifter nhập <span class="loc">Kho mát {mod}</span> hạ xuống tầng 1, Shuttle riêng <span class="loc">{mod}1</span> về vị trí chờ' },
                 { icon: '✓', tpl: 'Lifter và Shuttle riêng gửi tín hiệu hoàn tất về WCS' },
-                { icon: '✅', tpl: 'WCS gửi tín hiệu đến WMS – Lệnh nhập kho <span class="loc">CMD-{cmd}</span> hoàn thành' },
+                { icon: '✅', tpl: 'WCS gửi tín hiệu đến WMS – Lệnh nhập mới <span class="loc">CMD-{cmd}</span> hoàn thành' },
             ];
 
             // ─── QUY TRÌNH XUẤT KHO (các bước tự động) ───
@@ -1206,7 +1206,7 @@ const COLS = 57;
                 { icon: '📦', tpl: 'Shuttle chung xuất lấy Pallet từ Lifter xuất <span class="loc">Kho mát {mod}</span> thành công' },
                 { icon: '→', tpl: 'Shuttle chung xuất di chuyển Pallet về vị trí cổng xuất' },
                 { icon: '✓', tpl: 'Shuttle chung xuất gửi tín hiệu hoàn tất về WCS' },
-                { icon: '✅', tpl: 'WCS gửi tín hiệu đến WMS – Lệnh xuất kho <span class="loc">CMD-{cmd}</span> hoàn thành' },
+                { icon: '✅', tpl: 'WCS gửi tín hiệu đến WMS – Lệnh xuất bán <span class="loc">CMD-{cmd}</span> hoàn thành' },
             ];
 
             let currentLogs = [];
@@ -1429,12 +1429,12 @@ const COLS = 57;
 
                         <!-- Right: Accordions -->
                         <div class="nl-acc-side">
-                            <!-- Inbound Accordion -->
-                            <div class="nl-acc-item active" id="acc-inbound">
+                            <!-- Nhập mới Accordion -->
+                            <div class="nl-acc-item active" id="acc-in-new">
                                 <div class="nl-acc-header">
-                                    <div class="nl-acc-dot dot-in"></div>
-                                    <span class="nl-acc-title">Nhập hàng</span>
-                                    <span class="nl-acc-count">40</span>
+                                    <div class="nl-acc-dot dot-in-new"></div>
+                                    <span class="nl-acc-title">Nhập mới</span>
+                                    <span class="nl-acc-count">25</span>
                                 </div>
                                 <div class="nl-acc-content">
                                     <div class="nl-acc-inner">
@@ -1464,12 +1464,12 @@ const COLS = 57;
                                 </div>
                             </div>
 
-                            <!-- Outbound Accordion -->
-                            <div class="nl-acc-item" id="acc-outbound">
+                            <!-- Nhập lại Accordion -->
+                            <div class="nl-acc-item" id="acc-in-return">
                                 <div class="nl-acc-header">
-                                    <div class="nl-acc-dot dot-out"></div>
-                                    <span class="nl-acc-title">Xuất hàng</span>
-                                    <span class="nl-acc-count">40</span>
+                                    <div class="nl-acc-dot dot-in-return"></div>
+                                    <span class="nl-acc-title">Nhập lại</span>
+                                    <span class="nl-acc-count">15</span>
                                 </div>
                                 <div class="nl-acc-content">
                                     <div class="nl-acc-inner">
@@ -1477,15 +1477,86 @@ const COLS = 57;
                                             <div class="nl-tree-line-v"></div>
                                             <div class="nl-tree-items">
                                                 ${[
-                                                    { name: 'Khu vực chứa chuối Nhật 28CP', val: '05' },
-                                                    { name: 'Khu vực chứa chuối Nhật 36CP', val: '05' },
-                                                    { name: 'Khu vực chứa chuối Nhật 30CP', val: '05' },
-                                                    { name: 'Khu vực chứa chuối Nhật 38CP', val: '05' },
-                                                    { name: 'Khu vực chứa chuối Nhật B5', val: '04' },
-                                                    { name: 'Khu vực chứa chuối Nhật B6', val: '04' },
+                                                    { name: 'Khu vực chứa chuối TQ A456', val: '04' },
+                                                    { name: 'Khu vực chứa chuối TQ CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối TQ A789', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật RCL', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 28LY', val: '04' },
                                                     { name: 'Khu vực chứa chuối Nhật 33CP', val: '04' },
-                                                    { name: 'Khu vực chứa chuối Nhật 28H', val: '04' },
-                                                    { name: 'Khu vực chứa chuối Nhật 43 CP', val: '04' }
+                                                    { name: 'Khu vực chứa chuối Nhật 35CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 38CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 40CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 35CLD', val: '04' }
+                                                ].map((item, idx) => `
+                                                <div class="nl-tree-item">
+                                                    <div class="nl-tree-line-h"></div>
+                                                    <span class="nl-tree-name">${item.name}</span>
+                                                    <span class="nl-tree-val">${item.val}</span>
+                                                </div>`).join('')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Xuất bán Accordion -->
+                            <div class="nl-acc-item" id="acc-out-sale">
+                                <div class="nl-acc-header">
+                                    <div class="nl-acc-dot dot-out-sale"></div>
+                                    <span class="nl-acc-title">Xuất bán</span>
+                                    <span class="nl-acc-count">30</span>
+                                </div>
+                                <div class="nl-acc-content">
+                                    <div class="nl-acc-inner">
+                                        <div class="nl-tree-line-wrapper">
+                                            <div class="nl-tree-line-v"></div>
+                                            <div class="nl-tree-items">
+                                                ${[
+                                                                                                { name: 'Khu vực chứa chuối TQ A456', val: '04' },
+                                                    { name: 'Khu vực chứa chuối TQ CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối TQ A789', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật RCL', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 28LY', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 33CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 35CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 38CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 40CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 35CLD', val: '04' }
+                                                ].map((item, idx) => `
+                                                <div class="nl-tree-item">
+                                                    <div class="nl-tree-line-h"></div>
+                                                    <span class="nl-tree-name">${item.name}</span>
+                                                    <span class="nl-tree-val">${item.val}</span>
+                                                </div>`).join('')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Xuất hủy Accordion -->
+                            <div class="nl-acc-item" id="acc-out-scrap">
+                                <div class="nl-acc-header">
+                                    <div class="nl-acc-dot dot-out-scrap"></div>
+                                    <span class="nl-acc-title">Xuất hủy</span>
+                                    <span class="nl-acc-count">10</span>
+                                </div>
+                                <div class="nl-acc-content">
+                                    <div class="nl-acc-inner">
+                                        <div class="nl-tree-line-wrapper">
+                                            <div class="nl-tree-line-v"></div>
+                                            <div class="nl-tree-items">
+                                                ${[                                       
+                                                    { name: 'Khu vực chứa chuối TQ A456', val: '04' },
+                                                    { name: 'Khu vực chứa chuối TQ CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối TQ A789', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật RCL', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 28LY', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 33CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 35CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 38CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 40CP', val: '04' },
+                                                    { name: 'Khu vực chứa chuối Nhật 35CLD', val: '04' }
                                                 ].map((item, idx) => `
                                                 <div class="nl-tree-item">
                                                     <div class="nl-tree-line-h"></div>

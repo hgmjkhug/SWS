@@ -838,7 +838,7 @@ body {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    background: conic-gradient(#4388EF 0% 50%, #076EB8 50% 100%);
+    background: conic-gradient(#076EB8 0% 30%, #4388EF 30% 50%, #F59E0B 50% 85%, #EF4444 85% 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -911,8 +911,10 @@ body {
     margin-right: 10px;
 }
 
-.dot-in { background: #4388EF; }
-.dot-out { background: #076EB8; }
+.dot-in-new { background: #076EB8; }
+.dot-in-return { background: #4388EF; }
+.dot-out-sale { background: #F59E0B; }
+.dot-out-scrap { background: #EF4444; }
 
 .nl-acc-title {
     font-size: 13px;
