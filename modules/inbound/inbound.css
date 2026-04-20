@@ -95,15 +95,16 @@ input, button, select, textarea {
     left: 50px;
     z-index: 200;
     background-color: #fff;
-    width: 220px;
+    width: 140px;
+    padding-left: 16px;
     box-shadow: 2px 0 4px rgba(0,0,0,0.06);
 }
 .data-table th:nth-child(3), .data-table td:nth-child(3) {
     position: sticky;
-    left: 270px;
+    left: 190px;
     z-index: 200;
     background-color: #fff;
-    width: 240px;
+    width: 320px;
     box-shadow: 2px 0 5px rgba(0,0,0,0.08);
 }
 /* Sticky header cells get blue bg + higher z-index */
@@ -237,6 +238,7 @@ input, button, select, textarea {
 }
 
 .product-item:last-child { border-bottom: none; }
+.product-item.no-indicator::before { display: none !important; }
 .prod-code { 
     font-size: 14px; 
     font-weight: 700; 
@@ -251,7 +253,7 @@ input, button, select, textarea {
 /* Custom class for truncating long code in table */
 .code-link-truncate {
     display: inline-block;
-    max-width: 175px; /* Fits within 220px col minus padding/gap */
+    max-width: 110px; /* Fits within 140px col minus padding/gap */
     white-space: nowrap; 
     overflow: hidden; 
     text-overflow: ellipsis; 

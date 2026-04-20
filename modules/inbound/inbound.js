@@ -248,7 +248,11 @@ function formatBinLocation(binInfo) {
             colLetter = String.fromCharCode(65 + (temp - 1) % 26) + colLetter;
             temp = Math.floor((temp - 1) / 26);
         }
-        return `${floor}-${colLetter}${cell}`;
+
+        // Xác định khu vực dựa trên tầng và cột (Demo)
+        const zone = colNum <= 5 ? 'A' : (colNum <= 10 ? 'B' : 'C');
+        
+        return `Kho mát ${zone} - ${floor}-${colLetter}${cell}`;
     }
     return binInfo;
 }
@@ -366,8 +370,8 @@ function renderTableBody() {
                 <td class="text-center">${startIdx + i + 1}</td>
                 <td>
                     <div style="display:flex;align-items:center;gap:6px;">
-                        <a href="javascript:void(0)" class="text-link code-link-truncate" title="${o.code}" onclick="openOrderDetailModal('${o.id}')">${o.code}</a>
-                        <i class="fa-regular fa-copy btn-copy" onclick="copyToClipboard('${o.code}', this)" title="Sao chép"></i>
+                        <a href="javascript:void(0)" class="text-link code-link-truncate" title="${o.pallets[0] || o.code}" onclick="openOrderDetailModal('${o.id}')">${o.pallets[0] || o.code}</a>
+                        <i class="fa-regular fa-copy btn-copy" onclick="copyToClipboard('${o.pallets[0] || o.code}', this)" title="Sao chép"></i>
                     </div>
                 </td>
                 <td>
@@ -394,12 +398,17 @@ function renderTableBody() {
                         <div style="font-size:12px;color:#64748b;margin-top:2px;">${o.batch ? o.batch.name : 'Lô hàng mặc định'}</div>
                     </div>
                 </td>
-                <td>
-                    <div class="product-item" style="border-bottom:none;min-height:fit-content;">
-                        <div class="pallet-list" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:2px;">
-                            ${o.pallets.length ? o.pallets.map(p => `<span class="pallet-tag" style="background:#e0f2fe;border:1px solid #7dd3fc;padding:2px 6px;font-size:12px;font-weight:500;border-radius:4px;color:#0369a1">Vật chứa: ${p}</span>`).join('') : '<span class="no-pallet">-</span>'}
-                        </div>
-                        ${o.status === 'COMPLETED' && o.bin ? `<div style="color:#cbd5e1;font-size:10px;margin:2px 0;">-</div><span class="bin-tag" style="background:#f8fafc;border:1px solid #e2e8f0;padding:2px 6px;font-size:12px;font-weight:500;border-radius:4px;color:#64748b;width:fit-content;">Vị trí: ${formatBinLocation(o.bin)}</span>` : ''}
+                <td class="text-center">
+                    <div class="product-item no-indicator" style="border-bottom:none;min-height:52px;padding:0;display:flex;align-items:center;justify-content:center;text-align:center;">
+                        ${(o.status === 'COMPLETED' || o.status === 'PROCESSING') && o.bin ? `
+                            <span style="font-size:13px;font-weight:600;color:#0D6BB9;">
+                                ${formatBinLocation(o.bin)}
+                            </span>
+                        ` : `
+                            <span style="color:#94a3b8;font-style:italic;font-size:12px;">
+                                Đang chờ gán vị trí
+                            </span>
+                        `}
                     </div>
                 </td>
                 <td class="text-center">${getEntryTypeBadge(o.type)}</td>
@@ -1231,7 +1240,7 @@ function printInboundOrder(orderId) {
         const expiry = m.expiryDate ? new Date(m.expiryDate).toLocaleDateString('en-GB') : '-';
         const qrData = encodeURIComponent(`${order.code}|${m.code}`);
         htmlContent += `<div class="label-container"><table>
-            <tr><td class="label-header">Mã Lệnh nhập</td><td><b>${order.code}</b></td><td class="label-header">Tên Lệnh nhập</td><td>-</td></tr>
+            <tr><td class="label-header">Mã Lệnh nhập</td><td><b>${order.pallets[0]}</b></td><td class="label-header">Tên Lệnh nhập</td><td>-</td></tr>
             <tr><td class="label-header">Mã sản phẩm</td><td><b>${m.code}</b></td><td rowspan="7" colspan="2" class="qr-cell"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrData}" width="120" height="120"></td></tr>
             <tr><td class="label-header">Tên sản phẩm</td><td>${m.name}</td></tr>
             <tr><td class="label-header">Trọng lượng</td><td>${weight}kg</td></tr>
@@ -1741,7 +1750,7 @@ function openOrderDetailModal(orderId) {
     if (!order) return;
 
     const title = document.getElementById('order-detail-title');
-    if (title) title.innerText = `Thông tin lệnh ${order.code}`;
+    if (title) title.innerText = `Thông tin vật chứa ${order.pallets[0] || order.code}`;
 
     const formatDate = dateObj => {
         if (!dateObj) return '-';
@@ -1817,7 +1826,7 @@ function exportInboundExcel() {
 
     const dataToExport = allData.map((order, index) => ({
         'STT': index + 1,
-        'Mã lệnh nhập': order.code,
+        'Mã vật chứa': order.pallets[0] || order.code,
         'Sản phẩm': order.materials.map(m => `${m.name} (${m.code})`).join(', '),
         'Số lượng': order.materials.reduce((sum, m) => sum + (m.qty || 0), 0),
         'Đơn vị': order.materials[0]?.unit || '',

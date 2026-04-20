@@ -100,7 +100,7 @@
             type="text"
             id="search-input"
             class="search-input"
-            placeholder="Tìm theo mã lệnh, mã hoặc tên sản phẩm"
+            placeholder="Tìm theo mã vật chứa, mã hoặc tên sản phẩm"
             onkeyup="handleMainSearchKeyup()"
             style="
               width: 260px;
@@ -420,8 +420,8 @@
           <table class="data-table" style="table-layout: fixed;">
             <colgroup>
               <col style="width: 50px">
-              <col style="width: 200px">
-              <col style="width: 220px">
+              <col style="width: 140px">
+              <col style="width: 320px">
               <col style="width: 120px">
               <col style="width: 180px">
               <col style="width: 180px">
@@ -438,7 +438,7 @@
                 <th>Sản phẩm</th>
                 <th class="text-center">Số lượng</th>
                 <th>Lô hàng</th>
-                <th style="text-align: left">Vị trí lưu</th>
+                <th class="text-center">Vị trí lưu</th>
                 <th style="text-align: center">Loại lệnh nhập</th>
                 <th class="text-center">Trạng thái</th>
                 <th class="text-center">Ưu tiên</th>
@@ -456,8 +456,8 @@
           <table class="data-table" style="table-layout: fixed;">
             <colgroup>
               <col style="width: 50px">
-              <col style="width: 200px">
-              <col style="width: 220px">
+              <col style="width: 140px">
+              <col style="width: 320px">
               <col style="width: 120px">
               <col style="width: 180px">
               <col style="width: 180px">
@@ -774,12 +774,12 @@
 
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
               <button type="button" class="btn-cancel-custom" style="padding: 8px 16px; min-width: 100px; height: 38px;" onclick="closeCreateModal()">Quay lại</button>
-              <button type="button" id="btnContinue" class="btn-cancel-custom" style="padding: 8px 16px; min-width: 130px; height: 38px; color: #076EB8; border-color: #076EB8;" disabled onclick="generateReceipt(true)">Tiếp tục tạo</button>
+              <button type="button" id="btnContinue" class="btn-cancel-custom" style="display:none; padding: 8px 16px; min-width: 130px; height: 38px; color: #076EB8; border-color: #076EB8;" disabled onclick="generateReceipt(true)">Tiếp tục tạo</button>
               <button type="button" id="btnNext" class="btn-add" style="padding: 8px 16px; height: 38px; border-radius: 8px;" disabled onclick="generateReceipt(false)">Xác nhận</button>
             </div>
 
             <div id="result-box" class="pda-result-box" style="display: none">
-              <small>Mã lệnh nhập: </small><br />
+              <small>Mã vật chứa: </small><br />
               <strong id="generatedCode" class="pda-generated-code"></strong>
             </div>
           </div>
