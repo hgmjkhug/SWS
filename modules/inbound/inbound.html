@@ -210,8 +210,36 @@
               </div>
             </div>
           </div>
-          <!-- Entry Type Filter -->
+          <!-- Batch Filter (Editable Combobox) -->
           <div style="display: flex; flex-direction: column; gap: 4px">
+            <label style="font-size: 14px; font-weight: 500; color: #334155"
+              >Lô hàng</label
+            >
+            <div class="custom-combobox-wrapper" id="batch-filter-combobox-wrapper">
+              <div class="combobox-input-group">
+                <input
+                  type="text"
+                  id="batch-filter-combobox-input"
+                  class="combobox-input"
+                  placeholder="Tất cả"
+                  autocomplete="off"
+                  onclick="toggleBatchFilterCombobox()"
+                  onkeyup="handleBatchFilterComboboxSearch(this)"
+                />
+                <i
+                  class="fas fa-chevron-down combobox-arrow"
+                  onclick="toggleBatchFilterCombobox()"
+                ></i>
+              </div>
+              <div class="combobox-dropdown" id="batch-filter-combobox-dropdown">
+                <ul class="combobox-list" id="batch-filter-combobox-list">
+                  <!-- Populated by JS -->
+                </ul>
+              </div>
+            </div>
+          </div>
+          <!-- Entry Type Filter -->
+          <div style="display: none; flex-direction: column; gap: 4px">
             <label style="font-size: 14px; font-weight: 500; color: #334155"
               >Loại lệnh nhập</label
             >
@@ -425,7 +453,7 @@
               <col style="width: 120px">
               <col style="width: 180px">
               <col style="width: 180px">
-              <col style="width: 130px">
+              <col style="width: 130px; display: none;">
               <col style="width: 120px">
               <col style="width: 80px">
               <col style="width: 240px">
@@ -439,7 +467,7 @@
                 <th class="text-center">Số lượng</th>
                 <th>Lô hàng</th>
                 <th class="text-center">Vị trí lưu</th>
-                <th style="text-align: center">Loại lệnh nhập</th>
+                <th style="text-align: center; display: none;">Loại lệnh nhập</th>
                 <th class="text-center">Trạng thái</th>
                 <th class="text-center">Ưu tiên</th>
                 <th style="text-align: left; cursor: pointer; user-select: none;" onclick="toggleTimeSort()" title="Sắp xếp theo thời gian tạo">
@@ -461,7 +489,7 @@
               <col style="width: 120px">
               <col style="width: 180px">
               <col style="width: 180px">
-              <col style="width: 130px">
+              <col style="width: 130px; display: none;">
               <col style="width: 120px">
               <col style="width: 80px">
               <col style="width: 240px">
@@ -786,7 +814,7 @@
         </div>
           <!-- Result Box -->
           <div id="result-box" class="pda-result-box" style="display: none">
-            <small>Mã lệnh nhập: </small><br />
+            <small>Mã vật chứa: </small><br />
             <strong id="generatedCode" class="pda-generated-code"></strong>
           </div>
         </div>
