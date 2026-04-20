@@ -35,11 +35,14 @@ body {
     gap: 16px;
 }
 
-/* Custom Dropdown (Combobox) */
 .custom-dropdown {
     position: relative;
-    width: fit-content; /* Wider for search */
+    width: fit-content;
     font-size: 14px;
+}
+
+#batch-filter {
+    width: 350px; /* Increased width to ~1.5x */
 }
 
 .combo-wrapper,
@@ -447,7 +450,8 @@ body {
 }
 
 .type-in { background: #dcfce7; color: #166534; }  /* Green bg */
-.type-out { background: #ffedd5; color: #9a3412; } /* Orange bg */
+.type-out-sell { background: #ffedd5; color: #9a3412; } /* Orange bg for Sell */
+.type-out-discard { background: #fee2e2; color: #991b1b; } /* Red bg for Discard */
 
 /* Card Body Info */
 .card-info {

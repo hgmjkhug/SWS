@@ -4,7 +4,7 @@
 
     // Mock Data
     // Mock Data
-    const mockBatches = [
+    let mockBatches = [
         { code: 'BATCH-001', name: 'Lô hàng linh kiện điện tử A' },
         { code: 'BATCH-002', name: 'Lô hàng vỏ nhựa B' },
         { code: 'BATCH-003', name: 'Lô hàng pin Lithium C' },
@@ -12,36 +12,55 @@
         { code: 'BATCH-005', name: 'Lô hàng phụ kiện E' }
     ];
 
+    // Try to load batches from batch module
+    const storedBatches = localStorage.getItem('SWS_BATCH_DATA_v4');
+    if (storedBatches) {
+        try {
+            const parsed = JSON.parse(storedBatches);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                mockBatches = parsed.map(b => ({ code: b.code, name: b.name }));
+            }
+        } catch(e) { console.error('Error loading batches from storage', e); }
+    }
+
     const mockTasks = [
-        // --- PENDING --- Chỉ có 13 Shuttle + 03 Lifter
-        { id: 'NK-20231024-001', type: 'Nhập kho', status: 'pending', warehouse: 'Kho A', device: 'Shuttle 001', step: 'Di chuyển đến vị trí nhận', batchCode: 'BATCH-001', logs: [{ time: '08:00', msg: 'Tạo lệnh nhập kho' }, { time: '08:05', msg: 'Đang chờ thiết bị' }] },
-        { id: 'NK-20231024-005', type: 'Nhập kho', status: 'pending', warehouse: 'Kho B', device: 'Lifter 001', step: 'Chờ xác nhận', batchCode: 'BATCH-002', logs: [{ time: '12:00', msg: 'Yêu cầu nhập kho thủ công' }] },
-        { id: 'NK-20231024-008', type: 'Nhập kho', status: 'pending', warehouse: 'Kho A', device: 'Shuttle 002', step: 'Đang xếp hàng chờ', batchCode: 'BATCH-001', logs: [{ time: '08:10', msg: 'Xe đang đợi tại vùng đệm' }] },
-        { id: 'XK-20231024-012', type: 'Xuất kho', status: 'pending', warehouse: 'Kho C', device: 'Shuttle 003', step: 'Chờ lệnh xuất', batchCode: 'BATCH-003', logs: [{ time: '09:00', msg: 'Đơn hàng tạo mới' }] },
-        { id: 'NK-20231024-015', type: 'Nhập kho', status: 'pending', warehouse: 'Kho B', device: 'Lifter 002', step: 'Kiểm tra vị trí trống', batchCode: 'BATCH-004', logs: [{ time: '10:30', msg: 'Hệ thống đang quét vị trí' }] },
+        // --- PENDING ---
+        { id: 'NK-20231024-001', containerCode: 'PL-STANDARD_001', creatorName: 'Nguyễn Văn An', type: 'Nhập kho', status: 'pending', warehouse: 'Kho A', device: 'Shuttle 001', step: 'Di chuyển đến vị trí nhận', batchCode: 'CN-BN-1060', logs: [{ time: '08:00', msg: 'Tạo lệnh nhập kho' }, { time: '08:05', msg: 'Đang chờ thiết bị' }] },
+        { id: 'NK-20231024-005', containerCode: 'PL-STANDARD_005', creatorName: 'Trần Thị Bình', type: 'Nhập kho', status: 'pending', warehouse: 'Kho B', device: 'Lifter 001', step: 'Chờ xác nhận', batchCode: 'JP-BN-1059', logs: [{ time: '12:00', msg: 'Yêu cầu nhập kho thủ công' }] },
+        { id: 'NK-20231024-008', containerCode: 'BOX-DANPLA_002', creatorName: 'Lê Văn Cường', type: 'Nhập kho', status: 'pending', warehouse: 'Kho A', device: 'Shuttle 002', step: 'Đang xếp hàng chờ', batchCode: 'CN-BN-1058', logs: [{ time: '08:10', msg: 'Xe đang đợi tại vùng đệm' }] },
+        { id: 'XK-20231024-012', containerCode: 'BOX-WOOD_003', creatorName: 'Phạm Minh Dũng', type: 'Xuất bán', status: 'pending', warehouse: 'Kho C', device: 'Shuttle 003', step: 'Chờ lệnh xuất', batchCode: 'JP-BN-1057', logs: [{ time: '09:00', msg: 'Đơn hàng tạo mới' }] },
+        { id: 'NK-20231024-015', containerCode: 'TRAY-COMP_004', creatorName: 'Nguyễn Văn An', type: 'Nhập kho', status: 'pending', warehouse: 'Kho B', device: 'Lifter 002', step: 'Kiểm tra vị trí trống', batchCode: 'CN-BN-1056', logs: [{ time: '10:30', msg: 'Hệ thống đang quét vị trí' }] },
 
         // --- IN PROGRESS ---
-        { id: 'XK-20231024-002', type: 'Xuất kho', status: 'in_progress', warehouse: 'Kho B', device: 'Shuttle 004', step: 'Nâng pallet lên kệ', batchCode: 'BATCH-001', logs: [{ time: '09:15', msg: 'Xe đang di chuyển' }, { time: '09:20', msg: 'Đang nâng hàng' }] },
-        { id: 'NK-20231024-006', type: 'Nhập kho', status: 'in_progress', warehouse: 'Kho A', device: 'Shuttle 005', step: 'Đang di chuyển', batchCode: 'BATCH-005', logs: [{ time: '13:05', msg: 'Đang di chuyển đến vùng đệm' }, { time: '13:10', msg: 'Cập nhật vị trí: Zone B' }] },
-        { id: 'XK-20231024-011', type: 'Xuất kho', status: 'in_progress', warehouse: 'Kho A', device: 'Shuttle 006', step: 'Vận chuyển ra cổng', batchCode: 'BATCH-002', logs: [{ time: '14:00', msg: 'Hàng đã lên băng tải' }] },
-        { id: 'NK-20231024-019', type: 'Nhập kho', status: 'in_progress', warehouse: 'Kho C', device: 'Shuttle 007', step: 'Đưa hàng vào kệ', batchCode: 'BATCH-003', logs: [{ time: '15:20', msg: 'Đang thao tác tại Line 3' }] },
-        { id: 'NK-20231024-021', type: 'Nhập kho', status: 'in_progress', warehouse: 'Kho B', device: 'Shuttle 008', step: 'Di chuyển về sạc', batchCode: 'BATCH-004', logs: [{ time: '16:00', msg: 'Pin yếu, về trạm sạc' }] },
-        { id: 'XK-20231024-025', type: 'Xuất kho', status: 'in_progress', warehouse: 'Kho A', device: 'Shuttle 009', step: 'Lấy hàng tầng 3', batchCode: 'BATCH-001', logs: [{ time: '11:45', msg: 'Đang hạ càng nâng' }] },
+        { id: 'XK-20231024-002', containerCode: 'PL-EURO_002', creatorName: 'Trần Thị Bình', type: 'Xuất bán', status: 'in_progress', warehouse: 'Kho B', device: 'Shuttle 004', step: 'Nâng pallet lên kệ', batchCode: 'CN-BN-1060', logs: [{ time: '09:15', msg: 'Xe đang di chuyển' }, { time: '09:20', msg: 'Đang nâng hàng' }] },
+        { id: 'NK-20231024-006', containerCode: 'PL-PLASTIC_006', creatorName: 'Lê Văn Cường', type: 'Nhập kho', status: 'in_progress', warehouse: 'Kho A', device: 'Shuttle 005', step: 'Đang di chuyển', batchCode: 'JP-BN-1055', logs: [{ time: '13:05', msg: 'Đang di chuyển đến vùng đệm' }, { time: '13:10', msg: 'Cập nhật vị trí: Zone B' }] },
+        { id: 'XK-20231024-011', containerCode: 'BOX-CARTON_011', creatorName: 'Phạm Minh Dũng', type: 'Xuất hủy', status: 'in_progress', warehouse: 'Kho A', device: 'Shuttle 006', step: 'Vận chuyển ra cổng', batchCode: 'CN-BN-1054', logs: [{ time: '14:00', msg: 'Hàng đã lên băng tải' }] },
+        { id: 'NK-20231024-019', containerCode: 'PL-MINI_019', creatorName: 'Nguyễn Văn An', type: 'Nhập kho', status: 'in_progress', warehouse: 'Kho C', device: 'Shuttle 007', step: 'Đưa hàng vào kệ', batchCode: 'JP-BN-1053', logs: [{ time: '15:20', msg: 'Đang thao tác tại Line 3' }] },
+        { id: 'NK-20231024-021', containerCode: 'PL-STANDARD_021', creatorName: 'Trần Thị Bình', type: 'Nhập kho', status: 'in_progress', warehouse: 'Kho B', device: 'Shuttle 008', step: 'Di chuyển về sạc', batchCode: 'CN-BN-1052', logs: [{ time: '16:00', msg: 'Pin yếu, về trạm sạc' }] },
+        { id: 'XK-20231024-025', containerCode: 'PL-EURO_025', creatorName: 'Lê Văn Cường', type: 'Xuất bán', status: 'in_progress', warehouse: 'Kho A', device: 'Shuttle 009', step: 'Lấy hàng tầng 3', batchCode: 'CN-BN-1060', logs: [{ time: '11:45', msg: 'Đang hạ càng nâng' }] },
 
         // --- COMPLETE ---
-        { id: 'NK-20231024-003', type: 'Nhập kho', status: 'complete', warehouse: 'Kho A', device: 'Shuttle 003', step: 'Hoàn thành', batchCode: 'BATCH-002', logs: [{ time: '10:00', msg: 'Tạo lệnh' }, { time: '10:30', msg: 'Hoàn thành nhập kho' }] },
-        { id: 'XK-20231024-010', type: 'Xuất kho', status: 'complete', warehouse: 'Kho C', device: 'Shuttle 001', step: 'Đã xuất kho', batchCode: 'BATCH-005', logs: [{ time: '08:30', msg: 'Container đã nhận hàng' }] },
-        { id: 'NK-20231024-014', type: 'Nhập kho', status: 'complete', warehouse: 'Kho B', device: 'Shuttle 002', step: 'Về vị trí đỗ', batchCode: 'BATCH-001', logs: [{ time: '17:00', msg: 'Nhiệm vụ hoàn tất' }] },
-        { id: 'NK-20231024-022', type: 'Nhập kho', status: 'complete', warehouse: 'Kho A', device: 'Lifter 003', step: 'Kiểm kê xong', batchCode: 'BATCH-003', logs: [{ time: '18:15', msg: 'Dữ liệu đã đồng bộ' }] },
-        { id: 'XK-20231024-030', type: 'Xuất kho', status: 'complete', warehouse: 'Kho B', device: 'Shuttle 004', step: 'Dừng băng tải', batchCode: 'BATCH-004', logs: [{ time: '19:00', msg: 'Hết ca làm việc' }] },
+        { id: 'NK-20231024-003', containerCode: 'BOX-DANPLA_003', creatorName: 'Phạm Minh Dũng', type: 'Nhập kho', status: 'complete', warehouse: 'Kho A', device: 'Shuttle 003', step: 'Hoàn thành', batchCode: 'JP-BN-1051', logs: [{ time: '10:00', msg: 'Tạo lệnh' }, { time: '10:30', msg: 'Hoàn thành nhập kho' }] },
+        { id: 'XK-20231024-010', containerCode: 'BOX-WOOD_010', creatorName: 'Nguyễn Văn An', type: 'Xuất bán', status: 'complete', warehouse: 'Kho C', device: 'Shuttle 001', step: 'Đã xuất kho', batchCode: 'CN-BN-1050', logs: [{ time: '08:30', msg: 'Container đã nhận hàng' }] },
+        { id: 'NK-20231024-014', containerCode: 'TRAY-COMP_014', creatorName: 'Trần Thị Bình', type: 'Nhập kho', status: 'complete', warehouse: 'Kho B', device: 'Shuttle 002', step: 'Về vị trí đỗ', batchCode: 'JP-BN-1049', logs: [{ time: '17:00', msg: 'Nhiệm vụ hoàn tất' }] },
+        { id: 'NK-20231024-022', containerCode: 'PL-STANDARD_022', creatorName: 'Lê Văn Cường', type: 'Nhập kho', status: 'complete', warehouse: 'Kho A', device: 'Lifter 003', step: 'Kiểm kê xong', batchCode: 'CN-BN-1048', logs: [{ time: '18:15', msg: 'Dữ liệu đã đồng bộ' }] },
+        { id: 'XK-20231024-030', containerCode: 'PL-PLASTIC_030', creatorName: 'Phạm Minh Dũng', type: 'Xuất hủy', status: 'complete', warehouse: 'Kho B', device: 'Shuttle 004', step: 'Dừng băng tải', batchCode: 'JP-BN-1047', logs: [{ time: '19:00', msg: 'Hết ca làm việc' }] },
 
         // --- BUG ---
-        { id: 'XK-20231024-004', type: 'Xuất kho', status: 'bug', warehouse: 'Kho C', device: 'Shuttle 001', step: 'Lỗi cảm biến', batchCode: 'BATCH-001', logs: [{ time: '11:00', msg: 'Bắt đầu băng tải' }, { time: '11:05', msg: 'Cảnh báo: Kẹt hàng tại vị trí C1' }] },
-        { id: 'NK-20231024-007', type: 'Nhập kho', status: 'bug', warehouse: 'Kho A', device: 'Lifter 001', step: 'Mất kết nối', batchCode: 'BATCH-002', logs: [{ time: '09:45', msg: 'Không tìm thấy tín hiệu điều khiển' }] },
-        { id: 'XK-20231024-018', type: 'Xuất kho', status: 'bug', warehouse: 'Kho B', device: 'Shuttle 005', step: 'Va chạm vật cản', batchCode: 'BATCH-005', logs: [{ time: '14:30', msg: 'Cảm biến va chạm kích hoạt' }] },
-        { id: 'NK-20231024-029', type: 'Nhập kho', status: 'bug', warehouse: 'Kho C', device: 'Lifter 002', step: 'Lỗi động cơ', batchCode: 'BATCH-001', logs: [{ time: '10:15', msg: 'Quá nhiệt động cơ nâng' }] },
-        { id: 'NK-20231024-033', type: 'Nhập kho', status: 'bug', warehouse: 'Kho A', device: 'System', step: 'Lỗi dữ liệu', batchCode: 'BATCH-004', logs: [{ time: '15:50', msg: 'Không thể đồng bộ tồn kho' }] }
+        { id: 'XK-20231024-004', containerCode: 'BOX-CARTON_004', creatorName: 'Nguyễn Văn An', type: 'Xuất bán', status: 'bug', warehouse: 'Kho C', device: 'Shuttle 001', step: 'Lỗi cảm biến', batchCode: 'CN-BN-1060', logs: [{ time: '11:00', msg: 'Bắt đầu băng tải' }, { time: '11:05', msg: 'Cảnh báo: Kẹt hàng tại vị trí C1' }] },
+        { id: 'NK-20231024-007', containerCode: 'PL-MINI_007', creatorName: 'Trần Thị Bình', type: 'Nhập kho', status: 'bug', warehouse: 'Kho A', device: 'Lifter 001', step: 'Mất kết nối', batchCode: 'JP-BN-1046', logs: [{ time: '09:45', msg: 'Không tìm thấy tín hiệu điều khiển' }] },
+        { id: 'XK-20231024-018', containerCode: 'PL-STANDARD_018', creatorName: 'Lê Văn Cường', type: 'Xuất bán', status: 'bug', warehouse: 'Kho B', device: 'Shuttle 005', step: 'Va chạm vật cản', batchCode: 'CN-BN-1045', logs: [{ time: '14:30', msg: 'Cảm biến va chạm kích hoạt' }] },
+        { id: 'NK-20231024-029', containerCode: 'BOX-DANPLA_029', creatorName: 'Phạm Minh Dũng', type: 'Nhập kho', status: 'bug', warehouse: 'Kho C', device: 'Lifter 002', step: 'Lỗi động cơ', batchCode: 'CN-BN-1060', logs: [{ time: '10:15', msg: 'Quá nhiệt động cơ nâng' }] },
+        { id: 'NK-20231024-033', containerCode: 'PL-EURO_033', creatorName: 'Nguyễn Văn An', type: 'Nhập kho', status: 'bug', warehouse: 'Kho A', device: 'System', step: 'Lỗi dữ liệu', batchCode: 'JP-BN-1044', logs: [{ time: '15:50', msg: 'Không thể đồng bộ tồn kho' }] }
     ];
+
+    // Dynamically map mockTasks to real batches from storage if available
+    if (mockBatches.length > 5) {
+        mockTasks.forEach((task, index) => {
+            const realBatch = mockBatches[index % mockBatches.length];
+            task.batchCode = realBatch.code;
+        });
+    }
 
     // State
     let currentWarehouseFilter = 'all';
@@ -465,8 +484,8 @@
         // 1. Filter Data
         const filteredTasks = mockTasks.filter(task => {
             const matchesWarehouse = currentWarehouseFilter === 'all' || task.warehouse === currentWarehouseFilter;
-            const matchesSearch = task.id.toLowerCase().includes(currentSearchTerm) || 
-                                  task.device.toLowerCase().includes(currentSearchTerm);
+            const matchesSearch = task.containerCode.toLowerCase().includes(currentSearchTerm) || 
+                                   task.device.toLowerCase().includes(currentSearchTerm);
             
             const matchesBatch = selectedBatches.length === 0 || selectedBatches.includes(task.batchCode);
             const matchesType = currentTypeFilter === 'all' || task.type === currentTypeFilter;
@@ -525,7 +544,7 @@
 
     // Create Card HTML Template
     function createCardHTML(task) {
-        const typeClass = task.type === 'Nhập kho' ? 'type-in' : 'type-out';
+        const typeClass = task.type === 'Nhập kho' ? 'type-in' : (task.type === 'Xuất bán' ? 'type-out-sell' : 'type-out-discard');
         
         // Generate Logs HTML (last 2 logs)
         const logsHTML = task.logs.slice(-2).map(log => `
@@ -538,7 +557,7 @@
         return `
             <div class="kanban-card status-${task.status}">
                 <div class="card-header">
-                    <span class="card-code">${task.id}</span>
+                    <span class="card-code">${task.containerCode}</span>
                     <div class="card-badges">
                         <span class="card-type ${typeClass}">${task.type}</span>
                     </div>
@@ -553,6 +572,10 @@
                         <div class="info-row">
                             <i class="fas fa-robot info-icon"></i>
                             <span class="text-highlight">${task.device}</span>
+                        </div>
+                        <div class="info-row">
+                            <i class="fa fa-user-plus info-icon"></i>
+                            <span>${task.creatorName || 'Hệ thống'}</span>
                         </div>
                     </div>
                     <span class="batch-badge">${task.batchCode}</span>

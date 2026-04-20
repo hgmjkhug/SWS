@@ -19,7 +19,7 @@
         <!-- Search Box -->
         <div class="search-box-panel">
           <i class="fas fa-search search-icon"></i>
-          <input type="text" id="search-input" placeholder="Tìm kiếm lệnh nhập/xuất kho..." autocomplete="off" />
+          <input type="text" id="search-input" placeholder="Tìm kiếm mã vật chứa" autocomplete="off" />
         </div>
 
         <!-- Batch Filter (Searchable Combobox) -->
@@ -38,11 +38,13 @@
         <div class="custom-dropdown" id="type-filter" style="width: 140px;">
           <div class="dropdown-selected" id="type-selected">
              <span class="selected-text">Tất cả</span>
+             <i class="fas fa-chevron-down combo-icon"></i>
           </div>
           <div class="dropdown-options" id="type-options">
              <div class="dropdown-option selected" data-value="all">Tất cả</div>
              <div class="dropdown-option" data-value="Nhập kho">Nhập kho</div>
-             <div class="dropdown-option" data-value="Xuất kho">Xuất kho</div>
+             <div class="dropdown-option" data-value="Xuất bán">Xuất bán</div>
+             <div class="dropdown-option" data-value="Xuất hủy">Xuất hủy</div>
           </div>
         </div>
 
