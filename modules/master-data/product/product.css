@@ -1344,3 +1344,96 @@ input:checked+.slider:before {
     color: #2563eb;
 }
 
+/* Bulk Action Bar */
+.bulk-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0 8px 0 16px;
+  min-height: 42px;
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+.bulk-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.bulk-actions-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-apply {
+  height: 32px;
+  padding: 0 16px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-apply:disabled {
+  background-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.btn-apply:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.btn-cancel {
+  height: 32px;
+  padding: 0 12px;
+  background-color: white;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  background-color: #fff1f2;
+  color: #e11d48;
+  border-color: #fecaca;
+}
+
+#method-bulk-dropdown .custom-dropdown-toggle {
+    height: 32px;
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+    font-weight: 600;
+}
+

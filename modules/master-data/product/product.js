@@ -255,6 +255,23 @@
         });
     });
 
+    function saveProductsToStorage() {
+        localStorage.setItem('sws_products', JSON.stringify(products));
+    }
+
+    function loadProductsFromStorage() {
+        const stored = localStorage.getItem('sws_products');
+        if (stored) {
+            try {
+                products = JSON.parse(stored);
+                return true;
+            } catch (e) {
+                console.error("Failed to parse stored products", e);
+            }
+        }
+        return false;
+    }
+
     function getCurrentWarehouse() {
         try {
             if (window.parent && window.parent.document) {
@@ -281,12 +298,16 @@
         const tbody = document.getElementById('product-table-body');
         if (!tbody) return;
 
-        // Hiển thị tên kho đang chọn
-        // Banner removed
+        // Load from localStorage or use initial bananaData
+        if (!loadProductsFromStorage()) {
+            // products is already populated by bananaData loop above if not in storage
+            saveProductsToStorage();
+        }
 
         filteredData = products.filter(p => !p.is_deleted);
         renderCategoryFilter();
         renderProducts();
+        updateBulkBarVisibility(); // Ensure initial state
     }
 
     function renderCategoryFilter() {
@@ -329,6 +350,14 @@
         if (!isVisible) menu.classList.add('show');
     };
 
+    window.toggleBulkMethodDropdown = function () {
+        const menu = document.getElementById('method-bulk-menu');
+        if (!menu) return;
+        const isVisible = menu.classList.contains('show');
+        document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.remove('show'));
+        if (!isVisible) menu.classList.add('show');
+    };
+
     window.selectFilterOption = function (type, value, label) {
         if (type === 'group') {
             document.getElementById('group-filter').value = value;
@@ -365,6 +394,85 @@
             menus.forEach(m => m.classList.remove('show'));
         }
     });
+
+    window.selectBulkOption = function (value, label) {
+        document.getElementById('bulk-method-select').value = value;
+        document.getElementById('method-bulk-display').innerText = label;
+        
+        const menu = document.getElementById('method-bulk-menu');
+        if (menu) {
+            const items = menu.querySelectorAll('.custom-dropdown-item');
+            items.forEach(item => {
+                if (item.innerText === label) item.classList.add('selected');
+                else item.classList.remove('selected');
+            });
+            menu.classList.remove('show');
+        }
+    };
+
+    let isBulkBarManuallyShown = false;
+
+    window.showBulkAssignBar = function () {
+        isBulkBarManuallyShown = true;
+        updateBulkBarVisibility();
+    };
+
+    window.updateBulkBarVisibility = function () {
+        const checked = document.querySelectorAll('.prod-check:checked');
+        const bulkBar = document.getElementById('bulk-action-bar');
+        const triggerBtn = document.getElementById('btn-trigger-bulk');
+        const applyBtn = document.getElementById('bulk-apply-btn');
+
+        if (!bulkBar) return;
+
+        // Show ONLY if manually triggered by clicking "Gán quy cách"
+        const shouldShow = isBulkBarManuallyShown;
+
+        if (shouldShow) {
+            bulkBar.style.display = 'flex';
+            if (triggerBtn) triggerBtn.style.display = 'none';
+        } else {
+            bulkBar.style.display = 'none';
+            if (triggerBtn) triggerBtn.style.display = 'flex';
+        }
+
+        if (applyBtn) {
+            applyBtn.disabled = checked.length === 0;
+        }
+        
+        // Also update the trigger button state - maybe disable it if no items selected?
+        if (triggerBtn) {
+            triggerBtn.disabled = checked.length === 0;
+        }
+    };
+
+    window.applyBulkMethod = function () {
+        const methodValue = document.getElementById('bulk-method-select').value;
+        const checked = document.querySelectorAll('.prod-check:checked');
+        const selectedIds = Array.from(checked).map(cb => cb.value);
+
+        if (selectedIds.length === 0) return;
+
+        products.forEach(p => {
+            if (selectedIds.includes(p.id)) {
+                p.specification = methodValue;
+                p.updated_at = new Date().toISOString();
+            }
+        });
+
+        showToast('Thiết lập quy cách cho sản phẩm thành công', 'success');
+        saveProductsToStorage();
+        renderProducts();
+        updateBulkBarVisibility();
+    };
+
+    window.cancelBulkAction = function () {
+        isBulkBarManuallyShown = false;
+        document.querySelectorAll('.prod-check').forEach(cb => cb.checked = false);
+        document.getElementById('check-all').checked = false;
+        updateBulkBarVisibility();
+        updateBulkDeleteBtn();
+    };
 
     // Try immediate init
     initProductModule();
@@ -541,6 +649,7 @@
     window.toggleAll = function (source) {
         document.querySelectorAll('.prod-check').forEach(chk => chk.checked = source.checked);
         updateBulkDeleteBtn();
+        updateBulkBarVisibility();
     };
 
     window.updateBulkDeleteBtn = function () {
@@ -550,6 +659,7 @@
         
         if (btn) btn.disabled = checked.length === 0;
         if (countSpan) countSpan.textContent = checked.length;
+        updateBulkBarVisibility();
     };
     
     window.printQR = function (id) {
@@ -853,6 +963,7 @@
             showToast('Thêm mới sản phẩm thành công');
         }
 
+        saveProductsToStorage();
         closeProductModal();
         filterProducts(); 
     };
@@ -863,6 +974,7 @@
             products[idx].status = isChecked ? 1 : 0;
             products[idx].updated_at = new Date().toISOString();
             showToast(`Đã ${isChecked ? 'bật' : 'tắt'} trạng thái hoạt động`);
+            saveProductsToStorage();
 
             // Update filteredData as well if it's currently showing that product
             const fIdx = filteredData.findIndex(p => p.id === id);
@@ -964,6 +1076,7 @@
         });
 
         showToast(`Đã xóa ${pendingDeleteIds.length} vật tư`);
+        saveProductsToStorage();
         closeDeleteModal();
         filterProducts();
     };
@@ -1136,6 +1249,7 @@
         });
 
         showToast(`Đã import thành công ${pendingImportData.length} vật tư!`);
+        saveProductsToStorage();
         closeImportModal();
         filterProducts();
     };
