@@ -95,6 +95,38 @@
                 <input type="hidden" id="status-filter" value="" />
               </div>
             </div>
+
+            <div class="filter-group">
+              <label class="filter-title">Quy cách</label>
+              <div
+                class="custom-dropdown"
+                id="spec-filter-dropdown"
+                style="min-width: 140px"
+              >
+                <div
+                  class="custom-dropdown-toggle"
+                  onclick="toggleFilterDropdown('spec')"
+                >
+                  <span id="spec-filter-display">Tất cả quy cách</span>
+                  <i
+                    class="fas fa-chevron-down"
+                    style="font-size: 12px; color: #64748b"
+                  ></i>
+                </div>
+                <div class="custom-dropdown-menu" id="spec-filter-menu">
+                  <div
+                    class="custom-dropdown-item selected"
+                    onclick="selectFilterOption('spec', '', 'Tất cả quy cách')"
+                  >
+                    Tất cả quy cách
+                  </div>
+                  <div class="custom-dropdown-item" onclick="selectFilterOption('spec', 'FIFO', 'FIFO')">FIFO</div>
+                  <div class="custom-dropdown-item" onclick="selectFilterOption('spec', 'FEFO', 'FEFO')">FEFO</div>
+                  <div class="custom-dropdown-item" onclick="selectFilterOption('spec', 'LIFO', 'LIFO')">LIFO</div>
+                </div>
+                <input type="hidden" id="spec-filter" value="" />
+              </div>
+            </div>
           </div>
           <div class="action-buttons">
             <button
@@ -145,6 +177,7 @@
                   <th>Nhóm sản phẩm</th>
                   <th>Đơn vị tính</th>
                   <th>Khối lượng</th>
+                  <th>Quy cách</th>
                   <th>Mô tả</th>
                   <th>Trạng thái</th>
                   <th>Thao tác</th>
@@ -279,13 +312,37 @@
                 />
               </div>
             </div>
-            <div class="form-group">
-              <label>Mô tả</label>
-              <textarea
-                id="prod-description"
-                rows="2"
-                placeholder="Mô tả chi tiết sản phẩm..."
-              ></textarea>
+            <div class="form-row">
+              <div class="form-group half">
+                <label>Quy cách <span class="required">*</span></label>
+                <div class="custom-dropdown" id="spec-dropdown">
+                  <div class="searchable-toggle-wrapper">
+                    <input type="text" 
+                           id="spec-search-input" 
+                           class="custom-dropdown-search-input" 
+                           placeholder="Chọn quy cách" 
+                           readonly
+                           onclick="toggleSpecDropdown(true)">
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                  </div>
+                  <div class="custom-dropdown-menu" id="spec-dropdown-menu">
+                    <div class="dropdown-items-list" id="spec-items-list">
+                      <div class="custom-dropdown-item" onclick="selectSpec('FIFO')">FIFO</div>
+                      <div class="custom-dropdown-item" onclick="selectSpec('FEFO')">FEFO</div>
+                      <div class="custom-dropdown-item" onclick="selectSpec('LIFO')">LIFO</div>
+                    </div>
+                  </div>
+                  <input type="hidden" id="prod-spec" value="" />
+                </div>
+              </div>
+              <div class="form-group half">
+                <label>Mô tả</label>
+                <textarea
+                  id="prod-description"
+                  rows="2"
+                  placeholder="Mô tả chi tiết sản phẩm..."
+                ></textarea>
+              </div>
             </div>
             <div class="form-group" style="margin-top: 16px">
               <div class="toggle-label-inline">

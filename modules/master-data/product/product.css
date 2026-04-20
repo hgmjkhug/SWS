@@ -221,82 +221,90 @@ html, body {
 /* 1. Checkbox */
 .product-table th:nth-child(1),
 .product-table td:nth-child(1) {
-    width: 50px;
-    min-width: 50px;
-    max-width: 50px;
+    width: 40px;
+    min-width: 40px;
+    max-width: 40px;
     text-align: center;
 }
 
 /* 2. STT */
 .product-table th:nth-child(2),
 .product-table td:nth-child(2) {
-    width: 60px;
-    min-width: 60px;
-    max-width: 60px;
+    width: 45px;
+    min-width: 45px;
+    max-width: 45px;
     text-align: center;
 }
 
 /* 3. Code */
 .product-table th:nth-child(3),
 .product-table td:nth-child(3) {
-    width: 140px;
-    min-width: 140px;
+    width: 130px;
+    min-width: 130px;
     text-align: center;
 }
 
 /* 4. Name */
 .product-table th:nth-child(4),
 .product-table td:nth-child(4) {
-    width: 230px;
-    min-width: 230px;
+    width: 320px;
+    min-width: 320px;
     text-align: left;
 }
 
 /* 5. Group */
 .product-table th:nth-child(5),
 .product-table td:nth-child(5) {
-    width: 160px;
-    min-width: 160px;
+    width: 150px;
+    min-width: 150px;
     text-align: left;
 }
 
 /* 6. Unit */
 .product-table th:nth-child(6),
 .product-table td:nth-child(6) {
-    width: 90px;
-    min-width: 90px;
+    width: 70px;
+    min-width: 70px;
     text-align: center;
 }
 
 /* 7. Weight */
 .product-table th:nth-child(7),
 .product-table td:nth-child(7) {
-    width: 100px;
-    min-width: 100px;
+    width: 80px;
+    min-width: 80px;
     text-align: center;
 }
 
-/* 8. Desc */
+/* 8. Quy cách */
 .product-table th:nth-child(8),
 .product-table td:nth-child(8) {
-    width: 180px;
-    min-width: 180px;
+    width: 85px;
+    min-width: 85px;
+    text-align: center;
+}
+
+/* 9. Desc */
+.product-table th:nth-child(9),
+.product-table td:nth-child(9) {
+    width: 160px;
+    min-width: 160px;
     text-align: left;
 }
 
-/* 9. Status */
-.product-table th:nth-child(9),
-.product-table td:nth-child(9) {
-    width: 100px;
-    min-width: 100px;
+/* 10. Status */
+.product-table th:nth-child(10),
+.product-table td:nth-child(10) {
+    width: 80px;
+    min-width: 80px;
     text-align: center;
 }
 
-/* 10. Action */
-.product-table th:nth-child(10),
-.product-table td:nth-child(10) {
-    width: 140px;
-    min-width: 140px;
+/* 11. Action */
+.product-table th:nth-child(11),
+.product-table td:nth-child(11) {
+    width: 120px;
+    min-width: 120px;
     text-align: center;
 }
 
@@ -315,38 +323,38 @@ html, body {
 }
 
 .product-table th:nth-child(2) {
-    left: 50px;
+    left: 40px;
     z-index: 50;
 }
 
 .product-table td:nth-child(2) {
     position: sticky;
-    left: 50px;
+    left: 40px;
     z-index: 5;
     background-color: #fff;
 }
 
 .product-table th:nth-child(3) {
-    left: 110px;
+    left: 85px;
     z-index: 50;
 }
 
 .product-table td:nth-child(3) {
     position: sticky;
-    left: 110px;
+    left: 85px;
     z-index: 5;
     background-color: #fff;
 }
 
 .product-table th:nth-child(4) {
-    left: 250px;
+    left: 215px;
     z-index: 50;
     box-shadow: 4px 0 8px -4px rgba(0, 0, 0, 0.15);
 }
 
 .product-table td:nth-child(4) {
     position: sticky;
-    left: 250px;
+    left: 215px;
     z-index: 5;
     background-color: #fff;
     box-shadow: 4px 0 8px -4px rgba(0, 0, 0, 0.15);
@@ -402,6 +410,31 @@ html, body {
 .status-inactive {
     border-color: #991b1b;
     color: #991b1b;
+}
+
+/* Specification Badge */
+.spec-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.spec-fifo {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.spec-fefo {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.spec-lifo {
+    background-color: #f3e8ff;
+    color: #6b21a8;
 }
 
 /* Action Icons */

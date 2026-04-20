@@ -233,6 +233,9 @@
                 const id = p.stt.toString().padStart(3, '0');
                 const fullName = `${line.dong_san_pham} - ${cat.pham_cap} - ${p.loai_thung}`;
                 const productCode = `${cat.pham_cap} - ${p.loai_thung}`;
+                const specs = ['FIFO', 'FEFO', 'LIFO'];
+                const spec = specs[Math.floor(Math.random() * specs.length)];
+                
                 products.push({
                     id: `uuid-prod-${id}`,
                     code: productCode,
@@ -240,7 +243,7 @@
                     group: cat.pham_cap,
                     unit: 'Thùng',
                     weight: (Math.random() * 0.5 + 13), // Adjusted weight to ~13kg
-                    exportMethod: 'FIFO',
+                    specification: spec,
                     description: `Mô tả ${fullName}`,
                     status: 1,
                     qr_code: `QR${id}`,
@@ -317,6 +320,7 @@
         let menu;
         if (type === 'group') menu = document.getElementById('group-filter-menu');
         else if (type === 'status') menu = document.getElementById('status-filter-menu');
+        else if (type === 'spec') menu = document.getElementById('spec-filter-menu');
 
         if (!menu) return;
 
@@ -334,6 +338,10 @@
             document.getElementById('status-filter').value = value;
             document.getElementById('status-filter-display').innerText = label;
             currentStatusFilter = value;
+        } else if (type === 'spec') {
+            document.getElementById('spec-filter').value = value;
+            document.getElementById('spec-filter-display').innerText = label;
+            currentSpecFilter = value;
         }
 
         const menu = document.getElementById(`${type}-filter-menu`);
@@ -401,7 +409,7 @@
         const pageData = activeData.slice(start, end);
 
         if (pageData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 20px; color: #64748b;">Không tìm thấy dữ liệu</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding: 20px; color: #64748b;">Không tìm thấy dữ liệu</td></tr>';
         } else {
             pageData.forEach((item, idx) => {
                 const groupName = window.masterCategoryData.find(c => c.code === item.group)?.name || item.group || 'N/A';
@@ -415,6 +423,7 @@
                 <td>${groupName}</td>
                 <td>${item.unit || ''}</td>
                 <td>${item.weight ? item.weight.toFixed(2) : '-'}</td>
+                <td><span class="spec-badge spec-${item.specification?.toLowerCase() || 'fifo'}">${item.specification || 'FIFO'}</span></td>
                 <td title="${item.description || ''}">${item.description || '-'}</td>
                 <td><label class="switch"><input type="checkbox" ${item.status === 1 ? 'checked' : ''} onchange="handleToggleRequest(this, '${item.id}')"><span class="slider round"></span></label></td>
                 <td>
@@ -501,6 +510,7 @@
     // State for filters
     let currentGroupFilter = '';
     let currentStatusFilter = '';
+    let currentSpecFilter = '';
 
     // Filter
     window.filterProducts = function () {
@@ -509,6 +519,7 @@
         // Use variables
         const groupFilter = currentGroupFilter;
         const statusFilter = currentStatusFilter;
+        const specFilter = currentSpecFilter;
 
         filteredData = products.filter(prod => {
             if (prod.is_deleted) return false;
@@ -519,8 +530,9 @@
             // Status filter logic
             const matchesStatus = statusFilter === '' || prod.status.toString() === statusFilter;
             const matchesGroup = groupFilter === '' || prod.group === groupFilter;
+            const matchesSpec = specFilter === '' || prod.specification === specFilter;
 
-            return matchesQuery && matchesStatus && matchesGroup;
+            return matchesQuery && matchesStatus && matchesGroup && matchesSpec;
         });
         currentPage = 1;
         renderProducts();
@@ -659,6 +671,12 @@
                 if (uSearchInput) uSearchInput.value = uVal;
 
                 document.getElementById('prod-weight').value = prod.weight || '';
+                
+                // Set Specification
+                const sVal = prod.specification || 'FIFO';
+                document.getElementById('prod-spec').value = sVal;
+                document.getElementById('spec-search-input').value = sVal;
+
                 document.getElementById('prod-status').checked = prod.status === 1;
             }
         } else {
@@ -668,6 +686,8 @@
             // Reset fields
             document.getElementById('prod-unit').value = '';
             document.getElementById('prod-group').value = '';
+            document.getElementById('prod-spec').value = 'FIFO';
+            document.getElementById('spec-search-input').value = 'FIFO';
             document.getElementById('prod-status').checked = true;
         }
         modal.classList.add('show');
@@ -740,7 +760,37 @@
             gDropdown.classList.remove('open');
             document.getElementById('group-dropdown-menu').classList.remove('show');
         }
+        // Spec
+        const sDropdown = document.getElementById('spec-dropdown');
+        if (sDropdown && !sDropdown.contains(e.target)) {
+            sDropdown.classList.remove('open');
+            document.getElementById('spec-dropdown-menu').classList.remove('show');
+        }
     });
+
+    window.toggleSpecDropdown = function (forceOpen = null) {
+        const dropdown = document.getElementById('spec-dropdown');
+        const menu = document.getElementById('spec-dropdown-menu');
+        const isCurrentlyOpen = menu.classList.contains('show');
+        const targetState = forceOpen !== null ? forceOpen : !isCurrentlyOpen;
+
+        document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.remove('show'));
+        document.querySelectorAll('.custom-dropdown').forEach(d => d.classList.remove('open'));
+
+        if (targetState) {
+            menu.classList.add('show');
+            dropdown.classList.add('open');
+        } else {
+            menu.classList.remove('show');
+            dropdown.classList.remove('open');
+        }
+    };
+
+    window.selectSpec = function (val) {
+        document.getElementById('prod-spec').value = val;
+        document.getElementById('spec-search-input').value = val;
+        window.toggleSpecDropdown(false);
+    };
 
     window.closeProductModal = function () {
         document.getElementById('product-modal').classList.remove('show');
@@ -753,6 +803,7 @@
         const description = document.getElementById('prod-description').value.trim();
         const group = document.getElementById('prod-group').value;
         const unit = document.getElementById('prod-unit').value;
+        const specification = document.getElementById('prod-spec').value || 'FIFO';
         const weight = parseFloat(document.getElementById('prod-weight').value) || 0;
         const status = document.getElementById('prod-status').checked ? 1 : 0;
 
@@ -785,7 +836,7 @@
             if (idx !== -1) {
                 products[idx] = {
                     ...products[idx],
-                    code, name, description, group, unit, weight, status,
+                    code, name, description, group, unit, specification, weight, status,
                     updated_at: now
                 };
                 showToast('Cập nhật sản phẩm thành công');
@@ -794,7 +845,7 @@
             const newId = crypto.randomUUID ? crypto.randomUUID() : `uuid-${Date.now()}`;
             products.unshift({
                 id: newId,
-                code, name, description, group, unit, weight, status,
+                code, name, description, group, unit, specification, weight, status,
                 is_deleted: false,
                 created_at: now,
                 updated_at: now
