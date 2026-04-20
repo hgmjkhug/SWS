@@ -96,6 +96,8 @@ instockCurrentViewRight.setMonth(instockCurrentViewRight.getMonth() + 1);
 // Product groups (Categories) collected from bananaData
 let productGroups = [];
 let instockBatchCodes = [];
+let instockSubSortDir = 'none'; // 'none' | 'asc' | 'desc'
+let instockExpandedRowId = null; 
 
 // Initialize Data
 function initMockData() {
@@ -226,9 +228,13 @@ function generateMockHistory(productId) {
     // Random Batch ID (matching batch module codes like CN-BN-1060)
     const batchCode = (Math.random() > 0.5 ? 'CN-BN-' : 'JP-BN-') + (1000 + Math.floor(Math.random() * 60));
 
+    const batchName = (batchCode.startsWith('CN') ? 'Lô hàng Chuối Trung Quốc' : 'Lô hàng Chuối Nhật Bản') + ' - Đợt ' + (Math.floor(Math.random() * 5) + 1);
+
     history.push({
       id: `${batchCode}-${productId}-${i}`,
+      containerId: containerId,
       batchId: batchCode,
+      batchName: batchName,
       type: type,
       quantity: Math.floor(Math.random() * 50) + 5,
       location: location,
@@ -297,6 +303,7 @@ function renderInstockTable() {
   pageData.forEach((item, index) => {
     const row = document.createElement("tr");
     row.className = "clickable-row";
+    if (item.id === instockExpandedRowId) row.classList.add("expanded");
     row.id = `row-${item.id}`;
     row.onclick = () => toggleRowExpansion(item.id);
 
@@ -352,54 +359,81 @@ function renderInstockTable() {
     const subRow = document.createElement("tr");
     subRow.className = "sub-table-row";
     subRow.id = `sub-row-${item.id}`;
-    subRow.style.display = "none";
+    subRow.style.display = (item.id === instockExpandedRowId) ? "table-row" : "none";
     subRow.innerHTML = `
       <td colspan="11">
         <div class="sub-table-container">
           <table class="sub-table">
             <colgroup>
+              <col style="width: 3%">
+              <col style="width: 12%">
+              <col style="width: 15%">
+              <col style="width: 9%">
               <col style="width: 5%">
-              <col style="width: 22%">
-              <col style="width: 11%">
-              <col style="width: 8%">
-              <col style="width: 6%">
               <col style="width: 10%">
+              <col style="width: 10.5%">
+              <col style="width: 10.5%">
+              <col style="width: 8%">
+              <col style="width: 8%">
               <col style="width: 9%">
-              <col style="width: 9%">
-              <col style="width: 9%">
-              <col style="width: 9%">
-              <col style="width: 7%">
             </colgroup>
             <thead>
               <tr>
                 <th class="text-center">STT</th>
-                <th>Mã lệnh</th>
-                <th>Mã lô hàng</th>
+                <th>Mã vật chứa</th>
+                <th>Lô hàng</th>
                 <th class="text-center">Loại lệnh</th>
                 <th class="text-center">Số lượng</th>
                 <th class="text-center">Vị trí lưu kho</th>
                 <th class="text-center">Ngày tạo</th>
                 <th class="text-center">Ngày hoàn thành</th>
-                <th class="text-center">TG tồn kho</th>
+                <th class="text-center" style="cursor:pointer;" onclick="toggleInstockSubSort(event)">
+                  TG tồn kho 
+                  <i class="fas ${instockSubSortDir === 'none' ? 'fa-sort' : (instockSubSortDir === 'asc' ? 'fa-sort-up' : 'fa-sort-down')}" 
+                     style="margin-left:4px; color:${instockSubSortDir === 'none' ? '#94a3b8' : '#076eb8'}"></i>
+                </th>
                 <th class="text-center">Ngày hết hạn</th>
                 <th class="text-center">Tình trạng</th>
               </tr>
             </thead>
             <tbody>
-              ${item.history.map((h, i) => `
+              ${(() => {
+                let sortedHistory = [...item.history];
+                if (instockSubSortDir !== 'none') {
+                  sortedHistory.sort((a, b) => {
+                    const timeA = parseInstockDateTime(a.executedAt) || 0;
+                    const timeB = parseInstockDateTime(b.executedAt) || 0;
+                    // Duration is (Now - ExecutedAt). 
+                    // So Ascending Duration = 1d, 2d, 3d... => timeA should be Latest to Earliest => timeB - timeA
+                    // Descending Duration = 10d, 9d, 8d... => timeA should be Earliest to Latest => timeA - timeB
+                    if (instockSubSortDir === 'asc') return timeB - timeA; 
+                    return timeA - timeB;
+                  });
+                }
+                return sortedHistory.map((h, i) => `
                 <tr>
                   <td class="text-center">${i + 1}</td>
-                  <td>${h.id}</td>
-                  <td style="font-weight: 500; color: #475569;">${h.batchId}</td>
+                  <td>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <span style="font-weight: 600; color: #076eb8;">${h.containerId || 'P-N0' + (i+1) + '-L' + (i+1)}</span>
+                      <i class="fa-regular fa-copy" style="cursor:pointer; color:#94a3b8; font-size:12px;" onclick="copyToClipboard('${h.containerId}', this)" title="Sao chép"></i>
+                    </div>
+                  </td>
+                  <td>
+                    <div style="font-size:13px; font-weight: 600; color: #0284c7;">${h.batchId}</div>
+                    <div style="font-size:11px; color: #64748b; margin-top: 1px;">${h.batchName || 'Lô hàng mặc định'}</div>
+                  </td>
                   <td class="text-center">
                     <span class="type-badge ${h.type.startsWith('Nhập') ? 'type-in' : 'type-out'}">
                       ${h.type}
                     </span>
                   </td>
                   <td class="text-center">${h.quantity}</td>
-                  <td class="text-center" style="font-weight: 600; color: #076eb8;">${h.location}</td>
-                  <td class="text-center">${h.createdAt}</td>
-                  <td class="text-center">${h.executedAt}</td>
+                  <td class="text-center" style="font-weight: 600; color: #076eb8;">
+                    ${h.type.startsWith('Xuất') ? '<span style="color:#94a3b8;font-weight:400;">—</span>' : h.location}
+                  </td>
+                  <td class="text-center" style="white-space: nowrap;">${h.createdAt}</td>
+                  <td class="text-center" style="white-space: nowrap;">${h.executedAt}</td>
                   <td class="text-center">
                     ${h.type.startsWith('Nhập')
                       ? `<span class="storage-duration-badge">${calcStorageDuration(h.executedAt) || '—'}</span>`
@@ -413,7 +447,8 @@ function renderInstockTable() {
                     </span>
                   </td>
                 </tr>
-              `).join('')}
+              `).join('');
+              })()}
             </tbody>
           </table>
         </div>
@@ -428,6 +463,8 @@ function renderInstockTable() {
 function toggleRowExpansion(id) {
   const row = document.getElementById(`row-${id}`);
   const subRow = document.getElementById(`sub-row-${id}`);
+  if (!row || !subRow) return;
+
   const isExpanded = row.classList.contains("expanded");
 
   // Close other expanded rows
@@ -443,9 +480,11 @@ function toggleRowExpansion(id) {
   if (isExpanded) {
     row.classList.remove("expanded");
     subRow.style.display = "none";
+    instockExpandedRowId = null;
   } else {
     row.classList.add("expanded");
     subRow.style.display = "table-row";
+    instockExpandedRowId = id;
   }
 }
 
@@ -543,7 +582,10 @@ function initInstockDefaultDateRange() {
   const today = new Date();
   instockActiveStartDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   instockActiveEndDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
-  instockSelectedStartDate = new Date(today.setMonth(today.getMonth() - 1)); // Default to last 30 days
+  
+  const start = new Date(today);
+  start.setDate(today.getDate() - 3);
+  instockSelectedStartDate = start;
   instockSelectedEndDate = new Date();
   
   instockActiveStartDate = instockSelectedStartDate;
@@ -555,7 +597,7 @@ function initInstockDefaultDateRange() {
 
   setTimeout(() => {
     document.querySelectorAll('#instockAnalyticsPicker .sidebar-item[data-range]').forEach(i => {
-      i.classList.toggle('active', i.getAttribute('data-range') === 'last30');
+      i.classList.toggle('active', i.getAttribute('data-range') === 'last3');
     });
   }, 100);
 }
@@ -1184,4 +1226,52 @@ if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initInstockModule);
 } else {
     initInstockModule();
+}
+
+// ── Copy to Clipboard ──────────────────────────────────────────
+function copyToClipboard(text, el) {
+  if (!navigator.clipboard) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      try { document.execCommand('copy'); showCopyPopover(el); } catch (e) { }
+      document.body.removeChild(ta);
+  } else {
+      navigator.clipboard.writeText(text).then(() => showCopyPopover(el));
+  }
+}
+
+function showCopyPopover(el) {
+  if (!el) return;
+  document.querySelector('.copy-popover')?.remove();
+  const rect = el.getBoundingClientRect();
+  const popover = document.createElement('div');
+  popover.className = 'copy-popover';
+  popover.innerText = 'Copied!';
+  document.body.appendChild(popover);
+  popover.style.left = (rect.left + rect.width / 2) + 'px';
+  popover.style.top = (rect.top - 8) + 'px';
+
+  // Basic styling for popover if not in CSS
+  popover.style.position = 'fixed';
+  popover.style.backgroundColor = '#334155';
+  popover.style.color = '#fff';
+  popover.style.padding = '4px 8px';
+  popover.style.borderRadius = '4px';
+  popover.style.fontSize = '12px';
+  popover.style.zIndex = '10000';
+  popover.style.transform = 'translateX(-50%)';
+  popover.style.pointerEvents = 'none';
+
+  setTimeout(() => popover.remove(), 1000);
+}
+
+// ── Sub-table Sorting ──────────────────────────────────────────
+function toggleInstockSubSort(event) {
+  if (event) event.stopPropagation();
+  if (instockSubSortDir === 'none') instockSubSortDir = 'asc';
+  else if (instockSubSortDir === 'asc') instockSubSortDir = 'desc';
+  else instockSubSortDir = 'none';
+  renderInstockTable();
 }

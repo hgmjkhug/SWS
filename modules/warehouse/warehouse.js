@@ -394,6 +394,12 @@
                         </td>
                         <td style="text-align: center;">${areasInTower}</td>
                         <td style="text-align: center; font-weight: 600;">${positionsInTower.toLocaleString()}</td>
+                        <td style="text-align: center;">
+                            <label class="switch" style="cursor: pointer;">
+                                <input type="checkbox" checked style="cursor: pointer;" onclick="event.stopPropagation()">
+                                <span class="slider" style="cursor: pointer;"></span>
+                            </label>
+                        </td>
                     </tr>
                 `;
             }
@@ -406,11 +412,12 @@
                         <thead>
                             <tr>
                                 <th style="width: 50px; text-align: center;">STT</th>
-                                <th style="width: 150px;">Mã tháp</th>
-                                <th style="width: 200px;">Tên tháp</th>
-                                <th style="width: 210px; text-align: center;">Loại tháp</th>
+                                <th style="width: 140px;">Mã tháp</th>
+                                <th style="width: 180px;">Tên tháp</th>
+                                <th style="width: 200px; text-align: center;">Loại tháp</th>
                                 <th style="width: 120px; text-align: center;">Số khu vực</th>
-                                <th style="width: 180px; text-align: center;">Số vị trí chứa hàng</th>
+                                <th style="width: 170px; text-align: center;">Số vị trí chứa hàng</th>
+                                <th style="width: 100px; text-align: center;">Sử dụng</th>
                             </tr>
                         </thead>
                         <tbody>

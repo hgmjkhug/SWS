@@ -8,7 +8,12 @@
 
   function saveOutboundOrders() {
       try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(outboundData));
+          const dataToSave = outboundData.map(o => {
+              const toSave = { ...o };
+              if (toSave.rawDate instanceof Date) toSave.rawDate = toSave.rawDate.toISOString();
+              return toSave;
+          });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
       } catch (e) {
           console.error('Error saving to localStorage:', e);
       }
@@ -29,6 +34,17 @@
           console.error('Error loading from localStorage:', e);
       }
       return null;
+  }
+
+  function ensureDataHasBatch(data) {
+      if (!data) return data;
+      const batchData = JSON.parse(localStorage.getItem('SWS_BATCH_DATA_v4') || '[]');
+      const getBatch = (i) => batchData.length > 0 ? { code: batchData[i % batchData.length].code, name: batchData[i % batchData.length].name } : { code: 'LOT-GEN', name: 'Lô hàng mặc định' };
+      
+      return data.map((o, i) => {
+          if (!o.batch) o.batch = getBatch(i);
+          return o;
+      });
   }
 
   // Mock Data Generation
@@ -163,8 +179,53 @@
     end: new Date(today.getFullYear(), today.getMonth(), today.getDate()) 
   };
   let tempRange = { start: null, end: null }; // For internal selection before Apply
+  let selectedBatchId = null;
 
-  let outboundData = loadOutboundOrders();
+  function ensureBatchDataInitialized() {
+      const BATCH_STORAGE_KEY = 'SWS_BATCH_DATA_v4';
+      if (!localStorage.getItem(BATCH_STORAGE_KEY)) {
+          const STAFF_LIST = [
+              { id: 'NV001', name: 'Nguyễn Văn An' },
+              { id: 'NV002', name: 'Trần Thị Bình' },
+              { id: 'NV003', name: 'Lê Văn Cường' },
+              { id: 'NV004', name: 'Phạm Minh Dũng' }
+          ];
+          const statusList = ['NEW', 'CHECKED', 'PROCESSING', 'COMPLETED'];
+          const codes = ['CN-BN', 'JP-BN'];
+          const productTypes = ['Chuối Trung Quốc/ Chinese bananas', 'Chuối Nhật Bản/ Japanese bananas'];
+          
+          const mockBatches = Array.from({ length: 50 }, function(_, i) {
+              const status = (i < 10) ? 'CHECKED' : statusList[i % 4];
+              const typeIndex = i % 2;
+              const createdAt = new Date();
+              createdAt.setDate(createdAt.getDate() - (i < 30 ? 0 : (i % 30)));
+              
+              return {
+                  id: Date.now() + i,
+                  code: codes[typeIndex] + '-' + String(1060 - i).padStart(4, '0'),
+                  name: (i < 10 ? 'Lô kiểm tồn - ' : 'Lô ') + productTypes[typeIndex] + ' - Đợt ' + (Math.floor(i / 5) + 1),
+                  productType: productTypes[typeIndex],
+                  status: status,
+                  batchType: (i % 2 === 0) ? 'EXPORT' : 'IMPORT',
+                  totalQty: (i < 10) ? 1200 : ((status === 'NEW') ? 0 : 500),
+                  executedQty: (status === 'COMPLETED') ? 500 : 0,
+                  creator: STAFF_LIST[i % STAFF_LIST.length],
+                  createdAt: createdAt
+              };
+          });
+          localStorage.setItem(BATCH_STORAGE_KEY, JSON.stringify(mockBatches));
+      }
+  }
+
+  ensureBatchDataInitialized();
+  const batchData = JSON.parse(localStorage.getItem('SWS_BATCH_DATA_v4') || '[]');
+  const getBatch = (i) => batchData.length > 0 ? { code: batchData[i % batchData.length].code, name: batchData[i % batchData.length].name } : { code: 'LOT-GEN', name: 'Lô hàng mặc định' };
+
+  let outboundData = ensureDataHasBatch(loadOutboundOrders());
+  if (outboundData) {
+      saveOutboundOrders();
+  }
+  
   if (!outboundData) {
       outboundData = Array.from({ length: 50 }, (_, i) => {
         const id = i + 1;
@@ -173,7 +234,9 @@
         const user = USERS[Math.floor(Math.random() * USERS.length)];
         const status = STATUS_LIST[Math.floor(Math.random() * STATUS_LIST.length)];
         const qty = Math.floor(Math.random() * 500) + 10;
-        const outboundType = Math.random() > 0.5 ? "PALLET" : "MATERIAL";
+        const method = Math.random() > 0.5 ? "PALLET" : "MATERIAL";
+        const outboundType = Math.random() > 0.7 ? "SCRAP" : "SALE";
+        const batch = getBatch(i);
 
         // Random Export Workflow
         const wf =
@@ -240,6 +303,7 @@
 
                 batches.push({
                     inboundCode: `${bPallet}_${mat.code}_${receipt.total}_${receipt.date.toISOString().slice(2,10).replace(/-/g, "")}`,
+                    batch: `LOT-${receipt.date.getFullYear()}${(receipt.date.getMonth()+1).toString().padStart(2, "0")}-${Math.floor(Math.random() * 999)}`,
                     exportedQty: batchQty,
                     totalQty: receipt.total,
                     pallet: bPallet,
@@ -270,9 +334,11 @@
             creatorId: user.id,
             creatorName: user.name,
             outboundType: outboundType,
+            method: method,
             workflow: wf,
             rawDate: date,
             batches: batches,
+            batch: batch,
             priority: Math.random() > 0.8
           };
       }).sort((a, b) => b.rawDate - a.rawDate);
@@ -300,8 +366,13 @@
 
       const inputCode = `${pallet}_${mat.code}_${quantity}_${yymmdd}`;
 
+      // Add mock batch info
+      const batchCode = Math.random() > 0.5 ? `CN-BN-${1000+i}` : `JP-BN-${2000+i}`;
+      const batchName = `Lô hàng ${mat.name} - Đợt ${i+1}`;
+
       return {
         inputCode: inputCode,
+        batch: `${batchCode} - ${batchName}`,
         quantity: quantity,
         pallet: pallet,
         location: location,
@@ -446,14 +517,15 @@
 
           // Format batches
           const batchesHtml = item.batches
-            .map((batch) => {
+            .map((batch, i) => {
               const date = new Date(batch.createdDate);
               const formattedDate = `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")} - ${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
               return `
                         <tr>
+                            <td style="text-align: center">${i + 1}</td>
                             <td>${batch.inputCode}</td>
+                            <td>${batch.batch || '-'}</td>
                             <td style="text-align: center">${batch.quantity}</td>
-                            <td style="text-align: center">${batch.pallet}</td>
                             <td style="text-align: center">${batch.location}</td>
                             <td style="text-align: center">${formattedDate}</td>
                         </tr>
@@ -463,19 +535,17 @@
 
           subRow.innerHTML = `
                     <td colspan="2" style="padding: 0; background-color: transparent; border: none;"></td>
-                    <td colspan="6" style="padding: 0;">
+                    <td colspan="7" style="padding: 0;">
                         <div class="sub-table-container">
                             <table class="sub-table">
                                 <thead>
                                     <tr>
-                                        <th rowspan="2" style="vertical-align: middle;">Mã lệnh nhập</th>
-                                        <th rowspan="2" style="text-align: center; vertical-align: middle;">Số lượng</th>
-                                        <th colspan="2" style="text-align: center;">Thông tin lưu</th>
-                                        <th rowspan="2" style="text-align: center; vertical-align: middle;">Thời gian tạo</th>
-                                    </tr>
-                                    <tr>
-                                        <th style="font-weight: 500; text-align: center;">Vật chứa</th>
-                                        <th style="font-weight: 500; text-align: center;">Vị trí lưu</th>
+                                        <th style="width: 40px; text-align: center; vertical-align: middle;">STT</th>
+                                        <th style="vertical-align: middle;">Mã vật chứa</th>
+                                        <th style="vertical-align: middle;">Lô hàng</th>
+                                        <th style="text-align: center; vertical-align: middle;">Số lượng</th>
+                                        <th style="text-align: center;">Vị trí lưu</th>
+                                        <th style="text-align: center; vertical-align: middle;">TG hoàn thành</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -917,6 +987,7 @@
 
     const searchTerm = searchInput.value.toLowerCase();
     const filterStatus = filterStatusEl.value;
+    const filterMethod = document.getElementById("filter-method")?.value || "ALL";
     const filterType = document.getElementById("filter-type")?.value || "ALL";
 
     // 1. Filter Data
@@ -929,6 +1000,9 @@
       const matchesStatus =
         filterStatus === "ALL" || item.status === filterStatus;
 
+      const matchesMethod =
+        filterMethod === "ALL" || item.method === filterMethod;
+
       const matchesType =
         filterType === "ALL" || item.outboundType === filterType;
 
@@ -936,6 +1010,8 @@
         !selectedCreatorId || item.creatorId === selectedCreatorId;
 
       const matchesPriority = !filterPriorityOnly || item.priority === true;
+
+      const matchesBatch = !selectedBatchId || (item.batch && item.batch.code === selectedBatchId);
 
       // Date Range Filter
       let matchesDate = true;
@@ -950,9 +1026,11 @@
       return (
         matchesSearch &&
         matchesStatus &&
+        matchesMethod &&
         matchesType &&
         matchesCreator &&
         matchesPriority &&
+        matchesBatch &&
         matchesDate
       );
     });
@@ -973,7 +1051,7 @@
     if (pageData.length === 0) {
       // Updated styling to be clearer
       tbody.innerHTML =
-        '<tr><td colspan="9" style="text-align:center; padding: 40px; color:#64748b; font-style:italic;">Không tìm thấy kết quả phù hợp</td></tr>';
+        '<tr><td colspan="10" style="text-align:center; padding: 40px; color:#64748b; font-style:italic;">Không tìm thấy kết quả phù hợp</td></tr>';
     } else {
       pageData.forEach((item, index) => {
         const statusInfo = statusConfig[item.status] || {
@@ -987,18 +1065,13 @@
   
         const tr = document.createElement("tr");
         tr.className = "clickable-row";
-        tr.onclick = (e) => {
-            if (e.target.closest('.btn-icon') || e.target.closest('.copy-icon')) return;
-            window.toggleOutboundSubTable(item.id, tr);
-        };
   
         tr.innerHTML = `
                 <td style="text-align:center">${start + index + 1}</td>
                 <td>
                     <div class="code-container" style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: #475569;">
-                        <i class="fas fa-chevron-right chevron-icon" style="font-size: 10px; color: #94a3b8; transition: transform 0.3s;"></i>
-                        <span class="code-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">${item.code}</span>
-                        <span class="copy-icon" onclick="copyCode('${item.code}', this, event)" title="Sao chép">
+                        <span class="code-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">${item.code.split('_')[0]}</span>
+                        <span class="copy-icon" onclick="copyCode('${item.code.split('_')[0]}', this, event)" title="Sao chép">
                             <i class="far fa-copy"></i>
                             <span class="copy-popover">Copied!</span>
                         </span>
@@ -1011,13 +1084,24 @@
                         <div style="font-weight: 600; color: #334155; font-size: 14px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${item.materialName}</div>
                     </div>
                 </td>
-                <td style="text-align: center; font-weight: 600; color: #076EB8;">
+                 <td style="text-align: center; font-weight: 600; color: #076EB8;">
                     ${item.quantity}
                 </td>
+                <td style="text-align: left; padding: 10px 0;">
+                    <div class="product-item" style="border-bottom: none;">
+                        <div style="font-weight: 600; color: #076EB8; font-size: 13px;">${item.batch ? item.batch.code : '-'}</div>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px; line-height: 1.3;">${item.batch ? item.batch.name : '-'}</div>
+                    </div>
+                </td>
 
+                <td style="text-align: center; display: none;">
+                    <span class="outbound-type-badge type-${item.method}" style="min-width: 130px;">
+                        ${item.method === "PALLET" ? "Xuất theo vật chứa" : "Xuất theo sản phẩm"}
+                    </span>
+                </td>
                 <td style="text-align: center">
                     <span class="outbound-type-badge type-${item.outboundType}">
-                        ${item.outboundType === "PALLET" ? "Xuất hủy" : "Xuất bán"}
+                        ${item.outboundType === "SCRAP" ? "Xuất hủy" : "Xuất bán"}
                     </span>
                 </td>
                 <!-- <td style="text-align: left;">
@@ -1036,15 +1120,15 @@
                 </td>
                 <td style="text-align: left; padding: 10px 0;">
                     <div class="product-item" style="border-bottom:none; min-height: fit-content; padding-left: 16px;">
-                        <div style="font-size: 13px; color: #334155;">
+                        <div style="font-size: 13px; color: #475569;">
                             <span style="font-weight: 600;">Thời gian:</span> ${item.date}
                         </div>
-                        <div style="font-size: 13px; color: #334155; margin-top: 2px;">
-                            <span style="font-weight: 600;">Người tạo:</span> ${item.creatorName || (item.creator ? item.creator.split(' (')[0] : 'Admin')} (${item.creatorId || (item.creator ? item.creator.split('(')[1].replace(')', '') : 'admin')})
+                        <div style="font-size: 13px; color: #475569; margin-top: 4px;">
+                            <span style="font-weight: 600;">Người tạo:</span> <span style="color: #076EB8;">${item.creatorName || (item.creator ? item.creator.split(' (')[0] : 'Admin')}</span> (${item.creatorId || (item.creator ? item.creator.split('(')[1].replace(')', '') : 'admin')})
                         </div>
                     </div>
                 </td>
-                <td style="text-align:center">
+                <td class="action-column">
                     <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
                         <button class="btn-icon btn-view" title="Xem chi tiết" onclick="event.stopPropagation(); window.showOutboundDetail('${item.id}')">
                             <i class="fas fa-eye"></i>
@@ -1151,6 +1235,7 @@
       if (!item.batches || item.batches.length === 0) {
           item.batches = [{
               inboundCode: item.code.includes('_') ? item.code : `IN_${item.materialCode}_001`,
+              batch: 'LOT-DEMO-999',
               exportedQty: item.quantity,
               totalQty: item.quantity,
               pallet: item.code.split('_')[0] !== 'OUT' && item.code.includes('_') ? item.code.split('_')[0] : 'PL-001',
@@ -1169,13 +1254,14 @@
         .map((batch, index) => {
           return `
                 <tr>
-                    <td style="text-align: center; width: 50px;">${index + 1}</td>
-                    <td style="text-align: left; padding-left: 15px; width: 230px;">${batch.inboundCode}</td>
+                    <td style="text-align: center; width: 50px; padding: 12px 5px;">${index + 1}</td>
+                    <td style="text-align: left; padding-left: 10px; width: 250px; padding-top: 12px; padding-bottom: 12px;">${batch.inboundCode}</td>
+                    <td style="text-align: left; padding-left: 10px; width: 180px; font-weight: 600; color: #0284c7;">${batch.batch || 'LOT-MISC'}</td>
                     <td style="text-align: center; font-weight: 600; color: #076EB8; width: 130px;">${batch.exportedQty}</td>
-                    <td style="text-align: center; font-weight: 500; color: #64748b; width: 120px;">${batch.totalQty}</td>
-                    <td style="text-align: center; width: 120px;">${batch.pallet}</td>
-                    <td style="text-align: center; width: 90px;">${batch.location}</td>
-                    <td style="text-align: center; width: 180px;">${batch.date}</td>
+                    <td style="text-align: center; font-weight: 500; color: #64748b; width: 130px;">${batch.totalQty}</td>
+                    <td style="text-align: center; width: 130px;">${batch.pallet}</td>
+                    <td style="text-align: center; width: 100px;">${batch.location}</td>
+                    <td style="text-align: center; width: 200px;">${batch.date}</td>
                     <td style="text-align: center; width: 130px;">${batch.expiryDate || '-'}</td>
                 </tr>
             `;
@@ -1184,19 +1270,20 @@
 
       subRow.innerHTML = `
             <td colspan="1" style="border:none; background: transparent;"></td>
-            <td colspan="6" style="padding: 0;">
-                <div class="sub-table-container" style="padding: 10px 20px; background-color: #f1f5f9; border-bottom: 1px solid #e2e8f0; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);">
-                    <table class="sub-table" style="width: 100%; border-collapse: collapse; background-color: white; border-radius: 6px; overflow: hidden; border: 1px solid #e2e8f0;">
+            <td colspan="9" style="padding: 0;">
+                <div class="sub-table-container" style="padding: 15px 30px; background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);">
+                    <table class="sub-table" style="width: 100%; min-width: 1250px; border-collapse: collapse; background-color: white; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
                         <thead>
                             <tr style="background-color: #076eb8;">
-                                <th style="text-align: center; color: white; padding: 10px 5px; font-weight: 600; width: 50px;">STT</th>
-                                <th style="text-align: left; color: white; padding: 10px 15px; font-weight: 600; width: 230px;">Mã lệnh nhập</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 130px;">Số lượng thực hiện</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 120px;">Tổng tồn kho</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 120px;">Container</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 90px;">Vị trí</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 180px;">Thời gian hoàn thành</th>
-                                <th style="text-align: center; color: white; padding: 10px 12px; font-weight: 600; width: 130px;">Ngày hết hạn</th>
+                                <th style="text-align: center; color: white; padding: 12px 5px; font-weight: 600; width: 50px;">STT</th>
+                                <th style="text-align: left; color: white; padding: 12px 10px; font-weight: 600; width: 250px;">Mã vật chứa</th>
+                                <th style="text-align: left; color: white; padding: 12px 10px; font-weight: 600; width: 180px;">Lô hàng</th>
+                                <th style="text-align: center; color: white; padding: 12px 8px; font-weight: 600; width: 130px;">SL thực hiện</th>
+                                <th style="text-align: center; color: white; padding: 12px 8px; font-weight: 600; width: 130px;">Tổng tồn kho</th>
+                                <th style="text-align: center; color: white; padding: 12px 8px; font-weight: 600; width: 130px;">Container</th>
+                                <th style="text-align: center; color: white; padding: 12px 8px; font-weight: 600; width: 100px;">Vị trí</th>
+                                <th style="text-align: center; color: white; padding: 12px 8px; font-weight: 600; width: 200px;">Thời gian hoàn thành</th>
+                                <th style="text-align: center; color: white; padding: 12px 8px; font-weight: 600; width: 130px;">Ngày hết hạn</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1226,12 +1313,40 @@
     renderOutboundTable();
   }
 
-  function toggleOutboundTypeDropdown() {
+  window.toggleOutboundTypeDropdown = function () {
     const dropdown = document.getElementById("type-dropdown");
     if (dropdown) dropdown.classList.toggle("open");
+  };
+
+  window.toggleOutboundMethodDropdown = function () {
+    const dropdown = document.getElementById("method-dropdown");
+    if (dropdown) dropdown.classList.toggle("open");
+  };
+
+  window.selectOutboundMethod = function (value, label) {
+    const input = document.getElementById("filter-method");
+    const labelEl = document.getElementById("method-selected-label");
+
+    if (input) input.value = value;
+    if (labelEl) labelEl.innerText = label;
+
+    // Update active class
+    const dropdown = document.getElementById("method-dropdown");
+    if (dropdown) {
+      dropdown.querySelectorAll(".dropdown-option").forEach((opt) => {
+        opt.classList.toggle(
+          "active",
+          opt.getAttribute("data-value") === value,
+        );
+      });
+      dropdown.classList.remove("open");
+    }
+
+    currentPage = 1;
+    renderOutboundTable();
   }
 
-  function selectOutboundType(value, label) {
+  window.selectOutboundType = function (value, label) {
     const input = document.getElementById("filter-type");
     const labelEl = document.getElementById("type-selected-label");
 
@@ -1252,7 +1367,7 @@
 
     currentPage = 1;
     renderOutboundTable();
-  }
+  };
 
   // --- Creator Combobox Logic ---
   let selectedCreatorId = null;
@@ -1907,13 +2022,7 @@
       if (priorityToggle) priorityToggle.checked = false;
 
       // Reset selection to MATERIAL (default)
-      const materialRadio = document.querySelector(
-        'input[name="outbound-type"][value="MATERIAL"]',
-      );
-      if (materialRadio) {
-        materialRadio.checked = true;
-        toggleOutboundForm("MATERIAL");
-      }
+      window.switchOutboundTab("MATERIAL");
     }
   }
 
@@ -2102,8 +2211,8 @@
                 }
             }
         } else {
-             if (window.showToast) window.showToast(`Chi tiết lệnh ${item.code}`, "info");
-             else alert(`Chi tiết lệnh ${item.code}`);
+             if (window.showToast) window.showToast(`Chi tiết vật chứa ${item.code.split('_')[0]}`, "info");
+             else alert(`Chi tiết vật chứa ${item.code.split('_')[0]}`);
         }
     }
     window.showOutboundDetail = showOutboundDetail;
@@ -2169,7 +2278,7 @@
       const dataToExport = filteredData.map((order, index) => {
           return {
               'STT': index + 1,
-              'Mã lệnh xuất': order.code,
+              'Mã vật chứa': order.code.split('_')[0],
               'Sản phẩm': `${order.materialName} (${order.materialCode})`,
               'Số lượng': order.quantity,
               'Loại xuất': order.outboundType === 'PALLET' ? 'Xuất hủy' : 'Xuất bán',
@@ -2217,6 +2326,22 @@
   window.selectOutboundType = selectOutboundType;
 
   // Redefine toggleOutboundForm (alias) to handle form switching
+  window.switchOutboundTab = function (type) {
+    // Update radio hidden input for form submission consistency
+    const radio = document.getElementById(`radio-${type.toLowerCase()}`);
+    if (radio) radio.checked = true;
+
+    // Update Tab UI
+    document.querySelectorAll(".modal-tab").forEach((tab) => {
+      tab.classList.remove("active");
+    });
+    const activeTab = document.getElementById(`tab-${type.toLowerCase()}`);
+    if (activeTab) activeTab.classList.add("active");
+
+    // Toggle Form Visibility
+    window.toggleOutboundForm(type);
+  };
+
   window.toggleOutboundForm = function (type) {
     const materialForm = document.getElementById("outbound-material-form");
     const palletForm = document.getElementById("outbound-pallet-form");
@@ -2225,11 +2350,12 @@
       if (materialForm) materialForm.style.display = "flex";
       if (palletForm) palletForm.style.display = "none";
 
-      // Select first Material radio
-      const firstRadio = document.querySelector(
-        'input[name="outboundType"][value="MATERIAL"]',
-      );
-      if (firstRadio) firstRadio.checked = true;
+      // Trigger render if table empty or just to refresh
+      if (typeof window.renderMaterialSelectionTable === "function") {
+        window.renderMaterialSelectionTable(
+          document.getElementById("material-search-input")?.value || "",
+        );
+      }
 
       // Reset save button state
       const saveBtn = document.getElementById("btn-save-outbound");
@@ -2241,15 +2367,11 @@
         // Render pallet table if empty
         const tbody = document.getElementById("pallet-selection-body");
         if (tbody && tbody.children.length === 0) {
-          renderPalletSelectionTable();
+          if (typeof window.renderPalletSelectionTable === "function") {
+            window.renderPalletSelectionTable();
+          }
         }
       }
-
-      // Select Pallet radio
-      const palletRadio = document.querySelector(
-        'input[name="outboundType"][value="PALLET"]',
-      );
-      if (palletRadio) palletRadio.checked = true;
 
       // Reset save button state
       const saveBtn = document.getElementById("btn-save-outbound");
@@ -2576,8 +2698,9 @@
                   inboundCode: b.inputCode,
                   exportedQty: take,
                   totalQty: b.quantity,
+                  batch: b.batch,
                   pallet: b.pallet,
-                  location: b.location,
+                  rawDate: finalDate,
                   date: dateStr,
                   expiryDate: "-"
               });
@@ -2662,6 +2785,76 @@
       // Close dropdown
       container.classList.remove('open');
   };
+
+  // ── Batch Filter Combobox ──
+  window.initBatchFilterCombobox = function() {
+      window.renderBatchFilterOptions();
+  };
+
+  window.renderBatchFilterOptions = function(filterText = '') {
+      const list = document.getElementById('batch-filter-combobox-list');
+      if (!list) return;
+      
+      const term = filterText.toLowerCase();
+      let html = '';
+      
+      // Always include "Tất cả"
+      if (!term || 'tất cả'.includes(term)) {
+          html += `<li class="combobox-option ${selectedBatchId === null ? 'selected' : ''}" onclick="window.selectBatchFilter(null, 'Tất cả')"><span>Tất cả</span></li>`;
+      }
+      
+      // Load from Batch Module
+      const batchData = JSON.parse(localStorage.getItem('SWS_BATCH_DATA_v4') || '[]');
+      batchData.forEach(b => {
+          if (!term || `${b.code} ${b.name}`.toLowerCase().includes(term)) {
+              html += `<li class="combobox-option ${selectedBatchId === b.code ? 'selected' : ''}" onclick="window.selectBatchFilter('${b.code}', '${b.code}')"><span style="font-weight:600;color:#076EB8;">${b.code}</span><span class="sub-text">${b.name}</span></li>`;
+          }
+      });
+      
+      if (!html) html = `<li class="combobox-option no-results">Không tìm thấy kết quả</li>`;
+      list.innerHTML = html;
+  };
+
+  window.toggleBatchFilterCombobox = function() {
+      const dropdown = document.getElementById('batch-filter-combobox-dropdown');
+      const arrow = document.querySelector('#batch-filter-combobox-wrapper .combobox-arrow');
+      const input = document.getElementById('batch-filter-combobox-input');
+      if (!dropdown) return;
+      
+      const isShow = dropdown.classList.contains('show');
+      if (!isShow) {
+          dropdown.classList.add('show');
+          arrow?.classList.add('active');
+          input?.focus();
+          window.renderBatchFilterOptions(input?.value.trim() === 'Tất cả' ? '' : input?.value);
+      } else {
+          dropdown.classList.remove('show');
+          arrow?.classList.remove('active');
+      }
+  };
+
+  window.handleBatchFilterComboboxSearch = function(input) {
+      const dropdown = document.getElementById('batch-filter-combobox-dropdown');
+      if (!dropdown?.classList.contains('show')) {
+          dropdown?.classList.add('show');
+          document.querySelector('#batch-filter-combobox-wrapper .combobox-arrow')?.classList.add('active');
+      }
+      window.renderBatchFilterOptions(input.value);
+  };
+
+  window.selectBatchFilter = function(id, text) {
+      selectedBatchId = id;
+      const input = document.getElementById('batch-filter-combobox-input');
+      if (input) input.value = text;
+      currentPage = 1;
+      renderOutboundTable();
+      const dropdown = document.getElementById('batch-filter-combobox-dropdown');
+      dropdown?.classList.remove('show');
+      document.querySelector('#batch-filter-combobox-wrapper .combobox-arrow')?.classList.remove('active');
+  };
+
+  // Initialize batch filter
+  setTimeout(window.initBatchFilterCombobox, 100);
 
   // Exposure
   window.openOutboundImportModal = openOutboundImportModal;

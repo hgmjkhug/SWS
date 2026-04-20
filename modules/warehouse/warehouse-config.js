@@ -1703,7 +1703,7 @@
             var isActive = (activeModuleId === mod.id) ? ' active' : '';
             
             html += '<div class="area-card' + isCollapsed + isActive + '" data-module-id="' + mod.id + '">';
-            html += '<div class="card-number-label-container"><span class="card-number-label">Tầng tháp ' + (idx + 1) + '</span></div>';
+            html += '<div class="card-number-label-container"><span class="card-number-label">Tháp ' + (idx + 1) + '</span></div>';
             html += '<div class="area-card-body">';
             
             // Mã tháp

@@ -257,7 +257,7 @@ input, button, select, textarea {
 
 /* Expandable Rows */
 .clickable-row {
-    cursor: pointer;
+    cursor: default;
     transition: background-color 0.2s;
 }
 
@@ -338,12 +338,14 @@ input, button, select, textarea {
     font-size: 13px;
     font-weight: 500;
     display: inline-block;
-    min-width: 130px;
+    min-width: 100px;
     text-align: center;
     border: 1px solid transparent;
 }
 .type-PALLET { background-color: #dbeafe; color: #1e40af; border-color: #bfdbfe; } /* Blue */
 .type-MATERIAL { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; } /* Green */
+.type-SALE { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; } /* Green */
+.type-SCRAP { background-color: #dbeafe; color: #1e40af; border-color: #bfdbfe; } /* Blue */
 
 /* Column Filters */
 .header-with-filter, .header-content {
@@ -370,11 +372,12 @@ input, button, select, textarea {
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    width: 200px;
+    min-width: 150px;
+    width: max-content;
+    max-width: 450px;
     background: white;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
     z-index: 10000;
     display: none;
@@ -776,14 +779,21 @@ input, button, select, textarea {
 }
 
 .combobox-option {
-    padding: 8px 12px;
+    padding: 10px 14px;
     font-size: 13px;
     color: #334155;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 6px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 4px;
+    transition: all 0.2s;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.combobox-option:last-child {
+    border-bottom: none;
 }
 
 .combobox-option:hover {
@@ -793,22 +803,30 @@ input, button, select, textarea {
 .combobox-option.selected {
     background: #eff6ff;
     color: var(--active-color);
-    font-weight: 500;
+}
+
+.combobox-option span:first-child {
+    font-weight: 600;
+    width: 100%;
 }
 
 .combobox-option .sub-text {
-    font-size: 12px;
-    color: #444;
-    margin-left: 8px;
-    font-style: italic;
-    font-weight: 500;
+    font-size: 11px;
+    color: #64748b;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.4;
+    white-space: normal;
+    word-break: break-word;
+    width: 100%;
 }
 
 .combobox-option.no-results {
     color: #94a3b8;
     cursor: default;
-    justify-content: center;
-    padding: 12px;
+    align-items: center;
+    padding: 15px;
+    border-bottom: none;
 }
 
 /* Modal */
@@ -1617,12 +1635,51 @@ button:disabled {
     color: white;
 }
 
-/* OUTBOUND TYPE SELECTION */
-.outbound-type-selection {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+/* MODAL TABS */
+.modal-tabs {
+    display: flex;
+    gap: 0;
     margin-bottom: 24px;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0 4px;
+}
+
+.modal-tab {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 2px solid transparent;
+}
+
+.modal-tab i {
+    font-size: 16px;
+    opacity: 0.7;
+}
+
+.modal-tab:hover {
+    color: #076EB8;
+    background: #f8fafc;
+}
+
+.modal-tab.active {
+    color: #076EB8;
+    border-bottom-color: #076EB8;
+}
+
+.modal-tab.active i {
+    opacity: 1;
+}
+
+/* OUTBOUND TYPE SELECTION (Legacy - can be removed if not used elsewhere) */
+.outbound-type-selection {
+    display: none; /* Hidden now that we use tabs */
 }
 
 .selection-card {
@@ -1969,5 +2026,11 @@ button:disabled {
     border: none;
     width: fit-content; 
     margin-bottom: 0; 
+}
+
+.action-column {
+    text-align: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 

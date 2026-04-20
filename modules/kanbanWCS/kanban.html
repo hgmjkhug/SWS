@@ -34,11 +34,22 @@
           </div>
         </div>
 
+        <!-- Product Filter (Searchable Combobox) -->
+        <div class="custom-dropdown" id="product-filter" style="width: 280px;">
+          <div class="combo-wrapper">
+             <div class="selected-tags" id="product-tags"></div>
+             <input type="text" class="combo-input" placeholder="Chọn sản phẩm..." id="product-input" autocomplete="off" />
+             <i class="fas fa-chevron-down combo-icon"></i>
+          </div>
+          <div class="dropdown-options" id="product-options">
+             <!-- Options will be injected here -->
+          </div>
+        </div>
+
         <!-- Task Type Filter (Inbound/Outbound) -->
         <div class="custom-dropdown" id="type-filter" style="width: 140px;">
           <div class="dropdown-selected" id="type-selected">
              <span class="selected-text">Tất cả</span>
-             <i class="fas fa-chevron-down combo-icon"></i>
           </div>
           <div class="dropdown-options" id="type-options">
              <div class="dropdown-option selected" data-value="all">Tất cả</div>

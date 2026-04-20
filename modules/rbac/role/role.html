@@ -82,17 +82,60 @@
   </div>
 </div>
 
-<!-- Permission Detail Modal -->
+<!-- Assign Permission Modal (NEW) -->
+<div class="modal-overlay" id="assign-permission-modal">
+  <div class="modal-box" style="width: 1000px; max-width: 95vw">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        Phân quyền vai trò: <span id="assign-header-role" style="color: #076EB8"></span>
+      </h3>
+      <div style="margin-left: auto; margin-right: 40px; display: flex; gap: 10px;">
+        <button class="btn btn-secondary" onclick="selectAllPermissions()" style="padding: 6px 12px; font-size: 13px;">Chọn tất cả</button>
+        <button class="btn btn-secondary" onclick="deselectAllPermissions()" style="padding: 6px 12px; font-size: 13px;">Bỏ chọn tất cả</button>
+      </div>
+      <button class="modal-close-square" onclick="closeAssignPermissionModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body" style="padding: 0">
+      <div class="permission-table-wrapper">
+        <table class="permission-table">
+          <thead>
+            <tr>
+              <th style="width: 60px; text-align: center">STT</th>
+              <th style="width: 400px; text-align: left">Tên menu</th>
+              <th style="width: 80px; text-align: center">Tất cả</th>
+              <th style="width: 92px; text-align: center">Xem</th>
+              <th style="width: 92px; text-align: center">Thêm</th>
+              <th style="width: 92px; text-align: center">Sửa</th>
+              <th style="width: 92px; text-align: center">Xóa</th>
+            </tr>
+          </thead>
+          <tbody id="assign-permission-table-body">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeAssignPermissionModal()">Đóng</button>
+      <button class="btn btn-primary" onclick="saveAssignPermissions()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Permission Detail Modal (Keep for viewing, but set same style) -->
 <div class="modal-overlay" id="permission-detail-modal">
-  <div class="modal-box" style="width: 900px; max-width: 95vw">
+  <div class="modal-box" style="width: 1000px; max-width: 95vw">
     <div class="modal-header">
       <h3
         class="modal-title"
         id="perm-header-title"
         style="font-weight: 700; color: #1e293b"
       >
-        Quyền của vai trò:
-        <span id="perm-header-role" style="color: #1e293b"></span>
+        Chi tiết quyền:
+        <span id="perm-header-role" style="color: #076EB8"></span>
       </h3>
       <button class="modal-close-square" onclick="closePermissionDetailModal()">
         <i class="fas fa-times"></i>
@@ -113,12 +156,13 @@
         <table class="permission-table">
           <thead>
             <tr>
-              <th style="width: 35%">Nguồn tài nguyên</th>
-              <th style="width: 10%; text-align: center">Tất cả</th>
-              <th style="width: 13.75%; text-align: center">Thêm</th>
-              <th style="width: 13.75%; text-align: center">Đọc</th>
-              <th style="width: 13.75%; text-align: center">Sửa</th>
-              <th style="width: 13.75%; text-align: center">Xóa</th>
+              <th style="width: 60px; text-align: center">STT</th>
+              <th style="width: 400px; text-align: left">Tên menu</th>
+              <th style="width: 80px; text-align: center">Tất cả</th>
+              <th style="width: 92px; text-align: center">Xem</th>
+              <th style="width: 92px; text-align: center">Thêm</th>
+              <th style="width: 92px; text-align: center">Sửa</th>
+              <th style="width: 92px; text-align: center">Xóa</th>
             </tr>
           </thead>
           <tbody id="permission-table-body">

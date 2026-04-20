@@ -54,18 +54,34 @@
         { id: 'NK-20231024-033', containerCode: 'PL-EURO_033', creatorName: 'Nguyễn Văn An', type: 'Nhập kho', status: 'bug', warehouse: 'Kho A', device: 'System', step: 'Lỗi dữ liệu', batchCode: 'JP-BN-1044', logs: [{ time: '15:50', msg: 'Không thể đồng bộ tồn kho' }] }
     ];
 
-    // Dynamically map mockTasks to real batches from storage if available
-    if (mockBatches.length > 5) {
-        mockTasks.forEach((task, index) => {
+    // Try to load products from product module
+    let mockProducts = [];
+    const storedProducts = localStorage.getItem('sws_products');
+    if (storedProducts) {
+        try {
+            mockProducts = JSON.parse(storedProducts);
+        } catch(e) { console.error('Error loading products from storage', e); }
+    }
+
+    // Dynamically map mockTasks to real batches and products from storage if available
+    mockTasks.forEach((task, index) => {
+        if (mockBatches.length > 0) {
             const realBatch = mockBatches[index % mockBatches.length];
             task.batchCode = realBatch.code;
-        });
-    }
+        }
+        if (mockProducts.length > 0) {
+            const realProd = mockProducts[index % mockProducts.length];
+            task.productCode = realProd.code;
+        } else {
+            task.productCode = 'PROD-' + (100 + index);
+        }
+    });
 
     // State
     let currentWarehouseFilter = 'all';
     let currentSearchTerm = '';
     let selectedBatches = []; // State for multi-select batches
+    let selectedProducts = []; // State for multi-select products
     let currentTypeFilter = 'all'; // State for Task Type filter
 
     // Date Range Picker State
@@ -133,6 +149,7 @@
 
         initDropdown();
         initBatchDropdown();
+        initProductDropdown();
         initTypeDropdown();
         initSearch();
         initDatePicker();
@@ -310,6 +327,113 @@
         });
     }
 
+    // Initialize Product Searchable Combobox (Multi-select)
+    function initProductDropdown() {
+        const dropdown = document.getElementById('product-filter');
+        if(!dropdown) return;
+
+        const input = document.getElementById('product-input');
+        const options = document.getElementById('product-options');
+        const tagsContainer = document.getElementById('product-tags');
+        const icon = dropdown.querySelector('.combo-icon');
+
+        function renderOptions(filter = '') {
+            options.innerHTML = '';
+            const term = filter.toLowerCase();
+            const filtered = mockProducts.filter(p => 
+                p.code.toLowerCase().includes(term) || 
+                p.name.toLowerCase().includes(term)
+            );
+
+            if (filtered.length === 0) {
+                options.innerHTML = '<div class="dropdown-option" style="text-align:center; color:#94a3b8;">Không tìm thấy sản phẩm</div>';
+                return;
+            }
+
+            filtered.forEach(p => {
+                const isSelected = selectedProducts.includes(p.code);
+                const div = document.createElement('div');
+                div.className = `dropdown-option ${isSelected ? 'selected' : ''}`;
+                div.dataset.value = p.code;
+                div.innerHTML = `
+                    <span class="item-code">${p.code}</span>
+                    <span class="item-name">${p.name}</span>
+                `;
+                options.appendChild(div);
+            });
+        }
+
+        function renderTags() {
+            tagsContainer.innerHTML = '';
+            selectedProducts.forEach(code => {
+                const prod = mockProducts.find(p => p.code === code);
+                const label = prod ? prod.code : code;
+
+                const tag = document.createElement('div');
+                tag.className = 'tag';
+                tag.innerHTML = `
+                    ${label}
+                    <i class="fas fa-times" data-code="${code}"></i>
+                `;
+                tagsContainer.appendChild(tag);
+            });
+
+            input.placeholder = selectedProducts.length > 0 ? "" : "Chọn sản phẩm...";
+        }
+
+        input.addEventListener('focus', () => {
+            options.classList.add('show');
+            renderOptions(input.value);
+        });
+
+        input.addEventListener('input', (e) => {
+            renderOptions(e.target.value);
+            if (!options.classList.contains('show')) options.classList.add('show');
+        });
+
+        icon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            options.classList.toggle('show');
+            if (options.classList.contains('show')) renderOptions(input.value);
+        });
+
+        options.addEventListener('click', (e) => {
+            const item = e.target.closest('.dropdown-option');
+            if (!item || !item.dataset.value) return;
+
+            e.stopPropagation();
+            const val = item.dataset.value;
+
+            if (selectedProducts.includes(val)) {
+                selectedProducts = selectedProducts.filter(p => p !== val);
+            } else {
+                selectedProducts.push(val);
+            }
+
+            renderTags();
+            renderOptions(input.value);
+            renderBoard();
+            input.focus();
+        });
+
+        tagsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('fa-times')) {
+                const code = e.target.dataset.code;
+                selectedProducts = selectedProducts.filter(p => p !== code);
+                renderTags();
+                renderOptions(input.value);
+                renderBoard();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target)) options.classList.remove('show');
+        });
+
+        renderOptions();
+        renderTags();
+    }
+
     // Initialize Batch Searchable Combobox (Multi-select)
     function initBatchDropdown() {
         const dropdown = document.getElementById('batch-filter');
@@ -484,10 +608,10 @@
         // 1. Filter Data
         const filteredTasks = mockTasks.filter(task => {
             const matchesWarehouse = currentWarehouseFilter === 'all' || task.warehouse === currentWarehouseFilter;
-            const matchesSearch = task.containerCode.toLowerCase().includes(currentSearchTerm) || 
-                                   task.device.toLowerCase().includes(currentSearchTerm);
+            const matchesSearch = task.containerCode.toLowerCase().includes(currentSearchTerm);
             
             const matchesBatch = selectedBatches.length === 0 || selectedBatches.includes(task.batchCode);
+            const matchesProduct = selectedProducts.length === 0 || selectedProducts.includes(task.productCode);
             const matchesType = currentTypeFilter === 'all' || task.type === currentTypeFilter;
 
             let matchesDate = true;
@@ -498,7 +622,7 @@
                 matchesDate = taskDate >= s && taskDate <= e;
             }
                                   
-            return matchesWarehouse && matchesSearch && matchesDate && matchesBatch && matchesType;
+            return matchesWarehouse && matchesSearch && matchesDate && matchesBatch && matchesProduct && matchesType;
         });
 
         // 2. Clear Columns
@@ -565,6 +689,10 @@
                 
                 <div class="card-body">
                     <div class="card-info">
+                        <div class="info-row" style="color: #076EB8; font-weight: 600;">
+                            <i class="fa-regular fa-banana info-icon"></i>
+                            <span>${task.productCode || 'N/A'}</span>
+                        </div>
                         <div class="info-row">
                             <i class="fas fa-clock info-icon"></i>
                             <span>${task.createdDate}</span>

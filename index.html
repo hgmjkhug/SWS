@@ -189,7 +189,7 @@
       <div class="menu-item" data-module="DEVICE">
         <div class="menu-link" onclick="toggleSubmenu(this)">
           <div class="link-content">
-            <i class="fas fa-project-diagram"></i>
+            <i class="fa-solid fa-robot"></i>
             <span class="link-text">Quản lý thiết bị</span>
           </div>
           <i class="fas fa-chevron-right arrow-icon"></i>
@@ -382,6 +382,10 @@
                   </div>
                 </span>
               </div>
+            </div>
+            <div class="notification-tabs">
+              <div class="notification-tab active" onclick="switchNotificationTab('all')">Tất cả</div>
+              <div class="notification-tab" onclick="switchNotificationTab('unread')">Chưa đọc</div>
             </div>
             <div class="notification-list" id="notification-list">
               <!-- Populated by JS -->

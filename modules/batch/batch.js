@@ -7,6 +7,7 @@
     var statusFilter = "ALL";
     var selectedCreatorFilterId = "ALL";
     var activeModalPicker = null;
+    var batchIdToDelete = null;
 
 
     // Advanced Date Picker State (Verbatim from Outbound)
@@ -166,6 +167,8 @@
                         if (b.delivererRep === undefined) b.delivererRep = 'Ông A';
                         if (b.receiver === undefined) b.receiver = 'Kho Thaco ID';
                         if (b.receiverRep === undefined) b.receiverRep = 'Bà B';
+                        if (b.sealNumber === undefined) b.sealNumber = 'S-' + (400 + i);
+                        if (b.docNumber === undefined) b.docNumber = 'DOC-' + (500 + i);
                         
                         return b;
                     });
@@ -226,7 +229,9 @@
                 deliverer: 'Công ty Giao Vận ' + (i % 5),
                 delivererRep: 'Ông A',
                 receiver: 'Kho Thaco ID',
-                receiverRep: 'Bà B'
+                receiverRep: 'Bà B',
+                sealNumber: 'S-' + (400 + i),
+                docNumber: 'DOC-' + (500 + i)
             };
         });
     }
@@ -314,8 +319,7 @@
                     </td>
                     <td>
                         <div style="display: flex; justify-content: center; gap: 4px; align-items: center;">
-                            <button class="btn-icon" title="Xem" onclick="window.viewBatch('${b.id}')"><i class="far fa-eye"></i></button>
-                            <button class="btn-icon" title="Cây quy trình" onclick="window.viewTree('${b.id}')"><i class="fas fa-sitemap"></i></button>
+                            <button class="btn-icon" title="Vòng đời lô hàng" onclick="window.viewTree('${b.id}')"><i class="fas fa-sitemap"></i></button>
                             
                             <button class="btn-icon" title="Kiểm kê" onclick="window.openInventoryCheck('${b.id}')" ${['PROCESSING', 'COMPLETED'].indexOf(b.status) !== -1 ? 'disabled' : ''}>
                                 <i class="fas fa-list-check"></i>
@@ -427,6 +431,8 @@ function renderPaginationBar(totalItems) {
         document.getElementById('batch-deliverer-rep').value = '';
         document.getElementById('batch-receiver').value = '';
         document.getElementById('batch-receiver-rep').value = '';
+        document.getElementById('batch-seal-number').value = '';
+        document.getElementById('batch-doc-number').value = '';
 
         modal.classList.add('open');
     };
@@ -450,6 +456,8 @@ function renderPaginationBar(totalItems) {
         document.getElementById('edit-batch-deliverer-rep').value = b.delivererRep || '';
         document.getElementById('edit-batch-receiver').value = b.receiver || '';
         document.getElementById('edit-batch-receiver-rep').value = b.receiverRep || '';
+        document.getElementById('edit-batch-seal-number').value = b.sealNumber || '';
+        document.getElementById('edit-batch-doc-number').value = b.docNumber || '';
 
         document.getElementById('modal-edit-batch').classList.add('open');
     };
@@ -484,7 +492,9 @@ function renderPaginationBar(totalItems) {
             deliverer: document.getElementById('batch-deliverer').value.trim(),
             delivererRep: document.getElementById('batch-deliverer-rep').value.trim(),
             receiver: document.getElementById('batch-receiver').value.trim(),
-            receiverRep: document.getElementById('batch-receiver-rep').value.trim()
+            receiverRep: document.getElementById('batch-receiver-rep').value.trim(),
+            sealNumber: document.getElementById('batch-seal-number').value.trim(),
+            docNumber: document.getElementById('batch-doc-number').value.trim()
         });
         saveBatches(); window.renderTable(); window.closeCreateModal();
     };
@@ -507,6 +517,8 @@ function renderPaginationBar(totalItems) {
             MOCK_BATCHES[idx].delivererRep = document.getElementById('edit-batch-deliverer-rep').value.trim();
             MOCK_BATCHES[idx].receiver = document.getElementById('edit-batch-receiver').value.trim();
             MOCK_BATCHES[idx].receiverRep = document.getElementById('edit-batch-receiver-rep').value.trim();
+            MOCK_BATCHES[idx].sealNumber = document.getElementById('edit-batch-seal-number').value.trim();
+            MOCK_BATCHES[idx].docNumber = document.getElementById('edit-batch-doc-number').value.trim();
 
             saveBatches(); window.renderTable(); window.closeEditModal();
         }
@@ -519,11 +531,17 @@ function renderPaginationBar(totalItems) {
             alert('Chỉ có thể xóa lô hàng có trạng thái "Mới tạo".');
             return;
         }
-        if (confirm('Xóa lô hàng này?')) {
-            MOCK_BATCHES = MOCK_BATCHES.filter(function(x) { return x.id != id; });
-            saveBatches(); window.renderTable();
-        }
+        
+        batchIdToDelete = id;
+        document.getElementById('delete-batch-code-display').textContent = b.code;
+        document.getElementById('modal-confirm-delete').classList.add('open');
     };
+
+    window.closeConfirmDeleteModal = function() {
+        document.getElementById('modal-confirm-delete').classList.remove('open');
+        batchIdToDelete = null;
+    };
+
     window.viewBatch = function(id) {
         var b = MOCK_BATCHES.find(function(x) { return x.id == id; });
         if (!b) return;
@@ -545,6 +563,8 @@ function renderPaginationBar(totalItems) {
         document.getElementById('view-batch-deliverer-rep').textContent = b.delivererRep || '-';
         document.getElementById('view-batch-receiver').textContent = b.receiver || '-';
         document.getElementById('view-batch-receiver-rep').textContent = b.receiverRep || '-';
+        document.getElementById('view-batch-seal-number').textContent = b.sealNumber || '-';
+        document.getElementById('view-batch-doc-number').textContent = b.docNumber || '-';
 
         document.getElementById('modal-view-batch').classList.add('open');
     };
@@ -578,6 +598,9 @@ function renderPaginationBar(totalItems) {
             document.body.appendChild(modal);
             setupInventoryEventListeners();
         }
+
+        // Reset to manual tab
+        window.switchInventoryTab('manual');
 
         // Update modal title
         var titleEl = document.getElementById('inventory-modal-title');
@@ -621,63 +644,126 @@ function renderPaginationBar(totalItems) {
                     '<i class="fas fa-times"></i>' +
                 '</div>' +
             '</div>' +
-            '<div class="modal-body" style="padding:20px 24px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:0;">' +
-                '<!-- Search & Filter Bar -->' +
-                '<div class="inventory-toolbar">' +
-                    '<div class="inventory-search-box">' +
-                        '<i class="fas fa-search"></i>' +
-                        '<input type="text" id="inventory-search-input" placeholder="Tìm theo mã sản phẩm, tên sản phẩm..." autocomplete="off">' +
+            '<div class="modal-body" style="padding:24px 32px; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:0; background: #fdfdfd;">' +
+                
+                '<!-- Mode Tabs -->' +
+                '<div class="inventory-modal-tabs">' +
+                    '<div class="inventory-tab-item active" id="tab-inventory-manual" onclick="window.switchInventoryTab(\'manual\')">' +
+                        '<i class="fa-solid fa-keyboard"></i> Kiểm kê thủ công' +
                     '</div>' +
-                    '<div class="inventory-group-filter" id="inventory-group-dropdown">' +
-                        '<div class="inventory-group-searchable">' +
-                            '<i class="fas fa-layer-group inventory-group-icon"></i>' +
-                            '<input type="text" id="inventory-group-search-input" class="inventory-group-search" placeholder="Tất cả nhóm sản phẩm" autocomplete="off" onfocus="window.openInventoryGroupDropdown()" oninput="window.filterInventoryGroupOptions(this.value)">' +
-                            '<i class="fas fa-chevron-down inventory-group-arrow"></i>' +
-                        '</div>' +
-                        '<div class="inventory-group-options" id="inventory-group-options"></div>' +
+                    '<div class="inventory-tab-item" id="tab-inventory-auto" onclick="window.switchInventoryTab(\'auto\')">' +
+                        '<i class="fa-solid fa-robot"></i> Kiểm kê tự động (Excel)' +
                     '</div>' +
                 '</div>' +
-                '<!-- Inventory Table (Split Head/Body Architecture) -->' +
-                '<div class="inventory-table-container">' +
-                    '<div class="inventory-table-head" id="inventory-table-head">' +
-                        '<table class="inventory-table">' +
-                            '<colgroup>' +
-                                '<col style="width:45px">' +
-                                '<col style="width:55px">' +
-                                '<col style="width:200px">' +
-                                '<col style="width:auto">' +
-                                '<col style="width:170px">' +
-                            '</colgroup>' +
-                            '<thead>' +
-                                '<tr>' +
-                                    '<th class="text-center"><input type="checkbox" id="inventory-select-all" onchange="window.toggleInventorySelectAll(this)"></th>' +
-                                    '<th class="text-center">STT</th>' +
-                                    '<th>Mã sản phẩm</th>' +
-                                    '<th>Tên sản phẩm</th>' +
-                                    '<th class="text-center">Số lượng</th>' +
-                                '</tr>' +
-                            '</thead>' +
-                        '</table>' +
+
+                '<!-- Content Area: Manual -->' +
+                '<div id="inventory-content-manual" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">' +
+                    '<div class="inventory-toolbar">' +
+                        '<div class="inventory-search-box">' +
+                            '<i class="fas fa-search"></i>' +
+                            '<input type="text" id="inventory-search-input" placeholder="Tìm theo mã sản phẩm, tên sản phẩm..." autocomplete="off">' +
+                        '</div>' +
+                        '<div class="inventory-group-filter" id="inventory-group-dropdown">' +
+                            '<div class="inventory-group-searchable">' +
+                                '<i class="fas fa-layer-group inventory-group-icon"></i>' +
+                                '<input type="text" id="inventory-group-search-input" class="inventory-group-search" placeholder="Tất cả nhóm sản phẩm" autocomplete="off" onfocus="window.openInventoryGroupDropdown()" oninput="window.filterInventoryGroupOptions(this.value)">' +
+                                '<i class="fas fa-chevron-down inventory-group-arrow"></i>' +
+                            '</div>' +
+                            '<div class="inventory-group-options" id="inventory-group-options"></div>' +
+                        '</div>' +
                     '</div>' +
-                    '<div class="inventory-table-body" id="inventory-table-body-wrapper">' +
-                        '<table class="inventory-table">' +
-                            '<colgroup>' +
-                                '<col style="width:45px">' +
-                                '<col style="width:55px">' +
-                                '<col style="width:200px">' +
-                                '<col style="width:auto">' +
-                                '<col style="width:170px">' +
-                            '</colgroup>' +
-                            '<tbody id="inventory-table-body"></tbody>' +
-                        '</table>' +
+                    '<div class="inventory-table-container">' +
+                        '<div class="inventory-table-head" id="inventory-table-head">' +
+                            '<table class="inventory-table">' +
+                                '<colgroup>' +
+                                    '<col style="width:45px">' +
+                                    '<col style="width:55px">' +
+                                    '<col style="width:200px">' +
+                                    '<col style="width:auto">' +
+                                    '<col style="width:170px">' +
+                                '</colgroup>' +
+                                '<thead>' +
+                                    '<tr>' +
+                                        '<th class="text-center"><input type="checkbox" id="inventory-select-all" onchange="window.toggleInventorySelectAll(this)"></th>' +
+                                        '<th class="text-center">STT</th>' +
+                                        '<th>Mã sản phẩm</th>' +
+                                        '<th>Tên sản phẩm</th>' +
+                                        '<th class="text-center">Số lượng</th>' +
+                                    '</tr>' +
+                                '</thead>' +
+                            '</table>' +
+                        '</div>' +
+                        '<div class="inventory-table-body" id="inventory-table-body-wrapper">' +
+                            '<table class="inventory-table">' +
+                                '<colgroup>' +
+                                    '<col style="width:45px">' +
+                                    '<col style="width:55px">' +
+                                    '<col style="width:200px">' +
+                                    '<col style="width:auto">' +
+                                    '<col style="width:170px">' +
+                                '</colgroup>' +
+                                '<tbody id="inventory-table-body"></tbody>' +
+                            '</table>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+
+                '<!-- Content Area: Auto (Integrated from modal-auto-audit) -->' +
+                '<div id="inventory-content-auto" style="display: none; flex-direction: column; flex: 1; padding: 10px 0;">' +
+                    '<div class="auto-audit-grid">' +
+                        '<div class="grid-left">' +
+                            '<div class="instruction-box">' +
+                                '<div class="title">' +
+                                    '<i class="fa-solid fa-circle-question"></i> Hướng dẫn thực hiện' +
+                                '</div>' +
+                                '<ul>' +
+                                    '<li>Tải file mẫu kiểm kê về máy tính của bạn.</li>' +
+                                    '<li>Điền đầy đủ thông tin vào các cột bắt buộc.</li>' +
+                                    '<li>Lưu file và tải lên vùng bên phải.</li>' +
+                                    '<li>Dữ liệu sẽ được hệ thống cập nhật tự động.</li>' +
+                                '</ul>' +
+                            '</div>' +
+                            '<div class="auto-audit-step">' +
+                                '<div style="font-weight: 700; font-size: 13px; color: #475569; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">' +
+                                    '<span style="background: #076EB8; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px;">1</span>' +
+                                    'Tải file mẫu kiểm kê' +
+                                '</div>' +
+                                '<a href="icons/files/auto_audit.xlsx" download class="sample-download-card" style="padding: 20px;">' +
+                                    '<div class="file-icon" style="width: 44px; height: 44px; font-size: 22px;"><i class="fa-solid fa-file-arrow-down"></i></div>' +
+                                    '<div class="file-info" style="margin-left: 15px;">' +
+                                        '<div class="file-name" style="font-size: 15px;">auto_audit.xlsx</div>' +
+                                        '<div class="file-desc">Bản mẫu dành cho kiểm kê tự động</div>' +
+                                    '</div>' +
+                                    '<i class="fa-solid fa-download download-icon" style="font-size: 20px;"></i>' +
+                                '</a>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="grid-right">' +
+                            '<div class="auto-audit-step" style="height: 100%; display: flex; flex-direction: column;">' +
+                                '<div style="font-weight: 700; font-size: 13px; color: #475569; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">' +
+                                    '<span style="background: #076EB8; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px;">2</span>' +
+                                    'Nhập file dữ liệu kiểm kê' +
+                                '</div>' +
+                                '<div class="upload-zone" id="inventory-upload-zone" onclick="document.getElementById(\'inventory-file-input\').click()" style="flex: 1; justify-content: center; padding: 40px; border-radius: 16px;">' +
+                                    '<div class="upload-icon-wrapper" style="width: 70px; height: 70px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">' +
+                                        '<i class="fa-solid fa-cloud-arrow-up" style="font-size: 36px; color: #94a3b8;"></i>' +
+                                    '</div>' +
+                                    '<div id="inventory-upload-text" style="font-size: 15px; margin-bottom: 8px;">Nhấn để chọn file hoặc kéo thả vào đây</div>' +
+                                    '<div style="color: #94a3b8; font-size: 13px;">Hỗ trợ định dạng .xlsx, .xls</div>' +
+                                    '<input type="file" id="inventory-file-input" style="display: none;" accept=".xlsx, .xls" onchange="window.handleInventoryFileSelect(this)">' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
-            '<div class="modal-footer" style="padding:12px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">' +
+            '<div class="modal-footer" id="inventory-modal-footer" style="padding:16px 32px; background:#fcfcfc; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">' +
                 '<div class="inventory-footer-info" id="inventory-footer-info">Đã chọn: <strong>0</strong> sản phẩm</div>' +
                 '<div style="display:flex;gap:12px">' +
-                    '<button class="btn-secondary" onclick="window.closeInventoryCheck()">Đóng</button>' +
-                    '<button class="btn-primary" onclick="window.saveInventoryCheck()">Lưu</button>' +
+                    '<button class="btn-secondary" onclick="window.closeInventoryCheck()" style="padding: 10px 24px;">Hủy bỏ</button>' +
+                    '<button class="btn-primary" id="btn-save-inventory" onclick="window.onInventoryConfirm()" style="padding: 10px 30px; min-width: 140px;">' +
+                        '<i class="fa-solid fa-circle-check" style="margin-right: 8px;"></i> Xác nhận lưu' +
+                    '</button>' +
                 '</div>' +
             '</div>' +
         '</div>';
@@ -798,15 +884,105 @@ function renderPaginationBar(totalItems) {
             inventorySelectedIds[productId] = { containerCount: '', perContainer: '' };
             // Auto-check the row when user types
             var checkbox = document.querySelector('.inventory-row-check[data-product-id="' + productId + '"]');
-            if (checkbox) checkbox.checked = true;
-            // Add selected styling
-            var row = input.closest('tr');
-            if (row) row.classList.add('row-selected');
+            if (checkbox && !checkbox.checked) {
+                checkbox.checked = true;
+                window.toggleInventoryRow(checkbox);
+            }
         }
         inventorySelectedIds[productId][field] = val;
         updateInventoryFooter();
-        updateSelectAllCheckbox();
     };
+
+    // --- TAB SWITCHING & NEW INTEGRATED LOGIC ---
+    var activeInventoryTab = 'manual';
+    var selectedIntegratedFile = null;
+
+    window.switchInventoryTab = function(tab) {
+        activeInventoryTab = tab;
+        
+        // Update tab UI
+        var tabManual = document.getElementById('tab-inventory-manual');
+        var tabAuto = document.getElementById('tab-inventory-auto');
+        var contentManual = document.getElementById('inventory-content-manual');
+        var contentAuto = document.getElementById('inventory-content-auto');
+        var footerInfo = document.getElementById('inventory-footer-info');
+        var confirmBtn = document.getElementById('btn-save-inventory');
+        
+        if (!tabManual || !tabAuto || !contentManual || !contentAuto) return;
+
+        if (tab === 'manual') {
+            tabManual.classList.add('active');
+            tabAuto.classList.remove('active');
+            contentManual.style.display = 'flex';
+            contentAuto.style.display = 'none';
+            if (footerInfo) footerInfo.style.opacity = '1';
+            if (confirmBtn) {
+                confirmBtn.innerHTML = '<i class="fa-solid fa-circle-check" style="margin-right: 8px;"></i> Xác nhận lưu';
+                confirmBtn.style.background = '#076EB8';
+                confirmBtn.disabled = false;
+            }
+        } else {
+            tabAuto.classList.add('active');
+            tabManual.classList.remove('active');
+            contentManual.style.display = 'none';
+            contentAuto.style.display = 'flex';
+            if (footerInfo) footerInfo.style.opacity = '0';
+            if (confirmBtn) {
+                confirmBtn.innerHTML = '<i class="fa-solid fa-rocket" style="margin-right: 8px;"></i> Bắt đầu xử lý';
+                confirmBtn.style.background = '#10b981';
+                confirmBtn.disabled = !selectedIntegratedFile;
+            }
+        }
+    };
+
+    window.handleInventoryFileSelect = function(input) {
+        if (input.files && input.files[0]) {
+            selectedIntegratedFile = input.files[0];
+            var uploadZone = document.getElementById('inventory-upload-zone');
+            if (uploadZone) {
+                uploadZone.classList.add('file-selected');
+                document.getElementById('inventory-upload-text').innerText = 'Đã chọn: ' + selectedIntegratedFile.name;
+            }
+            var confirmBtn = document.getElementById('btn-save-inventory');
+            if (confirmBtn && activeInventoryTab === 'auto') {
+                confirmBtn.disabled = false;
+            }
+        }
+    };
+
+    window.onInventoryConfirm = function() {
+        if (activeInventoryTab === 'manual') {
+            window.saveInventoryCheck();
+        } else {
+            window.startIntegratedAutoAudit();
+        }
+    };
+
+    window.startIntegratedAutoAudit = function() {
+        if (!selectedIntegratedFile) return;
+        
+        var btn = document.getElementById('btn-save-inventory');
+        var originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+
+        setTimeout(function() {
+            var idx = MOCK_BATCHES.findIndex(function(x) { return x.id == currentInventoryBatchId; });
+            if (idx !== -1) {
+                if (MOCK_BATCHES[idx].status === 'NEW') {
+                    MOCK_BATCHES[idx].status = 'CHECKED';
+                    MOCK_BATCHES[idx].totalQty = 1200;
+                }
+                saveBatches();
+                window.renderTable();
+            }
+            alert('Kiểm kê tự động hoàn tất!');
+            window.closeInventoryCheck();
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 1500);
+    };
+
 
     window.preventNonInteger = function(e) {
         // Prevent ., -, e, +
@@ -1492,6 +1668,19 @@ function renderPaginationBar(totalItems) {
         }
 
         updateCalendarUI();
+
+        // Setup Confirm Delete Button
+        var btnConfirm = document.getElementById('btn-confirm-delete');
+        if (btnConfirm) {
+            btnConfirm.onclick = function() {
+                if (batchIdToDelete) {
+                    MOCK_BATCHES = MOCK_BATCHES.filter(function(x) { return x.id != batchIdToDelete; });
+                    saveBatches(); window.renderTable();
+                    window.closeConfirmDeleteModal();
+                }
+            };
+        }
+
         window.renderTable();
     }
 

@@ -330,7 +330,7 @@ function loadPage(title) {
         'Dòng sản phẩm': 'modules/product-line/line.html',
         'Xưởng đóng gói': 'modules/package-station/station.html',
         'Khách hàng': 'modules/customer/customer.html',
-        'Thị trường': 'modules/market/market.html',
+        'Thị trường': 'modules/master-data/market/market.html',
         'Đơn hàng ERP': 'modules/order/receive/receive.html',
         // 'Đơn hàng xuất': 'modules/order/send/send.html',
         'Theo dõi tồn kho': 'modules/instock/instock.html',
@@ -1014,10 +1014,26 @@ let notifications = [
     { id: 1, title: 'Cảnh báo tồn kho', desc: 'Sản phẩm Chuối Trung Quốc - A456 - TROPICAL sắp hết hàng (còn 5 thùng)', time: '10 phút trước', read: false },
     { id: 2, title: 'Nhập kho thành công', desc: 'Phiếu nhập PN005 (Chuối Nhật Bản - 26CP - DEL MONTE) đã được xác nhận', time: '1 giờ trước', read: false },
     { id: 3, title: 'Bảo trì hệ thống', desc: 'Hệ thống Robot sẽ bảo trì vào 22:00 hôm nay', time: '2 giờ trước', read: true },
-    { id: 4, title: 'Yêu cầu phê duyệt', desc: 'Có 2 lệnh xuất kho chuối chờ duyệt', time: '5 giờ trước', read: true }
 ];
+let currentNotificationFilter = 'all';
 
 function initNotifications() {
+    renderNotifications();
+}
+
+function switchNotificationTab(filter) {
+    currentNotificationFilter = filter;
+    
+    // Update UI
+    const tabs = document.querySelectorAll('.notification-tab');
+    tabs.forEach(tab => {
+        if (tab.innerText.toLowerCase().includes(filter === 'all' ? 'tất cả' : 'chưa đọc')) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+    
     renderNotifications();
 }
 
@@ -1036,18 +1052,34 @@ function renderNotifications() {
         badge.style.display = 'none';
     }
 
-    if (notifications.length === 0) {
-        list.innerHTML = '<div class="empty-notification">Không có thông báo mới</div>';
+    // Filter notifications
+    const filtered = currentNotificationFilter === 'unread' 
+        ? notifications.filter(n => !n.read)
+        : notifications;
+
+    if (filtered.length === 0) {
+        const msg = currentNotificationFilter === 'unread' ? 'Không có thông báo chưa đọc' : 'Không có thông báo mới';
+        list.innerHTML = `<div class="empty-notification">${msg}</div>`;
         return;
     }
 
-    list.innerHTML = notifications.map(n => `
+    list.innerHTML = filtered.map(n => `
         <div class="notification-item ${n.read ? '' : 'unread'}" onclick="readNotification(${n.id})">
-            <div class="notification-title">
-                ${n.title}
-                <span class="notification-time">${n.time}</span>
+            <div class="notification-item-content">
+                <div class="notification-title">
+                    ${n.title}
+                    <span class="notification-time">${n.time}</span>
+                </div>
+                <div class="notification-desc">${n.desc}</div>
             </div>
-            <div class="notification-desc">${n.desc}</div>
+            <div class="notification-item-actions">
+                <div class="notif-action-btn nav-btn" title="Xem chi tiết" onclick="navigateNotification(${n.id}, event)">
+                    <i class="fa-solid fa-location-arrow"></i>
+                </div>
+                <div class="notif-action-btn delete-btn" title="Xóa thông báo" onclick="deleteNotification(${n.id}, event)">
+                    <i class="fa-regular fa-trash-can"></i>
+                </div>
+            </div>
         </div>
     `).join('');
 }
@@ -1066,6 +1098,39 @@ function readNotification(id) {
     if (notif && !notif.read) {
         notif.read = true;
         renderNotifications();
+    }
+}
+
+function deleteNotification(id, event) {
+    if (event) event.stopPropagation();
+    notifications = notifications.filter(n => n.id !== id);
+    renderNotifications();
+    showToast('Đã xóa thông báo', 'success');
+}
+
+function navigateNotification(id, event) {
+    if (event) event.stopPropagation();
+    const notif = notifications.find(n => n.id === id);
+    if (notif) {
+        // Navigation based on title
+        if (notif.title.includes('tồn kho')) {
+            loadPage('Theo dõi tồn kho');
+        } else if (notif.title.includes('Nhập kho')) {
+            loadPage('Lệnh nhập kho');
+        } else if (notif.title.includes('Bảo trì')) {
+            loadPage('Quản lý bảo trì');
+        } else if (notif.title.includes('xuất kho')) {
+            loadPage('Lệnh xuất kho');
+        } else {
+            showToast('Chức năng điều hướng đang được cập nhật', 'info');
+        }
+        
+        // Mark as read if it wasn't
+        readNotification(id);
+        
+        // Close dropdown
+        const dropdown = document.getElementById('notification-dropdown');
+        if (dropdown) dropdown.classList.remove('show');
     }
 }
 

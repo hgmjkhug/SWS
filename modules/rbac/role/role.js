@@ -406,28 +406,245 @@
         if (modal) modal.classList.remove('show');
     }
 
-    // Navigate to Assign Permission Page
-    function navigateToAssignPermission(id) {
-        console.log('Navigating to Assign Permission for ID:', id);
+    // --- PERMISSION ASSIGNMENT LOGIC (MOVED FROM permission.js) ---
 
-        const role = roles.find(r => r.id === id);
-        if (role) {
-            // Save context for the Permission module to read
-            localStorage.setItem('current_role_id', role.id);
-            localStorage.setItem('current_role_name', role.name);
-
-            // Use the global loadPage function (from script.js) to switch views
-            if (window.loadPage) {
-                window.loadPage('Phân quyền');
-            } else {
-                console.error('loadPage function not found!');
-                alert('Lỗi: Không tìm thấy chức năng điều hướng.');
-            }
+    const assignmentData = [
+        {
+            id: 1,
+            name: 'Theo dõi & Giám sát',
+            children: [
+                { id: 101, name: 'Dashboard chi tiết' },
+                { id: 102, name: 'Giám sát hoạt động' }
+            ]
+        },
+        {
+            id: 3,
+            name: 'Quản lý kho',
+            children: [
+                { id: 301, name: 'Quản lý kho' },
+                { id: 302, name: 'Loại khu vực' }
+            ]
+        },
+        {
+            id: 5,
+            name: 'Quản lý lệnh',
+            children: [
+                { id: 501, name: 'Quản lý lô hàng' },
+                { id: 502, name: 'Lệnh nhập kho' },
+                { id: 503, name: 'Lệnh xuất kho' },
+                { id: 504, name: 'Kanban lệnh' }
+            ]
+        },
+        {
+            id: 6,
+            name: 'Quản lý thiết bị',
+            children: [
+                { id: 601, name: 'Quản lý thiết bị' },
+                { id: 602, name: 'Quản lý bảo trì' }
+            ]
+        },
+        {
+            id: 7,
+            name: 'Quản lý quy trình',
+            children: [
+                { id: 701, name: 'Quản lý quy trình' }
+            ]
+        },
+        {
+            id: 8,
+            name: 'Danh mục chung',
+            children: [
+                { id: 801, name: 'Nhóm thiết bị' },
+                { id: 802, name: 'Dòng sản phẩm' },
+                { id: 803, name: 'Nhóm sản phẩm' },
+                { id: 804, name: 'Sản phẩm' },
+                { id: 806, name: 'Quy cách' },
+                { id: 807, name: 'Nhóm vật chứa' },
+                { id: 808, name: 'Vật chứa' },
+                { id: 809, name: 'Đơn vị tính' },
+                { id: 810, name: 'Thị trường' }
+            ]
+        },
+        {
+            id: 9,
+            name: 'Báo cáo thống kê',
+            children: [
+                { id: 901, name: 'Theo dõi tồn kho' },
+                { id: 902, name: 'Báo cáo Nhập/Xuất' }
+            ]
+        },
+        {
+            id: 10,
+            name: 'Hệ thống',
+            children: [
+                { id: 1001, name: 'Tài khoản' },
+                { id: 1002, name: 'Vai trò' },
+                { id: 1003, name: 'Chức năng' },
+                { id: 1004, name: 'Tài nguyên' }
+            ]
+        },
+        {
+            id: 11,
+            name: 'Tài liệu',
+            children: [
+                { id: 1101, name: 'Quản lý tài liệu' }
+            ]
         }
+    ];
+
+    let currentEditingRoleId = null;
+
+    function navigateToAssignPermission(id) {
+        currentEditingRoleId = id;
+        const role = roles.find(r => r.id === id);
+        if (!role) return;
+
+        document.getElementById('assign-header-role').innerText = role.name;
+        renderAssignTable();
+        loadRolePermissions(id);
+        
+        document.getElementById('assign-permission-modal').classList.add('show');
     }
 
-    // Mock Save
-    window.saveAssignPermission = function () {
-        showToast('Cập nhật phân quyền thành công!', 'success');
+    window.closeAssignPermissionModal = function() {
+        document.getElementById('assign-permission-modal').classList.remove('show');
+        currentEditingRoleId = null;
+    }
+
+    function renderAssignTable() {
+        const tbody = document.getElementById('assign-permission-table-body');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        assignmentData.forEach((group, index) => {
+            const hasChildren = group.children && group.children.length > 0;
+            const stt = index + 1;
+
+            // Group Row
+            const trGroup = document.createElement('tr');
+            trGroup.className = 'group-header expanded active';
+            trGroup.innerHTML = `
+                <td style="text-align: center;">${stt}</td>
+                <td style="font-weight: 700;">
+                    <i class="fas fa-chevron-right arrow-icon" style="transform: rotate(90deg)"></i>
+                    ${group.name}
+                </td>
+                <td class="text-center"><input type="checkbox" onchange="toggleGroupCheckboxes(${group.id}, this.checked)"></td>
+                <td></td><td></td><td></td><td></td>
+            `;
+            tbody.appendChild(trGroup);
+
+            // Child Rows
+            if (hasChildren) {
+                group.children.forEach((child, cIndex) => {
+                    const trChild = document.createElement('tr');
+                    trChild.className = `assign-child-row group-${group.id}`;
+                    const childStt = `${stt}.${cIndex + 1}`;
+
+                    trChild.innerHTML = `
+                        <td style="text-align: center; color: #64748b; font-size: 13px;">${childStt}</td>
+                        <td style="padding-left: 40px !important;">${child.name}</td>
+                        <td class="text-center"><input type="checkbox" class="cb-all" onchange="toggleRowCheckboxes(this)"></td>
+                        <td class="text-center"><input type="checkbox" class="cb-perm"></td>
+                        <td class="text-center"><input type="checkbox" class="cb-perm"></td>
+                        <td class="text-center"><input type="checkbox" class="cb-perm"></td>
+                        <td class="text-center"><input type="checkbox" class="cb-perm"></td>
+                    `;
+                    tbody.appendChild(trChild);
+                });
+            }
+        });
+    }
+
+    window.toggleGroupCheckboxes = function(groupId, checked) {
+        const rows = document.querySelectorAll(`.group-${groupId}`);
+        rows.forEach(row => {
+            row.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = checked);
+        });
+    }
+
+    window.toggleRowCheckboxes = function(allCb) {
+        const row = allCb.closest('tr');
+        row.querySelectorAll('.cb-perm').forEach(cb => cb.checked = allCb.checked);
+    }
+
+    window.selectAllPermissions = function() {
+        document.querySelectorAll('#assign-permission-table-body input[type="checkbox"]').forEach(cb => cb.checked = true);
+    }
+
+    window.deselectAllPermissions = function() {
+        document.querySelectorAll('#assign-permission-table-body input[type="checkbox"]').forEach(cb => cb.checked = false);
+    }
+
+    function loadRolePermissions(roleId) {
+        const storageKey = `role_permissions_${roleId}`;
+        const savedData = localStorage.getItem(storageKey);
+        if (!savedData) return;
+
+        const { state } = JSON.parse(savedData);
+        if (!state) return;
+
+        const rows = document.querySelectorAll('.assign-child-row');
+        rows.forEach(row => {
+            const name = row.cells[1].textContent.trim();
+            if (state[name]) {
+                const s = state[name];
+                row.querySelector('.cb-all').checked = s.all || false;
+                const perms = row.querySelectorAll('.cb-perm');
+                if (perms[0]) perms[0].checked = s.view || false;
+                if (perms[1]) perms[1].checked = s.add || false;
+                if (perms[2]) perms[2].checked = s.edit || false;
+                if (perms[3]) perms[3].checked = s.delete || false;
+            }
+        });
+    }
+
+    window.saveAssignPermissions = function() {
+        if (!currentEditingRoleId) return;
+
+        const rows = document.querySelectorAll('.assign-child-row');
+        let totalCount = 0;
+        const state = {};
+
+        rows.forEach(row => {
+            const name = row.cells[1].textContent.trim();
+            const allChecked = row.querySelector('.cb-all').checked;
+            const perms = row.querySelectorAll('.cb-perm');
+            
+            const rowState = {
+                all: allChecked,
+                view: perms[0]?.checked || false,
+                add: perms[1]?.checked || false,
+                edit: perms[2]?.checked || false,
+                delete: perms[3]?.checked || false
+            };
+
+            const checkedInRow = Object.values(rowState).filter(v => v === true).length;
+            // Only count view, add, edit, delete (exclude 'all' if you want pure permission count)
+            // But the original logic seemed to count all checked boxes including 'all'
+            // Actually permission.js line 137 used `cb-perm` count.
+            const permCheckboxes = row.querySelectorAll('.cb-perm');
+            const checkedPerms = Array.from(permCheckboxes).filter(cb => cb.checked).length;
+            totalCount += checkedPerms;
+
+            state[name] = rowState;
+        });
+
+        const storageKey = `role_permissions_${currentEditingRoleId}`;
+        localStorage.setItem(storageKey, JSON.stringify({
+            count: totalCount,
+            state: state
+        }));
+
+        // Update local roles array & localStorage
+        const roleIndex = roles.findIndex(r => r.id == currentEditingRoleId);
+        if (roleIndex !== -1) {
+            roles[roleIndex].permissions = totalCount;
+            localStorage.setItem('roles_data', JSON.stringify(roles));
+        }
+
+        renderRoles();
+        showToast(`Đã cập nhật ${totalCount} quyền cho vai trò`, 'success');
+        closeAssignPermissionModal();
     }
 })();

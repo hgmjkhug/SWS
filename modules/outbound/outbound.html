@@ -5,7 +5,7 @@
         type="text"
         class="search-input"
         id="search-input"
-        placeholder="Tìm theo mã lệnh, mã hoặc tên sản phẩm"
+        placeholder="Tìm theo mã vật chứa, mã hoặc tên sản phẩm"
         onkeyup="filterOutboundData()"
       />
 
@@ -64,6 +64,33 @@
         </div>
       </div>
 
+      <!-- Batch Filter (Editable Combobox) -->
+      <div class="status-custom-dropdown" style="width: 200px;">
+        <label class="filter-label">Lô hàng</label>
+        <div class="custom-combobox-wrapper" id="batch-filter-combobox-wrapper" style="width: 100%;">
+          <div class="combobox-input-group">
+            <input
+              type="text"
+              id="batch-filter-combobox-input"
+              class="combobox-input"
+              placeholder="Tất cả"
+              autocomplete="off"
+              onclick="toggleBatchFilterCombobox()"
+              onkeyup="handleBatchFilterComboboxSearch(this)"
+            />
+            <i
+              class="fas fa-chevron-down combobox-arrow"
+              onclick="toggleBatchFilterCombobox()"
+            ></i>
+          </div>
+          <div class="combobox-dropdown" id="batch-filter-combobox-dropdown">
+            <ul class="combobox-list" id="batch-filter-combobox-list">
+              <!-- Populated by JS -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <!-- Outbound Type Filter -->
       <div class="status-custom-dropdown" id="type-dropdown">
         <label class="filter-label">Loại xuất kho</label>
@@ -87,17 +114,17 @@
           </div>
           <div
             class="dropdown-option"
-            data-value="PALLET"
-            onclick="selectOutboundType('PALLET', 'Xuất hủy')"
+            data-value="SALE"
+            onclick="selectOutboundType('SALE', 'Xuất bán')"
           >
-            Xuất hủy
+            Xuất bán
           </div>
           <div
             class="dropdown-option"
-            data-value="MATERIAL"
-            onclick="selectOutboundType('MATERIAL', 'Xuất bán')"
+            data-value="SCRAP"
+            onclick="selectOutboundType('SCRAP', 'Xuất hủy')"
           >
-            Xuất bán
+            Xuất hủy
           </div>
         </div>
       </div>
@@ -276,26 +303,28 @@
       <table class="data-table">
         <colgroup>
           <col style="width: 50px">
-          <col style="width: 200px">
-          <col style="width: 350px">
-          <col style="width: 100px">
           <col style="width: 120px">
-          <col style="width: 120px">
+          <col style="width: 280px">
           <col style="width: 80px">
           <col style="width: 270px">
+          <col style="width: 100px">
+          <col style="width: 120px">
+          <col style="width: 80px">
+          <col style="width: 190px">
           <col style="width: 80px">
         </colgroup>
         <thead>
           <tr>
             <th class="text-center">STT</th>
-            <th>Mã lệnh xuất</th>
+            <th>Mã vật chứa</th>
             <th>Sản phẩm</th>
             <th class="text-center">Số lượng</th>
+            <th>Lô hàng</th>
             <th class="text-center">Loại xuất</th>
             <th class="text-center">Trạng thái</th>
             <th class="text-center">Ưu tiên</th>
             <th>Thông tin tạo</th>
-            <th class="text-center">Thao tác</th>
+            <th class="text-center action-column">Thao tác</th>
           </tr>
         </thead>
       </table>
@@ -304,13 +333,14 @@
       <table class="data-table">
         <colgroup>
           <col style="width: 50px">
-          <col style="width: 200px">
-          <col style="width: 350px">
-          <col style="width: 100px">
           <col style="width: 120px">
-          <col style="width: 120px">
+          <col style="width: 280px">
           <col style="width: 80px">
           <col style="width: 270px">
+          <col style="width: 100px">
+          <col style="width: 120px">
+          <col style="width: 80px">
+          <col style="width: 190px">
           <col style="width: 80px">
         </colgroup>
         <tbody id="table-body">
@@ -359,42 +389,16 @@
         <div class="modal-title">Thêm mới lệnh xuất kho</div>
       </div>
       <div class="modal-body">
-        <!-- Outbound Type Selection -->
-        <!-- Outbound Type Selection Hidden as per requirements -->
-        <div class="outbound-type-selection" style="display: none;">
-          <label class="selection-card">
-            <input
-              type="radio"
-              name="outbound-type"
-              value="MATERIAL"
-              checked
-              onchange="toggleOutboundForm(this.value)"
-            />
-            <div class="card-content">
-              <div class="card-icon"><i class="fas fa-cubes"></i></div>
-              <div class="card-text">
-                <span class="title">Xuất theo sản phẩm</span>
-                <span class="desc">Xuất lẻ số lượng sản phẩm nhất định</span>
-              </div>
-              <div class="check-icon"><i class="fas fa-check-circle"></i></div>
-            </div>
-          </label>
-          <label class="selection-card">
-            <input
-              type="radio"
-              name="outbound-type"
-              value="PALLET"
-              onchange="toggleOutboundForm(this.value)"
-            />
-            <div class="card-content">
-              <div class="card-icon"><i class="fa-solid fa-pallet"></i></div>
-              <div class="card-text">
-                <span class="title">Xuất theo container</span>
-                <span class="desc">Xuất toàn bộ container chứa hàng</span>
-              </div>
-              <div class="check-icon"><i class="fas fa-check-circle"></i></div>
-            </div>
-          </label>
+        <!-- Outbound Type Selection (Tabs) -->
+        <div class="modal-tabs" style="display: none;">
+          <div class="modal-tab active" id="tab-material" onclick="switchOutboundTab('MATERIAL')">
+            <i class="fas fa-cubes"></i> Xuất theo sản phẩm
+          </div>
+          <div class="modal-tab" id="tab-pallet" onclick="switchOutboundTab('PALLET')">
+            <i class="fa-solid fa-pallet"></i> Xuất theo vật chứa
+          </div>
+          <input type="radio" name="outbound-type" value="MATERIAL" id="radio-material" checked style="display: none;">
+          <input type="radio" name="outbound-type" value="PALLET" id="radio-pallet" style="display: none;">
         </div>
 
         <div class="form-grid">
@@ -524,7 +528,7 @@
                       <th rowspan="2" style="border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;"></th>
                       <th rowspan="2" class="text-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;">STT</th>
                       <th rowspan="2" style="border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;">Mã container</th>
-                      <th rowspan="2" style="border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;" class="truncate-header">Mã lệnh nhập</th>
+                      <th rowspan="2" style="border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;" class="truncate-header">Mã vật chứa</th>
                       <th colspan="3" class="text-center" style="border-bottom: 1px solid rgba(255,255,255,0.1);">Thông tin sản phẩm</th>
                       <th rowspan="2" class="text-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;">Thời gian tạo</th>
                       <th rowspan="2" class="text-center" style="border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle;">Vị trí lưu</th>
