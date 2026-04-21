@@ -55,11 +55,24 @@
     ];
 
     // Try to load products from product module
-    let mockProducts = [];
+    let mockProducts = [
+        { code: 'A456 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL' },
+        { code: 'A456 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA' },
+        { code: 'A456 - FRUIT WHARF', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - FRUIT WHARF' },
+        { code: 'A789 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL' },
+        { code: 'A789 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - SOFIA' },
+        { code: '14CP - XINFADIN', name: 'Chuối Nhật Bản/ Japanese bananas - 14CP - XINFADIN' },
+        { code: '16CP - SEIKA', name: 'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA' },
+        { code: '26CP - DEL MONTE', name: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE' }
+    ];
+
     const storedProducts = localStorage.getItem('sws_products');
     if (storedProducts) {
         try {
-            mockProducts = JSON.parse(storedProducts);
+            const parsed = JSON.parse(storedProducts);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                 mockProducts = parsed.map(p => ({ code: p.code, name: p.name }));
+            }
         } catch(e) { console.error('Error loading products from storage', e); }
     }
 

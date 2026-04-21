@@ -1325,3 +1325,85 @@ function createSakuraTransition(callback) {
     }, 3200); // Tornado duration
 }
 
+/**
+ * Takes a screenshot of the entire interface and downloads it.
+ */
+async function takeScreenshot() {
+    const btn = document.getElementById('btn-screenshot');
+    const icon = btn ? btn.querySelector('i') : null;
+    
+    // 1. Show loading state
+    if (icon) {
+        icon.className = 'fas fa-spinner fa-spin';
+    }
+    if (btn) {
+        btn.style.pointerEvents = 'none';
+        btn.style.opacity = '0.7';
+    }
+
+    try {
+        // 2. Capture the entire body
+        // We use a slight delay to ensure any open menus or hovers are cleared (if we want that)
+        // But here we capture as is.
+        
+        const canvas = await html2canvas(document.body, {
+            useCORS: true,
+            allowTaint: true,
+            scale: 2, // Higher quality
+            backgroundColor: '#f8fafc', // Match app background
+            logging: false,
+            onclone: (clonedDoc) => {
+                // Optional: You can hide specific elements in the screenshot here
+                // For example, hide the screenshot button itself if desired
+                const clonedBtn = clonedDoc.getElementById('btn-screenshot');
+                if (clonedBtn) clonedBtn.style.display = 'none';
+            }
+        });
+
+        // 3. Get Module Name for Filename
+        let moduleName = localStorage.getItem('wms_last_page') || 'Main';
+        if (!moduleName || moduleName === 'Main') {
+            const pageTitleEl = document.getElementById('page-title');
+            if (pageTitleEl) {
+                const childSpan = pageTitleEl.querySelector('span:last-child');
+                moduleName = childSpan ? childSpan.innerText.trim() : pageTitleEl.innerText.trim();
+            }
+        }
+        
+        // Clean name: only remove characters that are illegal in Windows filenames
+        // Illegal: \ / : * ? " < > |
+        const cleanName = moduleName
+            .replace(/[\\\/:\*\?"<>\|]/g, "_")
+            .trim();
+
+        // 4. Convert to image and download
+        const image = canvas.toDataURL("image/png");
+        const link = document.createElement('a');
+        const now = new Date();
+        const timestamp = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}`;
+        
+        link.download = `${cleanName}.png`;
+        link.href = image;
+        link.click();
+
+        // 4. Success feedback
+        if (typeof showToast === 'function') {
+            showToast('Đã chụp và lưu ảnh giao diện thành công!', 'success');
+        }
+    } catch (error) {
+        console.error('Screenshot error:', error);
+        if (typeof showToast === 'function') {
+            showToast('Lỗi khi chụp ảnh: ' + error.message, 'error');
+        }
+    } finally {
+        // 5. Restore button state
+        if (icon) {
+            icon.className = 'fa-solid fa-camera';
+        }
+        if (btn) {
+            btn.style.pointerEvents = '';
+            btn.style.opacity = '';
+        }
+    }
+}
+

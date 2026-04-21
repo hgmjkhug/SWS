@@ -198,19 +198,25 @@ if (MOCK_INBOUND_ORDERS && MOCK_INBOUND_ORDERS.some(o =>
 }
 // ─────────────────────────────────────────────────────────────
 
-if (!MOCK_INBOUND_ORDERS) {
+function getBatchFromStorage(i) {
     const batchData = JSON.parse(localStorage.getItem('SWS_BATCH_DATA_v4') || '[]');
-    const getBatch = (i) => batchData.length > 0 ? { code: batchData[i % batchData.length].code, name: batchData[i % batchData.length].name } : { code: 'LOT-GEN', name: 'Lô hàng mặc định' };
+    if (batchData.length > 0) {
+        const b = batchData[i % batchData.length];
+        return { code: b.code, name: b.name };
+    }
+    return { code: 'LOT-GEN', name: 'Lô hàng mặc định' };
+}
 
+if (!MOCK_INBOUND_ORDERS) {
     MOCK_INBOUND_ORDERS = [
-        { id: 1, type: 'NEW', code: 'P-A01-L3_A456-TROPICAL_500_25102025', materials: [{ code: 'A456 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 500, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 6500, expiryDate: '2025-10-25' }], batch: getBatch(0), pallets: ['P-A01-L3'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', priority: true, creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2025-10-25T08:30:00'), process: 'Quy trình Nhập - Kho Chuối' },
-        { id: 2, type: 'REENTRY', code: 'P-B01-L1_A456-SOFIA_1000_26102025', materials: [{ code: 'A456 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 1000, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', weight: 15000, expiryDate: '2025-06-15' }], batch: getBatch(1), pallets: ['P-B01-L1'], bin: 'T1-F1-P2-A5', status: 'COMPLETED', priority: false, creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: new Date('2025-10-26T09:15:00'), process: 'Quy trình Nhập - Kho Chuối' },
-        { id: 3, type: 'TRANSFER', code: 'P-C01-L2_A789-TROPICAL_200_27102025', materials: [{ code: 'A789 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', qty: 200, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 2600, expiryDate: '2025-12-27' }], batch: getBatch(2), pallets: ['P-C01-L2'], bin: 'T2-F3-P1-A2', status: 'PROCESSING', creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: new Date('2025-10-27T14:00:00'), process: 'Quy trình Phân cấp - Đóng thùng' },
-        { id: 4, type: 'NEW', code: 'P-A05-L1_26CP-DELMONTE_50_05112025', materials: [{ code: '26CP - DEL MONTE', name: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 650, expiryDate: '2026-03-20' }], batch: getBatch(3), pallets: ['P-A05-L1'], bin: 'T1-F8-P3-A2', status: 'COMPLETED', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2025-11-05T10:30:00'), process: 'Quy trình Nhập - Kho Chuối' },
-        { id: 5, type: 'NEW', code: 'P-D01-L2_16CP-SEIKA_500_12112025', materials: [{ code: '16CP - SEIKA', name: 'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA', qty: 500, unit: 'thùng', specs: 'Thùng 12kg tiêu chuẩn', weight: 6000, expiryDate: '2026-11-12' }], batch: getBatch(4), pallets: ['P-D01-L2'], bin: 'T3-F2-P5-A1', status: 'PENDING', creator: { id: 'US04', name: 'Phạm Minh Dũng' }, createdAt: new Date('2025-11-12T16:45:00'), process: 'Quy trình Nhập - Kho Chuối' },
-        { id: 31, type: 'NEW', code: 'P-N01-L1_A456-TROPICAL_100_TDAY', materials: [{ code: 'A456 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 100, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 1300, expiryDate: '2026-08-15' }], batch: getBatch(5), pallets: ['P-N01-L1'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', priority: true, creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: (() => { const d = new Date(); d.setHours(8, 30, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' },
-        { id: 32, type: 'NEW', code: 'P-N02-L2_A456-SOFIA_200_TDAY', materials: [{ code: 'A456 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 200, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', weight: 3000, expiryDate: '2026-10-10' }], batch: getBatch(6), pallets: ['P-N02-L2'], bin: 'T1-F2-P2-A2', status: 'PROCESSING', priority: false, creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: (() => { const d = new Date(); d.setHours(9, 15, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' },
-        { id: 33, type: 'NEW', code: 'P-N03-L3_A789-TROPICAL_50_TDAY', materials: [{ code: 'A789 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 650, expiryDate: '2027-01-01' }], batch: getBatch(7), pallets: ['P-N03-L3'], bin: 'T1-F3-P3-A3', status: 'PENDING', priority: false, creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: (() => { const d = new Date(); d.setHours(14, 45, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' }
+        { id: 1, type: 'NEW', code: 'P-A01-L3_A456-TROPICAL_500_25102025', materials: [{ code: 'A456 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 500, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 6500, expiryDate: '2025-10-25' }], batch: getBatchFromStorage(0), pallets: ['P-A01-L3'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', priority: true, creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2025-10-25T08:30:00'), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 2, type: 'REENTRY', code: 'P-B01-L1_A456-SOFIA_1000_26102025', materials: [{ code: 'A456 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 1000, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', weight: 15000, expiryDate: '2025-06-15' }], batch: getBatchFromStorage(1), pallets: ['P-B01-L1'], bin: 'T1-F1-P2-A5', status: 'COMPLETED', priority: false, creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: new Date('2025-10-26T09:15:00'), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 3, type: 'TRANSFER', code: 'P-C01-L2_A789-TROPICAL_200_27102025', materials: [{ code: 'A789 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', qty: 200, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 2600, expiryDate: '2025-12-27' }], batch: getBatchFromStorage(2), pallets: ['P-C01-L2'], bin: 'T2-F3-P1-A2', status: 'PROCESSING', creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: new Date('2025-10-27T14:00:00'), process: 'Quy trình Phân cấp - Đóng thùng' },
+        { id: 4, type: 'NEW', code: 'P-A05-L1_26CP-DELMONTE_50_05112025', materials: [{ code: '26CP - DEL MONTE', name: 'Chuối Nhật Bản/ Japanese bananas - 26CP - DEL MONTE', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 650, expiryDate: '2026-03-20' }], batch: getBatchFromStorage(3), pallets: ['P-A05-L1'], bin: 'T1-F8-P3-A2', status: 'COMPLETED', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date('2025-11-05T10:30:00'), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 5, type: 'NEW', code: 'P-D01-L2_16CP-SEIKA_500_12112025', materials: [{ code: '16CP - SEIKA', name: 'Chuối Nhật Bản/ Japanese bananas - 16CP - SEIKA', qty: 500, unit: 'thùng', specs: 'Thùng 12kg tiêu chuẩn', weight: 6000, expiryDate: '2026-11-12' }], batch: getBatchFromStorage(4), pallets: ['P-D01-L2'], bin: 'T3-F2-P5-A1', status: 'PENDING', creator: { id: 'US04', name: 'Phạm Minh Dũng' }, createdAt: new Date('2025-11-12T16:45:00'), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 31, type: 'NEW', code: 'P-N01-L1_A456-TROPICAL_100_TDAY', materials: [{ code: 'A456 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 100, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 1300, expiryDate: '2026-08-15' }], batch: getBatchFromStorage(5), pallets: ['P-N01-L1'], bin: 'T1-F1-P1-A1', status: 'COMPLETED', priority: true, creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: (() => { const d = new Date(); d.setHours(8, 30, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 32, type: 'NEW', code: 'P-N02-L2_A456-SOFIA_200_TDAY', materials: [{ code: 'A456 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 200, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', weight: 3000, expiryDate: '2026-10-10' }], batch: getBatchFromStorage(6), pallets: ['P-N02-L2'], bin: 'T1-F2-P2-A2', status: 'PROCESSING', priority: false, creator: { id: 'US02', name: 'Trần Thị Bình' }, createdAt: (() => { const d = new Date(); d.setHours(9, 15, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' },
+        { id: 33, type: 'NEW', code: 'P-N03-L3_A789-TROPICAL_50_TDAY', materials: [{ code: 'A789 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A789 - TROPICAL', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', weight: 650, expiryDate: '2027-01-01' }], batch: getBatchFromStorage(7), pallets: ['P-N03-L3'], bin: 'T1-F3-P3-A3', status: 'PENDING', priority: false, creator: { id: 'US03', name: 'Lê Văn Cường' }, createdAt: (() => { const d = new Date(); d.setHours(14, 45, 0, 0); return d; })(), process: 'Quy trình Nhập - Kho Chuối' }
     ];
 
     MOCK_INBOUND_ORDERS.forEach((o, i) => {
@@ -220,14 +226,18 @@ if (!MOCK_INBOUND_ORDERS) {
             const addSeconds = Math.floor(Math.random() * 60);
             o.completedAt = new Date(o.createdAt.getTime() + addMinutes * 60000 + addSeconds * 1000);
         }
-        if (!o.batch) o.batch = { code: 'LOT-GEN', name: 'Lô hàng mặc định' };
+        if (!o.batch || o.batch.code === 'LOT-GEN') {
+            o.batch = getBatchFromStorage(i);
+        }
     });
     saveInboundOrders();
 }
 
 // Ensure all orders have batch (repair for existing data)
-MOCK_INBOUND_ORDERS.forEach(o => {
-    if (!o.batch) o.batch = { code: 'LOT-GEN', name: 'Lô hàng mặc định' };
+MOCK_INBOUND_ORDERS.forEach((o, i) => {
+    if (!o.batch || o.batch.code === 'LOT-GEN') {
+        o.batch = getBatchFromStorage(i);
+    }
 });
 
 // ── Utilities ────────────────────────────────────────────────
@@ -285,8 +295,8 @@ function ensureTodayDataInbound() {
         });
 
         const todayData = [
-            { id: Date.now() + 1, code: 'P-T01-A1_A456-TROPICAL_50_T' + today.getTime().toString().slice(-4), materials: [{ code: 'A456 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', expiryDate: new Date(today.getFullYear(), today.getMonth() + 6, today.getDate()).toISOString().split('T')[0] }], pallets: ['P-T01-A1'], bin: 'T1-F1-P1-A1', status: 'PENDING', priority: true, type: 'NEW', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date(today.getTime() + 8 * 3600000 + 30 * 60000) },
-            { id: Date.now() + 2, code: 'P-T02-B2_A456-SOFIA_120_T' + today.getTime().toString().slice(-4), materials: [{ code: 'A456 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 120, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', expiryDate: new Date(today.getFullYear(), today.getMonth() + 12, today.getDate()).toISOString().split('T')[0] }], pallets: ['P-T02-B2'], bin: 'T2-F3-P1-B2', status: 'PROCESSING', priority: false, type: 'REENTRY', creator: { id: 'US14', name: 'Trịnh Thị Quyên' }, createdAt: new Date(today.getTime() + 10 * 3600000 + 15 * 60000) }
+            { id: Date.now() + 1, code: 'P-T01-A1_A456-TROPICAL_50_T' + today.getTime().toString().slice(-4), materials: [{ code: 'A456 - TROPICAL', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - TROPICAL', qty: 50, unit: 'thùng', specs: 'Thùng 13kg tiêu chuẩn', expiryDate: new Date(today.getFullYear(), today.getMonth() + 6, today.getDate()).toISOString().split('T')[0] }], batch: getBatchFromStorage(10), pallets: ['P-T01-A1'], bin: 'T1-F1-P1-A1', status: 'PENDING', priority: true, type: 'NEW', creator: { id: 'US01', name: 'Nguyễn Văn An' }, createdAt: new Date(today.getTime() + 8 * 3600000 + 30 * 60000) },
+            { id: Date.now() + 2, code: 'P-T02-B2_A456-SOFIA_120_T' + today.getTime().toString().slice(-4), materials: [{ code: 'A456 - SOFIA', name: 'Chuối Trung Quốc/ Chinese bananas - A456 - SOFIA', qty: 120, unit: 'thùng', specs: 'Thùng 15kg tiêu chuẩn', expiryDate: new Date(today.getFullYear(), today.getMonth() + 12, today.getDate()).toISOString().split('T')[0] }], batch: getBatchFromStorage(11), pallets: ['P-T02-B2'], bin: 'T2-F3-P1-B2', status: 'PROCESSING', priority: false, type: 'REENTRY', creator: { id: 'US14', name: 'Trịnh Thị Quyên' }, createdAt: new Date(today.getTime() + 10 * 3600000 + 15 * 60000) }
         ];
         MOCK_INBOUND_ORDERS.unshift(...todayData);
         saveInboundOrders();
@@ -405,7 +415,7 @@ function renderTableBody() {
                 </td>
                 <td class="text-center">
                     <div class="product-item no-indicator" style="border-bottom:none;min-height:52px;padding:0;display:flex;align-items:center;justify-content:center;text-align:center;">
-                        ${(o.status === 'COMPLETED' || o.status === 'PROCESSING') && o.bin ? `
+                        ${o.status === 'COMPLETED' && o.bin ? `
                             <span style="font-size:13px;font-weight:600;color:#0D6BB9;">
                                 ${formatBinLocation(o.bin)}
                             </span>

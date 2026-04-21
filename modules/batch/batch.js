@@ -652,7 +652,7 @@ function renderPaginationBar(totalItems) {
                         '<i class="fa-solid fa-keyboard"></i> Kiểm kê thủ công' +
                     '</div>' +
                     '<div class="inventory-tab-item" id="tab-inventory-auto" onclick="window.switchInventoryTab(\'auto\')">' +
-                        '<i class="fa-solid fa-robot"></i> Kiểm kê tự động (Excel)' +
+                        '<i class="fa-solid fa-robot"></i> Kiểm kê tự động' +
                     '</div>' +
                 '</div>' +
 
@@ -976,7 +976,7 @@ function renderPaginationBar(totalItems) {
                 saveBatches();
                 window.renderTable();
             }
-            alert('Kiểm kê tự động hoàn tất!');
+            showToast('Kiểm kê tự động thành công!', 'success');
             window.closeInventoryCheck();
             btn.innerHTML = originalText;
             btn.disabled = false;

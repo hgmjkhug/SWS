@@ -59,10 +59,32 @@
 
         // Initialize click outside for custom dropdown
         document.addEventListener('click', function(e) {
-            const wrapper = document.querySelector('.custom-select-wrapper');
-            const panel = document.getElementById('result-dropdown-options');
-            if (panel && panel.classList.contains('show') && (!wrapper || !wrapper.contains(e.target))) {
+            // Modal result dropdown
+            const resultWrapper = document.querySelector('.custom-select-wrapper');
+            const resultPanel = document.getElementById('result-dropdown-options');
+            if (resultPanel && resultPanel.classList.contains('show') && (!resultWrapper || !resultWrapper.contains(e.target))) {
                 toggleResultDropdown();
+            }
+
+            // Type filter dropdown
+            const typeWrapper = document.querySelector('.type-filter-wrapper');
+            const typePanel = document.getElementById('type-filter-options');
+            if (typePanel && typePanel.classList.contains('show') && (!typeWrapper || !typeWrapper.contains(e.target))) {
+                toggleTypeFilterDropdown();
+            }
+
+            // Year filter dropdown
+            const yearWrapper = document.querySelector('.year-filter-wrapper');
+            const yearPanel = document.getElementById('year-filter-options');
+            if (yearPanel && yearPanel.classList.contains('show') && (!yearWrapper || !yearWrapper.contains(e.target))) {
+                toggleYearDropdown();
+            }
+
+            // Month filter dropdown
+            const monthWrapper = document.querySelector('.month-filter-wrapper');
+            const monthPanel = document.getElementById('month-filter-options');
+            if (monthPanel && monthPanel.classList.contains('show') && (!monthWrapper || !monthWrapper.contains(e.target))) {
+                toggleMonthDropdown();
             }
         });
         
@@ -92,10 +114,67 @@
         document.getElementById('modal-result').value = value;
         document.getElementById('modal-result-text').textContent = text;
         
-        document.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected'));
+        document.querySelectorAll('#result-dropdown-options .custom-option').forEach(opt => opt.classList.remove('selected'));
         if(element) element.classList.add('selected');
 
         toggleResultDropdown();
+    };
+
+    window.toggleTypeFilterDropdown = function() {
+        const panel = document.getElementById('type-filter-options');
+        const trigger = document.getElementById('type-filter-trigger');
+        if(!panel) return;
+        panel.classList.toggle('show');
+        if (panel.classList.contains('show')) {
+            trigger.classList.add('active');
+        } else {
+            trigger.classList.remove('active');
+        }
+    };
+
+    window.selectTypeFilter = function(value, text, element) {
+        document.getElementById('device-type-filter').value = value;
+        document.getElementById('selected-type-text').textContent = text;
+        
+        document.querySelectorAll('#type-filter-options .custom-option').forEach(opt => opt.classList.remove('selected'));
+        if(element) element.classList.add('selected');
+
+        toggleTypeFilterDropdown();
+        filterMaintenanceList();
+    };
+
+    window.toggleMonthDropdown = function() {
+        const panel = document.getElementById('month-filter-options');
+        const trigger = document.getElementById('month-filter-trigger');
+        if(!panel) return;
+        panel.classList.toggle('show');
+        trigger.classList.toggle('active', panel.classList.contains('show'));
+    };
+
+    window.selectMonth = function(value, text, element) {
+        document.getElementById('month-select').value = value;
+        document.getElementById('selected-month-text').textContent = text;
+        document.querySelectorAll('#month-filter-options .custom-option').forEach(opt => opt.classList.remove('selected'));
+        if(element) element.classList.add('selected');
+        toggleMonthDropdown();
+        renderCalendar();
+    };
+
+    window.toggleYearDropdown = function() {
+        const panel = document.getElementById('year-filter-options');
+        const trigger = document.getElementById('year-filter-trigger');
+        if(!panel) return;
+        panel.classList.toggle('show');
+        trigger.classList.toggle('active', panel.classList.contains('show'));
+    };
+
+    window.selectYear = function(value, text, element) {
+        document.getElementById('year-select').value = value;
+        document.getElementById('selected-year-text').textContent = text;
+        document.querySelectorAll('#year-filter-options .custom-option').forEach(opt => opt.classList.remove('selected'));
+        if(element) element.classList.add('selected');
+        toggleYearDropdown();
+        renderCalendar();
     };
 
     window.switchMaintenanceTab = function(tab) {
@@ -138,8 +217,9 @@
         groups.forEach(g => grouped[g] = []);
         pageData.forEach(d => { if (grouped[d.group]) grouped[d.group].push(d); });
 
-        let globalIdx = start;
+        let itemsOnPage = [];
         let html = '';
+        let absIdx = start;
 
         groups.forEach(groupName => {
             const groupDevices = grouped[groupName];
@@ -169,12 +249,12 @@
 
             if (!isCollapsed) {
                 groupDevices.forEach((d, i) => {
-                    globalIdx++;
+                    absIdx++;
                     const nextOverdue = d.nextMaintenance < new Date();
                     html += `
                         <tr data-group="${groupName}">
                             <td class="text-center"><input type="checkbox" ${d.selected ? 'checked' : ''} onchange="toggleDeviceSelection(${d.id})"></td>
-                            <td class="text-center" style="color:#94a3b8;font-size:12px">${globalIdx}</td>
+                            <td class="text-center" style="color:#94a3b8;font-size:12px">${absIdx}</td>
                             <td style="color:#64748b;font-size:12px"></td>
                             <td><strong style="color:#076EB8">${d.code}</strong></td>
                             <td>${d.name}</td>
@@ -206,6 +286,12 @@
         // Render pagination
         renderMainPagination(totalPages, total);
         updateBulkButton();
+        
+        // Update Select All checkbox state
+        const selectAll = document.getElementById('select-all');
+        if (selectAll) {
+            selectAll.checked = total > 0 && filteredDevices.every(d => d.selected);
+        }
     };
 
     window.toggleGroup = function(groupName) {
@@ -287,11 +373,8 @@
     }
 
     window.goToMainPage = function(page) {
-        const term = (document.getElementById('device-search')?.value || '').toLowerCase();
-        const filtered = devices.filter(d =>
-            d.code.toLowerCase().includes(term) || d.name.toLowerCase().includes(term)
-        );
-        const totalPages = Math.max(1, Math.ceil(filtered.length / mainPageSize));
+        const total = filteredDevices.length;
+        const totalPages = Math.max(1, Math.ceil(total / mainPageSize));
         if (page < 1 || page > totalPages) return;
         mainCurrentPage = page;
         renderMaintenanceList();
@@ -356,6 +439,10 @@
         if (!device) return;
         const dateInput = document.getElementById('modal-maintenance-date');
         const nextDateInput = document.getElementById('modal-next-maintenance-date');
+        const technicianInput = document.getElementById('modal-technician');
+        const resultInput = document.getElementById('modal-result');
+        const noteInput = document.getElementById('modal-note');
+        
         const dateStr = dateInput?.dataset.date;
         const nextDateStr = nextDateInput?.dataset.date;
         
@@ -369,6 +456,20 @@
                 device.nextMaintenance.setDate(device.nextMaintenance.getDate() + cycleDays);
             }
             device.maintenanceCount++;
+            
+            // Save additional fields
+            device.history = device.history || [];
+            device.history.push({
+                date: new Date(dateStr),
+                technician: technicianInput?.value || '',
+                result: resultInput?.value || 'ok',
+                note: noteInput?.value || ''
+            });
+            
+            // Current status update
+            device.lastTechnician = technicianInput?.value || '';
+            device.lastResult = resultInput?.value || 'ok';
+            device.lastNote = noteInput?.value || '';
         }
         closeModal('maintenance-modal');
         showToast(`Đã ghi nhận bảo trì cho ${device.code}`, 'success');
@@ -396,15 +497,38 @@
 
     // ── Calendar ─────────────────────────────────────────────────────
     function initYearSelect() {
-        const select = document.getElementById('year-select');
+        const panel = document.getElementById('year-filter-options');
+        const selectedYearInput = document.getElementById('year-select');
+        const selectedYearText = document.getElementById('selected-year-text');
+        const selectedMonthInput = document.getElementById('month-select');
+        const selectedMonthText = document.getElementById('selected-month-text');
+        
         const currentYear = new Date().getFullYear();
-        for (let y = currentYear - 2; y <= currentYear + 2; y++) {
-            const opt = document.createElement('option');
-            opt.value = y; opt.textContent = y;
-            if (y === currentYear) opt.selected = true;
-            select.appendChild(opt);
+        const currentMonth = new Date().getMonth();
+        
+        // Month init
+        selectedMonthInput.value = currentMonth;
+        selectedMonthText.textContent = `Tháng ${currentMonth + 1}`;
+        const monthOptions = document.querySelectorAll('#month-filter-options .custom-option');
+        monthOptions.forEach((opt, idx) => {
+            if(idx === currentMonth) opt.classList.add('selected');
+            else opt.classList.remove('selected');
+        });
+
+        // Year init
+        selectedYearInput.value = currentYear;
+        selectedYearText.textContent = currentYear;
+        
+        if (panel) {
+            panel.innerHTML = '';
+            for (let y = currentYear - 2; y <= currentYear + 2; y++) {
+                const div = document.createElement('div');
+                div.className = 'custom-option' + (y === currentYear ? ' selected' : '');
+                div.textContent = y;
+                div.onclick = function() { selectYear(y, y, this); };
+                panel.appendChild(div);
+            }
         }
-        document.getElementById('month-select').value = new Date().getMonth();
     }
 
     window.renderCalendar = function() {

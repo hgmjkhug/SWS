@@ -9,8 +9,8 @@
   <!-- Header / Tabs -->
   <div class="module-header">
     <div class="tabs-control">
-      <button class="tab-btn active" onclick="switchMaintenanceTab('list')">Danh sách bảo trì</button>
       <button class="tab-btn" onclick="switchMaintenanceTab('monitoring')">Giám sát bảo trì</button>
+      <button class="tab-btn active" onclick="switchMaintenanceTab('list')">Danh sách thiết bị</button>
     </div>
   </div>
 
@@ -23,11 +23,26 @@
           <input type="text" id="device-search" placeholder="Tìm mã / tên thiết bị..." oninput="filterMaintenanceList()">
         </div>
         <div class="filter-group-inline">
-          <select id="device-type-filter" class="table-filter-select" onchange="filterMaintenanceList()">
-            <option value="all">Tất cả loại thiết bị</option>
-            <option value="Lifter">Lifter</option>
-            <option value="Shuttle">Shuttle</option>
-          </select>
+          <div class="custom-select-wrapper type-filter-wrapper">
+            <div class="table-filter-custom" id="type-filter-trigger" onclick="toggleTypeFilterDropdown()">
+              <div class="selected-value-wrap">
+                <span id="selected-type-text">Tất cả loại thiết bị</span>
+              </div>
+              <i class="fas fa-chevron-down toggle-icon"></i>
+            </div>
+            <div class="custom-options-panel" id="type-filter-options">
+              <div class="custom-option selected" onclick="selectTypeFilter('all', 'Tất cả loại thiết bị', this)">
+                Tất cả loại thiết bị
+              </div>
+              <div class="custom-option" onclick="selectTypeFilter('Lifter', 'Lifter', this)">
+                Lifter
+              </div>
+              <div class="custom-option" onclick="selectTypeFilter('Shuttle', 'Shuttle', this)">
+                Shuttle
+              </div>
+            </div>
+            <input type="hidden" id="device-type-filter" value="all">
+          </div>
         </div>
       </div>
       <div class="toolbar-right">
@@ -127,6 +142,7 @@
               "
               min="1"
               onchange="goToMainPageFromInput()"
+              onkeyup="if(event.key === 'Enter') goToMainPageFromInput()"
             />
             Trang
           </div>
@@ -138,7 +154,7 @@
   <div class="tab-content" id="tab-monitoring">
     <div class="monitoring-filters">
       <div class="filter-group">
-        <label>Tìm thiết bị</label>
+        <!-- <label>Tìm thiết bị</label> -->
         <div class="searchable-combobox" id="device-combobox">
           <div class="combobox-input-wrap">
             <i class="fas fa-search combobox-icon"></i>
@@ -150,18 +166,40 @@
       </div>
       <div class="filter-group">
         <label>Tháng</label>
-        <select id="month-select" class="form-select" onchange="renderCalendar()">
-          <option value="0">Tháng 1</option><option value="1">Tháng 2</option>
-          <option value="2">Tháng 3</option><option value="3">Tháng 4</option>
-          <option value="4">Tháng 5</option><option value="5">Tháng 6</option>
-          <option value="6">Tháng 7</option><option value="7">Tháng 8</option>
-          <option value="8">Tháng 9</option><option value="9">Tháng 10</option>
-          <option value="10">Tháng 11</option><option value="11">Tháng 12</option>
-        </select>
+        <div class="custom-select-wrapper month-filter-wrapper">
+          <div class="table-filter-custom min-w-130" id="month-filter-trigger" onclick="toggleMonthDropdown()">
+            <span id="selected-month-text">Tháng 4</span>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+          </div>
+          <div class="custom-options-panel" id="month-filter-options">
+            <div class="custom-option" onclick="selectMonth(0, 'Tháng 1', this)">Tháng 1</div>
+            <div class="custom-option" onclick="selectMonth(1, 'Tháng 2', this)">Tháng 2</div>
+            <div class="custom-option" onclick="selectMonth(2, 'Tháng 3', this)">Tháng 3</div>
+            <div class="custom-option" onclick="selectMonth(3, 'Tháng 4', this)">Tháng 4</div>
+            <div class="custom-option" onclick="selectMonth(4, 'Tháng 5', this)">Tháng 5</div>
+            <div class="custom-option" onclick="selectMonth(5, 'Tháng 6', this)">Tháng 6</div>
+            <div class="custom-option" onclick="selectMonth(6, 'Tháng 7', this)">Tháng 7</div>
+            <div class="custom-option" onclick="selectMonth(7, 'Tháng 8', this)">Tháng 8</div>
+            <div class="custom-option" onclick="selectMonth(8, 'Tháng 9', this)">Tháng 9</div>
+            <div class="custom-option" onclick="selectMonth(9, 'Tháng 10', this)">Tháng 10</div>
+            <div class="custom-option" onclick="selectMonth(10, 'Tháng 11', this)">Tháng 11</div>
+            <div class="custom-option" onclick="selectMonth(11, 'Tháng 12', this)">Tháng 12</div>
+          </div>
+          <input type="hidden" id="month-select" value="3">
+        </div>
       </div>
       <div class="filter-group">
         <label>Năm</label>
-        <select id="year-select" class="form-select" onchange="renderCalendar()"></select>
+        <div class="custom-select-wrapper year-filter-wrapper">
+          <div class="table-filter-custom min-w-100" id="year-filter-trigger" onclick="toggleYearDropdown()">
+            <span id="selected-year-text">2026</span>
+            <i class="fas fa-chevron-down toggle-icon"></i>
+          </div>
+          <div class="custom-options-panel" id="year-filter-options">
+            <!-- Dynamically populated -->
+          </div>
+          <input type="hidden" id="year-select" value="2026">
+        </div>
       </div>
       <!-- Legend moved here -->
       <div class="filter-group legend-filter-group">

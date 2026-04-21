@@ -98,19 +98,21 @@ var DATA = {
       linkedError:'Mất kết nối PLC' },
   ],
   inventory: {
-    total: 15420,
+    total: 35420,
     groups: [
-      { name: 'Chuối Nhật Bản', val: 9200, color: '#2563eb', 
+      { name: 'Chuối Nhật Bản', val: 21200, color: '#2563eb', 
         products: [ 
-          { name: '16CP - SEIKA', v: 4500 }, 
-          { name: '26CP - DEL MONTE', v: 3200 },
-          { name: '40CP - TAITO', v: 1500 }
+          { name: '14CP - XINFADIN', v: 1200 }, { name: '14CP - SEIKA', v: 1500 }, { name: '14CP - DASANG', v: 800 },
+          { name: '16CP - XINFADIN', v: 2200 }, { name: '16CP - SEIKA', v: 3100 }, { name: '16CP - DEL MONTE', v: 1800 },
+          { name: '26CP - XINFADIN', v: 900 }, { name: '26CP - SEIKA', v: 1400 }, { name: '26CP - DEL MONTE', v: 1200 }, { name: '26CP - SHIMIZU', v: 1100 }, { name: '26CP - TAITO', v: 700 },
+          { name: '30CP - SEIKA', v: 500 }, { name: '30CP - MAINICHI', v: 600 }, { name: '30CP - TAITO', v: 400 }, { name: '30CP - MAINICHI 13KG', v: 3100 }
         ] 
       },
-      { name: 'Chuối Trung Quốc', val: 6220, color: '#7c3aed', 
+      { name: 'Chuối Trung Quốc', val: 14220, color: '#7c3aed', 
         products: [ 
-          { name: 'A456 - TROPICAL', v: 3800 }, 
-          { name: 'B789 - SOFIA', v: 2420 }
+          { name: 'A456 - TROPICAL', v: 2800 }, { name: 'A456 - SOFIA', v: 1420 }, { name: 'A456 - FRUIT WHARF', v: 1100 }, { name: 'A456 - DASANG', v: 900 },
+          { name: 'A789 - TROPICAL', v: 1500 }, { name: 'A789 - SOFIA', v: 1200 },
+          { name: 'CL - DASANG', v: 1300 }, { name: 'CL - XINFADIN', v: 1100 }, { name: 'CL - SEIKA', v: 1600 }, { name: 'CL - TROPICAL', v: 1300 }
         ] 
       }
     ]
@@ -148,8 +150,10 @@ function doSync() {
 function drawDonut(id, values, colors) {
   const c = document.getElementById(id); if(!c) return;
   const ctx = c.getContext('2d');
-  const W = c.width, H = c.height, cx = W/2, cy = H/2;
-  const ro = W/2-4, ri = ro*0.62;
+  const W = c.clientWidth || c.width, H = c.clientHeight || c.height; 
+  c.width = W; c.height = H;
+  const cx = W/2, cy = H/2;
+  const ro = Math.min(W,H)/2-4, ri = ro*0.62;
   ctx.clearRect(0,0,W,H);
   const total = values.reduce((a,b)=>a+b,0);
   if(!total) {
@@ -275,33 +279,49 @@ function renderKPIPies() {
   renderInventory();
 }
 
-/* ── INVENTORY ─────────────────────────────────────── */
+/* ── INVENTORY PROGRESS BARS ─────────────────────────── */
 function renderInventory() {
   const inv = DATA.inventory;
   const totalEl = document.getElementById('inv-total');
   if(totalEl) totalEl.textContent = inv.total.toLocaleString();
 
-  const legendEl = document.getElementById('inv-legend');
-  if(legendEl) {
-    legendEl.innerHTML = inv.groups.map((g, idx) => {
-      const subItems = g.products.map(p => `
-        <div class="tree-sub-item">
-          <i class="fas fa-box tree-icon"></i>
-          <span class="tree-name">${p.name}</span>
-          <span class="tree-val">${p.v.toLocaleString()}</span>
-        </div>
-      `).join('');
+  const wrap = document.getElementById('inv-progress-wrap');
+  if(!wrap || !inv.groups) return;
+
+  // Find global max for relative bar width
+  const allVals = inv.groups.flatMap(g => g.products.map(p => p.v));
+  const globalMax = Math.max(...allVals);
+
+  wrap.innerHTML = inv.groups.map(g => {
+    const groupTotal = g.products.reduce((s, p) => s + p.v, 0);
+    const rows = g.products.map(p => {
+      const pct = (p.v / globalMax * 100).toFixed(1);
+      const pctOfGroup = (p.v / groupTotal * 100).toFixed(0);
       return `
-        <div class="kpi-leg-row">
-          <span class="kpi-leg-dot" style="background:${g.color}"></span>
-          <span class="kpi-leg-label">${g.name}</span>
-          <span class="kpi-leg-val">${g.val.toLocaleString()}</span>
-        </div>
-        <div class="tree-sub-list">${subItems}</div>
-      `;
+        <div class="inv-row">
+          <span class="inv-row-name" title="${p.name}">${p.name}</span>
+          <div class="inv-bar-outer">
+            <div class="inv-bar-inner" style="width:0%; background:${g.color}; opacity:0.85;" data-w="${pct}%"></div>
+          </div>
+          <span class="inv-pct">${pctOfGroup}%</span>
+          <span class="inv-row-val">${p.v.toLocaleString()}</span>
+        </div>`;
     }).join('');
-  }
-  drawDonut('c-inv', inv.groups.map(g=>g.val), inv.groups.map(g=>g.color));
+
+    return `
+      <div class="inv-group-section">
+        <div class="inv-group-header">
+          <div class="inv-group-dot" style="background:${g.color}"></div>
+          <span class="inv-group-name">${g.name}</span>
+          <span class="inv-group-total">${groupTotal.toLocaleString()}</span>
+        </div>
+        ${rows}
+      </div>`;
+  }).join('');
+
+  setTimeout(() => {
+    wrap.querySelectorAll('.inv-bar-inner').forEach(b => b.style.width = b.dataset.w);
+  }, 80);
 }
 
 /* ── PRODUCT STATS ─────────────────────────────────── */

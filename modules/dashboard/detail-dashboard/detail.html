@@ -1,7 +1,7 @@
 <body>
 
 <!-- TOPBAR -->
-<div class="topbar">
+<div class="topbar" style="display:none;">
   <div class="clock-block">
     <div class="clock-time" id="rt-time">00:00:00</div>
     <div class="clock-date" id="rt-date">--</div>
@@ -65,78 +65,82 @@
     </div>
   </div>
 
-  <div class="row-kpi row-kpi-4" style="margin-top:20px;">
-    <!-- Pie: Tổng tồn kho -->
-    <div class="kpi-pie-card">
-      <div class="kpi-pie-head">
-        <i class="fas fa-cubes"></i>
-        <span>Tổng tồn kho</span>
+  <div class="row-kpi row-kpi-stats" style="margin-top:0px;">
+    <!-- Average Completion Time Chart (Moved here and made wider) -->
+    <div class="card card-stats-wide">
+      <div class="card-head">
+        <div class="card-title"><i class="fas fa-chart-bar"></i>Thống kê và thời gian trung bình hoàn thành lệnh</div>
       </div>
-      <div class="kpi-pie-body">
-        <div class="kpi-pie-wrap">
-          <canvas id="c-inv" width="110" height="110"></canvas>
-          <div class="kpi-pie-center">
-            <span class="kpi-pie-n" id="inv-total">0</span>
-          </div>
+      <div class="chart-body" style="padding: 20px 20px 10px 40px; height: 180px; position:relative;">
+        <!-- Y Axis -->
+        <div class="y-axis" style="position:absolute; left:10px; top:20px; bottom:30px; display:flex; flex-direction:column; justify-content:space-between; font-size:11px; color:var(--text-3); align-items:flex-end;">
+          <span>10</span><span>5</span><span>0</span>
         </div>
-        <div class="kpi-pie-legend dev-legend" id="inv-legend">
-          <!-- Rendered by JS -->
+        <!-- Grid lines -->
+        <div class="grid-lines" style="position:absolute; left:40px; right:20px; top:20px; bottom:30px; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none;">
+          <div style="border-top:1px dashed var(--border); width:100%; height:0;"></div>
+          <div style="border-top:1px dashed var(--border); width:100%; height:0;"></div>
+          <div style="border-top:1px solid var(--border); width:100%; height:0;"></div>
+        </div>
+        <!-- Bars Container -->
+        <div class="bars-wrap" id="completion-bars" style="position:absolute; left:40px; right:20px; top:20px; bottom:30px; display:flex; align-items:flex-end; justify-content:space-around; z-index:1;">
+          <!-- JS will render bars here -->
         </div>
       </div>
     </div>
+
     <!-- Pie: Số lô hàng -->
-    <div class="kpi-pie-card">
+    <div class="kpi-pie-card kpi-narrow">
       <div class="kpi-pie-head">
         <i class="fas fa-boxes-stacked"></i>
         <span>Số lô hàng</span>
       </div>
       <div class="kpi-pie-body">
-        <div class="kpi-pie-wrap">
-          <canvas id="c-batch" width="110" height="110"></canvas>
+        <div class="kpi-pie-wrap small-pie">
+          <canvas id="c-batch" width="80" height="80"></canvas>
           <div class="kpi-pie-center">
-            <span class="kpi-pie-n" id="batch-total">0</span>
+            <span class="kpi-pie-n" id="batch-total" style="font-size:14px;">0</span>
           </div>
         </div>
-        <div class="kpi-pie-legend" id="batch-legend">
+        <div class="kpi-pie-legend" id="batch-legend" style="gap:2px;">
           <!-- Rendered by JS -->
         </div>
       </div>
     </div>
     <!-- Pie: Tổng lệnh -->
-    <div class="kpi-pie-card">
+    <div class="kpi-pie-card kpi-narrow">
       <div class="kpi-pie-head">
         <i class="fas fa-list-check"></i>
         <span>Tổng lệnh</span>
       </div>
       <div class="kpi-pie-body">
-        <div class="kpi-pie-wrap">
-          <canvas id="c-cmd" width="110" height="110"></canvas>
+        <div class="kpi-pie-wrap small-pie">
+          <canvas id="c-cmd" width="80" height="80"></canvas>
           <div class="kpi-pie-center">
-            <span class="kpi-pie-n" id="cmd-total">0</span>
+            <span class="kpi-pie-n" id="cmd-total" style="font-size:14px;">0</span>
           </div>
         </div>
-        <div class="kpi-pie-legend">
-          <div class="kpi-leg-row"><span class="kpi-leg-dot" style="background:#94a3b8"></span><span class="kpi-leg-label">Đang chờ</span><span class="kpi-leg-val" id="cmd-wait">0</span></div>
-          <div class="kpi-leg-row"><span class="kpi-leg-dot" style="background:#60a5fa"></span><span class="kpi-leg-label">Đang thực hiện</span><span class="kpi-leg-val" id="cmd-prog">0</span></div>
-          <div class="kpi-leg-row"><span class="kpi-leg-dot" style="background:#34d399"></span><span class="kpi-leg-label">Hoàn thành</span><span class="kpi-leg-val" id="cmd-done">0</span></div>
-          <div class="kpi-leg-row"><span class="kpi-leg-dot" style="background:#f87171"></span><span class="kpi-leg-label">Lỗi</span><span class="kpi-leg-val" id="cmd-err">0</span></div>
+        <div class="kpi-pie-legend" style="gap:2px;">
+          <div class="kpi-leg-row" style="padding:2px 4px;"><span class="kpi-leg-dot" style="background:#34d399"></span><span class="kpi-leg-label" style="font-size:11px;">Xong</span><span class="kpi-leg-val" id="cmd-done" style="font-size:11px;">0</span></div>
+          <div class="kpi-leg-row" style="padding:2px 4px;"><span class="kpi-leg-dot" style="background:#60a5fa"></span><span class="kpi-leg-label" style="font-size:11px;">Đang</span><span class="kpi-leg-val" id="cmd-prog" style="font-size:11px;">0</span></div>
+          <div class="kpi-leg-row" style="padding:2px 4px;"><span class="kpi-leg-dot" style="background:#f87171"></span><span class="kpi-leg-label" style="font-size:11px;">Lỗi</span><span class="kpi-leg-val" id="cmd-err" style="font-size:11px;">0</span></div>
         </div>
       </div>
     </div>
     <!-- Pie: Số thiết bị -->
-    <div class="kpi-pie-card">
+    <div class="kpi-pie-card kpi-narrow">
       <div class="kpi-pie-head">
         <i class="fas fa-microchip"></i>
         <span>Số thiết bị</span>
       </div>
       <div class="kpi-pie-body">
-        <div class="kpi-pie-wrap">
-          <canvas id="c-dev" width="110" height="110"></canvas>
+        <div class="kpi-pie-wrap small-pie">
+          <canvas id="c-dev" width="80" height="80"></canvas>
           <div class="kpi-pie-center">
-            <span class="kpi-pie-n" id="dev-total">0</span>
+            <span class="kpi-pie-n" id="dev-total" style="font-size:14px;">0</span>
           </div>
         </div>
-        <div class="kpi-pie-legend dev-legend" id="dev-legend">
+        <div class="kpi-pie-legend dev-legend" id="dev-legend" style="gap:2px;">
           <!-- Rendered by JS -->
         </div>
       </div>
@@ -198,29 +202,14 @@
   <!-- ROW 1: MISSION ANALYSIS & MAINTENANCE -->
   <div class="row-analysis" style="display:grid; grid-template-columns: 1fr 340px 340px; gap:16px; margin-bottom:16px;">
     
-    <!-- Average Completion Time Chart -->
-    <div class="card">
+    <!-- Inventory Progress Bars -->
+    <div class="card" style="display:flex; flex-direction:column;">
       <div class="card-head">
-        <div class="card-title"><i class="fas fa-chart-bar"></i>Thống kê và thời gian trung bình hoàn thành lệnh</div>
+        <div class="card-title"><i class="fas fa-cubes"></i>Tổng tồn kho</div>
+        <div class="card-tag">Tổng: <span id="inv-total">0</span></div>
       </div>
-      <div class="chart-body" style="padding: 20px 20px 10px 40px; height: 350px; position:relative;">
-        <!-- Y Axis -->
-        <div class="y-axis" style="position:absolute; left:10px; top:20px; bottom:30px; display:flex; flex-direction:column; justify-content:space-between; font-size:11px; color:var(--text-3); align-items:flex-end;">
-          <span>10</span><span>8</span><span>6</span><span>4</span><span>2</span><span>0</span>
-        </div>
-        <!-- Grid lines -->
-        <div class="grid-lines" style="position:absolute; left:40px; right:20px; top:20px; bottom:30px; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none;">
-          <div style="border-top:1px dashed var(--border); width:100%; height:0;"></div>
-          <div style="border-top:1px dashed var(--border); width:100%; height:0;"></div>
-          <div style="border-top:1px dashed var(--border); width:100%; height:0;"></div>
-          <div style="border-top:1px dashed var(--border); width:100%; height:0;"></div>
-          <div style="border-top:1px dashed var(--border); width:100%; height:0;"></div>
-          <div style="border-top:1px solid var(--border); width:100%; height:0;"></div>
-        </div>
-        <!-- Bars Container -->
-        <div class="bars-wrap" id="completion-bars" style="position:absolute; left:40px; right:20px; top:20px; bottom:30px; display:flex; align-items:flex-end; justify-content:space-around; z-index:1;">
-          <!-- JS will render bars here -->
-        </div>
+      <div class="inv-progress-wrap" id="inv-progress-wrap">
+        <!-- Rendered by JS -->
       </div>
     </div>
 

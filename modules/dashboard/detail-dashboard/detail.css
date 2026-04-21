@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -28,7 +28,7 @@
 }
 
 html { font-size: 14px; }
-body { background: var(--bg); color: var(--text-1); min-height: 100vh; font-family: 'Roboto', sans-serif; }
+body { background: var(--bg); color: var(--text-1); min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; }
 
 /* ── TOPBAR (same as general) ── */
 .topbar {
@@ -52,7 +52,7 @@ body { background: var(--bg); color: var(--text-1); min-height: 100vh; font-fami
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── LAYOUT ── */
-.dash { padding: 24px 0px; display: flex; flex-direction: column; gap: 20px; }
+.dash { padding: 0px 0px; display: flex; flex-direction: column; gap: 10px; }
 
 /* ── CARD BASE ── */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--sh); transition: box-shadow .2s; }
@@ -76,6 +76,10 @@ body { background: var(--bg); color: var(--text-1); min-height: 100vh; font-fami
 .row-kpi { display: grid; gap: 10px; }
 .row-kpi-3 { grid-template-columns: repeat(3, 1fr); }
 .row-kpi-4 { grid-template-columns: repeat(4, 1fr); }
+.row-kpi-stats { grid-template-columns: 1.5fr 1fr 1fr 1fr; }
+@media (max-width: 1400px) {
+  .row-kpi-stats { grid-template-columns: 1.3fr 1fr 1fr 1fr; }
+}
 .kpi-card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r); box-shadow: var(--sh);
@@ -109,6 +113,7 @@ body { background: var(--bg); color: var(--text-1); min-height: 100vh; font-fami
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r); box-shadow: var(--sh);
   transition: box-shadow .2s; overflow: hidden;
+  display: flex; flex-direction: column;
 }
 .kpi-pie-card:hover { box-shadow: var(--shh); }
 .kpi-pie-head {
@@ -120,12 +125,16 @@ body { background: var(--bg); color: var(--text-1); min-height: 100vh; font-fami
 .kpi-pie-head i { color: var(--accent); font-size: 15px; }
 .kpi-pie-body {
   display: flex; align-items: center; gap: 16px;
-  padding: 14px 16px;
+  padding: 16px;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
 }
 .kpi-pie-wrap {
   position: relative; flex-shrink: 0; width: 110px; height: 110px;
 }
-.kpi-pie-wrap canvas { width: 110px !important; height: 110px !important; }
+.kpi-pie-wrap.small-pie { width: 80px; height: 80px; }
+.kpi-pie-wrap canvas { width: 100% !important; height: 100% !important; }
 .kpi-pie-center {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
@@ -136,11 +145,21 @@ body { background: var(--bg); color: var(--text-1); min-height: 100vh; font-fami
   font-family: monospace; line-height: 1;
 }
 .kpi-pie-legend { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+/* ── CUSTOM SCROLLBAR FOR BARS ── */
+.bars-wrap::-webkit-scrollbar { height: 5px; }
+.bars-wrap::-webkit-scrollbar-track { background: var(--bg); border-radius: 10px; }
+.bars-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+.bars-wrap::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
 .kpi-leg-row { display: flex; align-items: center; gap: 7px; padding: 4px 6px; border-radius: 5px; transition: background .15s; }
 .kpi-leg-row:hover { background: var(--bg); }
 .kpi-leg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .kpi-leg-label { flex: 1; font-size: 14px; color: var(--text-2); }
 .kpi-leg-val { font-size: 14px; font-weight: 700; color: var(--text-1); }
+
+/* Narrow KPI adjustments */
+.kpi-narrow .kpi-pie-body { gap: 14px; padding: 12px 16px; }
+.kpi-narrow .kpi-pie-head { padding: 10px 16px; font-size: 15px; }
+.kpi-narrow .kpi-pie-n { font-size: 16px; }
 
 /* Device legend with sub-details */
 .dev-legend { gap: 2px; }
@@ -419,3 +438,50 @@ body { background: var(--bg); color: var(--text-1); min-height: 100vh; font-fami
 .ct-bk-tip {
   display: flex; gap: 10px; margin-top: 3px; font-size: 10px; font-family: monospace;
 }
+/* ── INVENTORY PROGRESS BAR ── */
+.inv-progress-wrap {
+  padding: 12px 18px;
+  overflow-y: auto;
+  max-height: 360px;
+}
+.inv-progress-wrap::-webkit-scrollbar { width: 4px; }
+.inv-progress-wrap::-webkit-scrollbar-track { background: var(--bg); }
+.inv-progress-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+.inv-group-section { margin-bottom: 18px; }
+.inv-group-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px; padding-bottom: 6px;
+  border-bottom: 2px solid var(--border);
+}
+.inv-group-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.inv-group-name { font-size: 12px; font-weight: 700; color: var(--text-1); flex: 1; }
+.inv-group-total { font-size: 12px; font-weight: 700; font-family: monospace; color: var(--text-2); }
+.inv-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.inv-row:last-child { border-bottom: none; }
+.inv-row-name { font-size: 11px; color: var(--text-2); min-width: 140px; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inv-bar-outer { flex: 1; height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.inv-bar-inner { height: 100%; border-radius: 99px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+.inv-row-val { font-size: 11px; font-weight: 700; font-family: monospace; color: var(--text-1); min-width: 46px; text-align: right; }
+.inv-pct { font-size: 10px; color: var(--text-3); min-width: 36px; text-align: right; }
+
+/* ── KPI CARD ENHANCEMENTS ── */
+.kpi-pie-head {
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  font-size: 13px; font-weight: 700;
+  letter-spacing: .3px; color: var(--text-2);
+  display: flex; align-items: center; gap: 7px;
+}
+.card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px 11px; border-bottom: 1px solid var(--border);
+}
+.card-title {
+  font-size: 13px; font-weight: 700;
+  letter-spacing: .3px; color: var(--text-2); display: flex; align-items: center; gap: 7px;
+}
+.kpi-leg-label { flex: 1; font-size: 12.5px; color: var(--text-2); }
+.kpi-leg-val { font-size: 13px; font-weight: 700; color: var(--text-1); }

@@ -579,18 +579,18 @@
         <div class="modal-body" style="padding: 24px">
           <!-- Step: Quét chi tiết & Thông tin lệnh -->
           <div id="create-step-content" class="pda-step">
-            <!-- Mã Pallet -->
+            <!-- Mã vật chứa -->
 
 
-            <!-- Mã Pallet -->
+            <!-- Mã vật chứa -->
             <div class="pda-form-group">
-              <label class="pda-label">Mã Pallet<span style="color: red">*</span></label>
+              <label class="pda-label">Mã vật chứa<span style="color: red">*</span></label>
               <div class="pda-input-box">
                 <input
                   type="text"
                   id="inputPallet"
                   class="pda-input with-scanner"
-                  placeholder="Quét hoặc nhập mã pallet"
+                  placeholder="Quét hoặc nhập mã vật chứa"
                   autocomplete="off"
                   oninput="handlePalletScan(this.value)"
                 />
@@ -602,8 +602,8 @@
                   <i class="fa-solid fa-qrcode"></i>
                 </button>
               </div>
-              <div id="pallet-helper-text" style="font-size: 12px; color: #64748b; margin-top: 6px; margin-left: 2px;">
-                <i class="fas fa-info-circle" style="margin-right: 4px; color: #3b82f6;"></i>Nhập mã Pallet P-001/P-002 để xem chức năng nhập lại Pallet
+              <div id="pallet-helper-text" style="font-size: 12px; display:none;color: #64748b; margin-top: 6px; margin-left: 2px;">
+                <i class="fas fa-info-circle" style="margin-right: 4px;  color: #3b82f6;"></i>Nhập Mã vật chứa P-001/P-002 để xem chức năng nhập lại Pallet
               </div>
               <div id="pallet-capacity-info" style="display:none; margin-top: 8px; padding: 8px 12px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; font-size: 12px; color: #0369a1;">
                 <i class="fas fa-box" style="margin-right: 6px;"></i>
@@ -614,7 +614,7 @@
             <!-- Sản phẩm và Số lượng -->
             <div class="pda-form-group">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <label style="font-size: 13px; font-weight: 700; color: #1e293b;">Sản phẩm & Chi tiết nội dung<span style="color: red">*</span></label>
+                  <label style="font-size: 13px; font-weight: 700; color: #1e293b;">Sản phẩm<span style="color: red">*</span></label>
                   <button type="button" class="btn-add" onclick="addProductToList()" style="height: 32px; padding: 0 16px; font-size: 13px;">
                     <i class="fas fa-plus"></i> Thêm sản phẩm
                   </button>
@@ -1082,7 +1082,7 @@
             </p>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
               <ul style="font-size: 13px; color: #64748b; padding-left: 20px; list-style-type: disc; margin: 0;">
-                <li><b>Trường bắt buộc:</b> Mã pallet, Sản phẩm, Số lượng, <b>Ưu tiên</b>.</li>
+                <li><b>Trường bắt buộc:</b> Mã vật chứa, Sản phẩm, Số lượng, <b>Ưu tiên</b>.</li>
                 <li><b>Ưu tiên:</b> Nhập <b>1</b> (Ưu tiên) hoặc <b>0</b> (Không ưu tiên).</li>
                 <li><b>Định dạng ngày:</b> dd/mm/yyyy.</li>
               </ul>
