@@ -1081,7 +1081,12 @@
                 <td style="text-align: left; padding: 10px 0;">
                     <div class="product-item" style="position: relative; padding-left: 16px;">
                         <div style="font-weight: 500; color: #0284c7; font-size: 13px;">${item.materialCode}</div>
-                        <div style="font-weight: 600; color: #334155; font-size: 14px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;">${item.materialName}</div>
+                        <div 
+                          title="${item.materialName}" 
+                          style="font-weight: 600; color: #334155; font-size: 14px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;"
+                        >
+                          ${item.materialName}
+                        </div>                    
                     </div>
                 </td>
                  <td style="text-align: center; font-weight: 600; color: #076EB8;">
@@ -1090,8 +1095,12 @@
                 <td style="text-align: left; padding: 10px 0;">
                     <div class="product-item" style="border-bottom: none;">
                         <div style="font-weight: 600; color: #076EB8; font-size: 13px;">${item.batch ? item.batch.code : '-'}</div>
-                        <div style="font-size: 11px; color: #64748b; margin-top: 2px; line-height: 1.3;">${item.batch ? item.batch.name : '-'}</div>
-                    </div>
+<div 
+  title="${item.batch ? item.batch.name : '-'}" 
+  style="font-size: 13px; font-weight:400;color: #334155; margin-top: 2px; line-height: 1.3;"
+>
+  ${item.batch ? item.batch.name : '-'}
+</div>                    </div>
                 </td>
 
                 <td style="text-align: center; display: none;">
