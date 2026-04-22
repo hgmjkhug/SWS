@@ -89,10 +89,6 @@
       <h3 class="modal-title">
         Phân quyền vai trò: <span id="assign-header-role" style="color: #076EB8"></span>
       </h3>
-      <div style="margin-left: auto; margin-right: 40px; display: flex; gap: 10px;">
-        <button class="btn btn-secondary" onclick="selectAllPermissions()" style="padding: 6px 12px; font-size: 13px;">Chọn tất cả</button>
-        <button class="btn btn-secondary" onclick="deselectAllPermissions()" style="padding: 6px 12px; font-size: 13px;">Bỏ chọn tất cả</button>
-      </div>
       <button class="modal-close-square" onclick="closeAssignPermissionModal()">
         <i class="fas fa-times"></i>
       </button>
@@ -118,9 +114,15 @@
         </table>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeAssignPermissionModal()">Đóng</button>
-      <button class="btn btn-primary" onclick="saveAssignPermissions()">Lưu</button>
+    <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-secondary" onclick="selectAllPermissions()">Chọn tất cả</button>
+        <button class="btn btn-secondary" onclick="deselectAllPermissions()">Bỏ chọn tất cả</button>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-secondary" onclick="closeAssignPermissionModal()">Đóng</button>
+        <button class="btn btn-primary" onclick="saveAssignPermissions()">Lưu</button>
+      </div>
     </div>
   </div>
 </div>

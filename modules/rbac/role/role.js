@@ -260,47 +260,39 @@
     const resourceGroups = [
         {
             group: 'Theo dõi & Giám sát',
-            resources: ['Dashboard chi tiết', 'Giám sát hoạt động', 'Giao diện kho mới']
+            resources: ['Dashboard chi tiết', 'Giám sát hoạt động']
         },
         {
             group: 'Quản lý đơn hàng',
-            resources: ['Đơn hàng nhập', 'Đơn hàng xuất']
+            resources: ['Đơn hàng ERP']
         },
         {
-            group: 'Quản lý Kho',
-            resources: ['Danh sách Kho', 'Quản lý lô hàng', 'Quản lý tồn kho', 'Quy cách sản phẩm', 'Quản lý vật chứa', 'Quản lý bảo trì', 'Biên bản bàn giao']
+            group: 'Quản lý lệnh',
+            resources: ['Quản lý lô hàng', 'Lệnh nhập kho', 'Lệnh xuất kho', 'Kanban lệnh']
         },
         {
-            group: 'Quản lý điều phối WCS',
-            resources: ['Kanban WCS']
+            group: 'Quản lý kho',
+            resources: ['Quản lý kho', 'Loại khu vực']
         },
         {
-            group: 'Nhập kho',
-            resources: ['Lệnh nhập kho']
-        },
-        {
-            group: 'Xuất kho',
-            resources: ['Lệnh xuất kho']
+            group: 'Quản lý thiết bị',
+            resources: ['Quản lý thiết bị', 'Quản lý bảo trì']
         },
         {
             group: 'Quản lý quy trình',
-            resources: ['Quản lý quy trình']
-        },
-        {
-            group: 'Danh mục chung',
-            resources: ['Nhóm thiết bị', 'Thiết bị', 'Dòng sản phẩm', 'Nhóm sản phẩm', 'Sản phẩm', 'Quy cách', 'Loại xe', 'Nhóm vật chứa', 'Vật chứa', 'ĐƠn vị tính', 'Thị trường', 'Khách hàng', 'Loại khu vực']
+            resources: ['Danh sách Quy trình']
         },
         {
             group: 'Báo cáo thống kê',
-            resources: ['Báo cáo Nhập/Xuất']
+            resources: ['Theo dõi tồn kho', 'Báo cáo Nhập/Xuất']
+        },
+        {
+            group: 'Danh mục chung',
+            resources: ['Nhóm thiết bị', 'Dòng sản phẩm', 'Nhóm sản phẩm', 'Sản phẩm', 'Quy cách', 'Nhóm vật chứa', 'Vật chứa', 'Đơn vị tính', 'Thị trường']
         },
         {
             group: 'Hệ thống',
             resources: ['Tài khoản', 'Vai trò', 'Chức năng', 'Tài nguyên']
-        },
-        {
-            group: 'Tài liệu',
-            resources: ['Tài liệu hướng dẫn', 'Quy trình vận hành']
         }
     ];
 
@@ -418,36 +410,51 @@
             ]
         },
         {
+            id: 2,
+            name: 'Quản lý đơn hàng',
+            children: [
+                { id: 201, name: 'Đơn hàng ERP' }
+            ]
+        },
+        {
             id: 3,
+            name: 'Quản lý lệnh',
+            children: [
+                { id: 301, name: 'Quản lý lô hàng' },
+                { id: 302, name: 'Lệnh nhập kho' },
+                { id: 303, name: 'Lệnh xuất kho' },
+                { id: 304, name: 'Kanban lệnh' }
+            ]
+        },
+        {
+            id: 4,
             name: 'Quản lý kho',
             children: [
-                { id: 301, name: 'Quản lý kho' },
-                { id: 302, name: 'Loại khu vực' }
+                { id: 401, name: 'Quản lý kho' },
+                { id: 402, name: 'Loại khu vực' }
             ]
         },
         {
             id: 5,
-            name: 'Quản lý lệnh',
+            name: 'Quản lý thiết bị',
             children: [
-                { id: 501, name: 'Quản lý lô hàng' },
-                { id: 502, name: 'Lệnh nhập kho' },
-                { id: 503, name: 'Lệnh xuất kho' },
-                { id: 504, name: 'Kanban lệnh' }
+                { id: 501, name: 'Quản lý thiết bị' },
+                { id: 502, name: 'Quản lý bảo trì' }
             ]
         },
         {
             id: 6,
-            name: 'Quản lý thiết bị',
+            name: 'Quản lý quy trình',
             children: [
-                { id: 601, name: 'Quản lý thiết bị' },
-                { id: 602, name: 'Quản lý bảo trì' }
+                { id: 601, name: 'Danh sách Quy trình' }
             ]
         },
         {
             id: 7,
-            name: 'Quản lý quy trình',
+            name: 'Báo cáo thống kê',
             children: [
-                { id: 701, name: 'Quản lý quy trình' }
+                { id: 701, name: 'Theo dõi tồn kho' },
+                { id: 702, name: 'Báo cáo Nhập/Xuất' }
             ]
         },
         {
@@ -458,36 +465,21 @@
                 { id: 802, name: 'Dòng sản phẩm' },
                 { id: 803, name: 'Nhóm sản phẩm' },
                 { id: 804, name: 'Sản phẩm' },
-                { id: 806, name: 'Quy cách' },
-                { id: 807, name: 'Nhóm vật chứa' },
-                { id: 808, name: 'Vật chứa' },
-                { id: 809, name: 'Đơn vị tính' },
-                { id: 810, name: 'Thị trường' }
+                { id: 805, name: 'Quy cách' },
+                { id: 806, name: 'Nhóm vật chứa' },
+                { id: 807, name: 'Vật chứa' },
+                { id: 808, name: 'Đơn vị tính' },
+                { id: 809, name: 'Thị trường' }
             ]
         },
         {
             id: 9,
-            name: 'Báo cáo thống kê',
-            children: [
-                { id: 901, name: 'Theo dõi tồn kho' },
-                { id: 902, name: 'Báo cáo Nhập/Xuất' }
-            ]
-        },
-        {
-            id: 10,
             name: 'Hệ thống',
             children: [
-                { id: 1001, name: 'Tài khoản' },
-                { id: 1002, name: 'Vai trò' },
-                { id: 1003, name: 'Chức năng' },
-                { id: 1004, name: 'Tài nguyên' }
-            ]
-        },
-        {
-            id: 11,
-            name: 'Tài liệu',
-            children: [
-                { id: 1101, name: 'Quản lý tài liệu' }
+                { id: 901, name: 'Tài khoản' },
+                { id: 902, name: 'Vai trò' },
+                { id: 903, name: 'Chức năng' },
+                { id: 904, name: 'Tài nguyên' }
             ]
         }
     ];
