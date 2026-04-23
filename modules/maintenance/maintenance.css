@@ -178,6 +178,8 @@
 }
 
 .type-filter-wrapper .custom-options-panel,
+.status-filter-wrapper .custom-options-panel,
+.timeliness-filter-wrapper .custom-options-panel,
 .month-filter-wrapper .custom-options-panel,
 .year-filter-wrapper .custom-options-panel {
     min-width: 190px;
@@ -377,12 +379,13 @@
 }
 
 .detail-container {
-    padding: 0 0 20px 45px;
+    padding: 20px 20px 20px 45px;
     background: #fcfcfc;
 }
 
 .detail-table {
     width: 100%;
+    padding: 8px;
     border-collapse: collapse;
     background: #fff;
     border: 1px solid #e2e8f0;

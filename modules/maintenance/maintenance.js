@@ -106,6 +106,20 @@
                 toggleTypeFilterDropdown();
             }
 
+            // Status filter dropdown
+            const statusWrapper = document.querySelector('.status-filter-wrapper');
+            const statusPanel = document.getElementById('status-filter-options');
+            if (statusPanel && statusPanel.classList.contains('show') && (!statusWrapper || !statusWrapper.contains(e.target))) {
+                toggleStatusFilterDropdown();
+            }
+
+            // Timeliness filter dropdown
+            const timelinessWrapper = document.querySelector('.timeliness-filter-wrapper');
+            const timelinessPanel = document.getElementById('timeliness-filter-options');
+            if (timelinessPanel && timelinessPanel.classList.contains('show') && (!timelinessWrapper || !timelinessWrapper.contains(e.target))) {
+                toggleTimelinessFilterDropdown();
+            }
+
             // Year filter dropdown
             const yearWrapper = document.querySelector('.year-filter-wrapper');
             const yearPanel = document.getElementById('year-filter-options');
@@ -176,6 +190,52 @@
         filterMaintenanceList();
     };
 
+    window.toggleStatusFilterDropdown = function() {
+        const panel = document.getElementById('status-filter-options');
+        const trigger = document.getElementById('status-filter-trigger');
+        if(!panel) return;
+        panel.classList.toggle('show');
+        if (panel.classList.contains('show')) {
+            trigger.classList.add('active');
+        } else {
+            trigger.classList.remove('active');
+        }
+    };
+
+    window.selectStatusFilter = function(value, text, element) {
+        document.getElementById('status-filter-value').value = value;
+        document.getElementById('selected-status-text').textContent = text;
+        
+        document.querySelectorAll('#status-filter-options .custom-option').forEach(opt => opt.classList.remove('selected'));
+        if(element) element.classList.add('selected');
+
+        toggleStatusFilterDropdown();
+        filterMaintenanceList();
+    };
+
+    window.toggleTimelinessFilterDropdown = function() {
+        const panel = document.getElementById('timeliness-filter-options');
+        const trigger = document.getElementById('timeliness-filter-trigger');
+        if(!panel) return;
+        panel.classList.toggle('show');
+        if (panel.classList.contains('show')) {
+            trigger.classList.add('active');
+        } else {
+            trigger.classList.remove('active');
+        }
+    };
+
+    window.selectTimelinessFilter = function(value, text, element) {
+        document.getElementById('timeliness-filter-value').value = value;
+        document.getElementById('selected-timeliness-text').textContent = text;
+        
+        document.querySelectorAll('#timeliness-filter-options .custom-option').forEach(opt => opt.classList.remove('selected'));
+        if(element) element.classList.add('selected');
+
+        toggleTimelinessFilterDropdown();
+        filterMaintenanceList();
+    };
+
     window.toggleMonthDropdown = function() {
         const panel = document.getElementById('month-filter-options');
         const trigger = document.getElementById('month-filter-trigger');
@@ -230,11 +290,20 @@
 
         const term = (document.getElementById('device-search')?.value || '').toLowerCase();
         const typeFilter = document.getElementById('device-type-filter')?.value || 'all';
+        const statusFilter = document.getElementById('status-filter-value')?.value || 'all';
+        const timelinessFilter = document.getElementById('timeliness-filter-value')?.value || 'all';
 
         filteredDevices = devices.filter(d => {
             const matchesSearch = d.code.toLowerCase().includes(term) || d.name.toLowerCase().includes(term);
             const matchesType = typeFilter === 'all' || d.group === typeFilter;
-            return matchesSearch && matchesType;
+            
+            // For status and timeliness, we check the latest history record (index 0)
+            const mostRecentRecord = d.history && d.history.length > 0 ? d.history[0] : null;
+            
+            const matchesStatus = statusFilter === 'all' || (mostRecentRecord && mostRecentRecord.status === statusFilter);
+            const matchesTimeliness = timelinessFilter === 'all' || (mostRecentRecord && mostRecentRecord.timeliness === timelinessFilter);
+            
+            return matchesSearch && matchesType && matchesStatus && matchesTimeliness;
         });
 
         const total = filteredDevices.length;
@@ -514,10 +583,10 @@
             
             // Save additional fields
             device.history = device.history || [];
-            device.history.push({
+            device.history.unshift({
                 startTime: new Date(dateStr),
                 endTime: new Date(),
-                status: resultInput?.value === 'ok' ? 'Hoàn thành' : 'Đang bảo trì',
+                status: resultInput?.value === 'ok' ? 'Hoàn thành' : (resultInput?.value === 'partial' ? 'Đang bảo trì' : 'Thất bại'),
                 timeliness: 'Đúng hạn',
                 technician: technicianInput?.value || '',
                 note: noteInput?.value || '',

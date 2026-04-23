@@ -22,7 +22,8 @@
           <i class="fas fa-search"></i>
           <input type="text" id="device-search" placeholder="Tìm mã, tên thiết bị..." oninput="filterMaintenanceList()">
         </div>
-        <div class="filter-group-inline">
+        <div class="filter-group-inline" style="gap: 8px;">
+          <!-- Loại thiết bị -->
           <div class="custom-select-wrapper type-filter-wrapper">
             <div class="table-filter-custom" id="type-filter-trigger" onclick="toggleTypeFilterDropdown()">
               <div class="selected-value-wrap">
@@ -42,6 +43,50 @@
               </div>
             </div>
             <input type="hidden" id="device-type-filter" value="all">
+          </div>
+
+          <!-- Trạng thái -->
+          <div class="custom-select-wrapper status-filter-wrapper">
+            <div class="table-filter-custom" id="status-filter-trigger" onclick="toggleStatusFilterDropdown()" style="min-width: 160px;">
+              <div class="selected-value-wrap">
+                <span id="selected-status-text">Tất cả trạng thái</span>
+              </div>
+              <i class="fas fa-chevron-down toggle-icon"></i>
+            </div>
+            <div class="custom-options-panel" id="status-filter-options" style="min-width: 160px;">
+              <div class="custom-option selected" onclick="selectStatusFilter('all', 'Tất cả trạng thái', this)">
+                Tất cả trạng thái
+              </div>
+              <div class="custom-option" onclick="selectStatusFilter('Hoàn thành', 'Hoàn thành', this)">
+                Hoàn thành
+              </div>
+              <div class="custom-option" onclick="selectStatusFilter('Đang bảo trì', 'Đang bảo trì', this)">
+                Đang bảo trì
+              </div>
+            </div>
+            <input type="hidden" id="status-filter-value" value="all">
+          </div>
+
+          <!-- Bảo trì (Timeliness) -->
+          <div class="custom-select-wrapper timeliness-filter-wrapper">
+            <div class="table-filter-custom" id="timeliness-filter-trigger" onclick="toggleTimelinessFilterDropdown()" style="min-width: 140px;">
+              <div class="selected-value-wrap">
+                <span id="selected-timeliness-text">Tất cả bảo trì</span>
+              </div>
+              <i class="fas fa-chevron-down toggle-icon"></i>
+            </div>
+            <div class="custom-options-panel" id="timeliness-filter-options" style="min-width: 140px;">
+              <div class="custom-option selected" onclick="selectTimelinessFilter('all', 'Tất cả bảo trì', this)">
+                Tất cả bảo trì
+              </div>
+              <div class="custom-option" onclick="selectTimelinessFilter('Đúng hạn', 'Đúng hạn', this)">
+                Đúng hạn
+              </div>
+              <div class="custom-option" onclick="selectTimelinessFilter('Trễ hạn', 'Trễ hạn', this)">
+                Trễ hạn
+              </div>
+            </div>
+            <input type="hidden" id="timeliness-filter-value" value="all">
           </div>
         </div>
       </div>
