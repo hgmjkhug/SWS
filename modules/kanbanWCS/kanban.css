@@ -382,7 +382,7 @@ body {
 
 .kanban-card {
     background: #fff;
-    border-radius: 8px;
+    border-radius: 16px;
     padding: 16px;
     max-height: auto;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -402,22 +402,14 @@ body {
 }
 
 /* Status Strip on Card Left */
-.kanban-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 4px;
-    border-radius: 8px 0 0 8px;
-}
+/* Removed ::before in favor of border-left */
 
 /* Card Status Colors Logic handled via JS classes usually, 
    but simplistic approach: match header colors */
-.kanban-card.status-pending::before { background-color: #64748b; }
-.kanban-card.status-in_progress::before { background-color: #076EB8; }
-.kanban-card.status-complete::before { background-color: #10b981; }
-.kanban-card.status-bug::before { background-color: #ef4444; }
+.kanban-card.status-pending { border-left: 3px solid #64748b; }
+.kanban-card.status-in_progress { border-left: 3px solid #076EB8; }
+.kanban-card.status-complete { border-left: 3px solid #10b981; }
+.kanban-card.status-bug { border-left: 3px solid #ef4444; }
 
 /* Card Header */
 .card-header {
@@ -507,7 +499,7 @@ body {
     border-radius: 6px;
     font-size: 12px;
     color: #334155;
-    margin-top: 4px;
+    margin-top: 0px;
     border: 1px solid #e2e8f0;
 }
 
@@ -519,7 +511,7 @@ body {
 
 /* Logs Section */
 .card-logs {
-    margin-top: 12px;
+    margin-top: 0px;
     padding: 10px;
     background: #f8fafc; /* Distinct background */
     border: 1px solid #e2e8f0;
