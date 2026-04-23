@@ -1907,22 +1907,21 @@
             html += '<div class="area-card-body">';
             
             // Searchable Combobox: Tháp
-            html += '<div class="area-field">';
-            html += '<span class="area-field-label">Tháp<span class="required-star">*</span></span>';
-            html += '<div class="area-field-value">';
-            html += '  <div class="init-dropdown" id="tfModuleDropdown-' + tf.id + '" style="width: 100%;">';
-            html += '    <div class="init-dropdown-toggle" onclick="toggleTfModuleDropdown(' + tf.id + ')">';
-            html += '      <span id="tfModuleDisplay-' + tf.id + '">' + escapeHtml(moduleDisplay) + '</span>';
-            html += '      <i class="fas fa-chevron-down" style="font-size: 12px; color: #8c8c8c"></i>';
+            var hasModuleSelection = activeModule ? ' has-selection' : '';
+
+            html += '<div class="area-field init-equipment-section" style="padding: 0; margin-bottom: 12px;">';
+            html += '<span class="area-field-label" style="padding-top: 10px;">Tháp<span style="color: red;">*</span></span>';
+            html += '<div class="init-equipment-container" style="flex: 1;">';
+            html += '  <div class="init-equipment-search-wrapper' + hasModuleSelection + '">';
+            html += '    <div class="init-equipment-search">';
+            html += '      <i class="fas fa-search search-icon"></i>';
+            html += '      <input type="text" id="tfModuleSearch-' + tf.id + '" value="' + escapeHtml(activeModule ? moduleDisplay : '') + '" placeholder="Chọn tháp..." onfocus="showTfModuleList(' + tf.id + ')" oninput="filterTfModuleList(' + tf.id + ')" ' + (activeModule ? 'readonly' : '') + '>';
+            if (activeModule) {
+                html += '      <i class="fas fa-times clear-icon" title="Xóa" onclick="removeTfModule(' + tf.id + ')"></i>';
+            }
+            html += '      <i class="fas fa-chevron-down toggle-icon" onclick="toggleTfModuleList(' + tf.id + ')"></i>';
             html += '    </div>';
-            html += '    <div class="init-dropdown-menu" id="tfModuleMenu-' + tf.id + '" style="max-height: 250px; overflow-y: auto;">';
-            html += '      <div class="dropdown-search-wrapper" style="padding: 8px; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; background: #fff;">';
-            html += '        <input type="text" placeholder="Tìm tháp..." oninput="filterTfModuleOptions(' + tf.id + ', this.value)" style="width: 100%; padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 13px;">';
-            html += '      </div>';
-            html += '      <div class="dropdown-options-list" id="tfModuleOptions-' + tf.id + '">';
-            // Optinos populated by renderTfModuleOptions
-            html += '      </div>';
-            html += '    </div>';
+            html += '    <div class="init-equipment-list" id="tfModuleList-' + tf.id + '" style="max-height: 200px; overflow-y: auto;"></div>';
             html += '  </div>';
             html += '</div></div>';
             
@@ -1999,71 +1998,67 @@
         
         // Render sub-elements
         towerFloorData.forEach(function(tf) {
-            renderTfModuleOptions(tf.id, '');
             if (!tf.collapsed) {
                 renderTowerFloorEqList(tf.id);
             }
         });
     }
 
-    function renderTfModuleOptions(tfId, term) {
-        var container = document.getElementById('tfModuleOptions-' + tfId);
-        if (!container) return;
-        
+    window.showTfModuleList = function(tfId) {
+        var list = document.getElementById('tfModuleList-' + tfId);
+        if (list) { list.classList.add('show'); filterTfModuleList(tfId); }
+    };
+    window.toggleTfModuleList = function(tfId) {
+        var list = document.getElementById('tfModuleList-' + tfId);
+        if (list) { list.classList.toggle('show'); if (list.classList.contains('show')) filterTfModuleList(tfId); }
+    };
+    window.filterTfModuleList = function(tfId) {
+        var list = document.getElementById('tfModuleList-' + tfId);
+        var input = document.getElementById('tfModuleSearch-' + tfId);
+        if (!list || !input) return;
+        var term = input.value.toLowerCase().trim();
         var tf = towerFloorData.find(function(t) { return t.id === tfId; });
-        var searchTerm = term.toLowerCase().trim();
-        
-        var filteredModules = moduleData.filter(function(m) {
-            return m.code.toLowerCase().indexOf(searchTerm) > -1 || m.name.toLowerCase().indexOf(searchTerm) > -1;
-        });
-        
-        if (filteredModules.length === 0) {
-            container.innerHTML = '<div class="init-dropdown-item" style="color: #94a3b8; font-style: italic;">Không tìm thấy tháp</div>';
-            return;
+        var activeModuleId = tf ? tf.moduleId : null;
+        var displayStr = '';
+        if (activeModuleId !== null) {
+            var mod = moduleData.find(function(m) { return m.id === activeModuleId; });
+            if (mod) displayStr = mod.code + ' - ' + mod.name;
         }
-        
-        var html = '';
-        filteredModules.forEach(function(m) {
-            var selected = (tf && tf.moduleId === m.id) ? ' active' : '';
-            html += '<div class="init-dropdown-item' + selected + '" onclick="selectTowerFloorModule(' + tfId + ', ' + m.id + ')">' + escapeHtml(m.code + ' - ' + m.name) + '</div>';
-        });
-        container.innerHTML = html;
-    }
 
-    window.toggleTfModuleDropdown = function(tfId) {
-        var menu = document.getElementById('tfModuleMenu-' + tfId);
-        if (menu) {
-            // Close other dropdowns
-            document.querySelectorAll('.init-dropdown-menu.show').forEach(function(m) {
-                if (m !== menu) m.classList.remove('show');
+        var results = moduleData;
+        if (term && term !== displayStr.toLowerCase()) {
+            results = moduleData.filter(function(m) {
+                return m.code.toLowerCase().indexOf(term) > -1 || m.name.toLowerCase().indexOf(term) > -1;
             });
-            menu.classList.toggle('show');
-            // If opening, focus search
-            if (menu.classList.contains('show')) {
-                var input = menu.querySelector('input');
-                if (input) {
-                    input.value = '';
-                    input.focus();
-                    renderTfModuleOptions(tfId, '');
-                }
-            }
+        }
+        
+        if (results.length === 0) {
+            list.innerHTML = '<div class="item">Không tìm thấy tháp</div>';
+        } else {
+            list.innerHTML = results.map(function(m) {
+                var isSelected = (activeModuleId === m.id);
+                return '<div class="item ' + (isSelected ? 'selected' : '') + '" onclick="selectTowerFloorModule(' + tfId + ', ' + m.id + ')">' + 
+                       escapeHtml(m.code + ' - ' + m.name) + 
+                       (isSelected ? ' <i class="fas fa-check" style="color:#076EB8; font-size:10px; margin-left:auto;"></i>' : '') + 
+                       '</div>';
+            }).join('');
         }
     };
-
-    window.filterTfModuleOptions = function(tfId, term) {
-        renderTfModuleOptions(tfId, term);
-    };
-
     window.selectTowerFloorModule = function(tfId, moduleId) {
         var tf = towerFloorData.find(function(t) { return t.id === tfId; });
         if (tf) {
             tf.moduleId = moduleId;
-            var mod = moduleData.find(function(m) { return m.id === moduleId; });
-            var display = document.getElementById('tfModuleDisplay-' + tfId);
-            if (display && mod) display.textContent = mod.code + ' - ' + mod.name;
+            renderTowerFloorCards();
+            saveWarehouseConfig();
         }
-        var menu = document.getElementById('tfModuleMenu-' + tfId);
-        if (menu) menu.classList.remove('show');
+    };
+    window.removeTfModule = function(tfId) {
+        var tf = towerFloorData.find(function(t) { return t.id === tfId; });
+        if (tf) {
+            tf.moduleId = null;
+            renderTowerFloorCards();
+            saveWarehouseConfig();
+        }
     };
 
     function renderTowerFloorEqList(tfId) {
@@ -2844,6 +2839,27 @@
             html += '  </div>';
             html += '</div></div>';
 
+            // Loại khu vực (Searchable Combobox)
+            var selAreaType = area.selectedAreaType || null;
+            var displayAreaType = selAreaType ? ('[' + selAreaType.code + '] ' + selAreaType.name) : '';
+            var hasAreaTypeSelection = selAreaType ? ' has-selection' : '';
+
+            html += '<div class="area-field init-equipment-section" style="padding: 0; margin-bottom: 12px;">';
+            html += '<span class="area-field-label" style="padding-top: 10px;">Loại khu vực<span style="color: red;">*</span></span>';
+            html += '<div class="init-equipment-container" style="flex: 1;">';
+            html += '  <div class="init-equipment-search-wrapper' + hasAreaTypeSelection + '">';
+            html += '    <div class="init-equipment-search">';
+            html += '      <i class="fas fa-search search-icon"></i>';
+            html += '      <input type="text" id="areaTypeSearch-' + area.id + '" value="' + displayAreaType + '" placeholder="Chọn loại khu vực..." onfocus="showAreaTypeList(' + area.id + ')" oninput="filterAreaTypeList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selAreaType ? 'readonly' : '') + '>';
+            if (selAreaType && !isReadonly) {
+                html += '      <i class="fas fa-times clear-icon" title="Xóa" onclick="removeAreaType(' + area.id + ')"></i>';
+            }
+            html += '      <i class="fas fa-chevron-down toggle-icon" onclick="' + (isReadonly ? '' : 'toggleAreaTypeList(' + area.id + ')') + '"></i>';
+            html += '    </div>';
+            html += '    <div class="init-equipment-list" id="areaTypeList-' + area.id + '" style="max-height: 200px; overflow-y: auto;"></div>';
+            html += '  </div>';
+            html += '</div></div>';
+
             // Tên khu vực
             html += '<div class="area-field">';
             html += '<span class="area-field-label">Tên khu vực<span style="color: red;">*</span></span>';
@@ -2852,6 +2868,27 @@
             html += '</div></div>';
             
             // Nhóm sản phẩm (Searchable Combobox)
+            var selCategory = area.selectedCategory || null;
+            var displayCategory = selCategory ? ('[' + selCategory.code + '] ' + selCategory.name) : '';
+            var hasCategorySelection = selCategory ? ' has-selection' : '';
+
+            html += '<div class="area-field init-equipment-section" style="padding: 0; margin-top: 12px; margin-bottom: 2px;">';
+            html += '<span class="area-field-label" style="padding-top: 10px;">Nhóm sản phẩm<span style="color: red;">*</span></span>';
+            html += '<div class="init-equipment-container" style="flex: 1;">';
+            html += '  <div class="init-equipment-search-wrapper' + hasCategorySelection + '">';
+            html += '    <div class="init-equipment-search">';
+            html += '      <i class="fas fa-search search-icon"></i>';
+            html += '      <input type="text" id="areaCategorySearch-' + area.id + '" value="' + displayCategory + '" placeholder="Chọn nhóm sản phẩm..." onfocus="showAreaCategoryList(' + area.id + ')" oninput="filterAreaCategoryList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selCategory ? 'readonly' : '') + '>';
+            if (selCategory && !isReadonly) {
+                html += '      <i class="fas fa-times clear-icon" title="Xóa" onclick="removeAreaCategory(' + area.id + ')"></i>';
+            }
+            html += '      <i class="fas fa-chevron-down toggle-icon" onclick="' + (isReadonly ? '' : 'toggleAreaCategoryList(' + area.id + ')') + '"></i>';
+            html += '    </div>';
+            html += '    <div class="init-equipment-list" id="areaCategoryList-' + area.id + '" style="max-height: 200px; overflow-y: auto;"></div>';
+            html += '  </div>';
+            html += '</div></div>';
+
+            // Sản phẩm (Searchable Combobox)
             var selProduct = area.selectedProduct || null;
             var displayProduct = selProduct ? ('[' + selProduct.code + '] ' + selProduct.name) : '';
             var hasProductSelection = selProduct ? ' has-selection' : '';
@@ -3167,6 +3204,95 @@
     window.removeAreaModule = function(areaId) {
         var area = areaData.find(function(a) { return a.id === areaId; });
         if (area) { area.selectedModule = null; area.moduleId = null; renderAreaCards(); saveWarehouseConfig(); }
+    };
+
+    // --- NEW: Area Type logic ---
+    window.showAreaTypeList = function(areaId) {
+        var list = document.getElementById('areaTypeList-' + areaId);
+        if (list) { list.classList.add('show'); filterAreaTypeList(areaId); }
+    };
+    window.toggleAreaTypeList = function(areaId) {
+        var list = document.getElementById('areaTypeList-' + areaId);
+        if (list) { list.classList.toggle('show'); if(list.classList.contains('show')) filterAreaTypeList(areaId); }
+    };
+    window.filterAreaTypeList = function(areaId) {
+        var list = document.getElementById('areaTypeList-' + areaId);
+        var input = document.getElementById('areaTypeSearch-' + areaId);
+        if (!list || !input) return;
+        var term = input.value.toLowerCase().trim();
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        var selCode = area && area.selectedAreaType ? area.selectedAreaType.code : null;
+
+        var results = areaTypeData;
+        if (term && selCode !== input.value) {
+             results = areaTypeData.filter(function(i) { return i.code.toLowerCase().includes(term) || i.name.toLowerCase().includes(term); });
+        }
+        
+        if (results.length === 0) {
+            list.innerHTML = '<div class="item">Không tìm thấy loại khu vực</div>';
+        } else {
+            list.innerHTML = results.map(function(i) {
+                var isSelected = (selCode === i.code);
+                return '<div class="item ' + (isSelected ? 'selected' : '') + '" onclick="selectAreaType(' + areaId + ', \'' + i.code + '\', \'' + i.name.replace(/'/g, "\\'") + '\')">[' + i.code + '] ' + i.name + (isSelected ? ' <i class="fas fa-check" style="color:#076EB8; font-size:10px; margin-left:auto;"></i>' : '') + '</div>';
+            }).join('');
+        }
+    };
+    window.selectAreaType = function(areaId, code, name) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area) { area.selectedAreaType = { code: code, name: name }; renderAreaCards(); saveWarehouseConfig(); }
+    };
+    window.removeAreaType = function(areaId) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area) { area.selectedAreaType = null; renderAreaCards(); saveWarehouseConfig(); }
+    };
+
+    // --- NEW: Area Category logic ---
+    function getCategoryData() {
+        var str = localStorage.getItem('masterData_categories');
+        if (str) {
+            try { return JSON.parse(str); } catch (e) {}
+        }
+        return [];
+    }
+    
+    window.showAreaCategoryList = function(areaId) {
+        var list = document.getElementById('areaCategoryList-' + areaId);
+        if (list) { list.classList.add('show'); filterAreaCategoryList(areaId); }
+    };
+    window.toggleAreaCategoryList = function(areaId) {
+        var list = document.getElementById('areaCategoryList-' + areaId);
+        if (list) { list.classList.toggle('show'); if(list.classList.contains('show')) filterAreaCategoryList(areaId); }
+    };
+    window.filterAreaCategoryList = function(areaId) {
+        var list = document.getElementById('areaCategoryList-' + areaId);
+        var input = document.getElementById('areaCategorySearch-' + areaId);
+        if (!list || !input) return;
+        var term = input.value.toLowerCase().trim();
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        var selCode = area && area.selectedCategory ? area.selectedCategory.code : null;
+
+        var cats = getCategoryData();
+        var results = cats;
+        if (term && (!area.selectedCategory || '[' + area.selectedCategory.code + '] ' + area.selectedCategory.name !== input.value)) {
+             results = cats.filter(function(i) { return i.code.toLowerCase().includes(term) || i.name.toLowerCase().includes(term); });
+        }
+        
+        if (results.length === 0) {
+            list.innerHTML = '<div class="item">Không tìm thấy nhóm sản phẩm</div>';
+        } else {
+            list.innerHTML = results.map(function(i) {
+                var isSelected = (selCode === i.code);
+                return '<div class="item ' + (isSelected ? 'selected' : '') + '" onclick="selectAreaCategory(' + areaId + ', \'' + i.code + '\', \'' + i.name.replace(/'/g, "\\'") + '\')">[' + i.code + '] ' + i.name + (isSelected ? ' <i class="fas fa-check" style="color:#076EB8; font-size:10px; margin-left:auto;"></i>' : '') + '</div>';
+            }).join('');
+        }
+    };
+    window.selectAreaCategory = function(areaId, code, name) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area) { area.selectedCategory = { code: code, name: name }; renderAreaCards(); saveWarehouseConfig(); }
+    };
+    window.removeAreaCategory = function(areaId) {
+        var area = areaData.find(function(a) { return a.id === areaId; });
+        if (area) { area.selectedCategory = null; renderAreaCards(); saveWarehouseConfig(); }
     };
 
     // --- Area: Product Group ---
@@ -4725,6 +4851,21 @@
     window.saveAreaTab = saveAreaTab;
     window.selectAreaProduct = selectAreaProduct;
     window.removeAreaProduct = removeAreaProduct;
+
+    // Area Type Exports
+    window.showAreaTypeList = showAreaTypeList;
+    window.toggleAreaTypeList = toggleAreaTypeList;
+    window.filterAreaTypeList = filterAreaTypeList;
+    window.selectAreaType = selectAreaType;
+    window.removeAreaType = removeAreaType;
+
+    // Area Category Exports
+    window.showAreaCategoryList = showAreaCategoryList;
+    window.toggleAreaCategoryList = toggleAreaCategoryList;
+    window.filterAreaCategoryList = filterAreaCategoryList;
+    window.selectAreaCategory = selectAreaCategory;
+    window.removeAreaCategory = removeAreaCategory;
+
     window.showAreaProductList = showAreaProductList;
     window.toggleAreaProductList = toggleAreaProductList;
     window.filterAreaProductList = filterAreaProductList;

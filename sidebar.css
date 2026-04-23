@@ -411,7 +411,7 @@ iframe#app-frame { width: 100%; height: 100%; border: none; display: block; }
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    width: 380px;
+    /* width: 380px; */
     background: white;
     border: 1px solid #e2e8f0;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);

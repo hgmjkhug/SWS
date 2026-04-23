@@ -4,12 +4,26 @@
     
     let devices = [];
     
-    // 13 Shuttles
-    for (let i = 1; i <= 13; i++) {
+    // 14 Shuttles
+    for (let i = 1; i <= 14; i++) {
         const lastDate = new Date();
         lastDate.setDate(lastDate.getDate() - Math.floor(Math.random() * 60) - 30);
         const nextDate = new Date(lastDate);
         nextDate.setDate(nextDate.getDate() + 90);
+        const history = [];
+        for (let j = 1; j <= 3; j++) {
+            const hDate = new Date(lastDate);
+            hDate.setDate(hDate.getDate() - (j * 30));
+            history.push({
+                startTime: new Date(hDate.getTime() - 3600000), // 1 hour before
+                endTime: hDate,
+                status: 'Hoàn thành',
+                timeliness: 'Đúng hạn',
+                technician: 'Lê Văn ' + String.fromCharCode(65 + j),
+                note: 'Bảo trì định kỳ cấp ' + j,
+                nextDate: lastDate
+            });
+        }
         devices.push({
             id: devices.length + 1,
             code: `SHUT-${String(i).padStart(3, '0')}`,
@@ -18,7 +32,9 @@
             maintenanceCount: Math.floor(Math.random() * 10) + 1,
             lastMaintenance: lastDate,
             nextMaintenance: nextDate,
-            selected: false
+            selected: false,
+            history: history,
+            expanded: false
         });
     }
     
@@ -28,6 +44,20 @@
         lastDate.setDate(lastDate.getDate() - Math.floor(Math.random() * 60) - 30);
         const nextDate = new Date(lastDate);
         nextDate.setDate(nextDate.getDate() + 90);
+        const history = [];
+        for (let j = 1; j <= 2; j++) {
+            const hDate = new Date(lastDate);
+            hDate.setDate(hDate.getDate() - (j * 45));
+            history.push({
+                startTime: new Date(hDate.getTime() - 7200000), // 2 hours before
+                endTime: hDate,
+                status: 'Hoàn thành',
+                timeliness: j % 2 === 0 ? 'Đúng hạn' : 'Trễ hạn',
+                technician: 'Trần Văn ' + String.fromCharCode(88 + j),
+                note: 'Kiểm tra tải trọng và động cơ',
+                nextDate: lastDate
+            });
+        }
         devices.push({
             id: devices.length + 1,
             code: `LIFT-${String(i).padStart(3, '0')}`,
@@ -36,7 +66,9 @@
             maintenanceCount: Math.floor(Math.random() * 10) + 1,
             lastMaintenance: lastDate,
             nextMaintenance: nextDate,
-            selected: false
+            selected: false,
+            history: history,
+            expanded: false
         });
     }
 
@@ -60,9 +92,10 @@
         // Initialize click outside for custom dropdown
         document.addEventListener('click', function(e) {
             // Modal result dropdown
-            const resultWrapper = document.querySelector('.custom-select-wrapper');
+            const resultTrigger = document.getElementById('result-dropdown-trigger');
+            const resultWrapper = resultTrigger ? resultTrigger.closest('.custom-select-wrapper') : null;
             const resultPanel = document.getElementById('result-dropdown-options');
-            if (resultPanel && resultPanel.classList.contains('show') && (!resultWrapper || !resultWrapper.contains(e.target))) {
+            if (resultPanel && resultPanel.classList.contains('show') && resultWrapper && !resultWrapper.contains(e.target)) {
                 toggleResultDropdown();
             }
 
@@ -212,65 +245,84 @@
         const end = start + mainPageSize;
         const pageData = filteredDevices.slice(start, end);
 
-        // Group devices (only those on the current page)
-        const grouped = {};
-        groups.forEach(g => grouped[g] = []);
-        pageData.forEach(d => { if (grouped[d.group]) grouped[d.group].push(d); });
-
-        let itemsOnPage = [];
         let html = '';
         let absIdx = start;
 
-        groups.forEach(groupName => {
-            const groupDevices = grouped[groupName];
-            if (!groupDevices || groupDevices.length === 0) return;
-
-            const isCollapsed = collapsedGroups[groupName];
-
+        pageData.forEach((d, i) => {
+            absIdx++;
+            const nextOverdue = d.nextMaintenance < new Date();
             html += `
-                <tr class="group-row ${isCollapsed ? 'collapsed' : ''}">
-                    <td></td>
-                    <td></td>
-                    <td onclick="toggleGroup('${groupName}')" style="cursor: pointer; padding: 10px 0;">
-                        <div style="display: flex; align-items: center; justify-content: center; width: 100%;">
-                            <span class="group-toggle-icon" style="margin-right: 6px; margin-bottom: 0;"><i class="fas fa-chevron-down"></i></span>
-                            <strong style="font-size: 13px;">${groupName}</strong>
-                            <span class="group-badge" style="margin-left: 6px;">${groupDevices.length}</span>
+                <tr data-group="${d.group}" class="${d.expanded ? 'row-expanded' : ''}">
+                    <td class="text-center"><input type="checkbox" ${d.selected ? 'checked' : ''} onchange="toggleDeviceSelection(${d.id})"></td>
+                    <td class="text-center" style="color:#94a3b8;font-size:12px">${absIdx}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="toggle-detail-btn ${d.expanded ? 'active' : ''}" onclick="toggleDeviceDetail(${d.id})">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                            <strong style="color:#076EB8">${d.code}</strong>
                         </div>
                     </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    <td>${d.name}</td>
+                    <td class="text-center" style="font-weight: 600; color: #475569;">${d.group}</td>
+                    <td class="text-center">${d.maintenanceCount}</td>
+                    <td class="text-center">${formatDate(d.lastMaintenance)}</td>
+                    <td class="text-center" style="color:${nextOverdue ? '#ef4444' : '#334155'};font-weight:${nextOverdue ? 700 : 400}">${formatDate(d.nextMaintenance)}</td>
+                    <td class="text-center">
+                        <div style="display: flex; justify-content: center; gap: 8px;">
+                            <button class="action-icon record" onclick="openMaintenanceModal(${d.id})" title="Ghi nhận bảo trì">
+                                <i class="fas fa-tools" style="font-size:12px"></i>
+                            </button>
+                        </div>
+                    </td>
                 </tr>
             `;
 
-            if (!isCollapsed) {
-                groupDevices.forEach((d, i) => {
-                    absIdx++;
-                    const nextOverdue = d.nextMaintenance < new Date();
-                    html += `
-                        <tr data-group="${groupName}">
-                            <td class="text-center"><input type="checkbox" ${d.selected ? 'checked' : ''} onchange="toggleDeviceSelection(${d.id})"></td>
-                            <td class="text-center" style="color:#94a3b8;font-size:12px">${absIdx}</td>
-                            <td style="color:#64748b;font-size:12px"></td>
-                            <td><strong style="color:#076EB8">${d.code}</strong></td>
-                            <td>${d.name}</td>
-                            <td class="text-center">${d.maintenanceCount}</td>
-                            <td class="text-center">${formatDate(d.lastMaintenance)}</td>
-                            <td class="text-center" style="color:${nextOverdue ? '#ef4444' : '#334155'};font-weight:${nextOverdue ? 700 : 400}">${formatDate(d.nextMaintenance)}</td>
-                            <td class="text-center">
-                                <div style="display: flex; justify-content: center; gap: 8px;">
-                                    <button class="action-icon record" onclick="openMaintenanceModal(${d.id})" title="Ghi nhận bảo trì">
-                                        <i class="fas fa-tools" style="font-size:12px"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                });
+            if (d.expanded) {
+                html += `
+                    <tr class="detail-row">
+                        <td colspan="9" style="padding: 0;">
+                            <div class="detail-container">
+                                <table class="detail-table">
+                                    <thead>
+                                        <tr>
+                                            <th width="55" class="text-center">STT</th>
+                                            <th width="130" class="text-center">Ngày thực hiện</th>
+                                            <th width="200" class="text-center">Ngày hoàn thành</th>
+                                            <th width="130" class="text-center">Trạng thái</th>
+                                            <th width="110" class="text-center">Bảo trì</th>
+                                            <th width="140" class="text-center">Nhân viên thực hiện</th>
+                                            <th width="140">Mô tả</th>
+                                            <th width="110" class="text-center">Bảo trì lần tới</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${d.history && d.history.length > 0 ? d.history.map((h, idx) => `
+                                            <tr>
+                                                <td class="text-center">${idx + 1}</td>
+                                                <td class="text-center">${formatDateTime(h.startTime)}</td>
+                                                <td class="text-center">${formatDateTime(h.endTime)}</td>
+                                                <td class="text-center">
+                                                    <span class="status-badge ${h.status === 'Hoàn thành' ? 'success' : (h.status === 'Đang bảo trì' ? 'warning' : 'danger')}">
+                                                        ${h.status}
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="type-badge ${h.timeliness === 'Đúng hạn' ? 'info' : 'danger'}">
+                                                        ${h.timeliness}
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">${h.technician}</td>
+                                                <td>${h.note}</td>
+                                                <td class="text-center">${formatDate(h.nextDate)}</td>
+                                            </tr>
+                                        `).join('') : '<tr><td colspan="8" class="text-center" style="padding: 20px; color: #94a3b8;">Chưa có lịch sử bảo trì</td></tr>'}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             }
         });
 
@@ -396,8 +448,11 @@
         const groupEl = document.getElementById('modal-device-group');
         if (groupEl) groupEl.value = device.group;
         
-        document.getElementById('modal-device-code').value = device.code;
-        document.getElementById('modal-device-name').value = device.name;
+        const codeEl = document.getElementById('modal-device-code');
+        if (codeEl) codeEl.value = device.code;
+        
+        const nameEl = document.getElementById('modal-device-name');
+        if (nameEl) nameEl.value = device.name;
         
         const dateInput = document.getElementById('modal-maintenance-date');
         const nextDateInput = document.getElementById('modal-next-maintenance-date');
@@ -460,10 +515,13 @@
             // Save additional fields
             device.history = device.history || [];
             device.history.push({
-                date: new Date(dateStr),
+                startTime: new Date(dateStr),
+                endTime: new Date(),
+                status: resultInput?.value === 'ok' ? 'Hoàn thành' : 'Đang bảo trì',
+                timeliness: 'Đúng hạn',
                 technician: technicianInput?.value || '',
-                result: resultInput?.value || 'ok',
-                note: noteInput?.value || ''
+                note: noteInput?.value || '',
+                nextDate: nextDateStr ? new Date(nextDateStr) : device.nextMaintenance
             });
             
             // Current status update
@@ -630,7 +688,7 @@
             const filtered = devices.filter(d =>
                 d.code.toLowerCase().includes(term.toLowerCase()) ||
                 d.name.toLowerCase().includes(term.toLowerCase())
-            ).slice(0, 10);
+            );
 
             if (filtered.length === 0) {
                 list.innerHTML = '<div class="option-empty"><i class="fas fa-search" style="margin-right:6px;color:#cbd5e1"></i>Không tìm thấy</div>';
@@ -960,10 +1018,23 @@
                 opt.classList.toggle('active', opt.textContent.includes(years + ' Năm'));
             });
         }
+    };    window.toggleDeviceDetail = function(id) {
+        const device = devices.find(d => d.id === id);
+        if (device) {
+            device.expanded = !device.expanded;
+            renderMaintenanceList();
+        }
     };
 
-
-
+    function formatDateTime(date) {
+        if (!date) return '';
+        const hh = String(date.getHours()).padStart(2, '0');
+        const mm = String(date.getMinutes()).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mo = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        return `${hh}:${mm} ${dd}/${mo}/${yyyy}`;
+    }
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {

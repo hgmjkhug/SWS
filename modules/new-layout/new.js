@@ -287,6 +287,21 @@ const SVG_WAITING_TOP_T = `<svg width="30" height="30" viewBox="0 0 30 30" fill=
 </defs>
 </svg>`;
 
+const SVG_WAITING_VERTICAL = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="30" height="30" fill="#A4D3FE" fill-opacity="0.4"/>
+<path d="M15.0004 0V8.25" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<path d="M15.0004 30V21.75" stroke="#7C8DB5" stroke-opacity="0.7"/>
+<g clip-path="url(#clip1_130_214_v)">
+<path d="M21.5938 14.5C21.5938 16.1162 20.9517 17.6661 19.8089 18.8089C18.6661 19.9517 17.1162 20.5938 15.5 20.5938C13.8838 20.5938 12.3339 19.9517 11.1911 18.8089C10.0483 17.6661 9.40625 16.1162 9.40625 14.5C9.40625 12.8838 10.0483 11.3339 11.1911 10.1911C12.3339 9.04827 13.8838 8.40625 15.5 8.40625C17.1162 8.40625 18.6661 9.04827 19.8089 10.1911C20.9517 11.3339 21.5938 12.8838 21.5938 14.5ZM8 14.5C8 16.4891 8.79018 18.3968 10.1967 19.8033C11.6032 21.2098 13.5109 22 15.5 22C17.4891 22 19.3968 21.2098 20.8033 19.8033C22.2098 18.3968 23 16.4891 23 14.5C23 12.5109 22.2098 10.6032 20.8033 9.1967C19.3968 7.79018 17.4891 7 15.5 7C13.5109 7 11.6032 7.79018 10.1967 9.1967C8.79018 10.6032 8 12.5109 8 14.5ZM14.7969 10.5156V14.5C14.7969 14.7344 14.9141 14.9541 15.1104 15.0859L17.9229 16.9609C18.2451 17.1777 18.6816 17.0898 18.8984 16.7646C19.1152 16.4395 19.0273 16.0059 18.7021 15.7891L16.2031 14.125V10.5156C16.2031 10.126 15.8896 9.8125 15.5 9.8125C15.1104 9.8125 14.7969 10.126 14.7969 10.5156Z" fill="#076EB8"/>
+</g>
+<rect x="0.25" y="0.25" width="29.5" height="29.5" stroke="#D8D8D8" stroke-opacity="0.2" stroke-width="0.5"/>
+<defs>
+<clipPath id="clip1_130_214_v">
+<rect width="15" height="15" transform="translate(8 7)"/>
+</clipPath>
+</defs>
+</svg>`;
+
 const SVG_VERTICAL_PATH = `
 <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_206_237)">
@@ -676,20 +691,23 @@ const COLS = 57;
 
             const waitingPositions = [
                 // Module 1 (Col 1-19)
-                { r: 2, c: 1 }, { r: 3, c: 0 }, { r: 13, c: 18 }, { r: 14, c: 17 },
+                { r: 2, c: 1 }, { r: 1, c: 0 }, { r: 3, c: 0 }, { r: 15, c: 18 }, { r: 13, c: 18 }, { r: 14, c: 17 },
                 // Module 2 (Col 20-38)
-                { r: 2, c: 20 }, { r: 3, c: 19 }, { r: 13, c: 37 }, { r: 14, c: 36 },
+                { r: 2, c: 20 }, { r: 1, c: 19 }, { r: 3, c: 19 }, { r: 15, c: 37 }, { r: 13, c: 37 }, { r: 14, c: 36 },
                 // Module 3 (Col 39-57)
-                { r: 2, c: 39 }, { r: 3, c: 38 }, { r: 13, c: 56 }, { r: 14, c: 55 }
+                { r: 2, c: 39 }, { r: 1, c: 38 }, { r: 3, c: 38 }, { r: 15, c: 56 }, { r: 13, c: 56 }, { r: 14, c: 55 }
             ];
 
             const isWaitingPos = waitingPositions.some(pos => pos.r === r && pos.c === c);
             if (isWaitingPos) {
-                 if (r === 2 && (c === 1 || c === 19 || c === 38)) {
+                 if (r === 2 && (c === 1 || c === 20 || c === 39)) {
                     svgContent = SVG_WAITING_TOP_T;
                 }
+                else if ((r === 15 && (c === 18 || c === 37 || c === 56)) || (r === 1 && (c === 0 || c === 19 || c === 38))) {
+                    svgContent = SVG_WAITING_VERTICAL;
+                }
                 else {
-                    const needsRight = (r === 3 && c === 0) || (r === 14 && (c === 18 || c === 37 || c === 56));
+                    const needsRight = (c === 0 || c === 19 || c === 38);
                     if (needsRight) {
                         svgContent = SVG_WAITING_RIGHT;
                     } else {
@@ -1422,7 +1440,7 @@ const COLS = 57;
                             <div class="nl-pie-small">
                                 <div class="nl-pie-small-fill"></div>
                                 <div class="nl-pie-small-center">
-                                    <span class="nl-pie-val">80</span>
+                                    <span class="nl-pie-val">65</span>
                                 </div>
                             </div>
                         </div>
@@ -1454,41 +1472,6 @@ const COLS = 57;
                                                     { name: 'Khu vực chứa chuối Nhật 35CLD', val: '04' }
                                                 ].map((item, idx) => `
                                                 <div class="nl-tree-item ${idx === 1 ? 'active' : ''}">
-                                                    <div class="nl-tree-line-h"></div>
-                                                    <span class="nl-tree-name">${item.name}</span>
-                                                    <span class="nl-tree-val">${item.val}</span>
-                                                </div>`).join('')}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Nhập lại Accordion -->
-                            <div class="nl-acc-item" id="acc-in-return">
-                                <div class="nl-acc-header">
-                                    <div class="nl-acc-dot dot-in-return"></div>
-                                    <span class="nl-acc-title">Nhập lại</span>
-                                    <span class="nl-acc-count">15</span>
-                                </div>
-                                <div class="nl-acc-content">
-                                    <div class="nl-acc-inner">
-                                        <div class="nl-tree-line-wrapper">
-                                            <div class="nl-tree-line-v"></div>
-                                            <div class="nl-tree-items">
-                                                ${[
-                                                    { name: 'Khu vực chứa chuối TQ A456', val: '04' },
-                                                    { name: 'Khu vực chứa chuối TQ CP', val: '04' },
-                                                    { name: 'Khu vực chứa chuối TQ A789', val: '04' },
-                                                    { name: 'Khu vực chứa chuối Nhật RCL', val: '04' },
-                                                    { name: 'Khu vực chứa chuối Nhật 28LY', val: '04' },
-                                                    { name: 'Khu vực chứa chuối Nhật 33CP', val: '04' },
-                                                    { name: 'Khu vực chứa chuối Nhật 35CP', val: '04' },
-                                                    { name: 'Khu vực chứa chuối Nhật 38CP', val: '04' },
-                                                    { name: 'Khu vực chứa chuối Nhật 40CP', val: '04' },
-                                                    { name: 'Khu vực chứa chuối Nhật 35CLD', val: '04' }
-                                                ].map((item, idx) => `
-                                                <div class="nl-tree-item">
                                                     <div class="nl-tree-line-h"></div>
                                                     <span class="nl-tree-name">${item.name}</span>
                                                     <span class="nl-tree-val">${item.val}</span>
@@ -1609,9 +1592,14 @@ const COLS = 57;
         const shuttle1 = createShuttleEl('shuttle-inbound');
         const shuttle2 = createShuttleEl('shuttle-outbound');
 
-        const setPos = (el, r, c) => {
-            el.style.left = `${c * 30}px`;
-            el.style.top = `${r * 30}px`;
+        const setPos = (el, r, c, isVertical = false) => {
+            const w = isVertical ? 22 : 30;
+            const h = isVertical ? 30 : 22;
+            el.innerHTML = isVertical ? SVG_SHUTTLE_LOADED_V : SVG_SHUTTLE_LOADED;
+            el.style.width = `${w}px`;
+            el.style.height = `${h}px`;
+            el.style.left = `${(c * 30) + (30 - w) / 2}px`;
+            el.style.top = `${(r * 30) + (30 - h) / 2}px`;
             el.dataset.r = r;
             el.dataset.c = c;
         };
@@ -1625,23 +1613,23 @@ const COLS = 57;
                 // Move vertically first
                 while (currR !== end.r) {
                     currR += (end.r > currR ? 1 : -1);
-                    path.push({ r: currR, c: currC });
+                    path.push({ r: currR, c: currC, v: true });
                 }
                 // Then horizontally
                 while (currC !== end.c) {
                     currC += (end.c > currC ? 1 : -1);
-                    path.push({ r: currR, c: currC });
+                    path.push({ r: currR, c: currC, v: false });
                 }
             } else {
                 // Move horizontally first
                 while (currC !== end.c) {
                     currC += (end.c > currC ? 1 : -1);
-                    path.push({ r: currR, c: currC });
+                    path.push({ r: currR, c: currC, v: false });
                 }
                 // Then vertically
                 while (currR !== end.r) {
                     currR += (end.r > currR ? 1 : -1);
-                    path.push({ r: currR, c: currC });
+                    path.push({ r: currR, c: currC, v: true });
                 }
             }
             return path;
@@ -1660,7 +1648,7 @@ const COLS = 57;
                 let step = 0;
                 const doStep = () => {
                     if (step < toTargetPath.length) {
-                        setPos(el, toTargetPath[step].r, toTargetPath[step].c);
+                        setPos(el, toTargetPath[step].r, toTargetPath[step].c, toTargetPath[step].v);
                         step++;
                         activeTimeouts.push(setTimeout(doStep, MOVE_STEP_MS));
                     } else {
@@ -1674,7 +1662,7 @@ const COLS = 57;
                             let backStep = 0;
                             const doBackStep = () => {
                                 if (backStep < toDockPath.length) {
-                                    setPos(el, toDockPath[backStep].r, toDockPath[backStep].c);
+                                    setPos(el, toDockPath[backStep].r, toDockPath[backStep].c, toDockPath[backStep].v);
                                     backStep++;
                                     activeTimeouts.push(setTimeout(doBackStep, MOVE_STEP_MS));
                                 } else {
@@ -1708,8 +1696,8 @@ const COLS = 57;
             { r: 2, c: 38 }  // Module C Outbound
         ];
 
-        setPos(shuttle1, s1Dock.r, s1Dock.c);
-        setPos(shuttle2, s2Dock.r, s2Dock.c);
+        setPos(shuttle1, s1Dock.r, s1Dock.c, false);
+        setPos(shuttle2, s2Dock.r, s2Dock.c, false);
 
         runAnimation(shuttle1, s1Targets, s1Dock);
         runAnimation(shuttle2, s2Targets, s2Dock);

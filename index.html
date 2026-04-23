@@ -8,7 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="https://demo-qtsx.thacoindustries.com/favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
     integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -76,13 +76,10 @@
           <i class="fas fa-chevron-right arrow-icon"></i>
         </div>
         <div class="submenu">
-          <!-- <a href="#" onclick="loadPage('Dashboard tổng quan')" data-code="DASHBOARD_OVERVIEW"><i
-              class="fas fa-chart-pie"></i>Dashboard tổng quan</a> -->
           <a href="#" onclick="loadPage('Dashboard chi tiết')" data-code="DASHBOARD_DETAIL"><i
               class="fas fa-chart-area"></i>Dashboard chi tiết</a>
           <a href="#" onclick="loadPage('Giám sát hoạt động')" data-code="DASHBOARD_MONITOR"><i
               class="fa-solid fa-chalkboard-user"></i>Giám sát hoạt động</a>
-          <!-- <a href="#" onclick="loadPage('Giao diện kho mới')" data-code="NEW_WAREHOUSE_LAYOUT"><i class="fa-regular fa-warehouse"></i>Giao diện kho mới</a> -->
         </div>
       </div>
 
@@ -97,62 +94,10 @@
         </div>
         <div class="submenu">
           <a href="#" onclick="loadPage('Đơn hàng ERP')" data-code="OUTBOUND_ORDER"><i class="fa-solid fa-retweet"></i>Đơn hàng ERP</a>
-          <a href="#" onclick="loadPage('Đơn hàng xuất')" data-code="OUTBOUND_ORDER"><i class="fa-solid fa-arrow-right-from-bracket"></i>Đơn hàng xuất</a>
         </div>
       </div> -->
 
-      <!-- Layout Kho (2D) - Active -->
-      <div class="menu-item" data-module="WAREHOUSE">
-        <div class="menu-link" onclick="toggleSubmenu(this)">
-          <div class="link-content">
-            <i class="fa-solid fa-warehouse"></i>
-            <span class="link-text">Quản lý kho</span>
-          </div>
-          <i class="fas fa-chevron-right arrow-icon"></i>
-        </div>
-        <div class="submenu">
-          <a href="#" onclick="loadPage('Quản lý kho')" data-code="WAREHOUSE_LIST"><i class="fas fa-warehouse"></i>Quản lý kho</a>
-          <!-- <a href="#" onclick="loadPage('Quản lý lô hàng')" data-code="LOT_MGMT"><i class="fa-solid fa-code-fork fa-rotate-180"></i>Quản lý lô hàng</a> -->
-          <!-- <a href="#" onclick="loadPage('Kiểm kê nhập xuất')" data-code="CHECK_IO"><i class="fa-solid fa-list-check"></i>Kiểm kê nhập xuất</a> -->
-          <!-- <a href="#" onclick="loadPage('Quy cách sản phẩm')" data-code="PRODUCT_METHOD"><i
-              class="fa-regular fa-box-isometric-tape"></i>Quy cách sản phẩm</a> -->
-          <!-- <a href="#" onclick="loadPage('Quản lý vật chứa')" data-code="CONTAINER_MGMT"><i
-              class="fa-regular fa-pallet-box"></i>Quản lý vật chứa</a> -->
-          <!-- <a href="#" onclick="loadPage('Quản lý bảo trì')" data-code="MAINTENANCE"><i
-              class="fa-solid fa-toolbox"></i>Quản lý bảo trì</a> -->
-          <a href="#" onclick="loadPage('Loại khu vực')" data-code="LOCATION_TYPE"><i
-              class="fas fa-map-marker-alt"></i>Loại khu vực</a>
-          <!-- <a href="#" onclick="loadPage('Biên bản bàn giao')" data-code="HANDOVER_NOTE"><i
-              class="fa-solid fa-file-signature"></i>Biên bản bàn giao</a> -->
-        </div>
-      </div>
-
-      <!-- Hệ thống WCS -->
-      <!-- <div class="menu-item" data-module="WCS">
-        <div class="menu-link" onclick="toggleSubmenu(this)">
-          <div class="link-content">
-            <i class="fas fa-microchip"></i>
-            <span class="link-text">Quản lý điều phối WCS</span>
-          </div>
-          <i class="fas fa-chevron-right arrow-icon"></i>
-        </div>
-        <div class="submenu"> -->
-          <!-- <a href="#" onclick="loadPage('Quản lý Lệnh')"><i class="fas fa-clipboard-list"></i>Quản lý Lệnh</a> -->
-          <!-- <a href="#" onclick="loadPage('Kanban lệnh')" data-code="ORDER_KANBAN"><i
-              class="fa-regular fa-chart-kanban"></i>Kanban lệnh</a> -->
-          <!-- <a href="#" onclick="loadPage('Quản lý Thiết bị')"
-              >Quản lý Thiết bị</a
-            > -->
-          <!-- <a href="#" onclick="loadPage('Giám sát Thiết bị')"
-              ><i class="fas fa-desktop"></i>Giám sát Thiết bị</a
-            > -->
-          <!-- <a href="#" onclick="loadPage('Truy vết nhập xuất')"
-              >Truy vết nhập xuất</a
-            > -->
-        <!-- </div>
-      </div> -->
-
-      <!-- Nhập kho -->
+      <!-- Quản lý lệnh -->
       <div class="menu-item" data-module="INBOUND">
         <div class="menu-link" onclick="toggleSubmenu(this)">
           <div class="link-content">
@@ -170,20 +115,22 @@
         </div>
       </div>
 
-      <!-- Xuất kho -->
-      <!-- <div class="menu-item" data-module="OUTBOUND">
+        <!-- Quản lý kho -->
+      <div class="menu-item" data-module="WAREHOUSE">
         <div class="menu-link" onclick="toggleSubmenu(this)">
           <div class="link-content">
-            <i class="fas fa-file-export"></i>
-            <span class="link-text">Xuất kho</span>
+            <i class="fa-solid fa-warehouse"></i>
+            <span class="link-text">Quản lý kho</span>
           </div>
           <i class="fas fa-chevron-right arrow-icon"></i>
         </div>
         <div class="submenu">
-          <a href="#" onclick="loadPage('Lệnh xuất kho')" data-code="OUTBOUND_ORDER"><i
-              class="fas fa-file-export"></i>Lệnh xuất kho</a>
+          <a href="#" onclick="loadPage('Quản lý kho')" data-code="WAREHOUSE_LIST"><i class="fas fa-warehouse"></i>Quản lý kho</a>
+          <a href="#" onclick="loadPage('Loại khu vực')" data-code="LOCATION_TYPE"><i
+              class="fas fa-map-marker-alt"></i>Loại khu vực</a>
         </div>
-      </div> -->
+      </div>
+
 
       <!-- Quản lý thiết bị -->
       <div class="menu-item" data-module="DEVICE">
@@ -212,6 +159,22 @@
         <div class="submenu">
           <a href="#" onclick="loadPage('Danh sách Quy trình')" data-code="WORKFLOW_PROCESS"><i
               class="fa-light fa-arrow-progress"></i>Quản lý quy trình</a>
+        </div>
+      </div>
+
+      <!-- <Báo cáo thống kê -->
+      <div class="menu-item" data-module="STATISTIC">
+        <div class="menu-link" onclick="toggleSubmenu(this)">
+          <div class="link-content">
+            <i class="fas fa-chart-bar"></i>
+            <span class="link-text">Báo cáo thống kê</span>
+          </div>
+          <i class="fas fa-chevron-right arrow-icon"></i>
+        </div>
+        <div class="submenu">
+          <a href="#" onclick="loadPage('Theo dõi tồn kho')" data-code="INVENTORY_MGMT"><i class="fa-solid fa-layer-group"></i>Theo dõi tồn kho</a>
+          <a href="#" onclick="loadPage('Báo cáo Nhập/Xuất')" data-code="STATISTIC_REPORT"><i
+              class="fa-solid fa-arrow-up-right-dots"></i>Báo cáo Nhập/Xuất</a>
         </div>
       </div>
 
@@ -248,27 +211,6 @@
         </div>
       </div>
 
-      <!-- <Báo cáo thống kê -->
-      <div class="menu-item" data-module="STATISTIC">
-        <div class="menu-link" onclick="toggleSubmenu(this)">
-          <div class="link-content">
-            <i class="fas fa-chart-bar"></i>
-            <span class="link-text">Báo cáo thống kê</span>
-          </div>
-          <i class="fas fa-chevron-right arrow-icon"></i>
-        </div>
-        <div class="submenu">
-          <a href="#" onclick="loadPage('Theo dõi tồn kho')" data-code="INVENTORY_MGMT"><i class="fa-solid fa-layer-group"></i>Theo dõi tồn kho</a>
-          <a href="#" onclick="loadPage('Báo cáo Nhập/Xuất')" data-code="STATISTIC_REPORT"><i
-              class="fa-solid fa-arrow-up-right-dots"></i>Báo cáo Nhập/Xuất</a>
-        </div>
-        <!-- <div class="submenu">
-            <a href="#" onclick="loadPage('Thống kê thiết bị')"
-              ><i class="fa-solid fa-conveyor-belt"></i>Thống kê thiết bị</a
-            >
-          </div> -->
-      </div>
-
       <!-- Hệ thống -->
       <div class="menu-item" data-module="SYSTEM">
         <div class="menu-link" onclick="toggleSubmenu(this)">
@@ -287,20 +229,6 @@
         </div>
       </div>
 
-       <!-- <Báo cáo thống kê -->
-      <!-- <div class="menu-item" data-module="DOCUMENT">
-        <div class="menu-link" onclick="toggleSubmenu(this)">
-          <div class="link-content">
-            <i class="fa-solid fa-book"></i>
-            <span class="link-text">Tài liệu</span>
-          </div>
-          <i class="fas fa-chevron-right arrow-icon"></i>
-        </div>
-        <div class="submenu">
-          <a href="#" onclick="loadPage('Quản lý tài liệu')" data-code="DOCUMENT_MANAGEMENT"><i class="fa-solid fa-book"></i>Quản lý tài liệu</a>
-          <a href="#" onclick="loadPage('Quy trình vận hành')" data-code="OPERATION_PROCEDURE"><i class="fa-solid fa-chart-diagram fa-rotate-270"></i>Quy trình vận hành</a>
-        </div>
-    </div> -->
   </nav>
 
   <!-- MAIN CONTENT -->
@@ -329,7 +257,7 @@
           </div>
           <div class="factory-dropdown" id="factory-dropdown">
             <div class="factory-search-box">
-              <input type="text" id="factory-search-input" placeholder="Tìm kiếm Kho" onkeyup="filterFactories()"
+              <input type="text" id="factory-search-input" placeholder="Tìm kiếm kho theo mã kho, tên kho" onkeyup="filterFactories()"
                 onclick="event.stopPropagation()" />
             </div>
             <div class="factory-list" id="factory-list">
@@ -340,9 +268,9 @@
 
         <!-- Screenshot Button -->
         <div class="notification-container" style="margin-right: 12px;">
-          <div class="notification-btn" id="btn-screenshot" onclick="takeScreenshot()" title="Chụp ảnh màn hình"
+          <div class="notification-btn" id="btn-screenshot" onclick="takeScreenshot()" title="Chụp ảnh màn hình của chức năng"
             style="color: var(--text-3); background: var(--surface); border: 1px solid var(--border); position: relative;">
-            <i class="fa-solid fa-camera"></i>
+            <i class="fa-regular fa-camera"></i>
           </div>
         </div>
 

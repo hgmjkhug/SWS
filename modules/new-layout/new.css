@@ -373,7 +373,9 @@ body {
     box-shadow: 0px 2px 8px rgba(3, 103, 204, 0.08);
     border-radius: 10px;
     width: 100%;
-    max-height: 260px;
+    height: 260px;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     box-sizing: border-box;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -416,7 +418,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    max-height: 200px;
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
 }
 
@@ -518,7 +521,8 @@ body {
     padding: 6px 10px;
     display: flex;
     flex-direction: column;
-    max-height: 200px;
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
     font-family: 'IBM Plex Mono', monospace;
 }
@@ -594,7 +598,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0; /* Dùng margin-bottom cho item thay vì gap để kiểm soát tốt hơn khi scroll */
-    max-height: 215px;
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
 }
 
@@ -819,7 +824,7 @@ body {
 
 .nl-pie-and-acc-row {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 15px;
     padding: 10px;
     height: 100%;
@@ -831,14 +836,13 @@ body {
     width: 120px;
     display: flex;
     justify-content: center;
-    padding-top: 10px;
 }
 
 .nl-pie-small {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    background: conic-gradient(#076EB8 0% 30%, #4388EF 30% 50%, #F59E0B 50% 85%, #EF4444 85% 100%);
+    background: conic-gradient(#076EB8 0% 38%, #F59E0B 38% 84%, #EF4444 84% 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1006,7 +1010,8 @@ body {
 
 .nl-stats-card {
     padding: 0;
-    height: calc(100% - 35px); /* Adjusted to fit under the header */
+    flex: 1;
+    min-height: 0;
 }
 
 /* Shuttles */

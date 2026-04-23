@@ -51,6 +51,7 @@
 
     // Init
     function initCategoryModule() {
+        localStorage.setItem('masterData_categories', JSON.stringify(categories));
         renderCategories();
     }
 

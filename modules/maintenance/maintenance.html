@@ -20,7 +20,7 @@
       <div class="toolbar-left">
         <div class="maintenance-search-box">
           <i class="fas fa-search"></i>
-          <input type="text" id="device-search" placeholder="Tìm mã / tên thiết bị..." oninput="filterMaintenanceList()">
+          <input type="text" id="device-search" placeholder="Tìm mã, tên thiết bị..." oninput="filterMaintenanceList()">
         </div>
         <div class="filter-group-inline">
           <div class="custom-select-wrapper type-filter-wrapper">
@@ -59,25 +59,25 @@
           <colgroup>
             <col style="width: 45px;">
             <col style="width: 55px;">
-            <col style="width: 150px;">
+            <col style="width: 130px;">
+            <col style="width: 200px;">
+            <col style="width: 130px;">
+            <col style="width: 110px;">
             <col style="width: 140px;">
-            <col style="width: 180px;">
-            <col style="width: 120px;">
-            <col style="width: 145px;">
-            <col style="width: 145px;">
-            <col style="width: 150px;">
+            <col style="width: 140px;">
+            <col style="width: 110px;">
           </colgroup>
           <thead>
             <tr>
               <th width="45" class="text-center"><input type="checkbox" id="select-all" onclick="toggleSelectAll(this)"></th>
               <th width="55" class="text-center">STT</th>
-              <th width="150" class="text-center">Nhóm thiết bị</th>
-              <th width="140">Mã thiết bị</th>
-              <th width="180">Tên thiết bị</th>
-              <th width="120" class="text-center">Số lần BT</th>
-              <th width="145" class="text-center">Bảo trì lần cuối</th>
-              <th width="145" class="text-center">Bảo trì tiếp theo</th>
-              <th width="150" class="text-center">Thao tác</th>
+              <th width="130">Mã thiết bị</th>
+              <th width="200">Tên thiết bị</th>
+              <th width="130" class="text-center">Nhóm thiết bị</th>
+              <th width="110" class="text-center">Số lần bảo trì</th>
+              <th width="140" class="text-center">Bảo trì lần cuối</th>
+              <th width="140" class="text-center">Bảo trì tiếp theo</th>
+              <th width="110" class="text-center">Thao tác</th>
             </tr>
           </thead>
         </table>
@@ -87,13 +87,13 @@
           <colgroup>
             <col style="width: 45px;">
             <col style="width: 55px;">
-            <col style="width: 150px;">
+            <col style="width: 130px;">
+            <col style="width: 200px;">
+            <col style="width: 130px;">
+            <col style="width: 110px;">
             <col style="width: 140px;">
-            <col style="width: 180px;">
-            <col style="width: 120px;">
-            <col style="width: 145px;">
-            <col style="width: 145px;">
-            <col style="width: 150px;">
+            <col style="width: 140px;">
+            <col style="width: 110px;">
           </colgroup>
           <tbody id="maintenance-list-body"></tbody>
         </table>
@@ -158,7 +158,7 @@
         <div class="searchable-combobox" id="device-combobox">
           <div class="combobox-input-wrap">
             <i class="fas fa-search combobox-icon"></i>
-            <input type="text" placeholder="Mã/Tên thiết bị..." onfocus="showDeviceOptions()" oninput="filterDeviceOptions(this)" autocomplete="off">
+            <input type="text" placeholder="Tìm mã, tên thiết bị..." onfocus="showDeviceOptions()" oninput="filterDeviceOptions(this)" autocomplete="off">
             <span class="combobox-clear" id="combobox-clear" onclick="clearDeviceFilter()" style="display:none"><i class="fas fa-times"></i></span>
           </div>
           <div class="options-list" id="device-options"></div>
@@ -229,22 +229,7 @@
       <span class="close-modal" onclick="closeModal('maintenance-modal')">&times;</span>
     </div>
     <div class="modal-body" style="padding: 24px;">
-      <div class="form-row" style="grid-template-columns: 1fr 1fr 1.5fr;">
-        <div class="form-field">
-          <label>Nhóm thiết bị</label>
-          <input type="text" id="modal-device-group" readonly class="form-input readonly not-allowed">
-        </div>
-        <div class="form-field">
-          <label>Mã thiết bị</label>
-          <input type="text" id="modal-device-code" readonly class="form-input readonly not-allowed">
-        </div>
-        <div class="form-field">
-          <label>Tên thiết bị</label>
-          <input type="text" id="modal-device-name" readonly class="form-input readonly not-allowed">
-        </div>
-      </div>
-      
-      <hr style="border: none; border-top: 1px dashed #cbd5e1; margin: 20px 0;">
+      <!-- Removed device info div -->
 
       <div class="form-row">
         <div class="form-field" style="position: relative;">
