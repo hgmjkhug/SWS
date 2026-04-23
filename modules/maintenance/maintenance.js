@@ -11,7 +11,8 @@
         const nextDate = new Date(lastDate);
         nextDate.setDate(nextDate.getDate() + 90);
         const history = [];
-        for (let j = 1; j <= 3; j++) {
+        const count = Math.floor(Math.random() * 10) + 1;
+        for (let j = 1; j <= count; j++) {
             const hDate = new Date(lastDate);
             hDate.setDate(hDate.getDate() - (j * 30));
             history.push({
@@ -19,7 +20,7 @@
                 endTime: hDate,
                 status: 'Hoàn thành',
                 timeliness: 'Đúng hạn',
-                technician: 'Lê Văn ' + String.fromCharCode(65 + j),
+                technician: 'Lê Văn ' + String.fromCharCode(65 + (j % 26)),
                 note: 'Bảo trì định kỳ cấp ' + j,
                 nextDate: lastDate
             });
@@ -29,7 +30,7 @@
             code: `SHUT-${String(i).padStart(3, '0')}`,
             name: `Shuttle ${i}`,
             group: 'Shuttle',
-            maintenanceCount: Math.floor(Math.random() * 10) + 1,
+            maintenanceCount: count,
             lastMaintenance: lastDate,
             nextMaintenance: nextDate,
             selected: false,
@@ -45,7 +46,8 @@
         const nextDate = new Date(lastDate);
         nextDate.setDate(nextDate.getDate() + 90);
         const history = [];
-        for (let j = 1; j <= 2; j++) {
+        const count = Math.floor(Math.random() * 10) + 1;
+        for (let j = 1; j <= count; j++) {
             const hDate = new Date(lastDate);
             hDate.setDate(hDate.getDate() - (j * 45));
             history.push({
@@ -53,7 +55,7 @@
                 endTime: hDate,
                 status: 'Hoàn thành',
                 timeliness: j % 2 === 0 ? 'Đúng hạn' : 'Trễ hạn',
-                technician: 'Trần Văn ' + String.fromCharCode(88 + j),
+                technician: 'Trần Văn ' + String.fromCharCode(88 + (j % 26)),
                 note: 'Kiểm tra tải trọng và động cơ',
                 nextDate: lastDate
             });
@@ -63,7 +65,7 @@
             code: `LIFT-${String(i).padStart(3, '0')}`,
             name: `Lifter ${i}`,
             group: 'Lifter',
-            maintenanceCount: Math.floor(Math.random() * 10) + 1,
+            maintenanceCount: count,
             lastMaintenance: lastDate,
             nextMaintenance: nextDate,
             selected: false,
@@ -611,10 +613,24 @@
         const selected = devices.filter(d => d.selected);
         if (confirm(`Tiến hành bảo trì cho ${selected.length} thiết bị đã chọn?`)) {
             selected.forEach(device => {
-                device.lastMaintenance = new Date();
-                device.nextMaintenance = new Date();
-                device.nextMaintenance.setDate(device.nextMaintenance.getDate() + 90);
+                const now = new Date();
+                device.lastMaintenance = now;
+                const next = new Date(now);
+                next.setDate(next.getDate() + 90);
+                device.nextMaintenance = next;
                 device.maintenanceCount++;
+
+                device.history = device.history || [];
+                device.history.unshift({
+                    startTime: new Date(now.getTime() - 3600000),
+                    endTime: now,
+                    status: 'Hoàn thành',
+                    timeliness: 'Đúng hạn',
+                    technician: 'Hệ thống',
+                    note: 'Bảo trì hàng loạt',
+                    nextDate: next
+                });
+
                 device.selected = false;
             });
             showToast(`Đã bảo trì thành công ${selected.length} thiết bị`, 'success');
