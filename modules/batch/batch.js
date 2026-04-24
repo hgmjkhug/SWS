@@ -504,7 +504,10 @@ function renderPaginationBar(totalItems) {
             sealNumber: document.getElementById('batch-seal-number').value.trim(),
             docNumber: document.getElementById('batch-doc-number').value.trim()
         });
-        saveBatches(); window.renderTable(); window.closeCreateModal();
+        saveBatches(); 
+        window.renderTable(); 
+        showToast('Thêm mới lô hàng thành công!', 'success');
+        window.closeCreateModal();
     };
 
     window.saveEditBatch = function() {
@@ -528,7 +531,10 @@ function renderPaginationBar(totalItems) {
             MOCK_BATCHES[idx].sealNumber = document.getElementById('edit-batch-seal-number').value.trim();
             MOCK_BATCHES[idx].docNumber = document.getElementById('edit-batch-doc-number').value.trim();
 
-            saveBatches(); window.renderTable(); window.closeEditModal();
+            saveBatches(); 
+            window.renderTable(); 
+            showToast('Cập nhật lô hàng thành công!', 'success');
+            window.closeEditModal();
         }
     };
 
@@ -1686,7 +1692,9 @@ function renderPaginationBar(totalItems) {
             btnConfirm.onclick = function() {
                 if (batchIdToDelete) {
                     MOCK_BATCHES = MOCK_BATCHES.filter(function(x) { return x.id != batchIdToDelete; });
-                    saveBatches(); window.renderTable();
+                    saveBatches(); 
+                    window.renderTable();
+                    showToast('Xóa lô hàng thành công!', 'success');
                     window.closeConfirmDeleteModal();
                 }
             };
