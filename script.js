@@ -106,12 +106,26 @@ function toggleSubmenu(element) {
     submenu.style.maxHeight = parent.classList.contains('open') ? submenu.scrollHeight + "px" : null;
 }
 
+let flyoutTimeout = null;
+
 /**
  * Shows a flyout popup next to the clicked menu item when sidebar is collapsed.
  */
 function showCollapsedFlyout(menuLinkElement) {
-    // Remove any existing flyout
-    closeCollapsedFlyout();
+    // Clear any existing close timeout
+    if (flyoutTimeout) {
+        clearTimeout(flyoutTimeout);
+        flyoutTimeout = null;
+    }
+
+    // Remove any existing flyout if it's not for this element
+    const existing = document.getElementById('sidebar-flyout');
+    if (existing) {
+        if (menuLinkElement.classList.contains('flyout-active')) {
+            return; // Already showing for this element
+        }
+        closeCollapsedFlyout();
+    }
 
     const menuItem = menuLinkElement.parentElement;
     const submenu = menuItem.querySelector('.submenu');
@@ -187,6 +201,20 @@ function showCollapsedFlyout(menuLinkElement) {
     // Mark the menu item as having an active flyout
     menuLinkElement.classList.add('flyout-active');
 
+    // Add hover listeners to the flyout to keep it open
+    flyout.addEventListener('mouseenter', () => {
+        if (flyoutTimeout) {
+            clearTimeout(flyoutTimeout);
+            flyoutTimeout = null;
+        }
+    });
+
+    flyout.addEventListener('mouseleave', () => {
+        flyoutTimeout = setTimeout(() => {
+            closeCollapsedFlyout();
+        }, 300);
+    });
+
     // Close flyout when clicking outside
     setTimeout(() => {
         document.addEventListener('click', _closeFlyoutOnClickOutside);
@@ -209,6 +237,38 @@ function closeCollapsedFlyout() {
     if (existing) existing.remove();
     document.querySelectorAll('.menu-link.flyout-active').forEach(el => el.classList.remove('flyout-active'));
     document.removeEventListener('click', _closeFlyoutOnClickOutside);
+    
+    if (flyoutTimeout) {
+        clearTimeout(flyoutTimeout);
+        flyoutTimeout = null;
+    }
+}
+
+/**
+ * Initializes hover events for sidebar items to show flyout in collapsed mode.
+ */
+function initSidebarHover() {
+    const menuLinks = document.querySelectorAll('.menu-link');
+    menuLinks.forEach(link => {
+        link.addEventListener('mouseenter', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('collapsed')) {
+                const submenu = this.parentElement.querySelector('.submenu');
+                if (!submenu) return;
+                
+                showCollapsedFlyout(this);
+            }
+        });
+        
+        link.addEventListener('mouseleave', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('collapsed')) {
+                flyoutTimeout = setTimeout(() => {
+                    closeCollapsedFlyout();
+                }, 300);
+            }
+        });
+    });
 }
 
 /**
@@ -1218,6 +1278,7 @@ document.addEventListener('click', (e) => {
 document.addEventListener('DOMContentLoaded', function () {
     initNotifications();
     restoreSidebarOrder();
+    initSidebarHover();
 
     // Show Login Success Toast if flag exists
     if (localStorage.getItem('showLoginSuccess') === 'true') {
