@@ -137,7 +137,8 @@
                 <colgroup>
                     <col style="width: 60px">
                     <col style="width: 110px">
-                    <col style="width: 310px">
+                    <col style="width: 210px">
+                    <col style="width: 100px">
                     <col style="width: 100px">
                     <col style="width: 100px">
                     <col style="width: 130px">
@@ -153,7 +154,8 @@
                         <th>Tên lô hàng</th>
 
                         <th class="text-center">Số lượng</th>
-                        <th class="text-center">SL thực hiện</th>
+                        <th class="text-center">Đã nhập</th>
+                        <th class="text-center">Đã xuất</th>
                         <th class="text-center">Ngày tạo</th>
                         <th class="text-center">Ngày hoàn thành</th>
                         <th class="text-center">Trạng thái</th>
@@ -168,9 +170,10 @@
         <div class="batch-table-body" id="batch-body-wrapper">
             <table class="data-table">
                 <colgroup>
-                  <col style="width: 60px">
+                    <col style="width: 60px">
                     <col style="width: 110px">
-                    <col style="width: 310px">
+                    <col style="width: 210px">
+                    <col style="width: 100px">
                     <col style="width: 100px">
                     <col style="width: 100px">
                     <col style="width: 130px">
@@ -449,6 +452,18 @@
                         <div class="form-group">
                             <label>Tên lô hàng</label>
                             <div id="view-batch-name" class="view-text-value">-</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Số lượng</label>
+                            <div id="view-batch-total-qty" class="view-text-value">-</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Đã nhập</label>
+                            <div id="view-batch-received-qty" class="view-text-value">-</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Đã xuất</label>
+                            <div id="view-batch-exported-qty" class="view-text-value">-</div>
                         </div>
 
                     </div>

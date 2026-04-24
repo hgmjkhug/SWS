@@ -170,6 +170,10 @@
                         if (b.sealNumber === undefined) b.sealNumber = 'S-' + (400 + i);
                         if (b.docNumber === undefined) b.docNumber = 'DOC-' + (500 + i);
                         
+                        // Migration for quantities
+                        if (b.receivedQty === undefined) b.receivedQty = b.executedQty || 0;
+                        if (b.exportedQty === undefined) b.exportedQty = (b.status === 'COMPLETED') ? b.totalQty : 0;
+                        
                         return b;
                     });
                 } else {
@@ -206,7 +210,8 @@
 
             // Mock quantities: 10 lô CHECKED có sẵn số lượng 1200
             var totalQty = (i < 10) ? 1200 : ((status === 'NEW') ? 0 : 500);
-            var executedQty = (status === 'COMPLETED') ? totalQty : ((status === 'PROCESSING') ? Math.floor(totalQty * 0.4) : 0);
+            var receivedQty = (status === 'COMPLETED') ? totalQty : ((status === 'PROCESSING') ? Math.floor(totalQty * 0.4) : 0);
+            var exportedQty = (status === 'COMPLETED') ? totalQty : 0;
             
             return {
                 id: Date.now() + i,
@@ -217,7 +222,8 @@
                 status: status,
                 productType: productType.name,
                 totalQty: totalQty,
-                executedQty: executedQty,
+                receivedQty: receivedQty,
+                exportedQty: exportedQty,
                 creator: creator,
                 createdAt: createdAt,
 
@@ -290,7 +296,7 @@
         var pageData = filtered.slice(startIdx, startIdx + PAGE_SIZE);
 
         if (totalItems === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" class="text-center" style="padding:40px; color:#64748b;"><i class="fas fa-box-open" style="font-size:24px; margin-bottom:10px; display:block; opacity:0.5;"></i>Không tìm thấy dữ liệu phù hợp</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center" style="padding:40px; color:#64748b;"><i class="fas fa-box-open" style="font-size:24px; margin-bottom:10px; display:block; opacity:0.5;"></i>Không tìm thấy dữ liệu phù hợp</td></tr>';
             renderPaginationBar(0);
             return;
         }
@@ -305,7 +311,8 @@
                     <td style="font-weight: 700; color: #076EB8">${b.code}</td>
                     <td style="font-weight: 500">${b.name}</td>
                     <td style="text-align:center; font-weight: 700;">${b.totalQty || 0}</td>
-                    <td class="text-center" style="font-weight: 700; color: #10b981;">${b.executedQty || 0}</td>
+                    <td class="text-center" style="font-weight: 700; color: #10b981;">${b.receivedQty || 0}</td>
+                    <td class="text-center" style="font-weight: 700; color: #f59e0b;">${b.exportedQty || 0}</td>
                     <td class="text-center">${createdDateFormatted}</td>
                     <td class="text-center">${formatDate(b.exportDate || b.createdAt)}</td>
                     <td class="text-center">
@@ -480,7 +487,8 @@ function renderPaginationBar(totalItems) {
             exportDate: null,
             creator: STAFF_LIST[0],
             totalQty: 0,
-            executedQty: 0,
+            receivedQty: 0,
+            exportedQty: 0,
             
             // Transport
             driverName: document.getElementById('batch-driver-name').value.trim(),
@@ -551,6 +559,9 @@ function renderPaginationBar(totalItems) {
         // General Info
         document.getElementById('view-batch-code').textContent = b.code || '-';
         document.getElementById('view-batch-name').textContent = b.name || '-';
+        document.getElementById('view-batch-total-qty').textContent = b.totalQty || 0;
+        document.getElementById('view-batch-received-qty').textContent = b.receivedQty || 0;
+        document.getElementById('view-batch-exported-qty').textContent = b.exportedQty || 0;
 
         // Transport
         document.getElementById('view-batch-driver-name').textContent = b.driverName || '-';
