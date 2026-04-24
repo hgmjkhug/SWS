@@ -1,8 +1,8 @@
+node_modules/
+.github/
+.vscode/
+Dockerfile
+autoDeploy.bat
+autoRun.bat
 LICENSE
-/node_modules
-/.github
-/.vscode
-/Dockerfile
-/autoDeploy.bat
-/autoRun.bat
-/.gitignore
+.gitignore
