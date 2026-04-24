@@ -1,24 +1,21 @@
-<<<<<<< HEAD
-#Build app
+# Quick Start
 
-docker build -t hgmjkhug/sws:latest .
+### 1. Npx
 
-docker push hgmjkhug/sws:latest
+**Bash**
 
-**Máy đồng nghiệp update**
+```
+npx http-server
+```
 
-docker rm -f sws-app
+### 2. Live Server
 
-docker pull hgmjkhug/sws:latest
+Open `index.html` with **Live Server** in VS Code.
 
+### 3. Docker
+
+**Bash**
+
+```
 docker run -d -p 8080:80 --name sws-app hgmjkhug/sws:latest
-
-4. Track code liên tục
-
-docker run -d --name watchtower -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower sws --interval 30
-
-# SWS
-
-SWS - WMS &amp; WCS | THACO
-
-> > > > > > > f93d21c9df4b6d456188f3b148a882f511d60890
+```
