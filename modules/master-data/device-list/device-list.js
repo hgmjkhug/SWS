@@ -38,8 +38,25 @@
         { code: 'CTSV', name: 'CÔNG TY SX XE CHUYÊN DỤNG' }
     ];
 
-    const groups = ['Shuttle', 'Lifter', 'Transfer', 'Stacker Crane', 'AMR'];
+    const groups = ['Shuttle', 'Lifter', 'Transfer', 'Stacker Crane', 'AMR', 'Conveyor', 'OHT'];
     const protocols = ['TCP/IP', 'Modbus TCP', 'Profinet'];
+    const deviceTypes = ['Tự hành', 'Cố định'];
+
+    function getDeviceType(group) {
+        if (!group) return '';
+        const lowerGroup = group.toLowerCase();
+        if (lowerGroup.includes('amr') || lowerGroup.includes('shuttle') || lowerGroup.includes('oht')) {
+            return 'Tự hành';
+        }
+        if (lowerGroup.includes('lifter') || lowerGroup.includes('conveyor')) {
+            return 'Cố định';
+        }
+        // Default based on common knowledge of the other groups in the list
+        if (lowerGroup.includes('transfer') || lowerGroup.includes('stacker crane')) {
+            return 'Cố định';
+        }
+        return 'Cố định';
+    }
 
     let devices = [
         // 13 Shuttle devices
@@ -71,8 +88,6 @@
     const pageSize = 20; // Changed to 20
     let filteredDevices = [...devices];
     let selectedDeviceIds = new Set();
-    let collapsedGroups = new Set();
-    // Removed global deviceToToggle
     let pendingDeleteDeviceIds = [];
 
     // Initialization
@@ -103,7 +118,6 @@
     // New Filter Exports
     window.openDeviceDropdown = openDeviceDropdown;
     window.toggleDeviceDropdown = toggleDeviceDropdown;
-    window.toggleGroup = toggleGroup;
     window.selectDeviceOption = selectDeviceOption;
     window.applyFilters = applyFilters;
 
@@ -125,6 +139,20 @@
             ` + groups.map(g => `
                 <div class="dropdown-option" data-value="${g}" onclick="selectDeviceOption('group', '${g}', '${g}')">
                     ${g}
+                </div>
+            `).join('');
+        }
+
+        // Render custom dropdown options for Type (Filter)
+        const typeOptions = document.getElementById('type-options');
+        if (typeOptions) {
+            typeOptions.innerHTML = `
+                <div class="dropdown-option active" data-value="" onclick="selectDeviceOption('type', '', 'Tất cả loại')">
+                    Tất cả loại
+                </div>
+            ` + deviceTypes.map(t => `
+                <div class="dropdown-option" data-value="${t}" onclick="selectDeviceOption('type', '${t}', '${t}')">
+                    ${t}
                 </div>
             `).join('');
         }
@@ -233,14 +261,7 @@
         }
     }
 
-    function toggleGroup(groupName) {
-        if (collapsedGroups.has(groupName)) {
-            collapsedGroups.delete(groupName);
-        } else {
-            collapsedGroups.add(groupName);
-        }
-        renderTable();
-    }
+
 
     function filterCommandOptions(input) {
     }
@@ -256,18 +277,20 @@
     function applyFilters() {
         const searchInput = document.getElementById('search-input');
         const groupInput = document.getElementById('group-filter-value');
+        const typeInput = document.getElementById('type-filter-value');
 
         if (!searchInput) return;
 
         const searchTerm = searchInput.value.toLowerCase();
         const groupFilter = groupInput ? groupInput.value : '';
+        const typeFilter = typeInput ? typeInput.value : '';
 
         filteredDevices = devices.filter(device => {
             const matchSearch = device.code.toLowerCase().includes(searchTerm) ||
                 device.name.toLowerCase().includes(searchTerm) ||
                 device.ip.includes(searchTerm);
             const matchGroup = !groupFilter || device.group === groupFilter;
-            const matchType = true;
+            const matchType = !typeFilter || getDeviceType(device.group) === typeFilter;
 
             return matchSearch && matchGroup && matchType;
         });
@@ -289,72 +312,44 @@
         tbody.innerHTML = '';
 
         if (pageData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 20px;">Không tìm thấy kết quả</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 20px;">Không tìm thấy kết quả</td></tr>';
             return;
         }
 
-        // Group the current page data by Nhóm thiết bị
-        const groupedData = {};
         pageData.forEach((device, index) => {
-            const groupName = device.group || 'Khác';
-            if (!groupedData[groupName]) groupedData[groupName] = [];
-            groupedData[groupName].push({ ...device, originalIndex: start + index + 1 });
-        });
+            const tr = document.createElement('tr');
+            tr.className = `device-row`;
+            const isChecked = selectedDeviceIds.has(device.id);
 
-        // Render groups
-        Object.entries(groupedData).forEach(([groupName, devicesInGroup]) => {
-            const isCollapsed = collapsedGroups.has(groupName);
-
-            // Group Header Row
-            const headerRow = document.createElement('tr');
-            headerRow.className = `group-header-row ${isCollapsed ? 'collapsed' : ''}`;
-            headerRow.onclick = () => toggleGroup(groupName);
-            headerRow.innerHTML = `
-                <td colspan="9" class="group-header-cell">
-                    <div class="group-header-inner">
-                        <div class="group-header-col1"></div>
-                        <div class="group-header-col2"></div>
-                        <div class="group-header-col3">
-                            <span class="group-toggle-icon"><i class="fas fa-chevron-down"></i></span>
-                            <span>${groupName} (${devicesInGroup.length})</span>
-                        </div>
-                        <div class="group-header-rest"></div>
+            tr.innerHTML = `
+                <td>
+                    <input type="checkbox" class="row-checkbox" value="${device.id}" ${isChecked ? 'checked' : ''} onchange="toggleSelection(${device.id})">
+                </td>
+                <td>${start + index + 1}</td>
+                <td>${device.group}</td>
+                <td class="device-code">${device.code}</td>
+                <td class="device-name" style="font-weight: 500">${device.name}</td>
+                <td>
+                    <span class="type-badge ${getDeviceType(device.group) === 'Cố định' ? 'fixed' : 'mobile'}">
+                        ${getDeviceType(device.group)}
+                    </span>
+                </td>
+                <td>
+                    ${device.ip} 
+                    <i class="fa-regular fa-copy btn-copy" onclick="copyToClipboard('${device.ip}', this)" title="Copy IP"></i>
+                </td>
+                <td>${device.port}</td>
+                <td>${device.protocol}</td>
+                <td style="text-align: center;">
+                    <div class="action-icon" onclick="openEditModal(${device.id})" title="Chỉnh sửa">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="action-icon delete" onclick="confirmDeleteOne(${device.id})" title="Xóa">
+                        <i class="fas fa-trash"></i>
                     </div>
                 </td>
             `;
-            tbody.appendChild(headerRow);
-
-            // Device Rows
-            devicesInGroup.forEach(device => {
-                const tr = document.createElement('tr');
-                tr.className = `device-row ${isCollapsed ? 'hidden-row' : ''}`;
-                const isChecked = selectedDeviceIds.has(device.id);
-
-                tr.innerHTML = `
-                    <td>
-                        <input type="checkbox" class="row-checkbox" value="${device.id}" ${isChecked ? 'checked' : ''} onchange="toggleSelection(${device.id})">
-                    </td>
-                    <td>${device.originalIndex}</td>
-                    <td>${device.group}</td>
-                    <td class="device-code">${device.code}</td>
-                    <td class="device-name" style="font-weight: 500">${device.name}</td>
-                    <td>
-                        ${device.ip} 
-                        <i class="fa-regular fa-copy btn-copy" onclick="copyToClipboard('${device.ip}', this)" title="Copy IP"></i>
-                    </td>
-                    <td>${device.port}</td>
-                    <td>${device.protocol}</td>
-                    <td style="text-align: center;">
-                        <div class="action-icon" onclick="openEditModal(${device.id})" title="Chỉnh sửa">
-                            <i class="fas fa-edit"></i>
-                        </div>
-                        <div class="action-icon delete" onclick="confirmDeleteOne(${device.id})" title="Xóa">
-                            <i class="fas fa-trash"></i>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+            tbody.appendChild(tr);
         });
         updateSelectAllCheckbox();
         updateBulkDeleteButton();

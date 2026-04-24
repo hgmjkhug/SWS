@@ -30,17 +30,32 @@
               <input type="hidden" id="group-filter-value" value="" />
             </div>
           </div>
+          <div class="filter-group">
+            <span class="filter-title">Loại thiết bị</span>
+            <div class="custom-dropdown" id="type-dropdown">
+              <div
+                class="dropdown-selected"
+                onclick="toggleDeviceDropdown('type-dropdown')"
+              >
+                <span id="type-selected-label">Tất cả loại</span>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="dropdown-options" id="type-options">
+                <!-- Populated by JS -->
+              </div>
+              <input type="hidden" id="type-filter-value" value="" />
+            </div>
+          </div>
         </div>
 
         <div class="action-buttons">
           <button
-            class="btn btn-danger"
+            class="btn btn-outline-danger"
             id="bulk-delete-btn"
             onclick="deleteSelected()"
             disabled
           >
-            <i class="fas fa-trash"></i> Xóa (<span id="selected-count">0</span
-            >)
+            <i class="fas fa-trash"></i> (<span id="selected-count">0</span>)
           </button>
           <button class="btn btn-primary" onclick="openAddModal()">
             <i class="fas fa-plus"></i> Thêm mới
@@ -58,6 +73,7 @@
               <col class="col-group" />
               <col class="col-code" />
               <col class="col-name" />
+              <col class="col-type" />
               <col class="col-ip" />
               <col class="col-port" />
               <col class="col-protocol" />
@@ -76,6 +92,7 @@
                 <th>Nhóm thiết bị</th>
                 <th>Mã thiết bị</th>
                 <th>Tên thiết bị</th>
+                <th>Loại thiết bị</th>
                 <th>IP</th>
                 <th>Port</th>
                 <th>Giao thức</th>
@@ -92,6 +109,7 @@
               <col class="col-group" />
               <col class="col-code" />
               <col class="col-name" />
+              <col class="col-type" />
               <col class="col-ip" />
               <col class="col-port" />
               <col class="col-protocol" />

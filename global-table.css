@@ -217,7 +217,7 @@ table thead,
 .confirm-content {
     background: white;
     border-radius: 16px;
-    width: 400px;
+    width: 750px;
     padding: 24px;
     text-align: center;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -308,7 +308,7 @@ table thead,
     font-size: 14px;
     font-weight: 500;
     min-width: 280px;
-    max-width: 400px;
+    max-width: 750px;
     position: relative;
     overflow: hidden;
     transform: translateX(120%);
@@ -536,4 +536,19 @@ table thead,
 }
 .btn-outline-success:hover {
     background-color: #f0fdf4 !important;
+}
+
+.btn-outline-danger {
+    background-color: #fff !important;
+    border: 1px solid #ef4444 !important;
+    color: #ef4444 !important;
+}
+.btn-outline-danger:hover {
+    background-color: #fef2f2 !important;
+}
+.btn-outline-danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #e2e8f0 !important;
+    color: #94a3b8 !important;
 }

@@ -212,7 +212,7 @@ function showCollapsedFlyout(menuLinkElement) {
     flyout.addEventListener('mouseleave', () => {
         flyoutTimeout = setTimeout(() => {
             closeCollapsedFlyout();
-        }, 300);
+        }, 100);
     });
 
     // Close flyout when clicking outside
@@ -265,7 +265,7 @@ function initSidebarHover() {
             if (sidebar.classList.contains('collapsed')) {
                 flyoutTimeout = setTimeout(() => {
                     closeCollapsedFlyout();
-                }, 300);
+                }, 100);
             }
         });
     });

@@ -622,7 +622,7 @@ html, body {
     height: 32px;
     border: 1px solid #e2e8f0;
     background: transparent;
-    border-radius: 6px;
+    border-radius: 6px !important;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -646,6 +646,7 @@ html, body {
     background: #2563eb;
     color: white;
     border-color: #2563eb;
+    border-radius: 6px !important;
 }
 
 .page-numbers {
@@ -680,7 +681,7 @@ html, body {
 }
 
 .small-box {
-    max-width: 400px;
+    max-width: 750px;
 }
 
 .modal-header {

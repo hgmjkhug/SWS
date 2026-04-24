@@ -62,23 +62,17 @@
         const pageData = filteredData.slice(start, end);
 
         if (pageData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8;">Không tìm thấy kết quả phù hợp</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">Không tìm thấy kết quả phù hợp</td></tr>`;
         } else {
             pageData.forEach((item, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td width="40px"><input type="checkbox" class="row-checkbox" value="${item.id}" onchange="updateSelection()"></td>
-                    <td width="60px" style="text-align: center;">${start + index + 1}</td>
-                    <td width="150px" style="font-weight: 500; color: #1e293b;">${item.code}</td>
+                    <td><input type="checkbox" class="row-checkbox" value="${item.id}" onchange="updateSelection()"></td>
+                    <td style="text-align: center;">${start + index + 1}</td>
+                    <td style="font-weight: 500; color: #1e293b;">${item.code}</td>
                     <td style="font-weight: 500; color: #076EB8;">${item.name}</td>
                     <td style="color: #64748b;">${item.description || '-'}</td>
-                    <td width="100px" style="text-align: center;">
-                        <label class="switch">
-                            <input type="checkbox" ${item.status ? 'checked' : ''} onchange="toggleStatus(${item.id})">
-                            <span class="slider round"></span>
-                        </label>
-                    </td>
-                    <td width="120px" style="text-align: center;">
+                    <td style="text-align: center;">
                         <div style="display: flex; gap: 8px; justify-content: center;">
                             <button class="btn-icon edit" onclick="openModal(${item.id})" title="Chỉnh sửa">
                                 <i class="fas fa-edit"></i>
@@ -169,18 +163,7 @@
         if (checkAll) checkAll.checked = selected.length === checkboxes.length && checkboxes.length > 0;
     }
 
-    // Status
-    window.toggleStatus = function(id) {
-        const item = products.find(p => p.id === id);
-        if (item) {
-            item.status = !item.status;
-            if (window.parent && window.parent.showToast) {
-                window.parent.showToast(`Đã ${item.status ? 'bật' : 'tắt'} trạng thái sử dụng cho ${item.code}`, 'success');
-            } else if (typeof showToast === 'function') {
-                showToast(`Đã ${item.status ? 'bật' : 'tắt'} trạng thái sử dụng cho ${item.code}`, 'success');
-            }
-        }
-    }
+
 
     // Modal
     window.openModal = function(id = null) {
@@ -199,7 +182,6 @@
                 document.getElementById('node-code').value = item.code;
                 document.getElementById('node-name').value = item.name;
                 document.getElementById('node-description').value = item.description;
-                document.getElementById('node-status').checked = item.status;
             }
         } else {
             title.innerText = 'Thêm mới dòng sản phẩm';
@@ -217,7 +199,6 @@
         const code = document.getElementById('node-code').value.trim();
         const name = document.getElementById('node-name').value.trim();
         const description = document.getElementById('node-description').value.trim();
-        const status = document.getElementById('node-status').checked;
 
         if (!code || !name) {
             if (typeof showToast === 'function') showToast('Vui lòng nhập đầy đủ thông tin bắt buộc', 'warning');
@@ -228,7 +209,7 @@
         if (id) {
             const index = products.findIndex(p => p.id == id);
             if (index !== -1) {
-                products[index] = { ...products[index], code, name, description, status };
+                products[index] = { ...products[index], code, name, description };
                 if (typeof showToast === 'function') showToast('Cập nhật thành công', 'success');
             }
         } else {
@@ -237,7 +218,6 @@
                 code,
                 name,
                 description,
-                status,
                 is_deleted: false
             };
             products.unshift(newItem);

@@ -254,7 +254,7 @@ function checkSelection() {
     const btn = document.getElementById('delete-selected-btn');
     if (btn) {
         btn.disabled = selected.length === 0;
-        btn.innerHTML = `<i class="fas fa-trash"></i> Xóa (${selected.length})`;
+        btn.innerHTML = `<i class="fas fa-trash"></i> (${selected.length})`;
     }
 }
 

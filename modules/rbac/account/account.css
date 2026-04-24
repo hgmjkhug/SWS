@@ -418,7 +418,7 @@ input:checked + .slider:before { transform: translateX(20px); }
     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
     animation: modalSlide 0.3s ease-out;
 }
-.small-box { width: 400px; }
+.small-box { width: 750px; }
 
 @keyframes modalSlide {
     from { transform: translateY(-20px); opacity: 0; }

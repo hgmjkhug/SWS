@@ -120,7 +120,7 @@
         const delBtn = document.getElementById('delete-selected-btn');
         if (delBtn) {
             delBtn.disabled = count === 0;
-            delBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i> Xóa (${count})`;
+            delBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i> (${count})`;
         }
     }
 

@@ -265,7 +265,7 @@ input[type="text"], select, textarea { width: 100%; padding: 10px; border: 1px s
 /* Confirm Modal */
 .modal-confirm { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1100; }
 .modal-confirm.show { display: flex; }
-.confirm-content { background: white; padding: 32px; border-radius: 16px; text-align: center; max-width: 400px; }
+.confirm-content { background: white; padding: 32px; border-radius: 16px; text-align: center; max-width: 750px; }
 .confirm-icon-box { width: 64px; height: 64px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px; }
 .confirm-title { font-size: 20px; margin-bottom: 8px; }
 .confirm-message { color: #64748b; margin-bottom: 24px; }

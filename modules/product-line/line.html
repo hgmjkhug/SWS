@@ -1,4 +1,4 @@
-<<body>
+<body>
     <link rel="stylesheet" href="line.css">
 
     <div id="main-view">
@@ -14,8 +14,8 @@
                     </div>
                 </div>
                 <div class="action-buttons">
-                    <button class="btn btn-danger" id="bulk-delete-btn" onclick="handleBulkDelete()" disabled>
-                        <i class="fas fa-trash"></i> Xóa (<span id="selected-count">0</span>)
+                    <button class="btn btn-outline-danger" id="bulk-delete-btn" onclick="handleBulkDelete()" disabled>
+                        <i class="fas fa-trash"></i> (<span id="selected-count">0</span>)
                     </button>
                     <button class="btn btn-primary" onclick="openModal()">
                         <i class="fas fa-plus"></i> Thêm mới
@@ -28,13 +28,12 @@
                 <div class="table-scroll-head">
                     <table class="line-table">
                         <colgroup>
-                            <col style="width: 40px;">
-                            <col style="width: 60px;">
-                            <col style="width: 250px;">
-                            <col style="width: auto;">
-                            <col style="width: auto;">
-                            <col style="width: 100px;">
-                            <col style="width: 120px;">
+                            <col style="width: 4%;">
+                            <col style="width: 5%;">
+                            <col style="width: 18%;">
+                            <col style="width: 33%;">
+                            <col style="width: 32%;">
+                            <col style="width: 8%;">
                         </colgroup>
                         <thead>
                             <tr>
@@ -45,7 +44,6 @@
                                 <th>Mã dòng sản phẩm</th>
                                 <th>Tên dòng sản phẩm</th>
                                 <th>Mô tả</th>
-                                <th style="text-align: center;">Sử dụng</th>
                                 <th style="text-align: center;">Thao tác</th>
                             </tr>
                         </thead>
@@ -54,13 +52,12 @@
                 <div class="table-scroll-body">
                     <table class="line-table">
                         <colgroup>
-                            <col style="width: 40px;">
-                            <col style="width: 60px;">
-                            <col style="width: 250px;">
-                            <col style="width: auto;">
-                            <col style="width: auto;">
-                            <col style="width: 100px;">
-                            <col style="width: 120px;">
+                            <col style="width: 4%;">
+                            <col style="width: 5%;">
+                            <col style="width: 18%;">
+                            <col style="width: 33%;">
+                            <col style="width: 32%;">
+                            <col style="width: 8%;">
                         </colgroup>
                         <tbody id="line-table-body">
                             <!-- Data rendered by JS -->
@@ -112,15 +109,7 @@
                         <label>Mô tả</label>
                         <textarea id="node-description" rows="3" placeholder="Nhập mô tả..."></textarea>
                     </div>
-                    <div class="form-group">
-                        <div class="toggle-container">
-                            <span class="toggle-label">Sử dụng</span>
-                            <label class="switch">
-                                <input type="checkbox" id="node-status" checked>
-                                <span class="slider round"></span>
-                            </label>
-                        </div>
-                    </div>
+
                 </form>
             </div>
             <div class="modal-footer">
@@ -132,7 +121,7 @@
 
     <!-- Confirmation Modal -->
     <div id="delete-confirm-modal" class="modal-overlay">
-        <div class="modal-confirm">
+        <div class="confirm-content">
             <div class="confirm-icon warning">
                 <i class="fas fa-exclamation-triangle"></i>
             </div>

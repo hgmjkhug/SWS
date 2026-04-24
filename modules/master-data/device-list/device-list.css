@@ -396,6 +396,7 @@ html, body {
 /* ── Column widths via colgroup (syncs both tables) ── */
 .col-chk      { width: 45px; }
 .col-stt      { width: 55px; }
+.col-type     { width: 120px; }
 .col-group    { width: 140px; }
 .col-code     { width: 120px; }
 .col-name     { width: 180px; }
@@ -407,26 +408,28 @@ html, body {
 /* ── Header alignment ── */
 .device-table thead th:nth-child(1),
 .device-table thead th:nth-child(2),
-.device-table thead th:nth-child(7),
-.device-table thead th:nth-child(8),
-.device-table thead th:nth-child(9) { text-align: center !important; padding-left: 0; padding-right: 0; }
-
 .device-table thead th:nth-child(3),
+.device-table thead th:nth-child(6),
+.device-table thead th:nth-child(8),
+.device-table thead th:nth-child(9),
+.device-table thead th:nth-child(10) { text-align: center !important; padding-left: 0; padding-right: 0; }
+
 .device-table thead th:nth-child(4),
 .device-table thead th:nth-child(5),
-.device-table thead th:nth-child(6) { text-align: left !important; }
+.device-table thead th:nth-child(7) { text-align: left !important; }
 
 /* ── Body row alignment (target .device-row td only, not group headers) ── */
 .device-row td:nth-child(1),
 .device-row td:nth-child(2),
-.device-row td:nth-child(7),
-.device-row td:nth-child(8),
-.device-row td:nth-child(9) { text-align: center !important; padding-left: 0; padding-right: 0; }
-
 .device-row td:nth-child(3),
+.device-row td:nth-child(6),
+.device-row td:nth-child(8),
+.device-row td:nth-child(9),
+.device-row td:nth-child(10) { text-align: center !important; padding-left: 0; padding-right: 0; }
+
 .device-row td:nth-child(4),
 .device-row td:nth-child(5),
-.device-row td:nth-child(6) { text-align: left !important; }
+.device-row td:nth-child(7) { text-align: left !important; }
 .device-table td {
     white-space: nowrap;
     overflow: hidden;
@@ -439,85 +442,27 @@ html, body {
     white-space: nowrap;
 }
 
-/* Accordion Group Header Styles */
-.group-header-row {
+/* Device Type Badges */
+.type-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 80px;
+}
+
+.type-badge.fixed {
     background-color: #f1f5f9;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    color: #475569;
+    border: 1px solid #e2e8f0;
 }
 
-.group-header-row:hover {
-    background-color: #e2e8f0;
-}
-
-.group-header-row td {
-    padding: 10px 16px !important;
-    font-weight: 600;
-    color: #334155;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.group-header-row td:nth-child(3) {
-    text-align: center !important;
-    white-space: normal;
-    overflow: visible;
-}
-
-/* Group header flex layout to align text precisely under Nhóm thiết bị column */
-.group-header-cell {
-    padding: 0 !important;
-}
-
-.group-header-inner {
-    display: flex;
-    align-items: stretch;
-    min-height: 42px;
-}
-
-.group-header-col1 {
-    width: 45px;
-    flex-shrink: 0;
-}
-
-.group-header-col2 {
-    width: 55px;
-    flex-shrink: 0;
-}
-
-.group-header-col3 {
-    width: 140px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    font-weight: 600;
-    color: #334155;
-    font-size: 13px;
-    padding: 10px 4px;
-}
-
-.group-header-rest {
-    flex: 1;
-}
-
-.group-title-content {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.group-toggle-icon {
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s;
-}
-
-.group-header-row.collapsed .group-toggle-icon {
-    transform: rotate(-90deg);
+.type-badge.mobile {
+    background-color: #ecfdf5;
+    color: #059669;
+    border: 1px solid #d1fae5;
 }
 
 .device-row.hidden-row {
@@ -623,7 +568,7 @@ html, body {
     color: #2563eb;
     border-color: transparent;
     border-top: 2px solid #2563eb;
-    border-radius: 0;
+    border-radius: 6px !important;
 }
 
 .page-numbers {
@@ -658,7 +603,7 @@ html, body {
 }
 
 .small-box {
-    max-width: 400px;
+    max-width: 750px;
 }
 
 .modal-header {
