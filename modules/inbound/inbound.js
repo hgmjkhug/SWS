@@ -1969,7 +1969,7 @@ function initImportDragAndDrop() {
 
 function downloadSampleImport() {
     const link = document.createElement('a');
-    link.href = '../../icons/files/sample_import_inboundOrder.xlsx';
+    link.href = '../../asset/files/sample_import_inboundOrder.xlsx';
     link.download = 'sample_import_inboundOrder.xlsx';
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }

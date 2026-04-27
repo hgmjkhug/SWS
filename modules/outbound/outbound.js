@@ -2537,7 +2537,7 @@
 
   function downloadSampleOutboundImport() {
     const link = document.createElement("a");
-    link.href = "../../icons/files/sample_import_outboundOrder.xlsx";
+    link.href = "../../asset/files/sample_import_outboundOrder.xlsx";
     link.download = "sample_import_outboundOrder.xlsx";
     document.body.appendChild(link);
     link.click();

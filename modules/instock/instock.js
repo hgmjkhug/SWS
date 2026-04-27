@@ -1048,7 +1048,7 @@ async function exportInstockExcel() {
     let ws;
 
     const templatePaths = [
-      'icons/files/instock_report.xlsx',
+      'asset/files/instock_report.xlsx',
       'instock_report.xlsx',
       './instock_report.xlsx',
     ];

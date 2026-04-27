@@ -745,7 +745,7 @@ function renderPaginationBar(totalItems) {
                                     '<span style="background: #076EB8; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px;">1</span>' +
                                     'Tải file mẫu kiểm kê' +
                                 '</div>' +
-                                '<a href="icons/files/auto_audit.xlsx" download class="sample-download-card" style="padding: 20px;">' +
+                                '<a href="asset/files/auto_audit.xlsx" download class="sample-download-card" style="padding: 20px;">' +
                                     '<div class="file-icon" style="width: 44px; height: 44px; font-size: 22px;"><i class="fa-solid fa-file-arrow-down"></i></div>' +
                                     '<div class="file-info" style="margin-left: 15px;">' +
                                         '<div class="file-name" style="font-size: 15px;">auto_audit.xlsx</div>' +
