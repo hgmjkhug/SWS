@@ -6,3 +6,4 @@ autoDeploy.bat
 autoRun.bat
 LICENSE
 .gitignore
+.dockerignore
