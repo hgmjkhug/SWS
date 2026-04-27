@@ -122,8 +122,11 @@
     var STATUS_MAP = {
         'NEW': { label: 'Mới tạo', class: 'status-NEW' },
         'CHECKED': { label: 'Đã kiểm kê', class: 'status-CHECKED' },
-        'PROCESSING': { label: 'Đang thực hiện', class: 'status-PROCESSING' },
-        'COMPLETED': { label: 'Hoàn thành', class: 'status-COMPLETED' }
+        'IMPORTING': { label: 'Đang nhập kho', class: 'status-IMPORTING' },
+        'INSTOCK': { label: 'Đã vào kho', class: 'status-INSTOCK' },
+        'EXPORTING': { label: 'Đang xuất kho', class: 'status-EXPORTING' },
+        'COMPLETED': { label: 'Hoàn thành', class: 'status-COMPLETED' },
+        'CANCELLED': { label: 'Đã hủy', class: 'status-CANCELLED' }
     };
 
     var MOCK_BATCHES = [];
@@ -145,8 +148,12 @@
                     }
 
                     // Migration to new lifecycle statuses
-                    if (['IMPORTING', 'INSTOCK', 'EXPORTING'].indexOf(obj.status) !== -1) obj.status = 'PROCESSING';
+                    if (obj.status === 'PROCESSING') obj.status = 'IMPORTING';
                     if (obj.status === 'OUTSTOCK') obj.status = 'COMPLETED';
+                    
+                    var validStatuses = Object.keys(STATUS_MAP);
+                    if (validStatuses.indexOf(obj.status) === -1) obj.status = 'NEW';
+
                     return obj;
                 }).filter(function(b) { return b && b.createdAt && !isNaN(b.createdAt.getTime()); }) : [];
                 
@@ -191,7 +198,7 @@
     }
 
     function generateMockData() {
-        var statusList = ['NEW', 'CHECKED', 'PROCESSING', 'COMPLETED'];
+        var statusList = ['NEW', 'CHECKED', 'IMPORTING', 'INSTOCK', 'EXPORTING', 'COMPLETED'];
         var codes = ['CN-BN', 'JP-BN'];
         return Array.from({ length: 50 }, function(_, i) {
             var status = (i < 10) ? 'CHECKED' : statusList[i % 4];
@@ -1106,7 +1113,7 @@ function renderPaginationBar(totalItems) {
         var steps = [
             {
                 key: 'created', label: 'Khởi tạo lô hàng',
-                from: 1, to: 2, color: '#076EB8',
+                from: 1, to: 2, color: '#64748b',
                 done: true,
                 date: formatDate(b.createdAt),
                 details: [
@@ -1115,43 +1122,53 @@ function renderPaginationBar(totalItems) {
                 ]
             },
             {
-                key: 'processing', label: 'Hệ thống xử lý dữ liệu',
-                from: 2, to: 2, type: 'self', color: '#7c3aed',
-                done: ['IMPORTING', 'INSTOCK', 'EXPORTING', 'OUTSTOCK'].indexOf(b.status) !== -1,
-                date: ['IMPORTING', 'INSTOCK', 'EXPORTING', 'OUTSTOCK'].indexOf(b.status) !== -1 ? formatDate(b.createdAt) : null,
+                key: 'checked', label: 'Kiểm kê & Phân loại',
+                from: 2, to: 2, type: 'self', color: '#f59e0b',
+                done: ['CHECKED', 'IMPORTING', 'INSTOCK', 'EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1,
+                date: ['CHECKED', 'IMPORTING', 'INSTOCK', 'EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1 ? formatDate(b.createdAt) : null,
                 details: [
-                    { label: 'Phân loại hàng',  value: b.productType },
-                    { label: 'Phẩm cấp tiêu chuẩn', value: (b.grades || []).join(', ') }
+                    { label: 'Số lượng tổng',  value: b.totalQty + ' thùng' },
+                    { label: 'Phẩm cấp', value: (b.grades || ['A', 'B']).join(', ') }
                 ]
             },
             {
-                key: 'instock', label: 'Xác nhận nhập kho',
-                from: 2, to: 3, color: '#16a34a',
-                done: ['INSTOCK', 'EXPORTING', 'OUTSTOCK'].indexOf(b.status) !== -1,
-                date: b.importDate ? formatDate(b.importDate) : null,
+                key: 'importing', label: 'Thực hiện nhập kho',
+                from: 2, to: 3, color: '#0ea5e9',
+                done: ['IMPORTING', 'INSTOCK', 'EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1,
+                date: b.importDate ? formatDate(b.importDate) : (['IMPORTING', 'INSTOCK', 'EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1 ? formatDate(b.createdAt) : null),
                 details: [
-                    { label: 'Thời gian nhập', value: b.importDate ? formatDate(b.importDate) : 'Chưa nhập' },
-                    { label: 'Vị trí lưu kho',    value: 'Kho tổng' }
+                    { label: 'Trạng thái', value: (['INSTOCK', 'EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1) ? 'Đã nhập xong' : (b.status === 'IMPORTING' ? 'Đang thực hiện' : 'Chưa bắt đầu') },
+                    { label: 'Số lượng thực nhập',    value: (b.receivedQty || 0) + ' thùng' }
                 ]
             },
             {
-                key: 'outstock', label: 'Yêu cầu xuất kho',
-                from: 3, to: 4, color: '#ea580c',
-                done: b.status === 'OUTSTOCK',
-                date: b.exportDate ? formatDate(b.exportDate) : null,
+                key: 'instock', label: 'Lưu kho & Bảo quản',
+                from: 3, to: 3, type: 'self', color: '#10b981',
+                done: ['INSTOCK', 'EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1,
+                date: b.importDate ? formatDate(b.importDate) : (['INSTOCK', 'EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1 ? formatDate(b.createdAt) : null),
                 details: [
-                    { label: 'Thời gian xuất', value: b.exportDate ? formatDate(b.exportDate) : 'Chưa xuất' },
-                    { label: 'Địa điểm giao hàng',  value: 'Công trình dự án' }
+                    { label: 'Vị trí', value: 'Khu vực A - Tầng 2' },
+                    { label: 'Nhiệt độ bảo quản',  value: '13°C - 15°C' }
                 ]
             },
             {
-                key: 'done', label: 'Hoàn tất quy trình',
-                from: 4, to: 1, type: 'return', color: '#2563eb',
-                done: b.status === 'OUTSTOCK',
-                date: b.exportDate ? formatDate(b.exportDate) : null,
+                key: 'exporting', label: 'Yêu cầu xuất kho',
+                from: 3, to: 4, color: '#f97316',
+                done: ['EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1,
+                date: b.exportDate ? formatDate(b.exportDate) : (['EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1 ? formatDate(b.createdAt) : null),
                 details: [
-                    { label: 'Trạng thái cuối', value: (STATUS_MAP[b.status] || { label: b.status }).label },
-                    { label: 'Đối soát kết quả', value: b.status === 'OUTSTOCK' ? 'Đã bàn giao đầy đủ' : 'Đang xử lý' }
+                    { label: 'Phương thức', value: 'FIFO (Nhập trước xuất trước)' },
+                    { label: 'Số lượng xuất', value: (b.exportedQty || 0) + ' thùng' }
+                ]
+            },
+            {
+                key: 'done', label: 'Bàn giao & Hoàn tất',
+                from: 4, to: 1, type: 'return', color: '#076EB8',
+                done: b.status === 'COMPLETED',
+                date: b.exportDate ? formatDate(b.exportDate) : (b.status === 'COMPLETED' ? formatDate(b.createdAt) : null),
+                details: [
+                    { label: 'Đơn vị vận chuyển', value: b.deliverer || 'N/A' },
+                    { label: 'Trạng thái cuối', value: 'Giao hàng thành công' }
                 ]
             }
         ];

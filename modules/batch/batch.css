@@ -221,8 +221,11 @@ body {
 
 .status-NEW { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 .status-CHECKED { background: #fef9c3; color: #a16207; border: 1px solid #fde047; }
-.status-PROCESSING { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.status-IMPORTING { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+.status-INSTOCK { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.status-EXPORTING { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
 .status-COMPLETED { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.status-CANCELLED { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
 
 /* Action Buttons */
 .btn-icon {
