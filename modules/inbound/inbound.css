@@ -1108,7 +1108,7 @@ input, button, select, textarea {
 
 /* PDA Modal specific */
 .pda-modal {
-    min-width: 550px;
+    width: 55%;
 }
 
 .pda-modal .modal-body {
