@@ -243,6 +243,9 @@
                             <button class="action-icon" onclick="openEditModal(${p.id})" title="Chỉnh sửa" ${!isNew ? 'disabled' : ''}>
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
+                            <button class="action-icon print" onclick="printContainerBarcode(${p.id})" title="In mã Barcode">
+                                <i class="fa-solid fa-print"></i>
+                            </button>
                             <button class="action-icon delete" onclick="showDeleteSinglePopover(${p.id})" title="Xóa" ${!isNew ? 'disabled' : ''}>
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
@@ -555,6 +558,74 @@
     function importExcel() { showToast('Chức năng nhập Excel đang phát triển!', 'info'); }
     function exportExcel() { showToast('Đang xuất Excel...', 'success'); }
 
+    function printContainerBarcode(id) {
+        const p = pallets.find(x => x.id === id);
+        if (!p) return;
+
+        const barcodeData = `${p.code}`;
+        const barcodeApiUrl = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encodeURIComponent(barcodeData)}`;
+        const typeName = containerTypes.find(t => t.code === p.typeCode)?.name || 'Vật chứa';
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Barcode - ${p.code}</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    padding: 20px;
+                    background: #fff;
+                }
+                .barcode-label {
+                    display: inline-block;
+                    border: 1px solid #000;
+                    padding: 15px;
+                    text-align: center;
+                }
+                .barcode-image {
+                    display: block;
+                    margin-bottom: 10px;
+                }
+                .barcode-image img {
+                    max-width: 100%;
+                    height: 80px;
+                    object-fit: contain;
+                }
+                .info {
+                    text-align: center;
+                }
+                .code {
+                    font-size: 24px;
+                    font-weight: 700;
+                    margin-bottom: 5px;
+                }
+                .type {
+                    font-size: 16px;
+                }
+                @media print {
+                    .no-print { display: none; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="barcode-label">
+                <div class="barcode-image">
+                    <img src="${barcodeApiUrl}" alt="Barcode" onload="window.print()">
+                </div>
+                <div class="info">
+                    <div class="code">${p.code}</div>
+                    <div class="type">${typeName}</div>
+                </div>
+            </div>
+        </body>
+        </html>
+    `);
+        printWindow.document.close();
+    }
+
     // Exports
     window.filterPallets = filterPallets;
     window.toggleStatusDropdown = toggleStatusDropdown;
@@ -588,6 +659,7 @@
     window.selectTypeFilter = selectTypeFilter;
     window.importExcel = importExcel;
     window.exportExcel = exportExcel;
+    window.printContainerBarcode = printContainerBarcode;
 
     initModule();
 })();

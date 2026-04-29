@@ -2818,26 +2818,26 @@
             html += '<div class="area-card-body">';
 
             // Tầng tháp (Searchable Combobox)
-            var selectedModule = area.selectedModule || (area.moduleId !== null ? moduleData.find(function(m) { return m.id === area.moduleId; }) : null);
-            var displayModule = selectedModule ? (selectedModule.code + ' - ' + selectedModule.name) : '';
-            var hasModuleSelection = selectedModule ? ' has-selection' : '';
+            // var selectedModule = area.selectedModule || (area.moduleId !== null ? moduleData.find(function(m) { return m.id === area.moduleId; }) : null);
+            // var displayModule = selectedModule ? (selectedModule.code + ' - ' + selectedModule.name) : '';
+            // var hasModuleSelection = selectedModule ? ' has-selection' : '';
 
-            html += '<div class="area-field init-equipment-section" style="padding: 0; margin-bottom: 12px;">';
-            html += '<span class="area-field-label" style="padding-top: 10px;">Tầng tháp<span style="color: red;">*</span></span>';
-            html += '<div class="init-equipment-container" style="flex: 1;">';
-            html += '  <div class="init-equipment-search-wrapper' + hasModuleSelection + '">';
-            html += '    <div class="init-equipment-search">';
-            html += '      <i class="fas fa-search search-icon"></i>';
-            html += '      <input type="text" id="areaModuleSearch-' + area.id + '" value="' + displayModule + '" placeholder="Chọn tầng tháp..." onfocus="showAreaModuleList(' + area.id + ')" oninput="filterAreaModuleList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selectedModule ? 'readonly' : '') + '>';
+            // html += '<div class="area-field init-equipment-section" style="padding: 0; margin-bottom: 12px;">';
+            // html += '<span class="area-field-label" style="padding-top: 10px;">Tầng tháp<span style="color: red;">*</span></span>';
+            // html += '<div class="init-equipment-container" style="flex: 1;">';
+            // html += '  <div class="init-equipment-search-wrapper' + hasModuleSelection + '">';
+            // html += '    <div class="init-equipment-search">';
+            // html += '      <i class="fas fa-search search-icon"></i>';
+            // html += '      <input type="text" id="areaModuleSearch-' + area.id + '" value="' + displayModule + '" placeholder="Chọn tầng tháp..." onfocus="showAreaModuleList(' + area.id + ')" oninput="filterAreaModuleList(' + area.id + ')" ' + (isReadonly ? 'disabled' : '') + ' ' + (selectedModule ? 'readonly' : '') + '>';
             
-            if (selectedModule && !isReadonly) {
-                html += '      <i class="fas fa-times clear-icon" title="Xóa" onclick="removeAreaModule(' + area.id + ')"></i>';
-            }
-            html += '      <i class="fas fa-chevron-down toggle-icon" onclick="' + (isReadonly ? '' : 'toggleAreaModuleList(' + area.id + ')') + '"></i>';
-            html += '    </div>';
-            html += '    <div class="init-equipment-list" id="areaModuleList-' + area.id + '" style="max-height: 200px; overflow-y: auto;"></div>';
-            html += '  </div>';
-            html += '</div></div>';
+            // if (selectedModule && !isReadonly) {
+            //     html += '      <i class="fas fa-times clear-icon" title="Xóa" onclick="removeAreaModule(' + area.id + ')"></i>';
+            // }
+            // html += '      <i class="fas fa-chevron-down toggle-icon" onclick="' + (isReadonly ? '' : 'toggleAreaModuleList(' + area.id + ')') + '"></i>';
+            // html += '    </div>';
+            // html += '    <div class="init-equipment-list" id="areaModuleList-' + area.id + '" style="max-height: 200px; overflow-y: auto;"></div>';
+            // html += '  </div>';
+            // html += '</div></div>';
 
             // Loại khu vực (Searchable Combobox)
             var selAreaType = area.selectedAreaType || null;
@@ -2947,7 +2947,7 @@
             }
 
             html += '<div class="area-field area-direction" style="margin-top: 15px;">';
-            html += '<span class="area-field-label">Chiều nhập<span style="color: red;">*</span></span>';
+            html += '<span class="area-field-label">Chiều nhập trục x<span style="color: red;">*</span></span>';
             html += '<div class="area-field-value">';
             html += '<div class="area-dropdown' + (isReadonly ? ' disabled' : '') + '" id="areaDirectionDropdown-' + area.id + '">';
             html += '<div class="area-dropdown-toggle" onclick="' + (isReadonly ? '' : 'toggleAreaDirectionDropdown(' + area.id + ')') + '">';
@@ -2963,6 +2963,38 @@
             html += '</div></div>';
             html += '</div></div>';
             
+               var directionOptions = [
+                { value: '', label: 'Chọn chiều nhập' },
+                { value: 'top-down', label: 'Trên xuống dưới' },
+                { value: 'bottom-up', label: 'Dưới lên trên' },
+                { value: 'left-right', label: 'Trái sang phải' },
+                { value: 'right-left', label: 'Phải sang trái' }
+            ];
+            
+            var currentDirectionLabel = 'Chọn chiều nhập';
+            for (var d = 0; d < directionOptions.length; d++) {
+                if (directionOptions[d].value === area.direction) {
+                    currentDirectionLabel = directionOptions[d].label;
+                    break;
+                }
+            }
+
+            html += '<div class="area-field area-direction" style="margin-top: 15px;">';
+            html += '<span class="area-field-label">Chiều nhập trục y<span style="color: red;">*</span></span>';
+            html += '<div class="area-field-value">';
+            html += '<div class="area-dropdown' + (isReadonly ? ' disabled' : '') + '" id="areaDirectionDropdown-' + area.id + '">';
+            html += '<div class="area-dropdown-toggle" onclick="' + (isReadonly ? '' : 'toggleAreaDirectionDropdown(' + area.id + ')') + '">';
+            html += '<span>' + currentDirectionLabel + '</span>';
+            html += '<i class="fas fa-chevron-down" style="font-size: 12px; color: #8c8c8c"></i>';
+            html += '</div>';
+            html += '<div class="area-dropdown-menu">';
+            for (var dIdx = 0; dIdx < directionOptions.length; dIdx++) {
+                var opt = directionOptions[dIdx];
+                if (opt.value === '') continue;
+                html += '<div class="area-dropdown-item' + (area.direction === opt.value ? ' selected' : '') + '" onclick="selectAreaDirection(' + area.id + ', \'' + opt.value + '\')">' + opt.label + '</div>';
+            }
+            html += '</div></div>';
+            html += '</div></div>';
             html += '</div>'; // end area-card-body
             
             // Actions

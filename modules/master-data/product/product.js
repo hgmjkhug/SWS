@@ -388,12 +388,14 @@
     };
 
     // Close filter dropdowns when clicking outside
-    window.addEventListener('click', function (e) {
+    if (window._productFilterClick) window.removeEventListener('click', window._productFilterClick);
+    window._productFilterClick = function (e) {
         if (!e.target.closest('.custom-dropdown')) {
             const menus = document.querySelectorAll('.custom-dropdown-menu');
             menus.forEach(m => m.classList.remove('show'));
         }
-    });
+    };
+    window.addEventListener('click', window._productFilterClick);
 
     window.selectBulkOption = function (value, label) {
         document.getElementById('bulk-method-select').value = value;
@@ -537,7 +539,7 @@
                 <td>
                     <div style="display: flex; gap: 4px; justify-content: center;">
                         <div class="action-icon" title="Xem/Sửa" onclick="openProductModal('${item.id}')"><i class="fas fa-edit"></i></div>
-                        <div class="action-icon print" title="In mã QR/Mã SP" onclick="printQR('${item.id}')"><i class="fas fa-print"></i></div>
+                        <div class="action-icon print" title="In mã Barcode/Mã SP" onclick="printQR('${item.id}')"><i class="fas fa-print"></i></div>
                         <div class="action-icon delete" title="Xóa" onclick="openDeleteModal('${item.id}')"><i class="fas fa-trash"></i></div>
                     </div>
                 </td>
@@ -857,26 +859,28 @@
     };
 
     // Close dropdown when clicking outside
-    window.addEventListener('click', function (e) {
+    if (window._productDropdownClick) window.removeEventListener('click', window._productDropdownClick);
+    window._productDropdownClick = function (e) {
         // Unit
         const uDropdown = document.getElementById('unit-dropdown');
         if (uDropdown && !uDropdown.contains(e.target)) {
             uDropdown.classList.remove('open');
-            document.getElementById('unit-dropdown-menu').classList.remove('show');
+            document.getElementById('unit-dropdown-menu')?.classList.remove('show');
         }
         // Group
         const gDropdown = document.getElementById('group-dropdown');
         if (gDropdown && !gDropdown.contains(e.target)) {
             gDropdown.classList.remove('open');
-            document.getElementById('group-dropdown-menu').classList.remove('show');
+            document.getElementById('group-dropdown-menu')?.classList.remove('show');
         }
         // Spec
         const sDropdown = document.getElementById('spec-dropdown');
         if (sDropdown && !sDropdown.contains(e.target)) {
             sDropdown.classList.remove('open');
-            document.getElementById('spec-dropdown-menu').classList.remove('show');
+            document.getElementById('spec-dropdown-menu')?.classList.remove('show');
         }
-    });
+    };
+    window.addEventListener('click', window._productDropdownClick);
 
     window.toggleSpecDropdown = function (forceOpen = null) {
         const dropdown = document.getElementById('spec-dropdown');
@@ -1040,12 +1044,14 @@
     };
 
     // Close confirm modal on outside click
-    window.addEventListener('click', function (e) {
+    if (window._productConfirmClick) window.removeEventListener('click', window._productConfirmClick);
+    window._productConfirmClick = function (e) {
         const cMdl = document.getElementById('confirmModal');
         if (cMdl && cMdl.classList.contains('show') && e.target === cMdl) {
             closeConfirmModal();
         }
-    });
+    };
+    window.addEventListener('click', window._productConfirmClick);
 
     // Delete Modal
     window.openDeleteModal = function (id) {
@@ -1277,20 +1283,20 @@
         }, 1000);
     };
 
-    // Print QR Code
+    // Print Barcode
     window.printQR = function (id) {
         const prod = products.find(p => p.id === id);
         if (!prod) return;
 
-        const qrData = `${prod.code}`;
-        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
+        const barcodeData = `${prod.code}`;
+        const barcodeApiUrl = `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encodeURIComponent(barcodeData)}`;
 
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
-            <title>QR - ${prod.code}</title>
+            <title>Barcode - ${prod.code}</title>
             <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; }
                 body {
@@ -1298,18 +1304,20 @@
                     padding: 20px;
                     background: #fff;
                 }
-                .qr-label {
+                .barcode-label {
                     display: inline-block;
                     border: 1px solid #000;
                     padding: 15px;
+                    text-align: center;
                 }
-                .qr-code {
+                .barcode-image {
                     display: block;
                     margin-bottom: 10px;
                 }
-                .qr-code img {
-                    width: 150px;
-                    height: 150px;
+                .barcode-image img {
+                    max-width: 100%;
+                    height: 80px;
+                    object-fit: contain;
                 }
                 .info {
                     text-align: center;
@@ -1328,9 +1336,9 @@
             </style>
         </head>
         <body>
-            <div class="qr-label">
-                <div class="qr-code">
-                    <img src="${qrApiUrl}" alt="QR Code" onload="window.print()">
+            <div class="barcode-label">
+                <div class="barcode-image">
+                    <img src="${barcodeApiUrl}" alt="Barcode" onload="window.print()">
                 </div>
                 <div class="info">
                     <div class="code">${prod.code}</div>
