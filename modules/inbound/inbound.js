@@ -1682,29 +1682,115 @@ document.addEventListener('click', function (e) {
 let html5QrCode = null;
 let currentScanField = '';
 
+let availableCameras = [];
+let currentCameraIndex = 0;
+
 function openQRScanner(fieldId) {
     currentScanField = fieldId;
     const overlay = document.getElementById('qr-scanner-overlay');
-    if (overlay) { overlay.classList.add('active'); overlay.style.display = 'flex'; }
+    if (overlay) { 
+        overlay.classList.add('active'); 
+        overlay.style.display = 'flex'; 
+    }
     switchScannerTab('camera');
+    
     if (!html5QrCode) html5QrCode = new Html5Qrcode('qr-reader');
 
-    html5QrCode.start({ facingMode: 'environment' }, { fps: 15, qrbox: { width: 250, height: 250 } },
-        decodedText => {
-            const targetField = document.getElementById(currentScanField);
-            if (targetField) targetField.value = decodedText;
-            closeQRScanner();
-            if (currentScanField === 'inputPallet') handlePalletScan(decodedText);
-            else if (currentScanField === 'inputVatTu') handleVatTuInput(decodedText);
-            validatePDAForm();
-            setTimeout(() => {
-                const nextId = currentScanField === 'inputPallet' ? 'inputVatTu' : currentScanField === 'inputVatTu' ? 'inputSoLuong' : null;
-                const nextField = nextId && document.getElementById(nextId);
-                if (nextField) { nextField.focus(); if (nextId === 'inputSoLuong') nextField.select(); }
-            }, 100);
-        },
-        () => { }
-    ).catch(() => switchScannerTab('upload'));
+    // Get available cameras to support switching and more robust selection
+    Html5Qrcode.getCameras().then(cameras => {
+        availableCameras = cameras;
+        const switchBtn = document.getElementById('btn-switch-camera');
+        
+        if (cameras && cameras.length > 1) {
+            if (switchBtn) switchBtn.style.display = 'flex';
+            
+            // Try to find the best back camera initially
+            // On iOS, the last camera in the list is often the "back" camera
+            currentCameraIndex = cameras.findIndex(c => 
+                c.label.toLowerCase().includes('back') || 
+                c.label.toLowerCase().includes('environment') ||
+                c.label.toLowerCase().includes('sau')
+            );
+            if (currentCameraIndex === -1) currentCameraIndex = cameras.length - 1;
+        } else {
+            if (switchBtn) switchBtn.style.display = 'none';
+            currentCameraIndex = 0;
+        }
+
+        const startConfig = (cameras && cameras.length > 0) 
+            ? cameras[currentCameraIndex].id 
+            : { facingMode: "environment" };
+
+        startScanner(startConfig);
+    }).catch(err => {
+        console.warn("Error getting cameras:", err);
+        startScanner({ facingMode: "environment" });
+    });
+}
+
+function startScanner(cameraConfig) {
+    if (!html5QrCode) return;
+    
+    // Stop if already scanning
+    const restartPromise = html5QrCode.isScanning 
+        ? html5QrCode.stop() 
+        : Promise.resolve();
+
+    restartPromise.then(() => {
+        const config = { 
+            fps: 20, 
+            qrbox: (viewfinderWidth, viewfinderHeight) => {
+                let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                let qrboxSize = Math.floor(minEdgeSize * 0.7);
+                return { width: qrboxSize, height: qrboxSize };
+            },
+            aspectRatio: 1.0,
+            videoConstraints: {
+                facingMode: typeof cameraConfig === 'object' ? cameraConfig.facingMode : undefined,
+                focusMode: "continuous",
+                width: { min: 640, ideal: 1280, max: 1920 },
+                height: { min: 480, ideal: 720, max: 1080 }
+            }
+        };
+
+        const target = typeof cameraConfig === 'string' ? cameraConfig : { facingMode: "environment" };
+
+        html5QrCode.start(
+            target, 
+            config,
+            decodedText => {
+                const targetField = document.getElementById(currentScanField);
+                if (targetField) targetField.value = decodedText;
+                closeQRScanner();
+                if (currentScanField === 'inputPallet') handlePalletScan(decodedText);
+                else if (currentScanField === 'inputVatTu') handleVatTuInput(decodedText);
+                validatePDAForm();
+                setTimeout(() => {
+                    const nextId = currentScanField === 'inputPallet' ? 'inputVatTu' : currentScanField === 'inputVatTu' ? 'inputSoLuong' : null;
+                    const nextField = nextId && document.getElementById(nextId);
+                    if (nextField) { nextField.focus(); if (nextId === 'inputSoLuong') nextField.select(); }
+                }, 100);
+            },
+            () => { /* Ignore verbose errors */ }
+        ).catch(err => {
+            console.error("Failed to start scanner:", err);
+            // If explicit camera fails, try facingMode as absolute fallback
+            if (typeof target === 'string') {
+                startScanner({ facingMode: "environment" });
+            } else {
+                switchScannerTab('upload');
+                showToast("Không thể khởi động camera. Vui lòng tải ảnh lên hoặc kiểm tra quyền.", "error");
+            }
+        });
+    });
+}
+
+function switchCamera() {
+    if (!availableCameras || availableCameras.length < 2) return;
+    
+    currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
+    startScanner(availableCameras[currentCameraIndex].id);
+    showToast(`Đang chuyển sang camera ${currentCameraIndex + 1}...`, 'info');
 }
 
 function closeQRScanner() {
@@ -2107,6 +2193,7 @@ Object.assign(window, {
     selectBatchFilter,
     openQRScanner,
     closeQRScanner,
+    switchCamera,
     switchScannerTab,
     scanImageFile,
     handlePalletScan,
