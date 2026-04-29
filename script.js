@@ -371,6 +371,7 @@ function loadPage(title) {
         'Chức năng': 'modules/rbac/menu/menu.html',
         'Quản lý bảo trì': 'modules/maintenance/maintenance.html',
         'Quản lý Lệnh': 'modules/wcs/job/job.html',
+        'Điều phối thủ công': 'modules/manual/manual.html',
         'Vật chứa': 'modules/new-container/new-cont.html',
         'Tài nguyên': 'modules/rbac/resource/resource.html',
         'Loại khu vực': 'modules/master-data/node-type/node-type.html',

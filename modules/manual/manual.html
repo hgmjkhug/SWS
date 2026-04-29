@@ -1,0 +1,221 @@
+<link rel="stylesheet" href="modules/manual/manual.css" />
+<div class="manual-container">
+  
+  <!-- LIST VIEW -->
+  <div class="view-container list-view" id="listView">
+    <div class="content-wrapper">
+      <!-- Top Bar -->
+      <div class="toolbar">
+        <div class="search-group">
+          <div class="manual-search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="taskSearch" placeholder="Tìm kiếm theo tên nhiệm vụ..." />
+          </div>
+          
+          <div class="filter-group">
+            <label>Người tạo</label>
+            <div class="searchable-select" id="creatorSelect">
+              <input type="text" class="select-input" id="creatorDisplay" placeholder="Tất cả người tạo" readonly 
+                onclick="window.toggleSearchableSelect(this)" 
+                oninput="window.filterSearchableSelect(this)" />
+              <i class="fas fa-times clear-btn" onclick="window.clearSearchableSelect('#creatorDisplay', 'creator', event)"></i>
+              <i class="fas fa-chevron-down"></i>
+              <div class="select-options" id="creatorOptions">
+                <!-- Data will be rendered here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="window.showAddView()">
+          <i class="fas fa-plus"></i> Thêm mới
+        </button>
+      </div>
+
+      <!-- Main Table -->
+      <div class="table-container">
+        <div class="table-wrapper">
+          <div class="table-scroll-head">
+            <table class="manual-table">
+              <colgroup>
+                <col style="width: 40px;">
+                <col style="width: 50px;">
+                <col style="width: 45%;">
+                <col style="width: 20%;">
+                <col style="width: 120px;">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="checkAll" onclick="window.toggleBulkCheck(this)" /></th>
+                  <th>STT</th>
+                  <th>Tên nhiệm vụ</th>
+                  <th>Thiết bị áp dụng</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+          <div class="table-scroll-body">
+            <table class="manual-table">
+              <colgroup>
+                <col style="width: 40px;">
+                <col style="width: 50px;">
+                <col style="width: 45%;">
+                <col style="width: 20%;">
+                <col style="width: 120px;">
+              </colgroup>
+              <tbody id="taskTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-wrapper">
+          <div class="page-info" id="pageInfo">Hiển thị 1-20 trong tổng số 0 nhiệm vụ</div>
+          <div class="pagination" id="pagination">
+            <!-- Pagination buttons will be rendered here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD/EDIT VIEW -->
+  <div class="view-container add-view d-none" id="addView">
+    <div class="warehouse-config-container">
+      <div class="config-content">
+        <!-- Left Panel -->
+        <div class="config-left-panel" id="manualConfigLeftPanel">
+          <div class="form-container-scrollable init-info-form" style="padding-top: 16px;">
+            <div id="tasksContainer">
+
+              <!-- Task Card 1 -->
+              <div class="task-card" id="task-1">
+                <div class="task-card-header">
+                  <span class="task-title">Nhiệm vụ 1</span>
+                  <button class="remove-task-btn" title="Xóa nhiệm vụ" onclick="window.removeTask(1)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+                <div class="task-card-body">
+
+                  <div class="card-field">
+                    <label class="card-field-label">Nhóm thiết bị <span class="required-star">*</span></label>
+                    <div class="searchable-select" id="groupSelect-1">
+                      <input type="text" class="select-input" id="groupDisplay-1" placeholder="Chọn nhóm thiết bị" readonly 
+                        onclick="window.toggleSearchableSelect(this)" 
+                        oninput="window.filterSearchableSelect(this)" />
+                      <i class="fas fa-times clear-btn" onclick="window.clearSearchableSelect('#groupDisplay-1', 'group', event)"></i>
+                      <i class="fas fa-chevron-down"></i>
+                      <div class="select-options" id="groupOptions-1"></div>
+                    </div>
+                  </div>
+
+                  <div class="card-field">
+                    <label class="card-field-label">Thiết bị <span class="required-star">*</span></label>
+                    <div class="searchable-select" id="deviceSelect-1">
+                      <input type="text" class="select-input" id="deviceDisplay-1" placeholder="Chọn thiết bị" readonly 
+                        onclick="window.toggleSearchableSelect(this)" 
+                        oninput="window.filterSearchableSelect(this)" />
+                      <i class="fas fa-times clear-btn" onclick="window.clearSearchableSelect('#deviceDisplay-1', 'device', event)"></i>
+                      <i class="fas fa-chevron-down"></i>
+                      <div class="select-options" id="deviceOptions-1"></div>
+                    </div>
+                  </div>
+
+                  <div class="card-field">
+                    <label class="card-field-label">Module hiện tại <span class="required-star">*</span></label>
+                    <div class="searchable-select field-disabled" id="currentModuleSelect-1">
+                      <input type="text" class="select-input" id="currentModuleDisplay-1" placeholder="Module hiện tại" readonly />
+                    </div>
+                  </div>
+
+                  <div class="card-field">
+                    <label class="card-field-label">Module áp dụng <span class="required-star">*</span></label>
+                    <div class="searchable-select" id="moduleSelect-1">
+                      <input type="text" class="select-input" id="moduleDisplay-1" placeholder="Chọn module áp dụng" readonly 
+                        onclick="window.toggleSearchableSelect(this)" 
+                        oninput="window.filterSearchableSelect(this)" />
+                      <i class="fas fa-times clear-btn" onclick="window.clearSearchableSelect('#moduleDisplay-1', 'module', event)"></i>
+                      <i class="fas fa-chevron-down"></i>
+                      <div class="select-options" id="moduleOptions-1"></div>
+                    </div>
+                  </div>
+
+                  <div class="card-field">
+                    <label class="card-field-label">Vị trí bắt đầu <span class="required-star">*</span></label>
+                    <div class="map-input-wrapper" onclick="window.setMapTarget('start', 1)" id="startWrapper-1">
+                      <input type="text" id="startPoint-1" class="select-input" placeholder="Chọn vị trí bắt đầu" readonly />
+                      <i class="fa-solid fa-map-location-dot" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#3b82f6;pointer-events:none;"></i>
+                    </div>
+                  </div>
+
+                  <div class="card-field">
+                    <label class="card-field-label">Vị trí giao <span class="required-star">*</span></label>
+                    <div class="map-input-wrapper" onclick="window.setMapTarget('end', 1)" id="endWrapper-1">
+                      <input type="text" id="endPoint-1" class="select-input" placeholder="Chọn vị trí giao" readonly />
+                      <i class="fa-solid fa-map-location-dot" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#3b82f6;pointer-events:none;"></i>
+                    </div>
+                  </div>
+
+                  <div class="card-field">
+                    <label class="card-field-label">Hành động <span class="required-star">*</span></label>
+                    <div class="searchable-select" id="actionSelect-1">
+                      <input type="text" class="select-input" id="actionDisplay-1" placeholder="Chọn hành động" readonly 
+                        onclick="window.toggleSearchableSelect(this)" 
+                        oninput="window.filterSearchableSelect(this)" />
+                      <i class="fas fa-times clear-btn" onclick="window.clearSearchableSelect('#actionDisplay-1', 'action', event)"></i>
+                      <i class="fas fa-chevron-down"></i>
+                      <div class="select-options" id="actionOptions-1"></div>
+                    </div>
+                  </div>
+
+                  <div class="card-field card-field-inline">
+                    <label class="card-field-label">Ưu tiên</label>
+                    <label class="switch">
+                      <input type="checkbox" id="taskPriority-1">
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+
+                </div>
+              </div>
+              <!-- End Task Card 1 -->
+
+            </div>
+
+            <!-- Add Task Button -->
+            <div class="add-task-btn-container">
+              <button class="add-task-circle-btn" title="Thêm nhiệm vụ" onclick="window.addNewTask()">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="manual-btn btn-outline" onclick="window.hideAddView()">Quay về</button>
+            <button class="manual-btn btn-primary" onclick="window.saveManual()">Lưu</button>
+          </div>
+        </div>
+
+        <!-- Resizer -->
+        <div class="config-resizer" id="manualResizer"></div>
+
+        <!-- Right Panel - Grid Area -->
+        <div class="grid-area">
+          <div class="map-container-sws">
+            <div class="map-grid-full" id="mainMapGrid"></div>
+            
+            <div class="zoom-controls">
+              <button class="zoom-btn" onclick="zoomMap(1.1)"><i class="fas fa-plus"></i></button>
+              <button class="zoom-btn" onclick="zoomMap(0.9)"><i class="fas fa-minus"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="modules/manual/manual.js"></script>
