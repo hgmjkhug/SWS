@@ -1688,6 +1688,9 @@ let currentCameraIndex = 0;
 function openQRScanner(fieldId) {
     currentScanField = fieldId;
     const overlay = document.getElementById('qr-scanner-overlay');
+    const statusEl = document.getElementById('scanner-status');
+    if (statusEl) statusEl.textContent = "Đang tìm kiếm camera...";
+    
     if (overlay) { 
         overlay.classList.add('active'); 
         overlay.style.display = 'flex'; 
@@ -1696,67 +1699,55 @@ function openQRScanner(fieldId) {
     
     if (!html5QrCode) html5QrCode = new Html5Qrcode('qr-reader');
 
-    // Get available cameras to support switching and more robust selection
     Html5Qrcode.getCameras().then(cameras => {
         availableCameras = cameras;
         const switchBtn = document.getElementById('btn-switch-camera');
         
-        if (cameras && cameras.length > 1) {
-            if (switchBtn) switchBtn.style.display = 'flex';
+        if (cameras && cameras.length > 0) {
+            if (statusEl) statusEl.textContent = `Tìm thấy ${cameras.length} camera. Đang khởi động...`;
+            if (cameras.length > 1 && switchBtn) switchBtn.style.display = 'flex';
             
-            // Try to find the best back camera initially
-            // On iOS, the last camera in the list is often the "back" camera
             currentCameraIndex = cameras.findIndex(c => 
                 c.label.toLowerCase().includes('back') || 
                 c.label.toLowerCase().includes('environment') ||
                 c.label.toLowerCase().includes('sau')
             );
             if (currentCameraIndex === -1) currentCameraIndex = cameras.length - 1;
+            startScanner(cameras[currentCameraIndex].id);
         } else {
-            if (switchBtn) switchBtn.style.display = 'none';
-            currentCameraIndex = 0;
+            if (statusEl) statusEl.textContent = "Không tìm thấy ID camera, thử chế độ mặc định...";
+            startScanner({ facingMode: "environment" });
         }
-
-        const startConfig = (cameras && cameras.length > 0) 
-            ? cameras[currentCameraIndex].id 
-            : { facingMode: "environment" };
-
-        startScanner(startConfig);
     }).catch(err => {
         console.warn("Error getting cameras:", err);
+        if (statusEl) statusEl.textContent = "Lỗi truy cập camera. Vui lòng cho phép quyền truy cập.";
         startScanner({ facingMode: "environment" });
     });
 }
 
 function startScanner(cameraConfig) {
     if (!html5QrCode) return;
+    const statusEl = document.getElementById('scanner-status');
     
-    // Stop if already scanning
     const restartPromise = html5QrCode.isScanning 
         ? html5QrCode.stop() 
         : Promise.resolve();
 
     restartPromise.then(() => {
         const config = { 
-            fps: 20, 
+            fps: 25, 
             qrbox: (viewfinderWidth, viewfinderHeight) => {
                 let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
                 let qrboxSize = Math.floor(minEdgeSize * 0.7);
                 return { width: qrboxSize, height: qrboxSize };
             },
             aspectRatio: 1.0,
-            videoConstraints: {
-                facingMode: typeof cameraConfig === 'object' ? cameraConfig.facingMode : undefined,
-                focusMode: "continuous",
-                width: { min: 640, ideal: 1280, max: 1920 },
-                height: { min: 480, ideal: 720, max: 1080 }
-            }
+            // Nới lỏng constraints cho iOS
+            videoConstraints: typeof cameraConfig === 'string' ? { deviceId: cameraConfig } : { facingMode: "environment" }
         };
 
-        const target = typeof cameraConfig === 'string' ? cameraConfig : { facingMode: "environment" };
-
         html5QrCode.start(
-            target, 
+            cameraConfig, 
             config,
             decodedText => {
                 const targetField = document.getElementById(currentScanField);
@@ -1771,15 +1762,18 @@ function startScanner(cameraConfig) {
                     if (nextField) { nextField.focus(); if (nextId === 'inputSoLuong') nextField.select(); }
                 }, 100);
             },
-            () => { /* Ignore verbose errors */ }
-        ).catch(err => {
+            () => { /* Quiet errors */ }
+        ).then(() => {
+            if (statusEl) statusEl.textContent = ""; // Clear status on success
+        }).catch(err => {
             console.error("Failed to start scanner:", err);
-            // If explicit camera fails, try facingMode as absolute fallback
-            if (typeof target === 'string') {
+            if (statusEl) statusEl.textContent = "Lỗi: " + (err.message || "Không thể mở camera");
+            
+            if (typeof cameraConfig === 'string') {
                 startScanner({ facingMode: "environment" });
             } else {
                 switchScannerTab('upload');
-                showToast("Không thể khởi động camera. Vui lòng tải ảnh lên hoặc kiểm tra quyền.", "error");
+                showToast("Lỗi khởi động camera. Vui lòng tải ảnh lên.", "error");
             }
         });
     });
