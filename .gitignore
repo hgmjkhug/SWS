@@ -1,5 +1,4 @@
 node_modules/
-.github/
 .vscode/
 Dockerfile
 autoDeploy.bat
