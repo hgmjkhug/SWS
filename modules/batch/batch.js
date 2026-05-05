@@ -695,6 +695,21 @@ function renderPaginationBar(totalItems) {
                             '</div>' +
                             '<div class="inventory-group-options" id="inventory-group-options"></div>' +
                         '</div>' +
+                        '<!-- Bulk Print Button -->' +
+                        '<div class="inventory-print-btn-group" id="inventory-print-group">' +
+                            '<button class="inventory-print-btn" id="inventory-print-trigger" onclick="window.toggleInventoryPrintDropdown(event)" disabled>' +
+                                '<i class="fas fa-print"></i> <span>In ấn</span>' +
+                                '<i class="fas fa-chevron-down" style="font-size: 10px; margin-left: 4px;"></i>' +
+                            '</button>' +
+                            '<div class="inventory-print-dropdown" id="inventory-print-dropdown">' +
+                                '<div class="inventory-print-option" onclick="window.onPrintInventory(\'barcode\')">' +
+                                    '<i class="fas fa-barcode"></i> In Barcode' +
+                                '</div>' +
+                                '<div class="inventory-print-option" onclick="window.onPrintInventory(\'qrcode\')">' +
+                                    '<i class="fas fa-qrcode"></i> In QR Code' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
                     '</div>' +
                     '<div class="inventory-table-container">' +
                         '<div class="inventory-table-head" id="inventory-table-head">' +
@@ -858,6 +873,12 @@ function renderPaginationBar(totalItems) {
         if (!footerInfo) return;
         var count = Object.keys(inventorySelectedIds).length;
         footerInfo.innerHTML = 'Đã chọn: <strong>' + count + '</strong> sản phẩm';
+        
+        // Update Print Button State
+        var printBtn = document.getElementById('inventory-print-trigger');
+        if (printBtn) {
+            printBtn.disabled = count === 0;
+        }
     }
 
     function updateSelectAllCheckbox() {
@@ -1090,6 +1111,105 @@ function renderPaginationBar(totalItems) {
 
         showToast('Đã kiểm kê thành công. Tổng số lượng: ' + totalQty, 'success');
         window.closeInventoryCheck();
+    };
+
+    window.toggleInventoryPrintDropdown = function(e) {
+        if (e) e.stopPropagation();
+        var dropdown = document.getElementById('inventory-print-dropdown');
+        if (dropdown) dropdown.classList.toggle('open');
+    };
+
+    window.onPrintInventory = function(type) {
+        var selectedIds = Object.keys(inventorySelectedIds);
+        if (selectedIds.length === 0) return;
+
+        var selectedProducts = INVENTORY_PRODUCTS.filter(function(p) {
+            return selectedIds.indexOf(p.id) !== -1;
+        });
+
+        var printWindow = window.open('', '_blank');
+        var title = type === 'barcode' ? 'In Barcode sản phẩm' : 'In QR Code sản phẩm';
+        
+        var html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>${title}</title>
+                <style>
+                    body { font-family: 'Inter', sans-serif; padding: 0; margin: 0; background: white; }
+                    .print-container { 
+                        display: grid; 
+                        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+                        gap: 20px; 
+                        padding: 20px;
+                    }
+                    .label-card { 
+                        background: white; 
+                        padding: 20px; 
+                        border-radius: 8px; 
+                        text-align: center; 
+                        border: 1px solid #e2e8f0; 
+                        display: flex; 
+                        flex-direction: column; 
+                        align-items: center; 
+                        break-inside: avoid;
+                    }
+                    .product-code { font-weight: 700; color: #076EB8; margin-bottom: 5px; font-size: 16px; }
+                    .product-name { 
+                        font-size: 12px; 
+                        color: #64748b; 
+                        margin-bottom: 15px; 
+                        height: 32px; 
+                        overflow: hidden; 
+                        display: -webkit-box; 
+                        -webkit-line-clamp: 2; 
+                        -webkit-box-orient: vertical; 
+                        width: 100%; 
+                    }
+                    .code-image { max-width: 100%; object-fit: contain; }
+                    .barcode-img { height: 70px; }
+                    .qrcode-img { width: 150px; height: 150px; }
+                    .code-value { font-family: 'Courier New', monospace; font-weight: 600; margin-top: 10px; color: #1e293b; font-size: 14px; letter-spacing: 1px; }
+                    
+                    @media print {
+                        body { padding: 0; margin: 0; }
+                        .print-container { padding: 0; gap: 10px; }
+                        .label-card { border: 1px solid #eee; margin-bottom: 10px; box-shadow: none; }
+                    }
+                </style>
+                <script>
+                    window.addEventListener('load', function() {
+                        setTimeout(function() {
+                            window.print();
+                        }, 500);
+                    });
+                </script>
+            </head>
+            <body>
+                <div class="print-container">
+                    ${selectedProducts.map(p => {
+                        const codeUrl = type === 'barcode' 
+                            ? `https://bwipjs-api.metafloor.com/?bcid=code128&text=${encodeURIComponent(p.code)}&scale=3&rotate=N`
+                            : `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(p.code)}`;
+                        return `
+                            <div class="label-card">
+                                <div class="product-code">${p.code}</div>
+                                <div class="product-name">${p.name}</div>
+                                <img src="${codeUrl}" class="code-image ${type}-img" alt="${p.code}">
+                                <div class="code-value">${p.code}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </body>
+            </html>
+        `;
+        
+        printWindow.document.write(html);
+        printWindow.document.close();
+        
+        var dropdown = document.getElementById('inventory-print-dropdown');
+        if (dropdown) dropdown.classList.remove('open');
     };
 
 
@@ -1343,6 +1463,11 @@ function renderPaginationBar(totalItems) {
             if (!e.target.closest('.inventory-group-filter')) {
                 var ig = document.getElementById('inventory-group-dropdown');
                 if (ig) ig.classList.remove('open');
+            }
+            // Inventory Print Dropdown
+            if (!e.target.closest('.inventory-print-btn-group')) {
+                var ip = document.getElementById('inventory-print-dropdown');
+                if (ip) ip.classList.remove('open');
             }
         });
 

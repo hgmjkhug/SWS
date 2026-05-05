@@ -1880,3 +1880,87 @@ body {
     color: #076EB8;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
 }
+
+/* Inventory Print Button */
+.inventory-print-btn-group {
+    position: relative;
+    margin-left: auto;
+}
+
+.inventory-print-btn {
+    height: 40px;
+    padding: 0 16px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.inventory-print-btn:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: var(--active-color);
+    color: var(--active-color);
+}
+
+.inventory-print-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f1f5f9;
+    box-shadow: none;
+}
+
+.inventory-print-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    width: 170px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    z-index: 1300;
+    padding: 4px;
+    display: none;
+    animation: fadeIn 0.15s ease-out;
+}
+
+.inventory-print-dropdown.open {
+    display: block;
+}
+
+.inventory-print-option {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s;
+}
+
+.inventory-print-option:hover {
+    background: #f1f5f9;
+    color: var(--active-color);
+}
+
+.inventory-print-option i {
+    font-size: 14px;
+    width: 16px;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.inventory-print-option:hover i {
+    color: var(--active-color);
+}
