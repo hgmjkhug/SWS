@@ -146,6 +146,49 @@
             >
               <i class="fas fa-arrow-right-from-bracket"></i> Đăng xuất tất cả
             </button>
+            <button
+              class="btn btn-outline-primary"
+              id="btn-trigger-bulk-wh"
+              onclick="showBulkAssignWhBar()"
+              disabled
+            >
+              <i class="fas fa-warehouse"></i> Gán kho
+            </button>
+
+            <div id="bulk-wh-action-bar" class="bulk-action-bar" style="display: none;">
+              <span class="bulk-label"><i class="fas fa-warehouse"></i> Gán kho:</span>
+              <div class="custom-dropdown" id="wh-bulk-dropdown" style="min-width: 250px">
+                <div class="dropdown-selected" onclick="toggleBulkWhDropdown()">
+                  <span id="wh-bulk-display">Chọn kho...</span>
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-options" id="wh-bulk-options">
+                  <div class="dropdown-search-container">
+                    <input
+                      type="text"
+                      class="dropdown-search-input"
+                      placeholder="Tìm kiếm kho..."
+                      oninput="filterBulkWhOptions(event)"
+                      onclick="event.stopPropagation()"
+                    />
+                    <i class="fas fa-search search-icon"></i>
+                  </div>
+                  <div id="wh-bulk-list">
+                    <!-- Dynamic options -->
+                  </div>
+                </div>
+                <input type="hidden" id="bulk-wh-select" value="">
+              </div>
+              <div class="bulk-actions-btns">
+                <button class="btn-apply" onclick="applyBulkWarehouse()" id="bulk-wh-apply-btn" disabled>
+                  <i class="fas fa-check"></i> Áp dụng
+                </button>
+                <button class="btn-cancel" onclick="cancelBulkWhAction()">
+                  <i class="fas fa-times"></i> Hủy
+                </button>
+              </div>
+            </div>
+
             <button class="btn btn-outline-success" onclick="openImportModal()" style="display: none;">
               <i class="fas fa-file-excel"></i>Nhập/Xuất Excel
             </button>
@@ -255,61 +298,43 @@
               />
             </div>
 
-            <div class="form-group">
-              <label>Phân quyền <span class="required">*</span></label>
-              <div class="permissions-section">
-                <div id="permissions-container" class="permissions-container">
-                  <!-- Permission rows will be rendered here -->
-                </div>
-                <!-- Hidden as requested, moved to icons on each row -->
-                <div class="section-footer" style="display: none;">
-                  <button
-                    type="button"
-                    class="btn-add-permission"
-                    onclick="addPermissionRow()"
-                  >
-                    <i class="fas fa-plus"></i> Thêm phân quyền
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Avatar</label>
-              <div class="avatar-options">
-                <div id="avatar-upload-panel" class="avatar-panel">
-                  <div
-                    class="avatar-upload-zone"
-                    onclick="document.getElementById('avatar-file').click()"
-                  >
-                    <img
-                      id="avatar-preview"
-                      src=""
-                      alt=""
-                      style="display: none"
-                    />
-                    <div id="avatar-placeholder">
-                      <i class="fas fa-upload"></i>
-                      <span>Nhấp để chọn file hoặc kéo thả vào đây</span>
-                    </div>
-                    <input
-                      type="file"
-                      id="avatar-file"
-                      hidden
-                      accept="image/*"
-                      onchange="handleAvatarUpload(this)"
-                    />
+            <div class="form-row">
+              <div class="form-group half">
+                <label>Vai trò <span class="required">*</span></label>
+                <div class="permissions-section">
+                  <div id="permissions-container" class="permissions-container">
+                    <!-- Permission rows will be rendered here -->
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="form-group">
-              <div class="form-group">
-                <div class="toggle-label">
-                  <span>Trạng thái hoạt động</span>
-                  <label class="switch">
-                    <input type="checkbox" id="acc-active" checked />
-                    <span class="slider round"></span>
-                  </label>
+              <div class="form-group half">
+                <label>Avatar</label>
+                <div class="avatar-options">
+                  <div id="avatar-upload-panel" class="avatar-panel">
+                    <div
+                      class="avatar-upload-zone"
+                      id="drop-zone"
+                      onclick="document.getElementById('avatar-file').click()"
+                    >
+                      <img
+                        id="avatar-preview"
+                        src=""
+                        alt=""
+                        style="display: none; width: 28px; height: 28px; border-radius: 50%; margin-right: 10px;"
+                      />
+                      <div id="avatar-placeholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>Kéo thả hoặc nhấp để chọn ảnh</span>
+                      </div>
+                      <input
+                        type="file"
+                        id="avatar-file"
+                        hidden
+                        accept="image/*"
+                        onchange="handleAvatarUpload(this)"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

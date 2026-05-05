@@ -18,7 +18,7 @@ var availableWarehouses = [
     { code: 'TOMCDD', name: 'CÔNG TY THIẾT BỊ CƠ KHÍ DÂN DỤNG' },
     { code: 'TUC', name: 'CÔNG TY THACO INDUSTRIES TẠI MỸ' },
     { code: 'DA', name: 'DỰ ÁN MỚI' },
-    { code: 'CTMC', name: 'CÔNG TY CƠ KHÍ CHÍNH XÁC & KHUÔN MẪU' },
+    { code: 'CTMC', name: 'CÔNG TY CƠ KHÍ CHÍNH XÁC & KHUÔM MẪU' },
     { code: 'CASF', name: 'CÔNG TY KEO & DUNG DỊCH CHUYÊN DỤNG' },
     { code: 'TIP', name: 'CÔNG TY NHỰA CÔNG NGHIỆP' },
     { code: 'M&E', name: 'CÔNG TY CƠ ĐIỆN' },
@@ -44,66 +44,6 @@ var availableWarehouses = [
     { code: 'AEC', name: 'CÔNG TY TNHH SẢN XUẤT PHỤ TÙNG ĐIỆN Ô TÔ' },
     { code: 'CTSV', name: 'CÔNG TY SX XE CHUYÊN DỤNG' }
 ];
-
-for (let i = 1; i <= 35; i++) {
-    const fn = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const mn = middleNames[Math.floor(Math.random() * middleNames.length)];
-    const ln = lastNames[Math.floor(Math.random() * lastNames.length)];
-    const fullname = `${fn} ${mn} ${ln}`;
-    const role = i <= 2 ? 'Admin' : i <= 5 ? 'Manager' : i <= 12 ? 'Operator' : 'User';
-    // Randomly assign warehouses based on role
-    let whs = [];
-    if (role === 'Admin') {
-        whs = ['ALL'];
-    } else if (role === 'Manager') {
-        // Random 1-3 warehouses
-        const count = Math.floor(Math.random() * 3) + 1;
-        const shuffled = [...availableWarehouses].sort(() => 0.5 - Math.random());
-        whs = shuffled.slice(0, count).map(w => w.code);
-    } else {
-        // Random 1 warehouse (Mandatory)
-        whs = [availableWarehouses[Math.floor(Math.random() * availableWarehouses.length)].code];
-    }
-
-    // Base role and warehouse
-    let permissions = [];
-    if (role === 'Admin') {
-        permissions.push({ role: 'Admin', warehouses: ['ALL'] });
-    } else {
-        // First role
-        permissions.push({ role: role, warehouses: whs });
-        
-        // 40% chance for 2nd role (if not Admin)
-        if (i > 2 && Math.random() < 0.4) {
-            const role2 = role === 'Manager' ? 'Operator' : 'Manager';
-            // Random warehouses for role 2 (Mandatory 1-2)
-            let whs2 = [];
-            const count2 = Math.floor(Math.random() * 2) + 1;
-            const shuffled2 = [...availableWarehouses].sort(() => 0.5 - Math.random());
-            whs2 = shuffled2.slice(0, count2).map(w => w.code);
-            permissions.push({ role: role2, warehouses: whs2 });
-
-            // 10% chance for 3rd role (User)
-            if (Math.random() < 0.1) {
-                // Must also have at least one warehouse
-                const wh3 = [availableWarehouses[Math.floor(Math.random() * availableWarehouses.length)].code];
-                permissions.push({ role: 'User', warehouses: wh3 });
-            }
-        }
-    }
-
-    accounts.push({
-        id: i,
-        accountCode: `user${String(i).padStart(3, '0')}`,
-        fullname: fullname,
-        email: `${ln.toLowerCase()}${i}@yopmail.com`,
-        permissions: permissions,
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullname)}&background=random`,
-        active: Math.random() > 0.2
-    });
-}
-// Manual overrides removed as loop handles variety
-
 var currentResetId = null;
 var pendingImportData = [];
 var currentPage = 1;
@@ -113,18 +53,16 @@ var openDropdownId = null;
 var pendingToggleId = null;
 var confirmModal = null;
 var pendingDeleteAccountId = null;
+var isBulkWhBarManuallyShown = false;
+var currentBulkSelectedWarehouses = [];
 
 // Initialization - always init when script runs (module may be reloaded)
 function initAccountModule() {
-    const table = document.getElementById('account-data-table');
-    if (!table) return;
-
-    filteredData = [...accounts];
-    currentPage = 1;
-    renderAccounts();
+    loadAccountsFromStorage();
     
     // Explicitly render warehouse filter options
     updateWarehouseFilters();
+    renderBulkWhOptions();
 
     // Synchronization scroll
     const scrollHead = document.querySelector('.table-scroll-head');
@@ -146,6 +84,16 @@ function initAccountModule() {
 
     // Attach drag & drop listeners to avatar zone
     initAvatarDragAndDrop();
+
+    // Update bulk bar on checkbox change
+    const tableBody = document.getElementById('account-data-table');
+    if (tableBody) {
+        tableBody.addEventListener('change', (e) => {
+            if (e.target.classList.contains('acc-check')) {
+                updateBulkWhBarVisibility();
+            }
+        });
+    }
 }
 
 function updateWarehouseFilters() {
@@ -594,10 +542,11 @@ function toggleAll(source) {
     document.querySelectorAll('.acc-check').forEach(chk => chk.checked = source.checked);
 }
 
-function toggleStatus(id) {
+function handleToggleRequest(input, id) {
     const acc = accounts.find(a => a.id === id);
     if (acc) {
-        acc.active = !acc.active;
+        acc.active = input.checked;
+        saveAccountsToStorage();
         showToast(`Trạng thái tài khoản ${acc.accountCode} đã được cập nhật`);
     }
 }
@@ -635,6 +584,7 @@ function handleToggleRequest(checkbox, id) {
         const acc = accounts.find(a => a.id === id);
         if (acc) {
             acc.active = true;
+            saveAccountsToStorage();
             showToast(`Tài khoản ${acc.accountCode} đã được kích hoạt`);
         }
     }
@@ -651,6 +601,7 @@ function confirmDisable() {
         const acc = accounts.find(a => a.id === pendingToggleId);
         if (acc) {
             acc.active = false;
+            saveAccountsToStorage();
             showToast(`Tài khoản ${acc.accountCode} đã được ngưng sử dụng`);
             renderAccounts(); // Refresh to update switch state
         }
@@ -675,7 +626,7 @@ function openAccountModal(id = null) {
             document.getElementById('acc-fullname').value = acc.fullname;
             document.getElementById('acc-email').value = acc.email;
             document.getElementById('acc-code').value = acc.accountCode;
-            document.getElementById('acc-active').checked = acc.active;
+            document.getElementById('acc-code').value = acc.accountCode;
 
             // Render Permissions
             renderPermissionRows(acc.permissions || []);
@@ -693,7 +644,6 @@ function openAccountModal(id = null) {
         }
     } else {
         title.innerText = 'Thêm mới tài khoản';
-        document.getElementById('acc-active').checked = true;
         // Initial empty permission
         renderPermissionRows([{ role: 'User', warehouses: [] }]);
     }
@@ -712,26 +662,18 @@ function saveAccount() {
     const accountCodeInput = document.getElementById('acc-code').value;
     const avatarValue = getAvatarValue();
     const avatar = avatarValue || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullname)}&background=random`;
-    const active = document.getElementById('acc-active').checked;
+    
+    // Existing active status or default to false for new accounts
+    let active = false;
+    if (idStr) {
+        const existingAcc = accounts.find(a => a.id === parseInt(idStr));
+        if (existingAcc) active = existingAcc.active;
+    }
 
     // Use currentPermissions global instead of manual DOM scraping which was broken
     const permissions = JSON.parse(JSON.stringify(currentPermissions));
-    let isValid = true;
-
-    if (permissions.length === 0) isValid = false;
-    permissions.forEach(p => {
-        if (!p.warehouses || p.warehouses.length === 0) {
-            isValid = false;
-        }
-    });
-
     if (!fullname || !accountCodeInput) {
         alert('Vui lòng nhập đầy đủ thông tin tài khoản');
-        return;
-    }
-
-    if (!isValid) {
-        alert('Mỗi quyền phải chọn ít nhất một kho');
         return;
     }
 
@@ -749,7 +691,74 @@ function saveAccount() {
     }
 
     closeAccountModal();
+    saveAccountsToStorage();
     filterAccounts(); // Re-apply filter and render
+}
+
+function saveAccountsToStorage() {
+    localStorage.setItem('sws_accounts', JSON.stringify(accounts));
+}
+
+function loadAccountsFromStorage() {
+    const stored = localStorage.getItem('sws_accounts');
+    if (stored) {
+        accounts = JSON.parse(stored);
+    }
+    
+    // If accounts is empty (either no storage or empty array), generate mock data
+    if (accounts.length === 0) {
+        generateMockAccounts();
+        saveAccountsToStorage();
+    }
+    filterAccounts();
+}
+
+function generateMockAccounts() {
+    accounts = [];
+    for (let i = 1; i <= 35; i++) {
+        const fn = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const mn = middleNames[Math.floor(Math.random() * middleNames.length)];
+        const ln = lastNames[Math.floor(Math.random() * lastNames.length)];
+        const fullname = `${fn} ${mn} ${ln}`;
+        const role = i <= 2 ? 'Admin' : i <= 5 ? 'Manager' : i <= 12 ? 'Operator' : 'User';
+        
+        let whs = [];
+        if (role === 'Admin') {
+            whs = ['ALL'];
+        } else if (role === 'Manager') {
+            const count = Math.floor(Math.random() * 3) + 1;
+            const shuffled = [...availableWarehouses].sort(() => 0.5 - Math.random());
+            whs = shuffled.slice(0, count).map(w => w.code);
+        } else {
+            whs = [availableWarehouses[Math.floor(Math.random() * availableWarehouses.length)].code];
+        }
+
+        let permissions = [];
+        if (role === 'Admin') {
+            permissions.push({ role: 'Admin', warehouses: ['ALL'] });
+        } else {
+            permissions.push({ role: role, warehouses: whs });
+            if (i > 2 && Math.random() < 0.4) {
+                const role2 = role === 'Manager' ? 'Operator' : 'Manager';
+                let whs2 = [];
+                const count2 = Math.floor(Math.random() * 2) + 1;
+                const shuffled2 = [...availableWarehouses].sort(() => 0.5 - Math.random());
+                whs2 = shuffled2.slice(0, count2).map(w => w.code);
+                permissions.push({ role: role2, warehouses: whs2 });
+            }
+        }
+
+        accounts.push({
+            id: i,
+            accountCode: `user${String(i).padStart(3, '0')}`,
+            fullname: fullname,
+            email: `${ln.toLowerCase()}${i}@yopmail.com`,
+            permissions: permissions,
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullname)}&background=random`,
+            active: i % 3 !== 0,
+            lastLogin: i % 5 === 0 ? '2024-03-20 10:30' : '2024-03-19 14:15'
+        });
+    }
 }
 
 // Reset Password Modal
@@ -789,9 +798,10 @@ function closeDeleteConfirm() {
 function confirmDeleteAccount() {
     if (pendingDeleteAccountId) {
         accounts = accounts.filter(a => a.id !== pendingDeleteAccountId);
-        filterAccounts();
-        showToast('Đã xóa tài khoản', 'success');
+        saveAccountsToStorage();
+        showToast('Xóa tài khoản thành công');
         closeDeleteConfirm();
+        renderAccounts();
     }
 }
 
@@ -1059,7 +1069,10 @@ function getAvatarValue() {
 var currentPermissions = [];
 
 function renderPermissionRows(perms = []) {
-    currentPermissions = perms.length > 0 ? JSON.parse(JSON.stringify(perms)) : [{ role: 'User', warehouses: [] }];
+    // We now only support one role in the modal, but keep the data structure for compatibility
+    const defaultRole = perms.length > 0 ? perms[0].role : 'User';
+    currentPermissions = [{ role: defaultRole, warehouses: perms.length > 0 ? perms[0].warehouses : [] }];
+    
     const container = document.getElementById('permissions-container');
     if (!container) return;
 
@@ -1068,28 +1081,8 @@ function renderPermissionRows(perms = []) {
         const row = document.createElement('div');
         row.className = 'permission-row';
         
-        // Get warehouse display value
-        let warehouseValue = '';
-        if (perm.warehouses && perm.warehouses.length > 0) {
-            warehouseValue = perm.warehouses.join(', ');
-        }
-        
-        const isOnlyRow = currentPermissions.length === 1 && idx === 0;
-        const isFirstRow = idx === 0;
-
         row.innerHTML = `
-            <div class="permission-row-actions">
-                <button type="button" class="btn-icon-add" onclick="addPermissionRow()" title="Thêm phân quyền">
-                    <i class="fas fa-plus"></i>
-                </button>
-                <button type="button" class="btn-icon-remove ${isFirstRow ? 'disabled' : ''}" 
-                        ${isFirstRow ? '' : `onclick="removePermissionRow(${idx})"`} 
-                        title="${isFirstRow ? 'Không thể xóa quyền mặc định' : 'Xóa phân quyền'}">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="form-group">
-                <label>Vai trò <span class="required">*</span></label>
+            <div class="form-group" style="width: 100%;">
                 <div class="editable-combobox" id="perm-role-dropdown-${idx}">
                     <input type="text" class="combobox-input" 
                            id="perm-role-input-${idx}"
@@ -1100,26 +1093,6 @@ function renderPermissionRows(perms = []) {
                     <i class="fas fa-chevron-down combobox-icon" onclick="toggleRoleDropdown(event, ${idx})"></i>
                     <div class="combobox-options" id="perm-role-options-${idx}">
                         ${renderRoleOptions(idx, perm.role)}
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Kho áp dụng <span class="required">*</span></label>
-                <div class="editable-combobox" id="perm-wh-dropdown-${idx}">
-                    <input type="text" class="combobox-input" 
-                           id="perm-wh-input-${idx}"
-                           placeholder="Nhập hoặc chọn kho..." 
-                           value="${warehouseValue}"
-                           onfocus="openPermissionDropdown(${idx})"
-                           oninput="handleWarehouseInput(${idx}, this.value)"
-                           autocomplete="off">
-                    <i class="fas fa-times combobox-clear" 
-                       id="perm-wh-clear-${idx}" 
-                       onclick="clearPermissionWarehouse(event, ${idx})"
-                       style="display: ${warehouseValue ? 'block' : 'none'}"></i>
-                    <i class="fas fa-chevron-down combobox-icon" onclick="togglePermissionDropdown(${idx})"></i>
-                    <div class="combobox-options" id="perm-wh-options-${idx}">
-                        ${renderWhOptions(idx, perm.warehouses, '')}
                     </div>
                 </div>
             </div>
@@ -1378,9 +1351,170 @@ function closePermissionDropdown(idx) {
     }
 }
 
-// Close row dropdowns on outside click
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.editable-combobox')) {
-        document.querySelectorAll('.editable-combobox').forEach(el => el.classList.remove('open'));
+// Bulk Warehouse Assignment
+function showBulkAssignWhBar() {
+    isBulkWhBarManuallyShown = true;
+    updateBulkWhBarVisibility();
+}
+
+function updateBulkWhBarVisibility() {
+    const checked = document.querySelectorAll('.acc-check:checked');
+    const bulkBar = document.getElementById('bulk-wh-action-bar');
+    const triggerBtn = document.getElementById('btn-trigger-bulk-wh');
+    const applyBtn = document.getElementById('bulk-wh-apply-btn');
+
+    if (!bulkBar) return;
+
+    if (isBulkWhBarManuallyShown) {
+        bulkBar.style.display = 'flex';
+        if (triggerBtn) triggerBtn.style.display = 'none';
+    } else {
+        bulkBar.style.display = 'none';
+        if (triggerBtn) {
+            triggerBtn.style.display = 'flex';
+            triggerBtn.disabled = checked.length === 0;
+        }
     }
-});
+
+    if (applyBtn) {
+        applyBtn.disabled = checked.length === 0;
+    }
+}
+
+function toggleBulkWhDropdown() {
+    const dropdown = document.getElementById('wh-bulk-dropdown');
+    if (!dropdown) return;
+
+    const isOpening = !dropdown.classList.contains('open');
+    
+    // Close other dropdowns
+    document.querySelectorAll('.custom-dropdown, .editable-combobox').forEach(el => {
+        if (el.id !== 'wh-bulk-dropdown') el.classList.remove('open');
+    });
+
+    dropdown.classList.toggle('open');
+    
+    if (isOpening) {
+        const searchInput = dropdown.querySelector('.dropdown-search-input');
+        if (searchInput) {
+            setTimeout(() => searchInput.focus(), 50);
+            searchInput.value = '';
+        }
+        renderBulkWhOptions();
+    }
+}
+
+function renderBulkWhOptions(filter = '') {
+    const list = document.getElementById('wh-bulk-list');
+    if (!list) return;
+
+    const query = filter.toLowerCase().trim();
+    const warehouses = [{ code: 'ALL', name: 'Tất cả các kho' }, ...availableWarehouses];
+    
+    const html = warehouses.map(wh => {
+        const fullText = wh.code === 'ALL' ? wh.name : `${wh.code} - ${wh.name}`;
+        if (query && !fullText.toLowerCase().includes(query)) return '';
+        
+        const isSelected = currentBulkSelectedWarehouses.includes(wh.code);
+        return `
+            <div class="dropdown-option ${isSelected ? 'active' : ''}" 
+                 onclick="selectBulkWh('${wh.code}')">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>${fullText}</span>
+                    ${isSelected ? '<i class="fas fa-check" style="color: #3b82f6;"></i>' : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    list.innerHTML = html || '<div class="no-results">Không tìm thấy kho</div>';
+}
+
+function filterBulkWhOptions(event) {
+    renderBulkWhOptions(event.target.value);
+}
+
+function selectBulkWh(code) {
+    if (code === 'ALL') {
+        if (currentBulkSelectedWarehouses.includes('ALL')) {
+            currentBulkSelectedWarehouses = [];
+        } else {
+            currentBulkSelectedWarehouses = ['ALL'];
+        }
+    } else {
+        if (currentBulkSelectedWarehouses.includes('ALL')) {
+            currentBulkSelectedWarehouses = [];
+        }
+        const idx = currentBulkSelectedWarehouses.indexOf(code);
+        if (idx > -1) {
+            currentBulkSelectedWarehouses.splice(idx, 1);
+        } else {
+            currentBulkSelectedWarehouses.push(code);
+        }
+    }
+
+    // Update display label
+    const label = document.getElementById('wh-bulk-display');
+    if (label) {
+        if (currentBulkSelectedWarehouses.length === 0) {
+            label.textContent = 'Chọn kho...';
+        } else if (currentBulkSelectedWarehouses.includes('ALL')) {
+            label.textContent = 'Tất cả các kho';
+        } else {
+            label.textContent = currentBulkSelectedWarehouses.join(', ');
+        }
+    }
+
+    renderBulkWhOptions(document.querySelector('#wh-bulk-dropdown .dropdown-search-input').value);
+}
+
+function applyBulkWarehouse() {
+    const checked = document.querySelectorAll('.acc-check:checked');
+    const selectedIds = Array.from(checked).map(cb => parseInt(cb.value));
+
+    if (selectedIds.length === 0) return;
+    if (currentBulkSelectedWarehouses.length === 0) {
+        showToast('Vui lòng chọn ít nhất một kho', 'warning');
+        return;
+    }
+
+    accounts.forEach(acc => {
+        if (selectedIds.includes(acc.id)) {
+            // Update warehouses for ALL permissions (or just the first one as simplified)
+            if (acc.permissions && acc.permissions.length > 0) {
+                acc.permissions.forEach(p => {
+                    p.warehouses = [...currentBulkSelectedWarehouses];
+                });
+            } else {
+                acc.permissions = [{ role: 'User', warehouses: [...currentBulkSelectedWarehouses] }];
+            }
+        }
+    });
+
+    showToast('Đã gán kho cho các tài khoản được chọn', 'success');
+    saveAccountsToStorage();
+    cancelBulkWhAction();
+    renderAccounts();
+}
+
+function cancelBulkWhAction() {
+    isBulkWhBarManuallyShown = false;
+    currentBulkSelectedWarehouses = [];
+    const label = document.getElementById('wh-bulk-display');
+    if (label) label.textContent = 'Chọn kho...';
+    
+    document.querySelectorAll('.acc-check').forEach(cb => cb.checked = false);
+    document.getElementById('check-all').checked = false;
+    
+    const dropdown = document.getElementById('wh-bulk-dropdown');
+    if (dropdown) dropdown.classList.remove('open');
+    
+    updateBulkWhBarVisibility();
+}
+
+// Ensure toggleAll also updates bulk bar
+const originalToggleAll = window.toggleAll;
+window.toggleAll = function(source) {
+    originalToggleAll(source);
+    updateBulkWhBarVisibility();
+};
