@@ -1127,6 +1127,10 @@ function renderPaginationBar(totalItems) {
             return selectedIds.indexOf(p.id) !== -1;
         });
 
+        // Lấy thông tin lô hàng hiện tại
+        var currentBatch = MOCK_BATCHES.find(function(b) { return b.id == currentInventoryBatchId; });
+        var batchCode = currentBatch ? currentBatch.code : '';
+
         var printWindow = window.open('', '_blank');
         var title = type === 'barcode' ? 'In Barcode sản phẩm' : 'In QR Code sản phẩm';
         
@@ -1158,13 +1162,22 @@ function renderPaginationBar(totalItems) {
                     .product-name { 
                         font-size: 12px; 
                         color: #64748b; 
-                        margin-bottom: 15px; 
+                        margin-bottom: 4px; 
                         height: 32px; 
                         overflow: hidden; 
                         display: -webkit-box; 
                         -webkit-line-clamp: 2; 
                         -webkit-box-orient: vertical; 
                         width: 100%; 
+                    }
+                    .batch-code {
+                        font-size: 11px;
+                        font-weight: 700;
+                        color: #076EB8;
+                        margin-bottom: 15px;
+                        background: #f1f5f9;
+                        padding: 2px 8px;
+                        border-radius: 4px;
                     }
                     .code-image { max-width: 100%; object-fit: contain; }
                     .barcode-img { height: 70px; }
@@ -1175,6 +1188,7 @@ function renderPaginationBar(totalItems) {
                         body { padding: 0; margin: 0; }
                         .print-container { padding: 0; gap: 10px; }
                         .label-card { border: 1px solid #eee; margin-bottom: 10px; box-shadow: none; }
+                        .batch-code { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
                     }
                 </style>
                 <script>
@@ -1195,6 +1209,7 @@ function renderPaginationBar(totalItems) {
                             <div class="label-card">
                                 <div class="product-code">${p.code}</div>
                                 <div class="product-name">${p.name}</div>
+                                <div class="batch-code">Lô: ${batchCode}</div>
                                 <img src="${codeUrl}" class="code-image ${type}-img" alt="${p.code}">
                                 <div class="code-value">${p.code}</div>
                             </div>
