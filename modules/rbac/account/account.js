@@ -80,24 +80,32 @@ function initAccountModule() {
     window.selectStatusFilter = selectStatusFilter;
     window.selectWarehouseFilter = selectWarehouseFilter;
     window.updateWarehouseFilters = updateWarehouseFilters;
-    window.filterWarehouseOptions = filterWarehouseOptions;
+    window.openWarehouseFilterDropdown = openWarehouseFilterDropdown;
+    window.handleWarehouseFilterInput = handleWarehouseFilterInput;
+    window.toggleWarehouseFilterDropdown = toggleWarehouseFilterDropdown;
+    window.openBulkWhDropdown = openBulkWhDropdown;
+    window.handleBulkWhInput = handleBulkWhInput;
+    window.toggleBulkWhDropdownEvent = toggleBulkWhDropdownEvent;
 
     // Attach drag & drop listeners to avatar zone
     initAvatarDragAndDrop();
 
     // Update bulk bar on checkbox change
-    const tableBody = document.getElementById('account-data-table');
-    if (tableBody) {
-        tableBody.addEventListener('change', (e) => {
-            if (e.target.classList.contains('acc-check')) {
+    const container = document.querySelector('.account-container');
+    if (container) {
+        container.addEventListener('change', (e) => {
+            if (e.target.classList.contains('acc-check') || e.target.id === 'check-all') {
                 updateBulkWhBarVisibility();
             }
         });
     }
+
+    // Initial check
+    updateBulkWhBarVisibility();
 }
 
 function updateWarehouseFilters() {
-    const optionsList = document.getElementById('warehouse-options-list');
+    const optionsList = document.getElementById('warehouse-filter-options-list');
     if (!optionsList) return;
 
     let whHtml = `<div class="dropdown-option active" data-value="all" onclick="selectWarehouseFilter('all', 'Tất cả kho')">Tất cả kho</div>`;
@@ -111,13 +119,58 @@ function updateWarehouseFilters() {
     }
     
     optionsList.innerHTML = whHtml;
+}
 
-    // Reset search input
-    const searchInput = document.querySelector('#warehouse-filter-dropdown .dropdown-search-input');
-    if (searchInput) searchInput.value = '';
+function openWarehouseFilterDropdown() {
+    const dropdown = document.getElementById('warehouse-filter-dropdown');
+    if (!dropdown) return;
+
+    // Close other dropdowns
+    document.querySelectorAll('.custom-dropdown, .editable-combobox').forEach(el => {
+        if (el.id !== 'warehouse-filter-dropdown') el.classList.remove('open');
+    });
+
+    dropdown.classList.add('open');
+    openDropdownId = 'warehouse-filter-dropdown';
     
-    const noResults = document.getElementById('warehouse-no-results');
-    if (noResults) noResults.style.display = 'none';
+    // Reset search
+    handleWarehouseFilterInput('');
+}
+
+function toggleWarehouseFilterDropdown(event) {
+    if (event) event.stopPropagation();
+    const dropdown = document.getElementById('warehouse-filter-dropdown');
+    if (!dropdown) return;
+
+    if (dropdown.classList.contains('open')) {
+        dropdown.classList.remove('open');
+        openDropdownId = null;
+    } else {
+        openWarehouseFilterDropdown();
+        document.getElementById('warehouse-filter-input').focus();
+    }
+}
+
+function handleWarehouseFilterInput(value) {
+    const query = removeVietnameseTones(value.toLowerCase().trim());
+    const options = document.querySelectorAll('#warehouse-filter-options-list .dropdown-option');
+    const noResults = document.getElementById('warehouse-filter-no-results');
+    let hasResults = false;
+
+    options.forEach(opt => {
+        const rawText = opt.textContent.toLowerCase();
+        const text = removeVietnameseTones(rawText);
+        if (text.includes(query)) {
+            opt.style.display = 'block';
+            hasResults = true;
+        } else {
+            opt.style.display = 'none';
+        }
+    });
+
+    if (noResults) {
+        noResults.style.display = hasResults ? 'none' : 'block';
+    }
 }
 const VIET_MAP = {
   à:'a',á:'a',ạ:'a',ả:'a',ã:'a',â:'a',ầ:'a',ấ:'a',ậ:'a',ẩ:'a',ẫ:'a',
@@ -148,28 +201,7 @@ function removeVietnameseTones(str) {
   return str.replace(VIET_REGEX, ch => VIET_MAP[ch]);
 }
 
-function filterWarehouseOptions(event) {
-    const rawQuery = event.target.value.toLowerCase().trim();
-    const query = removeVietnameseTones(rawQuery);
-    const options = document.querySelectorAll('#warehouse-options-list .dropdown-option');
-    const noResults = document.getElementById('warehouse-no-results');
-    let hasResults = false;
-
-    options.forEach(opt => {
-        const rawText = opt.textContent.toLowerCase();
-        const text = removeVietnameseTones(rawText);
-        if (text.includes(query)) {
-            opt.classList.remove('hidden-option');
-            hasResults = true;
-        } else {
-            opt.classList.add('hidden-option');
-        }
-    });
-
-    if (noResults) {
-        noResults.style.display = hasResults ? 'none' : 'block';
-    }
-}
+// Removed filterWarehouseOptions as it is replaced by handleWarehouseFilterInput
 
 function selectStatusFilter(value, label) {
     const input = document.getElementById('status-filter');
@@ -196,13 +228,13 @@ function selectStatusFilter(value, label) {
 
 function selectWarehouseFilter(value, label) {
     const input = document.getElementById('warehouse-filter');
-    const labelEl = document.getElementById('warehouse-filter-label');
+    const displayInput = document.getElementById('warehouse-filter-input');
     const dropdown = document.getElementById('warehouse-filter-dropdown');
 
     if (input) input.value = value;
-    if (labelEl) {
-        labelEl.textContent = label;
-        labelEl.title = label;
+    if (displayInput) {
+        displayInput.value = label === 'Tất cả kho' ? '' : label;
+        displayInput.placeholder = label;
     }
 
     // Update active class
@@ -354,6 +386,7 @@ function renderAccounts() {
         });
     }
     updatePagination(totalItems, totalPages);
+    updateBulkWhBarVisibility();
 }
 
 function updatePagination(totalItems, totalPages) {
@@ -540,6 +573,7 @@ document.addEventListener('click', function (e) {
 
 function toggleAll(source) {
     document.querySelectorAll('.acc-check').forEach(chk => chk.checked = source.checked);
+    updateBulkWhBarVisibility();
 }
 
 function handleToggleRequest(input, id) {
@@ -1381,39 +1415,51 @@ function updateBulkWhBarVisibility() {
     }
 }
 
-function toggleBulkWhDropdown() {
+function openBulkWhDropdown() {
     const dropdown = document.getElementById('wh-bulk-dropdown');
     if (!dropdown) return;
 
-    const isOpening = !dropdown.classList.contains('open');
-    
     // Close other dropdowns
     document.querySelectorAll('.custom-dropdown, .editable-combobox').forEach(el => {
         if (el.id !== 'wh-bulk-dropdown') el.classList.remove('open');
     });
 
-    dropdown.classList.toggle('open');
+    dropdown.classList.add('open');
+    openDropdownId = 'wh-bulk-dropdown';
     
-    if (isOpening) {
-        const searchInput = dropdown.querySelector('.dropdown-search-input');
-        if (searchInput) {
-            setTimeout(() => searchInput.focus(), 50);
-            searchInput.value = '';
-        }
-        renderBulkWhOptions();
+    renderBulkWhOptions('');
+}
+
+function toggleBulkWhDropdownEvent(event) {
+    if (event) event.stopPropagation();
+    const dropdown = document.getElementById('wh-bulk-dropdown');
+    if (!dropdown) return;
+
+    if (dropdown.classList.contains('open')) {
+        dropdown.classList.remove('open');
+        openDropdownId = null;
+    } else {
+        openBulkWhDropdown();
+        document.getElementById('wh-bulk-input').focus();
     }
 }
 
+function handleBulkWhInput(value) {
+    renderBulkWhOptions(value);
+}
+
 function renderBulkWhOptions(filter = '') {
-    const list = document.getElementById('wh-bulk-list');
+    const list = document.getElementById('wh-bulk-options-list');
     if (!list) return;
 
-    const query = filter.toLowerCase().trim();
+    const query = removeVietnameseTones(filter.toLowerCase().trim());
     const warehouses = [{ code: 'ALL', name: 'Tất cả các kho' }, ...availableWarehouses];
     
     const html = warehouses.map(wh => {
         const fullText = wh.code === 'ALL' ? wh.name : `${wh.code} - ${wh.name}`;
-        if (query && !fullText.toLowerCase().includes(query)) return '';
+        const searchTarget = removeVietnameseTones(fullText.toLowerCase());
+        
+        if (query && !searchTarget.includes(query)) return '';
         
         const isSelected = currentBulkSelectedWarehouses.includes(wh.code);
         return `
@@ -1431,7 +1477,7 @@ function renderBulkWhOptions(filter = '') {
 }
 
 function filterBulkWhOptions(event) {
-    renderBulkWhOptions(event.target.value);
+    handleBulkWhInput(event.target.value);
 }
 
 function selectBulkWh(code) {
@@ -1453,19 +1499,20 @@ function selectBulkWh(code) {
         }
     }
 
-    // Update display label
-    const label = document.getElementById('wh-bulk-display');
-    if (label) {
+    // Update display label in input
+    const input = document.getElementById('wh-bulk-input');
+    if (input) {
         if (currentBulkSelectedWarehouses.length === 0) {
-            label.textContent = 'Chọn kho...';
+            input.value = '';
+            input.placeholder = 'Chọn kho...';
         } else if (currentBulkSelectedWarehouses.includes('ALL')) {
-            label.textContent = 'Tất cả các kho';
+            input.value = 'Tất cả các kho';
         } else {
-            label.textContent = currentBulkSelectedWarehouses.join(', ');
+            input.value = currentBulkSelectedWarehouses.join(', ');
         }
     }
 
-    renderBulkWhOptions(document.querySelector('#wh-bulk-dropdown .dropdown-search-input').value);
+    renderBulkWhOptions(document.getElementById('wh-bulk-input').value);
 }
 
 function applyBulkWarehouse() {
@@ -1500,8 +1547,11 @@ function applyBulkWarehouse() {
 function cancelBulkWhAction() {
     isBulkWhBarManuallyShown = false;
     currentBulkSelectedWarehouses = [];
-    const label = document.getElementById('wh-bulk-display');
-    if (label) label.textContent = 'Chọn kho...';
+    const input = document.getElementById('wh-bulk-input');
+    if (input) {
+        input.value = '';
+        input.placeholder = 'Chọn kho...';
+    }
     
     document.querySelectorAll('.acc-check').forEach(cb => cb.checked = false);
     document.getElementById('check-all').checked = false;
@@ -1512,9 +1562,4 @@ function cancelBulkWhAction() {
     updateBulkWhBarVisibility();
 }
 
-// Ensure toggleAll also updates bulk bar
-const originalToggleAll = window.toggleAll;
-window.toggleAll = function(source) {
-    originalToggleAll(source);
-    updateBulkWhBarVisibility();
-};
+// Removed toggleAll override as it is now integrated directly

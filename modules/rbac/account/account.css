@@ -623,6 +623,68 @@ input[type="text"], input[type="email"], select {
     color: #2563eb !important;
 }
 
+/* New Combobox Styles */
+.combobox-style {
+    position: relative;
+}
+
+.combobox-trigger {
+    position: relative;
+    width: 100%;
+}
+
+.combobox-input-trigger {
+    width: 100% !important;
+    height: 40px;
+    padding: 0 35px 0 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    font-size: 14px !important;
+    color: #1e293b !important;
+    cursor: text !important;
+    outline: none !important;
+    transition: all 0.2s !important;
+}
+
+.combobox-input-trigger:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+.combobox-input-trigger::placeholder {
+    color: #94a3b8;
+}
+
+.combobox-chevron {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    z-index: 5;
+}
+
+.custom-dropdown.open .combobox-chevron {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.combobox-style .dropdown-options {
+    margin-top: 5px !important;
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+    animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* Searchable Dropdown Styles */
 .dropdown-search-container {
     padding: 8px 12px;

@@ -108,31 +108,24 @@
               <span style="font-weight: 500; font-size: 12px; color: #475569"
                 >Kho</span
               >
-              <div class="custom-dropdown" id="warehouse-filter-dropdown">
-                <div
-                  class="dropdown-selected"
-                  onclick="toggleDropdown('warehouse-filter-dropdown')"
-                >
-                  <span id="warehouse-filter-label">Tất cả kho</span>
-                  <i class="fas fa-chevron-down"></i>
+              <div class="custom-dropdown combobox-style" id="warehouse-filter-dropdown">
+                <div class="combobox-trigger">
+                  <input
+                    type="text"
+                    id="warehouse-filter-input"
+                    class="combobox-input-trigger"
+                    placeholder="Tất cả kho"
+                    onfocus="openWarehouseFilterDropdown()"
+                    oninput="handleWarehouseFilterInput(this.value)"
+                    autocomplete="off"
+                  />
+                  <i class="fas fa-chevron-down combobox-chevron" onclick="toggleWarehouseFilterDropdown(event)"></i>
                 </div>
-                <div class="dropdown-options" id="warehouse-filter-options">
-                  <div class="dropdown-search-container">
-                    <input
-                      type="text"
-                      class="dropdown-search-input"
-                      placeholder="Tìm kiếm kho..."
-                      oninput="filterWarehouseOptions(event)"
-                      onclick="event.stopPropagation()"
-                    />
-                    <i class="fas fa-search search-icon"></i>
-                  </div>
-                  <div id="warehouse-options-list">
-                    <!-- Dynamic options will be rendered here -->
-                  </div>
-                  <div id="warehouse-no-results" class="no-results" style="display: none">
-                    Không tìm thấy kho
-                  </div>
+                <div class="dropdown-options" id="warehouse-filter-options-list">
+                  <!-- Dynamic options will be rendered here -->
+                </div>
+                <div id="warehouse-filter-no-results" class="no-results" style="display: none">
+                  Không tìm thấy kho
                 </div>
                 <input type="hidden" id="warehouse-filter" value="all" />
               </div>
@@ -157,25 +150,21 @@
 
             <div id="bulk-wh-action-bar" class="bulk-action-bar" style="display: none;">
               <span class="bulk-label"><i class="fas fa-warehouse"></i> Gán kho:</span>
-              <div class="custom-dropdown" id="wh-bulk-dropdown" style="min-width: 250px">
-                <div class="dropdown-selected" onclick="toggleBulkWhDropdown()">
-                  <span id="wh-bulk-display">Chọn kho...</span>
-                  <i class="fas fa-chevron-down"></i>
+              <div class="custom-dropdown combobox-style" id="wh-bulk-dropdown" style="min-width: 250px">
+                <div class="combobox-trigger">
+                  <input
+                    type="text"
+                    id="wh-bulk-input"
+                    class="combobox-input-trigger"
+                    placeholder="Chọn kho..."
+                    onfocus="openBulkWhDropdown()"
+                    oninput="handleBulkWhInput(this.value)"
+                    autocomplete="off"
+                  />
+                  <i class="fas fa-chevron-down combobox-chevron" onclick="toggleBulkWhDropdownEvent(event)"></i>
                 </div>
-                <div class="dropdown-options" id="wh-bulk-options">
-                  <div class="dropdown-search-container">
-                    <input
-                      type="text"
-                      class="dropdown-search-input"
-                      placeholder="Tìm kiếm kho..."
-                      oninput="filterBulkWhOptions(event)"
-                      onclick="event.stopPropagation()"
-                    />
-                    <i class="fas fa-search search-icon"></i>
-                  </div>
-                  <div id="wh-bulk-list">
-                    <!-- Dynamic options -->
-                  </div>
+                <div class="dropdown-options" id="wh-bulk-options-list">
+                  <!-- Dynamic options -->
                 </div>
                 <input type="hidden" id="bulk-wh-select" value="">
               </div>
