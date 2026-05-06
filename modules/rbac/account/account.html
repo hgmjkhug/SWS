@@ -67,7 +67,7 @@
 
             <div style="display: flex; flex-direction: column; gap: 6px">
               <span style="font-weight: 500; font-size: 12px; color: #475569"
-                >Trạng thái sử dụng</span
+                >Sử dụng</span
               >
               <div class="custom-dropdown" id="status-filter-dropdown">
                 <div
@@ -203,6 +203,7 @@
                   <th style="width: 65px; text-align: center">Avatar</th>
                   <th style="width: 130px">Tên đăng nhập</th>
                   <th style="width: 220px">Họ và tên</th>
+                  <th style="width: 100px">MSNV</th>
                   <th style="width: 200px">Email</th>
                   <th style="width: 110px">Vai trò</th>
                   <th style="width: 250px">Kho áp dụng</th>
@@ -267,7 +268,25 @@
                 placeholder="Nhập họ và tên"
               />
             </div>
+            <div class="form-group">
+              <label>Tên đăng nhập<span class="required">*</span></label>
+              <input
+                type="text"
+                id="acc-code"
+                required
+                placeholder="Nhập tên đăng nhập..."
+              />
+            </div>
             <div class="form-row">
+              <div class="form-group">
+                <label>Mã số nhân viên<span class="required">*</span></label>
+                <input
+                  type="text"
+                  id="acc-msnv"
+                  required
+                  placeholder="Nhập mã số nhân viên..."
+                />
+              </div>
               <div class="form-group">
                 <label>Email</label>
                 <input
@@ -276,15 +295,6 @@
                   placeholder="example@yopmail.com"
                 />
               </div>
-            </div>
-            <div class="form-group">
-              <label>Tên đăng nhập<span class="required">*</span></label>
-              <input
-                type="text"
-                id="acc-code"
-                required
-                placeholder="Nhập mã nhân viên..."
-              />
             </div>
 
             <div class="form-row">
