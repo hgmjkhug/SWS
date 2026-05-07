@@ -79,6 +79,7 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('currentUser', username || 'Admin');
             localStorage.setItem('showLoginSuccess', 'true');
+            localStorage.setItem('sidebar_collapsed', 'true');
             
             // Redirect to root instead of index.html for clean URL
             window.location.href = '../../';

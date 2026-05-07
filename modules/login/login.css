@@ -82,12 +82,10 @@ body {
     margin-bottom: 20px;
 }
 
-.brand-text {
-    font-size: 48px;
-    font-weight: 900;
-    letter-spacing: 2px;
-    line-height: 1.1;
-    text-transform: uppercase;
+.login-brand-logo {
+    max-width: 320px;
+    height: auto;
+    filter: brightness(0) invert(1);
 }
 
 /* Right Panel */
