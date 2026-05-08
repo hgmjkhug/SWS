@@ -1139,6 +1139,9 @@
                 </td>
                 <td class="action-column">
                     <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                        <button class="btn-icon btn-lifecycle" title="Vòng đời lệnh" onclick="event.stopPropagation(); window.viewOutboundLifecycle('${item.id}')">
+                            <i class="fa-solid fa-arrows-spin"></i>
+                        </button>
                         <button class="btn-icon btn-view" title="Xem chi tiết" onclick="event.stopPropagation(); window.showOutboundDetail('${item.id}')">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -2866,6 +2869,212 @@
   setTimeout(window.initBatchFilterCombobox, 100);
 
   // Exposure
+  // ── Order Lifecycle ─────────────────────────────────────────
+  const MOCK_DEVICES_OUTBOUND = [
+      { code: 'TWR-002', name: 'Tower Crane #2', type: 'Tower' },
+      { code: 'STK-002', name: 'Stacker Crane B', type: 'Stacker' },
+      { code: 'CVY-002', name: 'Conveyor Line 02', type: 'Conveyor' },
+      { code: 'AGV-002', name: 'AGV Robot #2', type: 'AGV' },
+      { code: 'SHT-002', name: 'Shuttle Car #2', type: 'Shuttle' },
+  ];
+
+  window.viewOutboundLifecycle = function(id) {
+      const order = outboundData.find(o => String(o.id) === String(id));
+      if (!order) return;
+
+      const statusCfg = {
+          'COMPLETED': { label: 'Hoàn thành', color: '#22C55E', icon: 'fa-circle-check' },
+          'PROCESSING': { label: 'Đang xử lý', color: '#1c92e1', icon: 'fa-spinner fa-spin' },
+          'PENDING': { label: 'Đang chờ', color: '#64748b', icon: 'fa-clock' },
+          'CANCELLED': { label: 'Lỗi', color: '#991b1b', icon: 'fa-circle-xmark' },
+      };
+      const statusInfo = statusCfg[order.status] || { label: order.status, color: '#64748b', icon: 'fa-circle-question' };
+
+      const numDevices = order.status === 'COMPLETED' ? 3 : (order.status === 'PROCESSING' ? 2 : 1);
+      const selectedDevices = MOCK_DEVICES_OUTBOUND.slice(0, numDevices);
+
+      const deviceSteps = selectedDevices.map((dev, i) => {
+          let stepStatus, stepTime;
+          if (order.status === 'COMPLETED') {
+              stepStatus = 'COMPLETED';
+              const t = new Date(order.rawDate);
+              t.setMinutes(t.getMinutes() + (i + 1) * 2 + Math.floor(Math.random() * 3));
+              stepTime = t;
+          } else if (order.status === 'PROCESSING') {
+              stepStatus = i < numDevices - 1 ? 'COMPLETED' : 'PROCESSING';
+              const t = new Date(order.rawDate);
+              t.setMinutes(t.getMinutes() + (i + 1) * 2);
+              stepTime = i < numDevices - 1 ? t : new Date();
+          } else {
+              stepStatus = 'PENDING';
+              stepTime = null;
+          }
+          return { device: dev, status: stepStatus, time: stepTime };
+      });
+
+      const fmtTime = (d) => {
+          if (!d) return '—';
+          const dt = new Date(d);
+          return `${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}:${String(dt.getSeconds()).padStart(2,'0')} — ${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
+      };
+
+      const getDeviceIcon = (type) => {
+          const icons = { 'Tower': 'fa-building', 'Stacker': 'fa-layer-group', 'Conveyor': 'fa-arrow-right-arrow-left', 'AGV': 'fa-robot', 'Shuttle': 'fa-shuttle-space' };
+          return icons[type] || 'fa-microchip';
+      };
+
+      const getStepStatusBadge = (s) => {
+          if (s === 'COMPLETED') return '<span class="olc-step-badge olc-step-done"><i class="fa-solid fa-check"></i> Hoàn thành</span>';
+          if (s === 'PROCESSING') return '<span class="olc-step-badge olc-step-running"><i class="fa-solid fa-spinner fa-spin"></i> Đang thực hiện</span>';
+          return '<span class="olc-step-badge olc-step-pending"><i class="fa-regular fa-clock"></i> Chờ thực hiện</span>';
+      };
+
+      const creatorName = order.creatorName || 'Admin';
+      const creatorId = order.creatorId || 'admin';
+
+      let humanCardHtml = `
+          <div class="olc-section">
+              <div class="olc-section-header">
+                  <div class="olc-section-icon olc-human-icon"><i class="fa-solid fa-user-tie"></i></div>
+                  <div class="olc-section-title">Thao tác con người</div>
+                  <span class="olc-step-badge olc-step-done"><i class="fa-solid fa-check"></i> Đã hoàn thành</span>
+              </div>
+              <div class="olc-human-card">
+                  <div class="olc-human-row">
+                      <div class="olc-human-item">
+                          <i class="fa-solid fa-user" style="color:#076EB8"></i>
+                          <div class="olc-human-info">
+                              <span class="olc-human-label">Nhân viên tạo lệnh</span>
+                              <span class="olc-human-value">${creatorName}</span>
+                          </div>
+                      </div>
+                      <div class="olc-human-item">
+                          <i class="fa-solid fa-id-badge" style="color:#64748b"></i>
+                          <div class="olc-human-info">
+                              <span class="olc-human-label">Mã nhân viên</span>
+                              <span class="olc-human-value">${creatorId}</span>
+                          </div>
+                      </div>
+                      <div class="olc-human-item">
+                          <i class="fa-solid fa-calendar-check" style="color:#10b981"></i>
+                          <div class="olc-human-info">
+                              <span class="olc-human-label">Thời gian tạo lệnh</span>
+                              <span class="olc-human-value">${fmtTime(order.rawDate)}</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      `;
+
+      let connectorHtml = '<div class="olc-connector"><div class="olc-connector-line"></div><div class="olc-connector-dot"></div><div class="olc-connector-text">Hệ thống tự động tiếp nhận</div><div class="olc-connector-dot"></div><div class="olc-connector-line"></div></div>';
+
+      let deviceHtml = `
+          <div class="olc-section">
+              <div class="olc-section-header">
+                  <div class="olc-section-icon olc-auto-icon"><i class="fa-solid fa-microchip"></i></div>
+                  <div class="olc-section-title">Thực hiện tự động — Thiết bị</div>
+              </div>
+              <div class="olc-device-timeline">
+      `;
+
+      deviceSteps.forEach((step, i) => {
+          const isLast = i === deviceSteps.length - 1;
+          const stepColorMap = { 'COMPLETED': '#22C55E', 'PROCESSING': '#1c92e1', 'PENDING': '#cbd5e1' };
+          const stepColor = stepColorMap[step.status] || '#cbd5e1';
+
+          deviceHtml += `
+              <div class="olc-device-step ${step.status === 'PROCESSING' ? 'olc-step-active' : ''}">
+                  <div class="olc-step-indicator">
+                      <div class="olc-step-dot" style="border-color:${stepColor};${step.status === 'COMPLETED' ? 'background:' + stepColor : ''}">
+                          ${step.status === 'COMPLETED' ? '<i class="fa-solid fa-check" style="color:#fff;font-size:10px"></i>' : (step.status === 'PROCESSING' ? '<div class="olc-pulse"></div>' : '')}
+                      </div>
+                      ${!isLast ? '<div class="olc-step-line" style="background:' + (step.status === 'COMPLETED' ? stepColor : '#e2e8f0') + '"></div>' : ''}
+                  </div>
+                  <div class="olc-device-card">
+                      <div class="olc-device-card-header">
+                          <div class="olc-device-icon" style="color:${stepColor}">
+                              <i class="fa-solid ${getDeviceIcon(step.device.type)}"></i>
+                          </div>
+                          <div class="olc-device-info">
+                              <div class="olc-device-code">${step.device.code}</div>
+                              <div class="olc-device-name">${step.device.name}</div>
+                          </div>
+                          ${getStepStatusBadge(step.status)}
+                      </div>
+                      <div class="olc-device-card-body">
+                          <div class="olc-device-detail">
+                              <span class="olc-detail-label">Thời gian thực hiện</span>
+                              <span class="olc-detail-value">${fmtTime(step.time)}</span>
+                          </div>
+                          <div class="olc-device-detail">
+                              <span class="olc-detail-label">Trạng thái</span>
+                              <span class="olc-detail-value" style="color:${stepColor};font-weight:700">${step.status === 'COMPLETED' ? 'Đã hoàn thành' : (step.status === 'PROCESSING' ? 'Đang thực hiện' : 'Chờ thực hiện')}</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          `;
+      });
+
+      deviceHtml += '</div></div>';
+
+      const completedCount = deviceSteps.filter(s => s.status === 'COMPLETED').length;
+      const progressPct = Math.round((completedCount / deviceSteps.length) * 100);
+      let summaryHtml = `
+          <div class="olc-summary">
+              <div class="olc-summary-item">
+                  <span class="olc-summary-label">Tiến độ tổng</span>
+                  <div class="olc-progress-bar">
+                      <div class="olc-progress-fill" style="width:${progressPct}%"></div>
+                  </div>
+                  <span class="olc-summary-pct">${progressPct}%</span>
+              </div>
+              <div class="olc-summary-item">
+                  <span class="olc-summary-label">Thiết bị hoàn thành</span>
+                  <span class="olc-summary-value">${completedCount} / ${deviceSteps.length}</span>
+              </div>
+          </div>
+      `;
+
+      const fullContent = humanCardHtml + connectorHtml + deviceHtml + summaryHtml;
+
+      let modal = document.getElementById('modal-outbound-lifecycle');
+      if (!modal) {
+          modal = document.createElement('div');
+          modal.id = 'modal-outbound-lifecycle';
+          modal.className = 'modal-overlay';
+          modal.setAttribute('data-module-asset', 'true');
+          modal.innerHTML = `
+              <div class="modal-box olc-modal-box">
+                  <div class="modal-header">
+                      <div style="display:flex;align-items:center;gap:15px;flex:1">
+                          <i class="fa-solid fa-arrows-spin" style="color:#076EB8;font-size:20px"></i>
+                          <div class="modal-title" id="olc-out-modal-title">Vòng đời lệnh</div>
+                          <div class="olc-header-badges" id="olc-out-header-badges"></div>
+                      </div>
+                      <div class="close-modal" onclick="var m=document.getElementById('modal-outbound-lifecycle');m.style.display='none';m.style.opacity='0'"><i class="fas fa-times"></i></div>
+                  </div>
+                  <div class="modal-body olc-modal-body" id="olc-out-modal-content"></div>
+                  <div class="modal-footer" style="padding:12px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;">
+                      <button class="btn-secondary" onclick="var m=document.getElementById('modal-outbound-lifecycle');m.style.display='none';m.style.opacity='0'">Đóng</button>
+                  </div>
+              </div>
+          `;
+          document.body.appendChild(modal);
+      }
+
+      document.getElementById('olc-out-modal-title').textContent = 'Vòng đời lệnh — ' + order.code.split('_')[0];
+      document.getElementById('olc-out-header-badges').innerHTML = `
+          <div class="olc-header-badge"><i class="fa-solid fa-hashtag" style="color:#076EB8"></i> <span>Mã: <strong>${order.code.split('_')[0]}</strong></span></div>
+          <div class="olc-header-badge"><i class="fa-solid ${statusInfo.icon}" style="color:${statusInfo.color}"></i> <span style="color:${statusInfo.color};font-weight:700">${statusInfo.label}</span></div>
+      `;
+      document.getElementById('olc-out-modal-content').innerHTML = fullContent;
+      modal.style.display = 'flex';
+      modal.style.opacity = '1';
+      modal.style.zIndex = '10000';
+  };
+
   window.openOutboundImportModal = openOutboundImportModal;
   window.closeOutboundImportModal = closeOutboundImportModal;
   window.downloadSampleOutboundImport = downloadSampleOutboundImport;
