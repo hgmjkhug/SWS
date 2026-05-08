@@ -241,12 +241,11 @@
 .account-table th:nth-child(3), .account-table td:nth-child(3) { width: 65px; text-align: center; } /* Avatar */
 .account-table th:nth-child(4), .account-table td:nth-child(4) { width: 130px; } /* Code */
 .account-table th:nth-child(5), .account-table td:nth-child(5) { width: 220px; } /* Name */
-.account-table th:nth-child(6), .account-table td:nth-child(6) { width: 100px; } /* MSNV */
-.account-table th:nth-child(7), .account-table td:nth-child(7) { width: 200px; } /* Email */
-.account-table th:nth-child(8), .account-table td:nth-child(8) { width: 110px; text-align: center; } /* Role */
-.account-table th:nth-child(9), .account-table td:nth-child(9) { width: 250px; } /* Warehouse Scope */
-.account-table th:nth-child(10), .account-table td:nth-child(10) { width: 90px; text-align: center; } /* Status */
-.account-table th:nth-child(11), .account-table td:nth-child(11) { width: 110px; text-align: center; } /* Action */
+.account-table th:nth-child(6), .account-table td:nth-child(6) { width: 200px; } /* Email */
+.account-table th:nth-child(7), .account-table td:nth-child(7) { width: 110px; text-align: center; } /* Role */
+.account-table th:nth-child(8), .account-table td:nth-child(8) { width: 250px; } /* Warehouse Scope */
+.account-table th:nth-child(9), .account-table td:nth-child(9) { width: 90px; text-align: center; } /* Status */
+.account-table th:nth-child(10), .account-table td:nth-child(10) { width: 110px; text-align: center; } /* Action */
 
 /* Universal Vertical Alignment */
 .account-table th, .account-table td {

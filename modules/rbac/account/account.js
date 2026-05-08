@@ -331,7 +331,6 @@ function renderAccounts() {
                         </td>
                         <td rowspan="${rowSpan}" style="vertical-align: middle;"><span style="font-family: roboto; font-weight: 600; color: #334155;">${acc.accountCode}</span></td>
                         <td rowspan="${rowSpan}" style="vertical-align: middle;"><div style="font-weight: 500; color: #0f172a;">${acc.fullname}</div></td>
-                        <td rowspan="${rowSpan}" style="vertical-align: middle;"><span style="font-weight: 500; color: #475569;">${acc.msnv || '-'}</span></td>
                         <td rowspan="${rowSpan}" style="vertical-align: middle;">${acc.email}</td>
                     `;
                 }
@@ -464,8 +463,7 @@ function filterAccounts() {
 
     filteredData = accounts.filter(acc => {
         const matchesQuery = acc.fullname.toLowerCase().includes(query) ||
-            acc.accountCode.toLowerCase().includes(query) ||
-            (acc.msnv && acc.msnv.toLowerCase().includes(query));
+            acc.accountCode.toLowerCase().includes(query);
         const matchesRole = roleFilter === '' || (acc.permissions && acc.permissions.some(p => p.role === roleFilter));
         
         let matchesStatus = true;
@@ -662,7 +660,6 @@ function openAccountModal(id = null) {
             document.getElementById('acc-fullname').value = acc.fullname;
             document.getElementById('acc-email').value = acc.email;
             document.getElementById('acc-code').value = acc.accountCode;
-            document.getElementById('acc-msnv').value = acc.msnv || '';
 
             // Render Permissions
             renderPermissionRows(acc.permissions || []);
@@ -696,7 +693,6 @@ function saveAccount() {
     const fullname = document.getElementById('acc-fullname').value;
     const email = document.getElementById('acc-email').value;
     const accountCodeInput = document.getElementById('acc-code').value;
-    const msnvInput = document.getElementById('acc-msnv').value;
     const avatarValue = getAvatarValue();
     const avatar = avatarValue || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullname)}&background=random`;
     
@@ -709,7 +705,7 @@ function saveAccount() {
 
     // Use currentPermissions global instead of manual DOM scraping which was broken
     const permissions = JSON.parse(JSON.stringify(currentPermissions));
-    if (!fullname || !accountCodeInput || !msnvInput) {
+    if (!fullname || !accountCodeInput) {
         showToast('Vui lòng nhập đầy đủ thông tin tài khoản', 'error');
         return;
     }
@@ -718,12 +714,12 @@ function saveAccount() {
         const id = parseInt(idStr);
         const idx = accounts.findIndex(a => a.id === id);
         if (idx !== -1) {
-            accounts[idx] = { ...accounts[idx], fullname, email, accountCode: accountCodeInput, msnv: msnvInput, avatar, active, permissions };
+            accounts[idx] = { ...accounts[idx], fullname, email, accountCode: accountCodeInput, avatar, active, permissions };
             showToast('Cập nhật thông tin tài khoản thành công');
         }
     } else {
         const newId = accounts.length > 0 ? Math.max(...accounts.map(a => a.id)) + 1 : 1;
-        accounts.push({ id: newId, accountCode: accountCodeInput, msnv: msnvInput, fullname: fullname, email: email, avatar: avatar, active: active, permissions: permissions });
+        accounts.push({ id: newId, accountCode: accountCodeInput, fullname: fullname, email: email, avatar: avatar, active: active, permissions: permissions });
         showToast('Cập nhật thông tin tài khoản thành công');
     }
 
@@ -740,16 +736,6 @@ function loadAccountsFromStorage() {
     const stored = localStorage.getItem('sws_accounts');
     if (stored) {
         accounts = JSON.parse(stored);
-        
-        // Ensure all accounts have msnv
-        let updated = false;
-        accounts.forEach(acc => {
-            if (!acc.msnv) {
-                acc.msnv = `NV${String(Math.floor(Math.random() * 9000) + 1000)}`;
-                updated = true;
-            }
-        });
-        if (updated) saveAccountsToStorage();
     }
     
     // If accounts is empty (either no storage or empty array), generate mock data
@@ -798,7 +784,6 @@ function generateMockAccounts() {
         accounts.push({
             id: i,
             accountCode: `user${String(i).padStart(3, '0')}`,
-            msnv: `NV${String(Math.floor(Math.random() * 9000) + 1000)}`,
             fullname: fullname,
             email: `${ln.toLowerCase()}${i}@yopmail.com`,
             permissions: permissions,
@@ -991,12 +976,11 @@ function renderPreviewTable(data) {
     const thead = document.getElementById('preview-thead');
     const tbody = document.getElementById('preview-tbody');
 
-    thead.innerHTML = '<tr><th>Họ và tên</th><th>Email</th><th>Mã NV</th><th>Vai trò</th></tr>';
+    thead.innerHTML = '<tr><th>Họ và tên</th><th>Email</th><th>Vai trò</th></tr>';
     tbody.innerHTML = data.map(row => `
         <tr>
             <td>${row.fullname}</td>
             <td>${row.email}</td>
-            <td>${row.code}</td>
             <td><span class="role-badge role-${row.role.toLowerCase()}">${row.role}</span></td>
         </tr>
     `).join('');
@@ -1022,7 +1006,6 @@ function confirmImport() {
             accountCode: `user${String(maxId).padStart(3, '0')}`,
             fullname: row.fullname,
             email: row.email,
-            code: row.code,
             role: row.role,
             avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(row.fullname)}&background=random`,
             active: true

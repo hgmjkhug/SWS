@@ -52,7 +52,6 @@
     window.saveProfileChanges = function() {
         const fullname = document.getElementById('p-fullname')?.value;
         const email = document.getElementById('p-email')?.value;
-        const phone = document.getElementById('p-phone')?.value;
         
         if (!fullname) {
             if (typeof showToast === 'function') {
