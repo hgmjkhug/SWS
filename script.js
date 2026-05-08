@@ -365,7 +365,7 @@ function loadPage(title) {
         'Đơn vị tính': 'modules/master-data/unit-of-measure/unit.html',
         'Nhóm thiết bị': 'modules/master-data/device-type/device-type.html',
         // 'Quản lý thiết bị': 'modules/master-data/device/device.html',
-        'Danh sách Quy trình': 'modules/workflow/workflow.html',
+        'Quản lý quy trình tự động': 'modules/workflow/workflow.html',
         'Quản lý bước': 'modules/workflow-step/workflow-step.html',
         'Phân hệ': 'modules/rbac/module/module.html',
         'Chức năng': 'modules/rbac/menu/menu.html',
