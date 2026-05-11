@@ -449,7 +449,7 @@ tr.expanded .chevron-btn {
 /* Child Table Styles */
 .child-table-row {
   display: none;
-  background: #fcfdfe;
+  background: #f8fafc;
 }
 
 .child-table-row.expanded {
@@ -457,11 +457,13 @@ tr.expanded .chevron-btn {
 }
 
 .child-table-container {
-  padding: 16px 24px;
-  margin: 10px 20px;
+  padding: 0;
+  margin: 12px 24px 20px 60px;
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 
 .child-table {
@@ -470,18 +472,30 @@ tr.expanded .chevron-btn {
 }
 
 .child-table th {
-  background: #f8fafc !important;
-  color: #64748b !important;
-  font-size: 12px !important;
-  padding: 10px 12px !important;
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 12px 16px !important;
   border-bottom: 1px solid #e2e8f0 !important;
-  text-transform: none !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em;
+  text-align: left;
 }
 
 .child-table td {
-  padding: 10px 12px;
+  padding: 12px 16px;
   border-bottom: 1px solid #f1f5f9;
   font-size: 13px;
+  color: #334155;
+}
+
+.child-table tr:last-child td {
+  border-bottom: none;
+}
+
+.child-table tr:hover td {
+  background: #fdfdfd;
 }
 
 /* Badges */
@@ -1065,4 +1079,66 @@ input:checked + .slider:before {
   width: 100%;
   padding-right: 40px;
   cursor: pointer;
+}
+/* Additional Styles for Description Column and Modal */
+.manual-table td:nth-child(4) {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.btn-config { 
+  color: #64748b; 
+}
+
+.btn-config:hover { 
+  background: #f1f5f9; 
+  color: #076EB8; 
+  border-color: #076EB8; 
+}
+
+/* Modal specific styles for manual module */
+.form-group-manual {
+  margin-bottom: 16px;
+}
+
+.manual-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.modal-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.modal-input:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.modal-textarea {
+  width: 100%;
+  height: 100px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: none;
+  transition: all 0.2s;
+}
+
+.modal-textarea:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }

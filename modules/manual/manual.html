@@ -27,7 +27,7 @@
           </div>
         </div>
 
-        <button class="btn btn-primary" onclick="window.showAddView()">
+        <button class="btn btn-primary" onclick="window.showAddTaskModal()">
           <i class="fas fa-plus"></i> Thêm mới
         </button>
       </div>
@@ -40,15 +40,17 @@
               <colgroup>
                 <col style="width: 40px;">
                 <col style="width: 50px;">
-                <col style="width: 45%;">
-                <col style="width: 20%;">
-                <col style="width: 120px;">
+                <col style="width: 30%;">
+                <col style="width: 25%;">
+                <col style="width: 15%;">
+                <col style="width: 140px;">
               </colgroup>
               <thead>
                 <tr>
                   <th><input type="checkbox" id="checkAll" onclick="window.toggleBulkCheck(this)" /></th>
                   <th>STT</th>
                   <th>Tên nhiệm vụ</th>
+                  <th>Mô tả</th>
                   <th>Thiết bị áp dụng</th>
                   <th>Thao tác</th>
                 </tr>
@@ -60,9 +62,10 @@
               <colgroup>
                 <col style="width: 40px;">
                 <col style="width: 50px;">
-                <col style="width: 45%;">
-                <col style="width: 20%;">
-                <col style="width: 120px;">
+                <col style="width: 30%;">
+                <col style="width: 25%;">
+                <col style="width: 15%;">
+                <col style="width: 140px;">
               </colgroup>
               <tbody id="taskTableBody"></tbody>
             </table>
@@ -212,6 +215,32 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD TASK MODAL -->
+  <div class="modal-overlay" id="addTaskModal">
+    <div class="modal-box medium-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Thêm nhiệm vụ mới</h3>
+        <button class="close-btn" onclick="window.closeAddTaskModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group-manual">
+          <label class="manual-label">Tên nhiệm vụ <span class="required-star">*</span></label>
+          <input type="text" id="modalTaskName" placeholder="Nhập tên nhiệm vụ..." class="modal-input" />
+        </div>
+        <div class="form-group-manual" style="margin-top: 16px;">
+          <label class="manual-label">Mô tả nhiệm vụ</label>
+          <textarea id="modalTaskDesc" placeholder="Nhập mô tả nhiệm vụ (nếu có)..." class="modal-textarea"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="manual-btn btn-outline" onclick="window.closeAddTaskModal()">Hủy</button>
+        <button class="manual-btn btn-primary" onclick="window.saveNewTask()">Lưu nhiệm vụ</button>
       </div>
     </div>
   </div>

@@ -395,9 +395,14 @@ function loadPage(title) {
         'Đơn hàng ERP': 'modules/order/receive/receive.html',
         // 'Đơn hàng xuất': 'modules/order/send/send.html',
         'Theo dõi tồn kho': 'modules/instock/instock.html',
-        'Kiểm kê nhập xuất': 'modules/check/check.html'
-        // 'Vật chứa mới': 'modules/new-container/new-cont.html',
+        'Kiểm kê nhập xuất': 'modules/check/check.html',
+        'Trang chủ': 'HOME'
     };
+
+    if (title === 'Trang chủ') {
+        showHome();
+        return;
+    }
 
     const mapped = moduleMap[title];
     if (mapped) {
@@ -1299,7 +1304,7 @@ document.addEventListener('DOMContentLoaded', function () {
             loadPage(lastPage);
         } else {
             // Default page if none
-            loadPage('Giám sát hoạt động');
+            loadPage('Trang chủ');
         }
     } catch (e) {
         console.error("Restoration error:", e);
@@ -1469,3 +1474,40 @@ async function takeScreenshot() {
     }
 }
 
+/**
+ * Displays the home background image in the main content area.
+ */
+function showHome() {
+    const mainView = document.getElementById('main-view');
+    const pageTitle = document.getElementById('page-title');
+    
+    if (pageTitle) {
+        pageTitle.innerHTML = `
+            <div class="breadcrumbs" style="display:flex; align-items:center; gap:5px;">
+                <span style="color: #1e293b; font-size: 13px; font-weight: 700; text-transform: uppercase;">TRANG CHỦ</span>
+            </div>
+        `;
+    }
+
+    if (mainView) {
+        mainView.innerHTML = `
+            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #f8fafc; padding: 0;">
+                <img src="asset/Home_Background.webp" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);" alt="Home Background" />
+            </div>
+        `;
+        // Remove padding from content body for full bleed effect
+        mainView.style.padding = '20px'; // Keep some padding for aesthetic
+    }
+    
+    // Clear active states in sidebar
+    document.querySelectorAll('.menu-item').forEach(mi => {
+        mi.classList.remove('open');
+        const sm = mi.querySelector('.submenu');
+        if (sm) sm.style.maxHeight = null;
+    });
+    document.querySelectorAll('.menu-link').forEach(ml => ml.classList.remove('active'));
+    document.querySelectorAll('.submenu a').forEach(el => el.classList.remove('sub-active'));
+
+    // Persist state
+    try { localStorage.setItem('wms_last_page', 'Trang chủ'); } catch (e) { }
+}

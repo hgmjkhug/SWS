@@ -6,6 +6,7 @@
     {
       id: 1,
       name: "Cấp pallet từ kho mát A đến line sản xuất 1",
+      description: "Nhiệm vụ cấp pallet rỗng cho dây chuyền sản xuất số 1",
       device: "OHT-01",
       creator: "Nguyễn Văn A",
       details: [
@@ -16,6 +17,7 @@
     {
       id: 2,
       name: "Chuyển thành phẩm từ line 2 về kho mát B",
+      description: "Vận chuyển thành phẩm sau khi đóng gói về kho lưu trữ B",
       device: "RGV-05",
       creator: "Trần Thị B",
       details: [
@@ -29,6 +31,7 @@
     tasks.push({
       id: i,
       name: `Nhiệm vụ điều phối thủ công số ${i}`,
+      description: `Mô tả chi tiết cho nhiệm vụ số ${i}`,
       device: i % 2 === 0 ? "OHT-03" : "RGV-02",
       creator: i % 3 === 0 ? "Nguyễn Văn A" : "Hoàng Minh Hưng",
       details: [
@@ -41,6 +44,7 @@
   const itemsPerPage = 20;
   let filteredTasks = [...tasks];
   let originalBreadcrumb = '';
+  let currentEditTaskId = null;
   let mapZoom = 1.0;
   let selectedModules = [];
   let taskCount = 1;
@@ -77,7 +81,7 @@
     const pageTasks = filteredTasks.slice(start, end);
 
     if (pageTasks.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">Không có dữ liệu</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">Không có dữ liệu</td></tr>';
       updatePagination();
       return;
     }
@@ -94,9 +98,13 @@
             <span>${task.name}</span>
           </div>
         </td>
-        <td>${task.device}</td>
+        <td>${task.description || '---'}</td>
+        <td>${task.device || '---'}</td>
         <td>
           <div class="action-btns">
+            <div class="btn-icon btn-config" onclick="window.showAddView(${task.id})" title="Cấu hình">
+              <i class="fas fa-cog"></i>
+            </div>
             <div class="btn-icon btn-play" onclick="window.activateTask(${task.id})" title="Kích hoạt">
               <i class="fas fa-play"></i>
             </div>
@@ -110,26 +118,26 @@
         </td>
       </tr>
       <tr class="child-table-row" id="child-${task.id}">
-        <td colspan="5">
+        <td colspan="6">
           <div class="child-table-container">
             <table class="child-table">
               <thead>
                 <tr>
-                  <th width="50">STT</th>
+                  <th width="60" style="text-align: center;">STT</th>
                   <th>Thời gian bắt đầu</th>
                   <th>Thời gian kết thúc</th>
-                  <th>Trạng thái</th>
-                  <th>Người thực hiện</th>
+                  <th width="150">Trạng thái</th>
+                  <th width="200">Người thực hiện</th>
                 </tr>
               </thead>
               <tbody>
                 ${task.details.map((d, i) => `
                   <tr>
-                    <td>${i + 1}</td>
-                    <td>${d.start}</td>
-                    <td>${d.end}</td>
+                    <td style="text-align: center; color: #94a3b8; font-weight: 600;">${i + 1}</td>
+                    <td style="font-weight: 500;">${d.start}</td>
+                    <td style="font-weight: 500;">${d.end}</td>
                     <td><span class="badge badge-${d.status}">${getStatusText(d.status)}</span></td>
-                    <td>${d.executor}</td>
+                    <td style="color: #64748b;"><i class="fas fa-user-circle" style="margin-right: 6px; font-size: 14px;"></i>${d.executor}</td>
                   </tr>
                 `).join('')}
               </tbody>
@@ -484,8 +492,79 @@
     }
   };
 
+
+
+  // Modal Logic
+  window.showAddTaskModal = function () {
+    currentEditTaskId = null;
+    const modal = document.getElementById('addTaskModal');
+    if (modal) {
+      modal.classList.add('show');
+      document.getElementById('modalTitle').innerText = 'Thêm nhiệm vụ mới';
+      document.getElementById('modalTaskName').value = '';
+      document.getElementById('modalTaskDesc').value = '';
+      document.getElementById('modalTaskName').focus();
+    }
+  };
+
+  window.editTask = function (id) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    
+    currentEditTaskId = id;
+    const modal = document.getElementById('addTaskModal');
+    if (modal) {
+      modal.classList.add('show');
+      document.getElementById('modalTitle').innerText = 'Chỉnh sửa nhiệm vụ';
+      document.getElementById('modalTaskName').value = task.name;
+      document.getElementById('modalTaskDesc').value = task.description || '';
+      document.getElementById('modalTaskName').focus();
+    }
+  };
+
+  window.closeAddTaskModal = function () {
+    const modal = document.getElementById('addTaskModal');
+    if (modal) modal.classList.remove('show');
+  };
+
+  window.saveNewTask = function () {
+    const name = document.getElementById('modalTaskName').value.trim();
+    const desc = document.getElementById('modalTaskDesc').value.trim();
+
+    if (!name) {
+      if (window.showToast) window.showToast("Tên nhiệm vụ là bắt buộc", "warning");
+      return;
+    }
+
+    if (currentEditTaskId) {
+      // Edit mode
+      const taskIndex = tasks.findIndex(t => t.id === currentEditTaskId);
+      if (taskIndex !== -1) {
+        tasks[taskIndex].name = name;
+        tasks[taskIndex].description = desc;
+        if (window.showToast) window.showToast("Đã cập nhật nhiệm vụ", "success");
+      }
+    } else {
+      // Add mode
+      const newTask = {
+        id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
+        name: name,
+        description: desc,
+        device: "",
+        creator: "hmhung",
+        details: []
+      };
+      tasks.unshift(newTask);
+      if (window.showToast) window.showToast("Đã thêm nhiệm vụ mới. Vui lòng nhấn icon gear để cấu hình.", "success");
+    }
+
+    filteredTasks = [...tasks];
+    renderTable();
+    window.closeAddTaskModal();
+  };
+
   // View Navigation
-  window.showAddView = function () {
+  window.showAddView = function (taskId) {
     document.getElementById('listView').classList.add('d-none');
     document.getElementById('addView').classList.remove('d-none');
     
@@ -495,11 +574,14 @@
       originalBreadcrumb = pageTitle.innerHTML;
     }
     
+    const task = tasks.find(t => t.id === taskId);
+    const taskNameSuffix = task ? ` / ${task.name}` : '';
+    
     if (pageTitle) {
       pageTitle.innerHTML = `
         <div class="breadcrumbs" style="display:flex; align-items:center; gap:5px;">
           <span style="color: #64748b; font-size: 13px; font-weight: 500; text-transform: uppercase;">QUẢN LÝ THIẾT BỊ / ĐIỀU PHỐI THỦ CÔNG /</span>
-          <span style="color: #1e293b; font-size: 13px; font-weight: 700; text-transform: uppercase;">THIẾT LẬP ĐIỀU PHỐI</span>
+          <span style="color: #1e293b; font-size: 13px; font-weight: 700; text-transform: uppercase;">THIẾT LẬP ĐIỀU PHỐI${taskNameSuffix}</span>
         </div>
       `;
     }
