@@ -1234,213 +1234,139 @@ function renderPaginationBar(totalItems) {
         var b = MOCK_BATCHES.find(function(x) { return x.id == id; });
         if (!b) return;
 
-        // Use percentages for a truly responsive diagram area (75% of modal)
-        // Centers for 4 columns: 100% / 4 / 2 = 12.5%, 37.5%, 62.5%, 87.5%
-        var ACTOR_X = { 1: '12.5%', 2: '37.5%', 3: '62.5%', 4: '87.5%' };
-
-        var actors = [
-            { id: 1, name: 'Nhân viên',    icon: 'fa-user-tie' },
-            { id: 2, name: 'Hệ thống WMS', icon: 'fa-server' },
-            { id: 3, name: 'Kho bãi',      icon: 'fa-warehouse' },
-            { id: 4, name: 'Vận chuyển',   icon: 'fa-truck-fast' }
-        ];
+        var STEP_ICONS = ['fa-file-circle-plus','fa-list-check','fa-warehouse','fa-boxes-stacked','fa-truck-ramp-box','fa-circle-check'];
+        var STEP_LABELS = ['Tạo lô hàng','Kiểm kê','Nhập kho','Lưu kho','Xuất kho','Hoàn tất'];
+        var UNIT_ICONS = ['fa-user-tie','fa-users','fa-server','fa-warehouse','fa-truck-fast','fa-server'];
+        var UNIT_NAMES = ['Nhân viên','Nhân viên','WMS','Kho bãi','Vận chuyển','WMS'];
 
         var steps = [
-            {
-                key: 'created', label: 'Khởi tạo lô hàng',
-                from: 1, to: 2, color: '#64748b',
-                done: true,
-                date: formatDate(b.createdAt),
-                details: [
-                    { label: 'Người thực hiện', value: b.creator.name },
-                    { label: 'Mã nhân viên',    value: b.creator.id }
-                ]
-            },
-            {
-                key: 'checked', label: 'Kiểm kê & Phân loại',
-                from: 2, to: 2, type: 'self', color: '#f59e0b',
-                done: ['CHECKED', 'IMPORTING', 'INSTOCK', 'EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1,
-                date: ['CHECKED', 'IMPORTING', 'INSTOCK', 'EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1 ? formatDate(b.createdAt) : null,
-                details: [
-                    { label: 'Số lượng tổng',  value: b.totalQty + ' thùng' },
-                    { label: 'Phẩm cấp', value: (b.grades || ['A', 'B']).join(', ') }
-                ]
-            },
-            {
-                key: 'importing', label: 'Thực hiện nhập kho',
-                from: 2, to: 3, color: '#0ea5e9',
-                done: ['IMPORTING', 'INSTOCK', 'EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1,
-                date: b.importDate ? formatDate(b.importDate) : (['IMPORTING', 'INSTOCK', 'EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1 ? formatDate(b.createdAt) : null),
-                details: [
-                    { label: 'Trạng thái', value: (['INSTOCK', 'EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1) ? 'Đã nhập xong' : (b.status === 'IMPORTING' ? 'Đang thực hiện' : 'Chưa bắt đầu') },
-                    { label: 'Số lượng thực nhập',    value: (b.receivedQty || 0) + ' thùng' }
-                ]
-            },
-            {
-                key: 'instock', label: 'Lưu kho & Bảo quản',
-                from: 3, to: 3, type: 'self', color: '#10b981',
-                done: ['INSTOCK', 'EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1,
-                date: b.importDate ? formatDate(b.importDate) : (['INSTOCK', 'EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1 ? formatDate(b.createdAt) : null),
-                details: [
-                    { label: 'Vị trí', value: 'Khu vực A - Tầng 2' },
-                    { label: 'Nhiệt độ bảo quản',  value: '13°C - 15°C' }
-                ]
-            },
-            {
-                key: 'exporting', label: 'Yêu cầu xuất kho',
-                from: 3, to: 4, color: '#f97316',
-                done: ['EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1,
-                date: b.exportDate ? formatDate(b.exportDate) : (['EXPORTING', 'COMPLETED'].indexOf(b.status) !== -1 ? formatDate(b.createdAt) : null),
-                details: [
-                    { label: 'Phương thức', value: 'FIFO (Nhập trước xuất trước)' },
-                    { label: 'Số lượng xuất', value: (b.exportedQty || 0) + ' thùng' }
-                ]
-            },
-            {
-                key: 'done', label: 'Bàn giao & Hoàn tất',
-                from: 4, to: 1, type: 'return', color: '#076EB8',
-                done: b.status === 'COMPLETED',
-                date: b.exportDate ? formatDate(b.exportDate) : (b.status === 'COMPLETED' ? formatDate(b.createdAt) : null),
-                details: [
-                    { label: 'Đơn vị vận chuyển', value: b.deliverer || 'N/A' },
-                    { label: 'Trạng thái cuối', value: 'Giao hàng thành công' }
-                ]
-            }
+            { num:1, label:'Tạo thông tin lô hàng', desc:'Nhân viên tạo hồ sơ lô hàng.', unit:UNIT_NAMES[0], unitIcon:UNIT_ICONS[0],
+              done:true, date:formatDate(b.createdAt)+' '+formatTime(b.createdAt),
+              keydata:['Mã lô: <strong>'+b.code+'</strong>'] },
+            { num:2, label:'Kiểm kê & phân loại', desc:'Kiểm đếm số lượng và phân loại phẩm cấp.', unit:UNIT_NAMES[1], unitIcon:UNIT_ICONS[1],
+              done:['CHECKED','IMPORTING','INSTOCK','EXPORTING','COMPLETED'].indexOf(b.status)!==-1,
+              date:['CHECKED','IMPORTING','INSTOCK','EXPORTING','COMPLETED'].indexOf(b.status)!==-1?formatDate(b.createdAt)+' '+formatTime(b.createdAt):null,
+              keydata:['Số lượng tổng: <strong>'+(b.totalQty||0)+' thùng</strong>','Phẩm cấp: <strong>'+(b.grades||['A','B']).join(', ')+'</strong>'] },
+            { num:3, label:'Thực hiện nhập kho', desc:'WMS tiếp nhận và ghi nhận lô nhập kho.', unit:UNIT_NAMES[2], unitIcon:UNIT_ICONS[2],
+              done:['IMPORTING','INSTOCK','EXPORTING','COMPLETED'].indexOf(b.status)!==-1,
+              date:['IMPORTING','INSTOCK','EXPORTING','COMPLETED'].indexOf(b.status)!==-1?formatDate(b.createdAt)+' '+formatTime(b.createdAt):null,
+              keydata:['Số lượng thực nhập: <strong>'+(b.receivedQty||0)+'/'+(b.totalQty||0)+' thùng</strong>','Khu nhập: <strong>Inbound 01</strong>'] },
+            { num:4, label:'Lưu kho & bảo quản', desc:'Đã phân bổ vị trí lưu trữ trong kho.', unit:UNIT_NAMES[3], unitIcon:UNIT_ICONS[3],
+              done:['INSTOCK','EXPORTING','COMPLETED'].indexOf(b.status)!==-1,
+              date:['INSTOCK','EXPORTING','COMPLETED'].indexOf(b.status)!==-1?formatDate(b.createdAt)+' '+formatTime(b.createdAt)+' – Hiện tại':null,
+              keydata:['Vị trí: <strong>A01-B02-L03</strong>','Điều kiện bảo quản: <strong>13°C</strong>'] },
+            { num:5, label:'Xuất kho', desc:'Chưa phát sinh yêu cầu xuất / hoặc đang chuẩn bị xuất.', unit:UNIT_NAMES[4], unitIcon:UNIT_ICONS[4],
+              done:['EXPORTING','COMPLETED'].indexOf(b.status)!==-1, date:null, keydata:[] },
+            { num:6, label:'Hoàn tất vòng đời', desc:'Hoàn tất khi lô đã xuất hết và đóng hồ sơ.', unit:UNIT_NAMES[5], unitIcon:UNIT_ICONS[5],
+              done:b.status==='COMPLETED', date:null, keydata:[] }
         ];
 
-        var currentStepIndex = -1;
-        steps.forEach(function(s, i) { if (s.done) currentStepIndex = i; });
+        var currentIdx=-1;
+        steps.forEach(function(s,i){if(s.done)currentIdx=i;});
+        var doneCount=currentIdx+1;
 
-        // ── ACTOR HEADER ROW ──────────────────────────────────────────────
-        var actorsHtml = '<div class="sd-actors"><div class="sd-actor-container">';
-        actors.forEach(function(a) {
-            var isActive = (currentStepIndex >= 0 && (steps[currentStepIndex].from === a.id || steps[currentStepIndex].to === a.id));
-            actorsHtml += '<div class="sd-actor-col">' +
-                '<div class="sd-actor-box' + (isActive ? ' sd-actor-active' : '') + '">' +
-                    '<i class="fa-solid ' + a.icon + '"></i>' +
-                    '<span>' + a.name + '</span>' +
-                '</div>' +
+        // Summary bar
+        var summaryHtml='<div class="lc-summary-bar">'+
+            '<div class="lc-summary-item"><div class="lc-summary-label"><i class="fa-solid fa-user"></i> Người tạo / Nhân viên</div><div class="lc-summary-value">'+(b.creator?b.creator.name:'N/A')+'</div></div>'+
+            '<div class="lc-summary-item"><div class="lc-summary-label"><i class="fa-solid fa-cubes"></i> Số lượng</div><div class="lc-summary-value">'+(b.totalQty||0)+' thùng</div></div>'+
+            '<div class="lc-summary-item"><div class="lc-summary-label"><i class="fa-solid fa-star"></i> Phẩm cấp</div><div class="lc-summary-value">'+(b.grades||['A','B']).join(', ')+'</div></div>'+
+            '<div class="lc-summary-item"><div class="lc-summary-label"><i class="fa-solid fa-location-dot"></i> Vị trí lưu kho</div><div class="lc-summary-value">Khu A · B02 · L03</div></div>'+
+            '<div class="lc-summary-item"><div class="lc-summary-label"><i class="fa-solid fa-calendar"></i> Thời gian tạo</div><div class="lc-summary-value">'+formatDate(b.createdAt)+' '+formatTime(b.createdAt)+'</div></div>'+
+            '<div class="lc-summary-item"><div class="lc-summary-label"><i class="fa-solid fa-chart-pie"></i> Tiến độ tổng</div><div class="lc-summary-value">'+doneCount+'/6 giai đoạn</div><div class="lc-progress-bar-mini"><div class="lc-progress-fill" style="width:'+Math.round(doneCount/6*100)+'%"></div></div></div>'+
             '</div>';
+
+        // Stepper
+        var stepperHtml='<div class="lc-stepper">';
+        steps.forEach(function(s,i){
+            var cls=s.done?'done':(i===currentIdx+1?'active':'');
+            stepperHtml+='<div class="lc-step-node '+cls+'"><div class="lc-step-circle">'+(s.done?'<i class="fa-solid fa-check" style="font-size:14px"></i>':(i+1))+'</div><div class="lc-step-label">'+STEP_LABELS[i]+'</div></div>';
+            if(i<steps.length-1){
+                var connCls=s.done?(steps[i+1].done?'done':(i===currentIdx?'active':'')):'';
+                stepperHtml+='<div class="lc-step-connector '+connCls+'"></div>';
+            }
         });
-        actorsHtml += '</div><div style="flex:1"></div></div>'; // Placeholder for card column
+        stepperHtml+='</div>';
 
-        // ── MESSAGE ROWS ──────────────────────────────────────────────────
-        var rowsHtml = '<div class="sd-rows">';
-        steps.forEach(function(s, i) {
-            var isDone = s.done;
-            var isActive = (i === currentStepIndex);
-            var rowMod = isDone ? ' sd-row--done' : (isActive ? ' sd-row--active' : ' sd-row--pending');
+        // Step cards
+        var cardsHtml='<div class="lc-steps-list">';
+        steps.forEach(function(s,i){
+            var state=s.done?'done':(i===currentIdx+1?'active':'pending');
+            var statusLabel=s.done?'Hoàn thành':(i===currentIdx+1?'Đang lưu kho':'Chưa thực hiện');
+            var statusIcon=s.done?'<i class="fa-solid fa-check"></i>':(i===currentIdx+1?'<i class="fa-solid fa-spinner fa-spin"></i>':'');
+            if(state==='active'){
+                if(i===3) statusLabel='Đang lưu kho';
+                else if(i===4) statusLabel='Chưa thực hiện';
+                else statusLabel='Đang thực hiện';
+            }
+            if(state==='pending') statusLabel='Chờ hoàn tất';
 
-            var x1 = ACTOR_X[s.from];
-            var x2 = ACTOR_X[s.to];
-            var color = isDone ? s.color : '#cbd5e1';
-            var isReturn = (s.type === 'return');
-
-            // ── Arrow SVG (Nested SVG Groups for Robust Widescreen Rendering) ──
-            var svgArrow = '';
-            if (s.type === 'self') {
-                // Wrap entire self-loop in a nested SVG anchored at x1
-                svgArrow = '<svg class="sd-arrow-svg" xmlns="http://www.w3.org/2000/svg">' +
-                    '<svg x="' + x1 + '" y="35" width="100" height="50" overflow="visible">' +
-                        '<path d="M 0,0 H 50 V 35 H 0" ' +
-                            'fill="none" stroke="' + color + '" stroke-width="3.5" class="sd-arrow-line ' + (isActive ? 'sd-path-animated' : '') + '" ' +
-                            'stroke-dasharray="' + (isDone ? 'none' : '6,5') + '"/>' +
-                        '<polygon points="0,0 12,-7 12,7" fill="' + color + '" transform="translate(0, 35)"/>' +
-                        '<text x="60" y="20" font-size="14" fill="' + color + '" font-weight="800">' + s.label + '</text>' +
-                    '</svg>' +
-                '</svg>';
-            } else {
-                var midX = 'calc((' + x1 + ' + ' + x2 + ') / 2)';
-                svgArrow = '<svg class="sd-arrow-svg" xmlns="http://www.w3.org/2000/svg">' +
-                    '<line x1="' + x1 + '" y1="40" x2="' + x2 + '" y2="40" ' +
-                        'stroke="' + color + '" stroke-width="3.5" class="sd-arrow-line ' + (isActive ? 'sd-path-animated' : '') + '" ' +
-                        'stroke-dasharray="' + (isReturn || !isDone ? '9,6' : 'none') + '"/>';
-                // Nested SVG reliably anchors arrowhead at percentage x2
-                svgArrow += '<svg x="' + x2 + '" y="40" overflow="visible">';
-                if (isReturn) {
-                    svgArrow += '<polyline points="12,-8 0,0 12,8" fill="none" stroke="' + color + '" stroke-width="3.5"/>';
-                } else {
-                    svgArrow += '<polygon points="0,0 -12,-8 -12,8" fill="' + color + '"/>';
-                }
-                svgArrow += '</svg>';
-                svgArrow += '<text x="' + midX + '" y="30" text-anchor="middle" font-size="15" ' +
-                    'fill="' + color + '" font-weight="900">' + s.label + '</text>';
-                svgArrow += '</svg>';
+            var keydataHtml='';
+            if(s.keydata&&s.keydata.length){
+                keydataHtml='<div class="lc-card-keydata"><div class="lc-card-keydata-title">Key data</div><ul>'+s.keydata.map(function(k){return '<li>'+k+'</li>';}).join('')+'</ul></div>';
             }
 
-            var detailsHtml = s.details.map(function(d) {
-                return '<div class="sd-detail-row"><span>' + d.label + '</span><strong>' + d.value + '</strong></div>';
-            }).join('');
-
-            var badgeHtml = isDone
-                ? '<span class="sd-badge sd-badge--done"><i class="fa-solid fa-check-double"></i> Hoàn thành</span>'
-                : '<span class="sd-badge sd-badge--pending"><i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý</span>';
-
-            rowsHtml +=
-                '<div class="sd-row' + rowMod + '" style="--sc:' + s.color + '">' +
-                    '<div class="sd-diagram-area">' +
-                        '<div class="sd-lifelines">' +
-                            actors.map(function(a) {
-                                return '<div class="sd-lifeline-col"><div class="sd-lifeline"></div></div>';
-                            }).join('') +
-                        '</div>' +
-                        svgArrow +
-                    '</div>' +
-                    '<div class="sd-detail-card">' +
-                        '<div class="sd-detail-header" style="color:' + s.color + '">' +
-                            '<div style="display: flex; align-items: center; gap: 10px;">' +
-                                '<i class="fa-solid fa-shield-heart"></i> ' + s.label +
-                            '</div>' +
-                            badgeHtml +
-                        '</div>' +
-                        detailsHtml +
-                        (s.date ? '<div class="sd-detail-date"><i class="fa-regular fa-clock"></i> Cập nhật: ' + s.date + '</div>' : '') +
-                    '</div>' +
-                '</div>';
+            cardsHtml+='<div class="lc-step-card '+state+'">'+
+                '<div class="lc-card-icon '+state+'"><i class="fa-solid '+STEP_ICONS[i]+'"></i></div>'+
+                '<div class="lc-card-body">'+
+                    '<div class="lc-card-title-row"><span class="lc-card-number">'+(i+1)+'.</span><span class="lc-card-title">'+s.label+'</span></div>'+
+                    '<div class="lc-card-desc">'+s.desc+'</div>'+
+                    '<div class="lc-card-meta">'+
+                        '<div class="lc-meta-group"><div class="lc-meta-label">'+(i<2?'Người thực hiện':'Đơn vị thực hiện')+'</div><div class="lc-meta-value"><i class="fa-solid '+s.unitIcon+'"></i> '+s.unit+'</div></div>'+
+                        '<div class="lc-meta-group"><div class="lc-meta-label">Thời gian</div><div class="lc-meta-value"><i class="fa-regular fa-clock"></i> '+(s.date||'–')+'</div></div>'+
+                    '</div>'+
+                    keydataHtml+
+                '</div>'+
+                '<div class="lc-card-status '+state+'">'+statusIcon+' '+statusLabel+'</div>'+
+            '</div>';
         });
-        rowsHtml += '</div>';
+        cardsHtml+='</div>';
 
-        var diagramHtml = '<div class="sd-wrap">' + actorsHtml + rowsHtml + '</div>';
+        var contentHtml=summaryHtml+stepperHtml+cardsHtml;
 
-        // ── Modal ────────────────────────────────────────────────────────
-        // ── Modal ────────────────────────────────────────────────────────
-        var modal = document.getElementById('modal-lifecycle');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'modal-lifecycle';
-            modal.className = 'modal-overlay';
-            modal.setAttribute('data-module-asset', 'true');
-            modal.innerHTML =
-                '<div class="modal-box lifecycle-modal-box">' +
-                    '<div class="modal-header">' +
-                        '<div style="display:flex;align-items:center;gap:15px;flex:1">' +
-                            '<i class="fa-solid fa-sitemap" style="color:#076EB8;font-size:20px"></i>' +
-                            '<div class="modal-title" id="lifecycle-modal-title">Vòng đời lô hàng</div>' +
-                            '<div class="lifecycle-header-info" id="lifecycle-batch-info"></div>' +
-                        '</div>' +
-                        '<div class="close-modal" onclick="document.getElementById(\'modal-lifecycle\').classList.remove(\'open\')">' +
-                            '<i class="fas fa-times"></i>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="modal-body lifecycle-modal-body">' +
-                        '<div id="lifecycle-timeline"></div>' +
-                    '</div>' +
-                    '<div class="modal-footer" style="padding:12px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;">' +
-                        '<button class="btn-secondary" onclick="document.getElementById(\'modal-lifecycle\').classList.remove(\'open\')">Đóng</button>' +
-                    '</div>' +
+        // Modal
+        var modal=document.getElementById('modal-lifecycle');
+        if(!modal){
+            modal=document.createElement('div');
+            modal.id='modal-lifecycle';
+            modal.className='modal-overlay';
+            modal.setAttribute('data-module-asset','true');
+            modal.innerHTML=
+                '<div class="modal-box lifecycle-modal-box">'+
+                    '<div class="modal-header" style="padding:14px 24px">'+
+                        '<div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">'+
+                            '<div class="modal-title" id="lifecycle-modal-title" style="white-space:nowrap"></div>'+
+                            '<div class="lifecycle-header-info" id="lifecycle-batch-info"></div>'+
+                        '</div>'+
+                        '<div style="display:flex;align-items:center;gap:12px">'+
+                            '<div id="lifecycle-status-badge"></div>'+
+                            '<div class="close-modal" onclick="document.getElementById(\'modal-lifecycle\').classList.remove(\'open\')"><i class="fas fa-times"></i></div>'+
+                        '</div>'+
+                    '</div>'+
+                    '<div class="modal-body lifecycle-modal-body"><div id="lifecycle-timeline"></div></div>'+
+                    '<div class="modal-footer" style="padding:12px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center">'+
+                        '<div class="lc-footer-legend" id="lifecycle-legend"></div>'+
+                        '<div style="display:flex;gap:12px">'+
+                            '<button class="btn-secondary" style="padding:8px 20px;font-size:13px" onclick="document.getElementById(\'modal-lifecycle\').classList.remove(\'open\')">Đóng</button>'+
+                        '</div>'+
+                    '</div>'+
                 '</div>';
             document.body.appendChild(modal);
         }
 
-        var statusObj = STATUS_MAP[b.status] || { label: b.status, class: '' };
-        document.getElementById('lifecycle-modal-title').textContent = 'Vòng đời lô hàng — ' + b.code;
-        document.getElementById('lifecycle-batch-info').innerHTML =
-            '<div class="lifecycle-info-item"><i class="fa-solid fa-box-open" style="color:#076EB8"></i> <span>Mã lô: <strong>' + b.code + '</strong></span></div>' +
-            '<div class="lifecycle-info-item"><i class="fa-solid fa-cube" style="color:#64748b"></i> <span>Sản phẩm: <strong>' + b.name + '</strong></span></div>' +
-            '<div class="lifecycle-info-item"><span class="status-badge ' + statusObj.class + '">' + statusObj.label + '</span></div>';
-        
-        var tc = document.getElementById('lifecycle-timeline');
-        if (tc) tc.innerHTML = diagramHtml;
+        var statusObj=STATUS_MAP[b.status]||{label:b.status,class:''};
+        document.getElementById('lifecycle-modal-title').textContent='Vòng đời lô hàng – '+b.code;
+        document.getElementById('lifecycle-batch-info').innerHTML=
+            '<div class="lifecycle-info-item"><i class="fa-solid fa-barcode" style="color:#076EB8"></i> <span>Mã lô: <strong>'+b.code+'</strong></span></div>'+
+            '<div class="lifecycle-info-item"><i class="fa-solid fa-cube" style="color:#64748b"></i> <span>Sản phẩm: <strong>'+b.name+'</strong></span></div>';
+        document.getElementById('lifecycle-status-badge').innerHTML='<span class="status-badge '+statusObj.class+'" style="font-size:12px;padding:5px 14px">'+statusObj.label+'</span>';
+        document.getElementById('lifecycle-legend').innerHTML=
+            '<span class="lc-legend-title">Các đơn vị liên quan</span>'+
+            '<span class="lc-legend-item legend-staff"><i class="fa-solid fa-user-tie"></i> Nhân viên</span>'+
+            '<span class="lc-legend-item legend-wms"><i class="fa-solid fa-server"></i> WMS</span>'+
+            '<span class="lc-legend-item legend-warehouse"><i class="fa-solid fa-warehouse"></i> Kho bãi</span>'+
+            '<span class="lc-legend-item legend-transport"><i class="fa-solid fa-truck-fast"></i> Vận chuyển</span>';
+
+        document.getElementById('lifecycle-timeline').innerHTML=contentHtml;
         modal.classList.add('open');
     };
 
