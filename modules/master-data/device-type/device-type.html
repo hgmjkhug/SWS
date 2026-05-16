@@ -54,8 +54,10 @@
                 />
               </th>
               <th>STT</th>
+              <th>Hình ảnh</th>
               <th>Mã nhóm</th>
               <th>Tên nhóm thiết bị</th>
+              <th>Loại thiết bị</th>
               <th>Mô tả</th>
               <!-- <th>Thông số</th> -->
               <th>Thao tác</th>
@@ -97,22 +99,34 @@
         </div>
         <div class="modal-body">
           <input type="hidden" id="device-type-id" />
-          <div class="form-row">
-            <div class="form-group">
-              <label>Mã nhóm <span class="required">*</span></label>
-              <input
-                type="text"
-                id="device-type-code"
-                placeholder="Nhập mã nhóm"
-              />
-            </div>
-            <div class="form-group">
-              <label>Tên nhóm <span class="required">*</span></label>
-              <input
-                type="text"
-                id="device-type-name"
-                placeholder="Nhập tên nhóm"
-              />
+          <div class="form-group">
+            <label>Mã nhóm <span class="required">*</span></label>
+            <input
+              type="text"
+              id="device-type-code"
+              placeholder="Nhập mã nhóm"
+            />
+          </div>
+          <div class="form-group">
+            <label>Tên nhóm <span class="required">*</span></label>
+            <input
+              type="text"
+              id="device-type-name"
+              placeholder="Nhập tên nhóm"
+            />
+          </div>
+          <div class="form-group">
+            <label>Loại thiết bị <span class="required">*</span></label>
+            <input type="hidden" id="device-type-category" value="" />
+            <div class="category-toggle-group" id="category-toggle-group">
+              <button type="button" class="category-toggle-btn" data-value="autonomous" onclick="selectCategory('autonomous')">
+                <i class="fas fa-robot"></i>
+                <span>Tự hành</span>
+              </button>
+              <button type="button" class="category-toggle-btn" data-value="fixed" onclick="selectCategory('fixed')">
+                <i class="fas fa-industry"></i>
+                <span>Cố định</span>
+              </button>
             </div>
           </div>
           <div class="form-group">
@@ -124,13 +138,21 @@
             ></textarea>
           </div>
           <div class="form-group">
-            <label>Thông số kỹ thuật</label>
-            <textarea
-              id="device-type-specs"
-              rows="5"
-              class="code-editor"
-              placeholder='{"key": "value"}'
-            ></textarea>
+            <label>Hình ảnh</label>
+            <div class="image-upload-area" id="image-upload-area" onclick="document.getElementById('device-type-image-input').click()">
+              <input type="file" id="device-type-image-input" accept="image/*" onchange="previewImage(event)" style="display:none" />
+              <div class="image-upload-placeholder" id="image-upload-placeholder">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>Kéo thả hoặc nhấn để tải ảnh lên</span>
+                <small>PNG, JPG, WEBP (tối đa 5MB)</small>
+              </div>
+              <div class="image-preview-wrapper" id="image-preview-wrapper" style="display:none">
+                <img id="image-preview" src="" alt="Preview" />
+                <button type="button" class="image-remove-btn" onclick="removeImage(event)" title="Xóa ảnh">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-footer">

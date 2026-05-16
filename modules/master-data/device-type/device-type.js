@@ -2,10 +2,12 @@
 (function () {
     // Mock Data
     let deviceTypes = [
-        { id: 1, code: 'Lifter', name: 'Thang máy nâng hàng', desc: 'Nâng chuyển tầng', specs: { load: '2000kg', floors: 4 } },
-        { id: 2, code: 'Shuttle', name: 'Shuttle', desc: 'Shuttle chạy theo ray', specs: { range: '5m', freq: 'UHF' } }
-
+        { id: 1, code: 'Lifter', name: 'Thang máy nâng hàng', category: 'fixed', desc: 'Nâng chuyển tầng', image: '', specs: { load: '2000kg', floors: 4 } },
+        { id: 2, code: 'Shuttle', name: 'Shuttle', category: 'autonomous', desc: 'Shuttle chạy theo ray', image: '', specs: { range: '5m', freq: 'UHF' } }
     ];
+
+    // Temporary image data for current modal session
+    let currentImageData = '';
 
     let selectedIds = [];
     let currentPage = 1;
@@ -104,21 +106,27 @@
         renderPaginationControls(totalPages);
 
         if (totalItems === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px;">Không tìm thấy dữ liệu</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">Không tìm thấy dữ liệu</td></tr>';
             return;
         }
 
         pageData.forEach((item, index) => {
             // Calculate global STT
             const stt = startItem + index + 1;
+            const categoryLabel = item.category === 'autonomous' ? 'Tự hành' : item.category === 'fixed' ? 'Cố định' : '-';
+            const categoryClass = item.category === 'autonomous' ? 'badge-autonomous' : item.category === 'fixed' ? 'badge-fixed' : '';
+            const imageHtml = item.image
+                ? `<img src="${item.image}" alt="${item.name}" class="table-thumbnail" />`
+                : `<div class="table-thumbnail-empty"><i class="fas fa-image"></i></div>`;
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="text-align:center"><input type="checkbox" class="row-checkbox" value="${item.id}" onclick="toggleRow(${item.id})"></td>
                 <td style="text-align:center">${stt}</td>
+                <td style="text-align:center">${imageHtml}</td>
                 <td style="font-weight:600; color:#2563eb">${item.code}</td>
                 <td>${item.name}</td>
+                <td style="text-align:center"><span class="device-category-badge ${categoryClass}">${categoryLabel}</span></td>
                 <td>${item.desc || '-'}</td>
-
                 <td style="text-align:center">
                     <div class="action-buttons" style="justify-content:center">
                         <div class="action-icon" onclick="openEditModal(${item.id})" title="Chỉnh sửa"><i class="fas fa-edit"></i></div>
@@ -160,13 +168,70 @@
     };
 
     // Modal Functions
+    function resetImageUpload() {
+        currentImageData = '';
+        const placeholder = document.getElementById('image-upload-placeholder');
+        const previewWrapper = document.getElementById('image-preview-wrapper');
+        const preview = document.getElementById('image-preview');
+        const fileInput = document.getElementById('device-type-image-input');
+        if (placeholder) placeholder.style.display = 'flex';
+        if (previewWrapper) previewWrapper.style.display = 'none';
+        if (preview) preview.src = '';
+        if (fileInput) fileInput.value = '';
+    }
+
+    function showImagePreview(src) {
+        currentImageData = src;
+        const placeholder = document.getElementById('image-upload-placeholder');
+        const previewWrapper = document.getElementById('image-preview-wrapper');
+        const preview = document.getElementById('image-preview');
+        if (placeholder) placeholder.style.display = 'none';
+        if (previewWrapper) previewWrapper.style.display = 'flex';
+        if (preview) preview.src = src;
+    }
+
+    window.previewImage = function (event) {
+        event.stopPropagation();
+        const file = event.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('Kích thước ảnh không được vượt quá 5MB', 'error');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            showImagePreview(e.target.result);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.removeImage = function (event) {
+        event.stopPropagation();
+        resetImageUpload();
+    };
+
+    function resetCategoryToggle() {
+        const btns = document.querySelectorAll('.category-toggle-btn');
+        btns.forEach(b => b.classList.remove('active'));
+    }
+
+    window.selectCategory = function (value) {
+        document.getElementById('device-type-category').value = value;
+        const btns = document.querySelectorAll('.category-toggle-btn');
+        btns.forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-value') === value);
+        });
+    };
+
     window.openAddModal = function () {
         document.getElementById('modal-title').innerText = 'Thêm mới Nhóm thiết bị';
         document.getElementById('device-type-id').value = '';
         document.getElementById('device-type-code').value = '';
         document.getElementById('device-type-name').value = '';
+        document.getElementById('device-type-category').value = '';
+        resetCategoryToggle();
         document.getElementById('device-type-desc').value = '';
-        document.getElementById('device-type-specs').value = '';
+        resetImageUpload();
         document.getElementById('device-type-modal').classList.add('show');
     };
 
@@ -178,8 +243,15 @@
         document.getElementById('device-type-id').value = item.id;
         document.getElementById('device-type-code').value = item.code;
         document.getElementById('device-type-name').value = item.name;
+        document.getElementById('device-type-category').value = item.category || '';
+        resetCategoryToggle();
+        if (item.category) selectCategory(item.category);
         document.getElementById('device-type-desc').value = item.desc || '';
-        document.getElementById('device-type-specs').value = JSON.stringify(item.specs, null, 2);
+        if (item.image) {
+            showImagePreview(item.image);
+        } else {
+            resetImageUpload();
+        }
         document.getElementById('device-type-modal').classList.add('show');
     };
 
@@ -191,19 +263,17 @@
         const id = document.getElementById('device-type-id').value;
         const code = document.getElementById('device-type-code').value.trim();
         const name = document.getElementById('device-type-name').value.trim();
+        const category = document.getElementById('device-type-category').value;
         const desc = document.getElementById('device-type-desc').value.trim();
-        const specsStr = document.getElementById('device-type-specs').value.trim();
+        const image = currentImageData;
 
         if (!code || !name) {
             showToast('Vui lòng nhập Mã và Tên nhóm thiết bị', 'error');
             return;
         }
 
-        let specs = {};
-        try {
-            if (specsStr) specs = JSON.parse(specsStr);
-        } catch (e) {
-            showToast('Định dạng JSON không hợp lệ ở trường Thông số', 'error');
+        if (!category) {
+            showToast('Vui lòng chọn Loại thiết bị', 'error');
             return;
         }
 
@@ -211,13 +281,13 @@
             // Update
             const index = deviceTypes.findIndex(d => d.id == id);
             if (index !== -1) {
-                deviceTypes[index] = { ...deviceTypes[index], code, name, desc, specs };
+                deviceTypes[index] = { ...deviceTypes[index], code, name, category, desc, image };
                 showToast('Cập nhật thành công');
             }
         } else {
             // Create
             const newId = deviceTypes.length > 0 ? Math.max(...deviceTypes.map(d => d.id)) + 1 : 1;
-            deviceTypes.push({ id: newId, code, name, desc, specs });
+            deviceTypes.push({ id: newId, code, name, category, desc, image });
             showToast('Thêm mới thành công');
         }
 
