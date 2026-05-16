@@ -4814,8 +4814,8 @@
     window.saveGridConfig = saveGridConfig;
     window.zoomIn = zoomIn;
     window.zoomOut = zoomOut;
-    window.resetCurrentFloor = resetCurrentFloor;
-    window.syncAllFloors = syncAllFloors;
+    window.resetCurrentFloor = window.resetCurrentFloor;
+    window.syncAllFloors = window.syncAllFloors;
     window.initWarehouseConfigGrid = init;
     window.setMode = setMode;
     window.setConfigTab = setConfigTab;
@@ -4869,10 +4869,10 @@
     window.selectLocationType = selectLocationType;
     
     // Floor Assignment Exports
-    window.toggleFloorAssignDropdown = toggleFloorAssignDropdown;
-    window.selectFloorAssign = selectFloorAssign;
-    window.bulkAssignFloor = bulkAssignFloor;
-    window.bulkUnassignFloor = bulkUnassignFloor;
+    window.toggleFloorAssignDropdown = window.toggleFloorAssignDropdown;
+    window.selectFloorAssign = window.selectFloorAssign;
+    window.bulkAssignFloor = window.bulkAssignFloor;
+    window.bulkUnassignFloor = window.bulkUnassignFloor;
 
     window.addArea = addArea;
     window.deleteArea = deleteArea;
@@ -4881,26 +4881,26 @@
     window.updateAreaField = updateAreaField;
     window.editArea = editArea;
     window.saveAreaTab = saveAreaTab;
-    window.selectAreaProduct = selectAreaProduct;
-    window.removeAreaProduct = removeAreaProduct;
+    window.selectAreaProduct = window.selectAreaProduct;
+    window.removeAreaProduct = window.removeAreaProduct;
 
     // Area Type Exports
-    window.showAreaTypeList = showAreaTypeList;
-    window.toggleAreaTypeList = toggleAreaTypeList;
-    window.filterAreaTypeList = filterAreaTypeList;
-    window.selectAreaType = selectAreaType;
-    window.removeAreaType = removeAreaType;
+    window.showAreaTypeList = window.showAreaTypeList;
+    window.toggleAreaTypeList = window.toggleAreaTypeList;
+    window.filterAreaTypeList = window.filterAreaTypeList;
+    window.selectAreaType = window.selectAreaType;
+    window.removeAreaType = window.removeAreaType;
 
     // Area Category Exports
-    window.showAreaCategoryList = showAreaCategoryList;
-    window.toggleAreaCategoryList = toggleAreaCategoryList;
-    window.filterAreaCategoryList = filterAreaCategoryList;
-    window.selectAreaCategory = selectAreaCategory;
-    window.removeAreaCategory = removeAreaCategory;
+    window.showAreaCategoryList = window.showAreaCategoryList;
+    window.toggleAreaCategoryList = window.toggleAreaCategoryList;
+    window.filterAreaCategoryList = window.filterAreaCategoryList;
+    window.selectAreaCategory = window.selectAreaCategory;
+    window.removeAreaCategory = window.removeAreaCategory;
 
-    window.showAreaProductList = showAreaProductList;
-    window.toggleAreaProductList = toggleAreaProductList;
-    window.filterAreaProductList = filterAreaProductList;
+    window.showAreaProductList = window.showAreaProductList;
+    window.toggleAreaProductList = window.toggleAreaProductList;
+    window.filterAreaProductList = window.filterAreaProductList;
     window.toggleAreaDirectionDropdown = toggleAreaDirectionDropdown;
     window.selectAreaDirection = selectAreaDirection;
     window.toggleAreaRuleDropdown = toggleAreaRuleDropdown;
@@ -4920,20 +4920,20 @@
     window.selectSubAreaProduct = selectSubAreaProduct;
     window.removeSubAreaProduct = removeSubAreaProduct;
     window.renderSubAreaCards = renderSubAreaCards;
-    window.toggleSubAreaParentList = toggleSubAreaParentList;
-    window.showSubAreaParentList = showSubAreaParentList;
-    window.filterSubAreaParentList = filterSubAreaParentList;
-    window.selectSubAreaParent = selectSubAreaParent;
-    window.removeSubAreaParent = removeSubAreaParent;
-    window.toggleSubAreaCollapse = toggleSubAreaCollapse;
+    window.toggleSubAreaParentList = window.toggleSubAreaParentList;
+    window.showSubAreaParentList = window.showSubAreaParentList;
+    window.filterSubAreaParentList = window.filterSubAreaParentList;
+    window.selectSubAreaParent = window.selectSubAreaParent;
+    window.removeSubAreaParent = window.removeSubAreaParent;
+    window.toggleSubAreaCollapse = window.toggleSubAreaCollapse;
     window.toggleSubAreaGroup = window.toggleSubAreaGroup;
 
     // Area Module search
-    window.showAreaModuleList = showAreaModuleList;
-    window.filterAreaModuleList = filterAreaModuleList;
-    window.toggleAreaModuleList = toggleAreaModuleList;
-    window.selectAreaModule = selectAreaModule;
-    window.removeAreaModule = removeAreaModule;
+    window.showAreaModuleList = window.showAreaModuleList;
+    window.filterAreaModuleList = window.filterAreaModuleList;
+    window.toggleAreaModuleList = window.toggleAreaModuleList;
+    window.selectAreaModule = window.selectAreaModule;
+    window.removeAreaModule = window.removeAreaModule;
 
     // Location Module search logic was removed as requested
 
@@ -4945,9 +4945,9 @@
     window.editModule = editModule;
     window.removeModuleTag = removeModuleTag;
     window.saveModuleTab = saveModuleTab;
-    window.toggleModuleActive = toggleModuleActive;
-    window.toggleTowerTypeDropdown = toggleTowerTypeDropdown;
-    window.selectTowerType = selectTowerType;
+    window.toggleModuleActive = window.toggleModuleActive;
+    window.toggleTowerTypeDropdown = window.toggleTowerTypeDropdown;
+    window.selectTowerType = window.selectTowerType;
 
 
 

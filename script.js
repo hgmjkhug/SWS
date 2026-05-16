@@ -1063,13 +1063,16 @@ function filterFactories() {
 }
 
 function selectFactory(code) {
+    if (code === currentFactoryCode) {
+        toggleFactoryMenu(); // Close without changing
+        return;
+    }
     currentFactoryCode = code;
     localStorage.setItem('currentFactoryCode', code);
     updateFactoryUI();
     renderFactoryList(); // Re-render to update selected state
     toggleFactoryMenu(); // Close
-    // Optional: Reload page or trigger event
-    // window.location.reload();
+    showToast(`Thay đổi sang kho ${code} thành công`, 'success');
 }
 
 // Ensure init is called

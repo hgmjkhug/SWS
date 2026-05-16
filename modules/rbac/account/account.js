@@ -299,7 +299,7 @@ function renderAccounts() {
     if (pageData.length === 0) {
         const tbody = document.createElement('tbody');
         tbody.id = 'account-table-body';
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 20px; color: #64748b;">Không tìm thấy dữ liệu</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding: 20px; color: #64748b;">Không tìm thấy dữ liệu</td></tr>';
         table.appendChild(tbody);
     } else {
         pageData.forEach((acc, idx) => {
@@ -329,6 +329,7 @@ function renderAccounts() {
                                 <img src="${acc.avatar}" class="avatar-img" alt="${acc.fullname}">
                             </div>
                         </td>
+                        <td rowspan="${rowSpan}" style="vertical-align: middle;"><span style="font-family: roboto; font-weight: 600; color: #0369a1;">${acc.employeeId || '-'}</span></td>
                         <td rowspan="${rowSpan}" style="vertical-align: middle;"><span style="font-family: roboto; font-weight: 600; color: #334155;">${acc.accountCode}</span></td>
                         <td rowspan="${rowSpan}" style="vertical-align: middle;"><div style="font-weight: 500; color: #0f172a;">${acc.fullname}</div></td>
                         <td rowspan="${rowSpan}" style="vertical-align: middle;">${acc.email}</td>
@@ -463,7 +464,8 @@ function filterAccounts() {
 
     filteredData = accounts.filter(acc => {
         const matchesQuery = acc.fullname.toLowerCase().includes(query) ||
-            acc.accountCode.toLowerCase().includes(query);
+            acc.accountCode.toLowerCase().includes(query) ||
+            (acc.employeeId && acc.employeeId.toLowerCase().includes(query));
         const matchesRole = roleFilter === '' || (acc.permissions && acc.permissions.some(p => p.role === roleFilter));
         
         let matchesStatus = true;
@@ -658,6 +660,7 @@ function openAccountModal(id = null) {
             title.innerText = 'Cập nhật tài khoản';
             document.getElementById('acc-id').value = acc.id;
             document.getElementById('acc-fullname').value = acc.fullname;
+            document.getElementById('acc-employee-id').value = acc.employeeId || '';
             document.getElementById('acc-email').value = acc.email;
             document.getElementById('acc-code').value = acc.accountCode;
 
@@ -691,6 +694,7 @@ function closeAccountModal() {
 function saveAccount() {
     const idStr = document.getElementById('acc-id').value;
     const fullname = document.getElementById('acc-fullname').value;
+    const employeeId = document.getElementById('acc-employee-id').value;
     const email = document.getElementById('acc-email').value;
     const accountCodeInput = document.getElementById('acc-code').value;
     const avatarValue = getAvatarValue();
@@ -705,7 +709,7 @@ function saveAccount() {
 
     // Use currentPermissions global instead of manual DOM scraping which was broken
     const permissions = JSON.parse(JSON.stringify(currentPermissions));
-    if (!fullname || !accountCodeInput) {
+    if (!fullname || !accountCodeInput || !employeeId) {
         showToast('Vui lòng nhập đầy đủ thông tin tài khoản', 'error');
         return;
     }
@@ -714,12 +718,12 @@ function saveAccount() {
         const id = parseInt(idStr);
         const idx = accounts.findIndex(a => a.id === id);
         if (idx !== -1) {
-            accounts[idx] = { ...accounts[idx], fullname, email, accountCode: accountCodeInput, avatar, active, permissions };
+            accounts[idx] = { ...accounts[idx], fullname, employeeId, email, accountCode: accountCodeInput, avatar, active, permissions };
             showToast('Cập nhật thông tin tài khoản thành công');
         }
     } else {
         const newId = accounts.length > 0 ? Math.max(...accounts.map(a => a.id)) + 1 : 1;
-        accounts.push({ id: newId, accountCode: accountCodeInput, fullname: fullname, email: email, avatar: avatar, active: active, permissions: permissions });
+        accounts.push({ id: newId, employeeId, accountCode: accountCodeInput, fullname: fullname, email: email, avatar: avatar, active: active, permissions: permissions });
         showToast('Cập nhật thông tin tài khoản thành công');
     }
 
@@ -783,6 +787,7 @@ function generateMockAccounts() {
 
         accounts.push({
             id: i,
+            employeeId: `V${String(1000000 + i).slice(-7)}`,
             accountCode: `user${String(i).padStart(3, '0')}`,
             fullname: fullname,
             email: `${ln.toLowerCase()}${i}@yopmail.com`,
